@@ -1,8 +1,9 @@
 @AGENTS.md
 
-# Mindmap project notes
+<!-- convex-ai-start -->
+This project uses [Convex](https://convex.dev) as its backend.
 
-- **Package manager: pnpm.** Never use `npm` or `yarn`. All install/run commands go through `pnpm`.
-- **Backend: Convex.** Schema and functions live in `convex/`. Mutations for writes, queries for reads (reactive), actions for LLM/external calls.
-- **Design spec: [SPEC.md](./SPEC.md).** Read it before changing the data model. It captures the branching semantics, immutability guarantees, and the reasoning behind them — several decisions have non-obvious consequences if ignored.
-- **Append-only messages.** Messages are never edited or deleted. `branchedAt` depends on this invariant — don't break it.
+When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
+
+Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
+<!-- convex-ai-end -->
