@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { normalizeTitle } from "./lib/validation";
 
 export const list = query({
   args: {},
@@ -18,11 +19,12 @@ export const get = query({
 export const create = mutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {
-    const threadId = await ctx.db.insert("threads", { name: args.name });
+    const name = normalizeTitle(args.name, "Thread name");
+    const threadId = await ctx.db.insert("threads", { name });
     const rootNodeId = await ctx.db.insert("nodes", {
       threadId,
       parentId: null,
-      title: args.name,
+      title: name,
     });
     return { threadId, rootNodeId };
   },

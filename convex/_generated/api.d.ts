@@ -11,6 +11,8 @@
 import type * as chat from "../chat.js";
 import type * as lib_context from "../lib/context.js";
 import type * as lib_llm from "../lib/llm.js";
+import type * as lib_models from "../lib/models.js";
+import type * as lib_validation from "../lib/validation.js";
 import type * as messages from "../messages.js";
 import type * as nodes from "../nodes.js";
 import type * as threads from "../threads.js";
@@ -25,6 +27,8 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   "lib/context": typeof lib_context;
   "lib/llm": typeof lib_llm;
+  "lib/models": typeof lib_models;
+  "lib/validation": typeof lib_validation;
   messages: typeof messages;
   nodes: typeof nodes;
   threads: typeof threads;

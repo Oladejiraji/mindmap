@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChatInput } from "@/components/shared/chat/chat-input";
 import { useCreateThread } from "@/services/threads/mutations";
 import { useSendMessage } from "@/services/chat/actions";
+import { showError } from "@/lib/toast";
 
 export default function Home() {
   const router = useRouter();
@@ -18,11 +19,11 @@ export default function Home() {
     try {
       const { threadId, rootNodeId } = await createThread({ name: "Untitled" });
       // Fire-and-forget so navigation isn't blocked on the LLM stream
-      void sendMessage({ nodeId: rootNodeId, content });
+      sendMessage({ nodeId: rootNodeId, content }).catch(showError);
       router.push(`/t/${threadId}/n/${rootNodeId}`);
     } catch (err) {
       setIsStarting(false);
-      throw err;
+      showError(err, "Failed to start conversation");
     }
   };
 

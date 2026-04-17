@@ -5,6 +5,7 @@ import type { Id } from "@convex/dataModel";
 
 import { useNodeContextMessages } from "@/services/messages/queries";
 import { useSendMessage } from "@/services/chat/actions";
+import { showError } from "@/lib/toast";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 
@@ -29,6 +30,8 @@ export function NodeChat({
     setIsSending(true);
     try {
       await sendMessage({ nodeId, content });
+    } catch (err) {
+      showError(err, "Failed to send message");
     } finally {
       setIsSending(false);
     }
