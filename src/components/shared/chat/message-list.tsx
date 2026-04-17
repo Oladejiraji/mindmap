@@ -1,20 +1,20 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import type { Message } from "@/services/messages/queries";
+import type { ChatItem } from "@/services/messages/queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "./message-bubble";
 
 export function MessageList({
-  messages,
+  items,
   isLoading,
 }: {
-  messages: Message[];
+  items: ChatItem[];
   isLoading: boolean;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const lastMessageRef = useCallback((node: HTMLDivElement | null) => {
+  const lastItemRef = useCallback((node: HTMLDivElement | null) => {
     node?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
@@ -40,7 +40,7 @@ export function MessageList({
     );
   }
 
-  if (messages.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="text-sm text-muted-foreground">
@@ -52,15 +52,39 @@ export function MessageList({
 
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-6">
-      {messages.map((msg, i) => (
-        <div
-          key={msg._id}
-          ref={i === messages.length - 1 ? lastMessageRef : undefined}
-        >
-          <MessageBubble message={msg} />
-        </div>
-      ))}
+      {items.map((item, i) => {
+        const isLast = i === items.length - 1;
+        const key = item.kind === "message" ? item.message._id : item.id;
+        return (
+          <div key={key} ref={isLast ? lastItemRef : undefined}>
+            {item.kind === "message" ? (
+              <MessageBubble message={item.message} />
+            ) : (
+              <BranchMarker fromTitle={item.fromTitle} intoTitle={item.intoTitle} />
+            )}
+          </div>
+        );
+      })}
       <div ref={bottomRef} />
+    </div>
+  );
+}
+
+function BranchMarker({
+  fromTitle,
+  intoTitle,
+}: {
+  fromTitle: string;
+  intoTitle: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground">
+      <div className="h-px flex-1 bg-border" />
+      <span>
+        Branched from <span className="text-foreground">{fromTitle}</span> into{" "}
+        <span className="text-foreground">{intoTitle}</span>
+      </span>
+      <div className="h-px flex-1 bg-border" />
     </div>
   );
 }

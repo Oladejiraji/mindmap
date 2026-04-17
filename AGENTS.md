@@ -36,9 +36,11 @@ A branching chat app. Conversations are a tree of nodes; each node is a whole ch
 - **Let spacing do the work.** Use whitespace and grouping to communicate structure, not lines or boxes. When two things look related, proximity handles it — an extra border or background is noise.
 
 <!-- convex-ai-start -->
+
 This project uses [Convex](https://convex.dev) as its backend.
 
 When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
 
 Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
+
 <!-- convex-ai-end -->
