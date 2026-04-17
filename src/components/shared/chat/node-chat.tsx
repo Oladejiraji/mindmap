@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import type { Id } from "@convex/dataModel";
 
 import { useMessagesByNode } from "@/services/messages/queries";
@@ -14,29 +14,26 @@ export function NodeChat({
   threadId: Id<"threads">;
   nodeId: Id<"nodes">;
 }) {
-  const { data: messages } = useMessagesByNode(nodeId);
+  const { data: messages, isLoading } = useMessagesByNode(nodeId);
   const sendMessage = useSendMessage();
   const [isSending, setIsSending] = useState(false);
 
   const isStreaming = messages?.some((m) => m.isStreaming) ?? false;
   const isBusy = isSending || isStreaming;
 
-  const handleSend = useCallback(
-    async (content: string) => {
-      setIsSending(true);
-      try {
-        await sendMessage({ nodeId, content });
-      } finally {
-        setIsSending(false);
-      }
-    },
-    [sendMessage, nodeId]
-  );
+  const handleSend = async (content: string) => {
+    setIsSending(true);
+    try {
+      await sendMessage({ nodeId, content });
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="flex h-[calc(100svh-3.5rem)] flex-col items-center">
       <div className="flex w-full max-w-175 flex-1 flex-col overflow-hidden">
-        <MessageList messages={messages ?? []} />
+        <MessageList messages={messages ?? []} isLoading={isLoading} />
         <ChatInput onSend={handleSend} disabled={isBusy} />
       </div>
     </div>

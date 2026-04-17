@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -7,23 +8,30 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useThreads } from "@/services/threads/queries";
 import { ThreadItem } from "./thread-item";
+import { NewChatButton } from "./new-chat-button";
 
 export function AppSidebar() {
   const { data: threads, isPending } = useThreads();
 
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 py-3 text-sm font-semibold">
-        Mindmap
+      <SidebarHeader className="px-4 py-3">
+        <Link href="/" className="text-sm font-semibold">
+          Mindmap
+        </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Threads</SidebarGroupLabel>
+        <SidebarGroup className="pb-0 pt-4">
+          <SidebarGroupContent>
+            <NewChatButton />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="pt-1">
+          <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             {isPending ? (
               <div className="flex flex-col gap-2 px-2">
@@ -33,14 +41,14 @@ export function AppSidebar() {
               </div>
             ) : !threads?.length ? (
               <p className="px-2 py-1 text-xs text-muted-foreground">
-                No threads yet.
+                No chats yet.
               </p>
             ) : (
-              <SidebarMenu>
+              <div className="flex flex-col gap-0.5">
                 {threads.map((thread) => (
                   <ThreadItem key={thread._id} thread={thread} />
                 ))}
-              </SidebarMenu>
+              </div>
             )}
           </SidebarGroupContent>
         </SidebarGroup>

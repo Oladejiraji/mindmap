@@ -28,13 +28,3 @@ export const create = mutation({
   },
 });
 
-export const rename = mutation({
-  args: {
-    threadId: v.id("threads"),
-    name: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.threadId, { name: args.name });
-    return null;
-  },
-});
