@@ -16,8 +16,8 @@ import {
 } from "@/services/nodes/mutations";
 import type { Thread } from "@/services/threads/queries";
 import type { Id } from "@convex/dataModel";
-
-type FlatNode = Node & { depth: number; isLeaf: boolean };
+import { collectSubtree, flattenTree, type FlatNode } from "@/lib/tree";
+import { showError } from "@/lib/toast";
 
 const focusAndSelect = (el: HTMLInputElement | null) => {
   el?.focus();
@@ -70,14 +70,18 @@ function NodeItem({
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleBranch = async () => {
-    const { childId } = await createEmptyBranch({ parentId: node._id });
-    router.push(`/t/${threadId}/n/${childId}`);
+    try {
+      const { childId } = await createEmptyBranch({ parentId: node._id });
+      router.push(`/t/${threadId}/n/${childId}`);
+    } catch (err) {
+      showError(err, "Failed to create branch");
+    }
   };
 
-  const redirectIfViewing = (subtreeIds: Set<string>) => {
+  const redirectIfViewing = (subtreeIds: Set<Id<"nodes">>) => {
     const match = pathname.match(/^\/t\/[^/]+\/n\/([^/]+)/);
     const currentNodeId = match?.[1];
-    if (!currentNodeId || !subtreeIds.has(currentNodeId)) return;
+    if (!currentNodeId || !subtreeIds.has(currentNodeId as Id<"nodes">)) return;
     if (node.parentId === null) {
       router.push("/");
     } else {
@@ -88,21 +92,27 @@ function NodeItem({
   const handleDeleteClick = () => {
     if (node.isLeaf) {
       redirectIfViewing(new Set([node._id]));
-      deleteLeafNode({ nodeId: node._id });
+      deleteLeafNode({ nodeId: node._id }).catch((err) =>
+        showError(err, "Failed to delete node"),
+      );
     } else {
       setConfirmOpen(true);
     }
   };
 
   const handleConfirmDelete = () => {
-    redirectIfViewing(collectSubtreeIds(node._id, allNodes));
-    deleteSubtree({ nodeId: node._id });
+    redirectIfViewing(collectSubtree(allNodes, node._id));
+    deleteSubtree({ nodeId: node._id }).catch((err) =>
+      showError(err, "Failed to delete subtree"),
+    );
   };
 
   const commitRename = () => {
     const next = draft.trim();
     if (next && next !== node.title) {
-      renameNode({ nodeId: node._id, title: next });
+      renameNode({ nodeId: node._id, title: next }).catch((err) =>
+        showError(err, "Failed to rename"),
+      );
     }
     setIsEditing(false);
   };
@@ -213,45 +223,3 @@ function NodeItem({
   );
 }
 
-function collectSubtreeIds(rootId: Id<"nodes">, nodes: Node[]): Set<string> {
-  const childrenByParent = new Map<string, string[]>();
-  for (const n of nodes) {
-    if (n.parentId) {
-      const list = childrenByParent.get(n.parentId) ?? [];
-      list.push(n._id);
-      childrenByParent.set(n.parentId, list);
-    }
-  }
-
-  const result = new Set<string>();
-  const queue: string[] = [rootId];
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    result.add(current);
-    for (const child of childrenByParent.get(current) ?? []) {
-      queue.push(child);
-    }
-  }
-  return result;
-}
-
-function flattenTree(nodes: Node[]): FlatNode[] {
-  const byParent = new Map<Id<"nodes"> | null, Node[]>();
-  for (const node of nodes) {
-    const key = node.parentId;
-    const list = byParent.get(key) ?? [];
-    list.push(node);
-    byParent.set(key, list);
-  }
-
-  const result: FlatNode[] = [];
-  function walk(parentId: Id<"nodes"> | null, depth: number) {
-    for (const node of byParent.get(parentId) ?? []) {
-      const isLeaf = !byParent.has(node._id);
-      result.push({ ...node, depth, isLeaf });
-      walk(node._id, depth + 1);
-    }
-  }
-  walk(null, 0);
-  return result;
-}

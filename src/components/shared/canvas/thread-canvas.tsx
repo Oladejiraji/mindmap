@@ -28,6 +28,8 @@ import {
   useRenameNode,
 } from "@/services/nodes/mutations";
 import { layoutNodes, NODE_WIDTH, NODE_HEIGHT } from "@/lib/layout";
+import { buildNodeMap, walkAncestors } from "@/lib/tree";
+import { showError } from "@/lib/toast";
 import { MindMapNode, type MindMapNodeData } from "./mind-map-node";
 
 const nodeTypes: NodeTypes = {
@@ -53,14 +55,18 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
-      deleteLeafNode({ nodeId: nodeId as Id<"nodes"> });
+      deleteLeafNode({ nodeId: nodeId as Id<"nodes"> }).catch((err) =>
+        showError(err, "Failed to delete node"),
+      );
     },
     [deleteLeafNode],
   );
 
   const handleRenameNode = useCallback(
     (nodeId: string, title: string) => {
-      renameNode({ nodeId: nodeId as Id<"nodes">, title });
+      renameNode({ nodeId: nodeId as Id<"nodes">, title }).catch((err) =>
+        showError(err, "Failed to rename"),
+      );
     },
     [renameNode],
   );
@@ -138,15 +144,16 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   // Ancestor path highlighting on selection
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  // Walk parent chain to build set of edge IDs on the ancestor path
+  // Edge IDs on the ancestor path of the selected node
   const ancestorEdgeIds = useMemo(() => {
     if (!selectedNodeId || !nodes) return new Set<string>();
-    const nodeMap = new Map(nodes.map((n) => [n._id as string, n]));
+    const chain = walkAncestors(
+      buildNodeMap(nodes),
+      selectedNodeId as Id<"nodes">,
+    );
     const edgeIds = new Set<string>();
-    let current = nodeMap.get(selectedNodeId);
-    while (current?.parentId) {
-      edgeIds.add(`${current.parentId}-${current._id}`);
-      current = nodeMap.get(current.parentId);
+    for (let i = 1; i < chain.length; i++) {
+      edgeIds.add(`${chain[i - 1]._id}-${chain[i]._id}`);
     }
     return edgeIds;
   }, [selectedNodeId, nodes]);
@@ -181,7 +188,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       updatePosition({
         nodeId: node.id as Id<"nodes">,
         position: { x: node.position.x, y: node.position.y },
-      });
+      }).catch((err) => showError(err, "Failed to save position"));
     },
     [updatePosition],
   );
@@ -219,7 +226,10 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           : event.clientY;
       const position = screenToFlowPosition({ x: clientX, y: clientY });
 
-      createEmptyBranch({ parentId: sourceId as Id<"nodes">, position });
+      createEmptyBranch({
+        parentId: sourceId as Id<"nodes">,
+        position,
+      }).catch((err) => showError(err, "Failed to create branch"));
     },
     [createEmptyBranch, screenToFlowPosition],
   );

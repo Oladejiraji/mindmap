@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { normalizeTitle } from "./lib/validation";
 
 export const listByThread = query({
   args: { threadId: v.id("threads") },
@@ -25,7 +26,8 @@ export const rename = mutation({
     title: v.string(),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.nodeId, { title: args.title });
+    const title = normalizeTitle(args.title, "Node title");
+    await ctx.db.patch(args.nodeId, { title });
     return null;
   },
 });

@@ -28,6 +28,7 @@ export function MessageBubble({ message }: { message: Message }) {
           </span>
         ) : (
           <div className="markdown-body">
+            {/* Default escapes raw HTML — never add rehype-raw without rehype-sanitize. */}
             <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
             {isStreaming && (
               <span className="ml-0.5 inline-block h-4 w-px animate-pulse bg-current align-middle" />

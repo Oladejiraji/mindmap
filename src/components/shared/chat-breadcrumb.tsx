@@ -12,6 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useNodesByThread, type Node } from "@/services/nodes/queries";
+import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import type { Id } from "@convex/dataModel";
 
 export function ChatBreadcrumb() {
@@ -37,22 +38,11 @@ function ChatBreadcrumbInner({
 
   const chain = useMemo<Node[]>(() => {
     if (!nodes || nodes.length === 0) return [];
-
-    const nodeMap = new Map(nodes.map((n) => [n._id as string, n]));
-
     if (!nodeId) {
       const root = nodes.find((n) => n.parentId === null);
       return root ? [root] : [];
     }
-
-    const result: Node[] = [];
-    let current = nodeMap.get(nodeId);
-    while (current) {
-      result.unshift(current);
-      if (!current.parentId) break;
-      current = nodeMap.get(current.parentId);
-    }
-    return result;
+    return walkAncestors(buildNodeMap(nodes), nodeId);
   }, [nodes, nodeId]);
 
   if (chain.length === 0) return null;

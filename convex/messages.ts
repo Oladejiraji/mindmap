@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
+import { normalizeMessageContent } from "./lib/validation";
 
 export const listByNode = query({
   args: { nodeId: v.id("nodes") },
@@ -18,6 +19,8 @@ export const append = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    const content = normalizeMessageContent(args.content);
+
     const node = await ctx.db.get(args.nodeId);
     if (!node) throw new Error("Node not found");
 
@@ -31,7 +34,7 @@ export const append = mutation({
     const messageId = await ctx.db.insert("messages", {
       nodeId: args.nodeId,
       role: args.role,
-      content: args.content,
+      content,
       index: nextIndex,
     });
 

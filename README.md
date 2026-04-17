@@ -22,6 +22,25 @@ pnpm dev            # in another — starts Next.js
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Environment
+
+Two things need to be set — they live in different places.
+
+**Frontend** (`.env.local` — `pnpm convex dev` populates these on first run):
+
+- `CONVEX_DEPLOYMENT`
+- `NEXT_PUBLIC_CONVEX_URL`
+
+See `.env.example` for the shape.
+
+**Backend** (Convex deployment env — set via CLI, not `.env.local`):
+
+```bash
+npx convex env set ANTHROPIC_API_KEY sk-ant-...
+```
+
+Without `ANTHROPIC_API_KEY` the chat action throws a 500 at stream time.
+
 ## Project layout
 
 ```

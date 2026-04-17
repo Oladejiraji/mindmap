@@ -5,6 +5,7 @@ import { api } from "@convex/api";
 import type { Doc, Id } from "@convex/dataModel";
 
 import { useNodesByThread, type Node } from "@/services/nodes/queries";
+import { buildNodeMap, walkAncestors } from "@/lib/tree";
 
 export type Message = Doc<"messages">;
 
@@ -26,15 +27,7 @@ export function useNodeContextMessages(
 
   const chain = useMemo<Node[] | null>(() => {
     if (!allNodes) return null;
-    const byId = new Map(allNodes.map((n) => [n._id, n]));
-    const result: Node[] = [];
-    let current = byId.get(nodeId);
-    while (current) {
-      result.unshift(current);
-      if (!current.parentId) break;
-      current = byId.get(current.parentId);
-    }
-    return result;
+    return walkAncestors(buildNodeMap(allNodes), nodeId);
   }, [allNodes, nodeId]);
 
   const queries = useQueries({
