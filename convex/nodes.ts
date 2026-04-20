@@ -127,12 +127,6 @@ export const deleteLeafNode = mutation({
     }
 
     await ctx.db.delete(args.nodeId);
-
-    // If we just deleted the root, the thread has no more nodes — remove it too.
-    if (node.parentId === null) {
-      await ctx.db.delete(node.threadId);
-    }
-
     return null;
   },
 });
@@ -166,11 +160,6 @@ export const deleteSubtree = mutation({
         await ctx.db.delete(msg._id);
       }
       await ctx.db.delete(id);
-    }
-
-    // If we just deleted the root, the thread is now empty — remove it too.
-    if (node.parentId === null) {
-      await ctx.db.delete(node.threadId);
     }
 
     return { deletedCount: toDelete.length };
