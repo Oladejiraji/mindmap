@@ -38,21 +38,25 @@ export async function streamAssistantResponse(
   let buffer = "";
   let lastPatch = Date.now();
 
-  for await (const chunk of result.textStream) {
-    buffer += chunk;
-    if (Date.now() - lastPatch >= PATCH_INTERVAL_MS) {
-      await ctx.runMutation(internal.messages.patchStreamingContent, {
-        messageId,
-        content: buffer,
-      });
-      lastPatch = Date.now();
+  // The streaming message row is already marked `isStreaming: true`. If the
+  // stream throws mid-flight, finalize in `finally` so it never stays orphaned.
+  try {
+    for await (const chunk of result.textStream) {
+      buffer += chunk;
+      if (Date.now() - lastPatch >= PATCH_INTERVAL_MS) {
+        await ctx.runMutation(internal.messages.patchStreamingContent, {
+          messageId,
+          content: buffer,
+        });
+        lastPatch = Date.now();
+      }
     }
+  } finally {
+    await ctx.runMutation(internal.messages.finishStreamingMessage, {
+      messageId,
+      content: buffer,
+    });
   }
-
-  await ctx.runMutation(internal.messages.finishStreamingMessage, {
-    messageId,
-    content: buffer,
-  });
 }
 
 /**

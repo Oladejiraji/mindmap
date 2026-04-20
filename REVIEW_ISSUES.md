@@ -71,18 +71,6 @@ Most component files use kebab-case (`thread-canvas.tsx`, `message-bubble.tsx`, 
 
 [src/components/shared/canvas/thread-canvas.tsx:155-165](src/components/shared/canvas/thread-canvas.tsx#L155-L165) mutates `flowEdges` via `setFlowEdges` inside an effect keyed on `ancestorEdgeIds`. Cleaner: derive `edges` inline (`rfEdges.map(e => ancestor ? {...e, animated: true} : e)`) and pass directly. No effect, no duplicated state.
 
-### 4.5 Root-node deletion races thread deletion — **Medium**
-
-[convex/nodes.ts:130-132](convex/nodes.ts#L130-L132) and [convex/nodes.ts:170-172](convex/nodes.ts#L170-L172) both delete the thread "if we just deleted the root." But subscriptions that are reading `threads.list` and `nodes.listByThread` will see a brief state where the thread exists but has no nodes. Also, the UI deletes the node then navigates — see 4.6.
-
-### 4.6 Redirect happens before delete — **Low**
-
-[src/components/shared/sidebar/thread-item.tsx:77-86](src/components/shared/sidebar/thread-item.tsx#L77-L86) redirects if the user is viewing a node in the to-be-deleted subtree, **before** the delete mutation fires ([thread-item.tsx:90-99](src/components/shared/sidebar/thread-item.tsx#L90-L99)). For a split second, the sidebar still shows the node the user was viewing. Functionally fine; cosmetically awkward.
-
-### 4.7 Streaming message can be orphaned on error — **Medium**
-
-[convex/lib/llm.ts:18-55](convex/lib/llm.ts#L18-L55): the loop over `textStream` has no try/finally. If the Anthropic call throws mid-stream, `finishStreamingMessage` never runs. The message row stays `isStreaming: true` forever, and [convex/messages.ts:66-79](convex/messages.ts#L66-L79)'s invariant `if (!message.isStreaming) throw` means no subsequent patch can ever fix it. Wrap in try/finally and always finalize (with whatever content we have) on the error path.
-
 ### 4.8 `patchStreamingContent` throws on already-finalized messages — **Medium**
 
 [convex/messages.ts:73-75](convex/messages.ts#L73-L75) throws `"Cannot patch a finalized message"`. The streaming loop patches on a 100 ms timer ([llm.ts:42-48](convex/lib/llm.ts#L42-L48)); if the stream finishes between a tick and the next patch arriving, the patch mutation throws. There's no guard in the loop to stop patching after `finishStreamingMessage`. Low-probability but real. Either make patches idempotent for finalized messages, or check a local `done` flag before enqueueing each patch.

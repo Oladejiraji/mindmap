@@ -14,6 +14,7 @@ import {
   useDeleteSubtree,
   useRenameNode,
 } from "@/services/nodes/mutations";
+import { useRemoveThread } from "@/services/threads/mutations";
 import type { Thread } from "@/services/threads/queries";
 import type { Id } from "@convex/dataModel";
 import { collectSubtree, flattenTree, type FlatNode } from "@/lib/tree";
@@ -60,6 +61,7 @@ function NodeItem({
   const createEmptyBranch = useCreateEmptyBranch();
   const deleteLeafNode = useDeleteLeafNode();
   const deleteSubtree = useDeleteSubtree();
+  const removeThread = useRemoveThread();
 
   const isActive = pathname === `/t/${threadId}/n/${node._id}`;
   const canDelete = node.isLeaf || node.parentId === null;
@@ -89,11 +91,16 @@ function NodeItem({
     }
   };
 
+  const isRoot = node.parentId === null;
+
   const handleDeleteClick = () => {
     if (node.isLeaf) {
       redirectIfViewing(new Set([node._id]));
-      deleteLeafNode({ nodeId: node._id }).catch((err) =>
-        showError(err, "Failed to delete node"),
+      const deletion = isRoot
+        ? removeThread({ threadId })
+        : deleteLeafNode({ nodeId: node._id });
+      deletion.catch((err) =>
+        showError(err, isRoot ? "Failed to delete thread" : "Failed to delete node"),
       );
     } else {
       setConfirmOpen(true);
@@ -102,8 +109,11 @@ function NodeItem({
 
   const handleConfirmDelete = () => {
     redirectIfViewing(collectSubtree(allNodes, node._id));
-    deleteSubtree({ nodeId: node._id }).catch((err) =>
-      showError(err, "Failed to delete subtree"),
+    const deletion = isRoot
+      ? removeThread({ threadId })
+      : deleteSubtree({ nodeId: node._id });
+    deletion.catch((err) =>
+      showError(err, isRoot ? "Failed to delete thread" : "Failed to delete subtree"),
     );
   };
 
