@@ -16,10 +16,8 @@ export function NodeChat({
   threadId: Id<"threads">;
   nodeId: Id<"nodes">;
 }) {
-  const { items, targetMessages, isLoading } = useNodeContextMessages(
-    threadId,
-    nodeId,
-  );
+  const { items, targetMessages, isLoading, error, retry } =
+    useNodeContextMessages(threadId, nodeId);
   const sendMessage = useSendMessage();
   const [isSending, setIsSending] = useState(false);
 
@@ -30,18 +28,34 @@ export function NodeChat({
     setIsSending(true);
     try {
       await sendMessage({ nodeId, content });
+      setIsSending(false);
     } catch (err) {
       showError(err, "Failed to send message");
-    } finally {
-      setIsSending(false);
+      // Keep the input disabled briefly so the user can read the toast
+      // before the send button becomes mashable again.
+      setTimeout(() => setIsSending(false), 600);
     }
   };
 
   return (
     <div className="flex h-[calc(100svh-3.5rem)] flex-col items-center">
       <div className="flex w-full max-w-175 flex-1 flex-col overflow-hidden">
-        <MessageList items={items} isLoading={isLoading} />
-        <ChatInput onSend={handleSend} disabled={isBusy} />
+        {error ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Couldn&apos;t load this conversation.
+            </p>
+            <button
+              onClick={retry}
+              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        ) : (
+          <MessageList items={items} isLoading={isLoading} />
+        )}
+        <ChatInput onSend={handleSend} disabled={isBusy || !!error} />
       </div>
     </div>
   );
