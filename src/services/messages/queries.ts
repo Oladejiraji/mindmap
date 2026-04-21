@@ -23,7 +23,12 @@ export function useNodeContextMessages(
   threadId: Id<"threads">,
   nodeId: Id<"nodes">,
 ) {
-  const { data: allNodes, isLoading: nodesLoading } = useNodesByThread(threadId);
+  const {
+    data: allNodes,
+    isLoading: nodesLoading,
+    error: nodesError,
+    refetch: refetchNodes,
+  } = useNodesByThread(threadId);
 
   const chain = useMemo<Node[] | null>(() => {
     if (!allNodes) return null;
@@ -35,6 +40,9 @@ export function useNodeContextMessages(
       ...convexQuery(api.messages.listByNode, { nodeId: node._id }),
     })),
   });
+
+  const messagesError = queries.find((q) => q.error)?.error ?? null;
+  const error = nodesError ?? messagesError;
 
   const messagesLoaded =
     chain !== null &&
@@ -71,9 +79,18 @@ export function useNodeContextMessages(
       ? ((queries[queries.length - 1].data ?? []) as Message[])
       : [];
 
+  const retry = () => {
+    if (nodesError) void refetchNodes();
+    for (const q of queries) {
+      if (q.error) void q.refetch();
+    }
+  };
+
   return {
     items,
     targetMessages,
-    isLoading: nodesLoading || !messagesLoaded,
+    isLoading: nodesLoading || (!error && !messagesLoaded),
+    error,
+    retry,
   };
 }

@@ -112,6 +112,12 @@ Parallelize ancestor message fetches with `Promise.all`. For `deleteSubtree`, fe
 
 [src/components/shared/chat/message-list.tsx](src/components/shared/chat/message-list.tsx) maps messages to `<MessageBubble>` without memo. During streaming, every 100 ms the list re-renders and every bubble re-renders, re-parsing markdown for historical messages. Wrap `MessageBubble` in `React.memo` and the markdown render in `useMemo` keyed on `(id, content, isStreaming)`.
 
+### 4.16 `sendMessage` action parallel error handling is asymmetric — **Low**
+
+[convex/chat.ts:15-34](convex/chat.ts#L15-L34) fires `streamAssistantResponse` + `maybeGenerateTitle` in parallel. `maybeGenerateTitle` swallows its own error; `streamAssistantResponse` propagates. Today the client catches the rejection via `showError`, so stream failures correctly surface — **not a bug right now**, but worth watching: if we add more parallel side-effects here later, one failure will still cancel the sibling's awaited result.
+
+**Fix (if/when needed):** switch to `Promise.allSettled` and decide per-task whether to rethrow.
+
 ---
 
 ## 5. Convex-specific issues
