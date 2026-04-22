@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useNodesByThread, type Node } from "@/services/nodes/queries";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
+import { routes } from "@/lib/routes";
 import type { Id } from "@convex/dataModel";
 
 export function ChatBreadcrumb() {
@@ -62,7 +63,7 @@ function ChatBreadcrumbInner({
                 ) : (
                   <BreadcrumbLink
                     className="max-w-[160px] truncate"
-                    render={<Link href={`/t/${threadId}/n/${node._id}`} />}
+                    render={<Link href={routes.node(threadId, node._id)} />}
                   >
                     {node.title}
                   </BreadcrumbLink>

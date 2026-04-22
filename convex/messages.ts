@@ -1,10 +1,13 @@
 import { v } from "convex/values";
+import { ConvexError } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { normalizeMessageContent } from "./lib/validation";
+import { requireNode } from "./lib/auth";
 
 export const listByNode = query({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
+    await requireNode(ctx, args.nodeId);
     return await ctx.db
       .query("messages")
       .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", args.nodeId))
@@ -19,10 +22,8 @@ export const append = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireNode(ctx, args.nodeId);
     const content = normalizeMessageContent(args.content);
-
-    const node = await ctx.db.get(args.nodeId);
-    if (!node) throw new Error("Node not found");
 
     const last = await ctx.db
       .query("messages")
@@ -46,7 +47,7 @@ export const startAssistantMessage = internalMutation({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
     const node = await ctx.db.get(args.nodeId);
-    if (!node) throw new Error("Node not found");
+    if (!node) throw new ConvexError("Node not found");
 
     const last = await ctx.db
       .query("messages")
@@ -76,9 +77,9 @@ export const patchStreamingContent = internalMutation({
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
-    if (!message) throw new Error("Message not found");
+    if (!message) throw new ConvexError("Message not found");
     if (!message.isStreaming) {
-      throw new Error("Cannot patch a finalized message");
+      throw new ConvexError("Cannot patch a finalized message");
     }
     await ctx.db.patch(args.messageId, { content: args.content });
     return null;
@@ -92,9 +93,9 @@ export const finishStreamingMessage = internalMutation({
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
-    if (!message) throw new Error("Message not found");
+    if (!message) throw new ConvexError("Message not found");
     if (!message.isStreaming) {
-      throw new Error("Message is already finalized");
+      throw new ConvexError("Message is already finalized");
     }
     await ctx.db.patch(args.messageId, {
       content: args.content,

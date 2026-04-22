@@ -1,9 +1,10 @@
 import { v } from "convex/values";
 import { action, internalQuery } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { buildPromptContext, type ChatMessage } from "./lib/context";
 import { maybeGenerateTitle, streamAssistantResponse } from "./lib/llm";
+import { requireUserId } from "./lib/auth";
 
 export const getContext = internalQuery({
   args: { nodeId: v.id("nodes") },
@@ -18,6 +19,9 @@ export const sendMessage = action({
     content: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireUserId(ctx);
+    await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.nodeId });
+
     await ctx.runMutation(api.messages.append, {
       nodeId: args.nodeId,
       role: "user",
@@ -40,6 +44,9 @@ export const sendToBranch = action({
     content: v.string(),
   },
   handler: async (ctx, args): Promise<{ childId: Id<"nodes"> }> => {
+    await requireUserId(ctx);
+    await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.parentId });
+
     const { childId }: { childId: Id<"nodes"> } = await ctx.runMutation(
       api.nodes.createBranch,
       {

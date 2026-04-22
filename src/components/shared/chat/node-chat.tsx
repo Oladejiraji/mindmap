@@ -5,7 +5,7 @@ import type { Id } from "@convex/dataModel";
 
 import { useNodeContextMessages } from "@/services/messages/queries";
 import { useSendMessage } from "@/services/chat/actions";
-import { showError } from "@/lib/toast";
+import { handleError } from "@/lib/handle-error";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 
@@ -30,7 +30,7 @@ export function NodeChat({
       await sendMessage({ nodeId, content });
       setIsSending(false);
     } catch (err) {
-      showError(err, "Failed to send message");
+      handleError(err, "Failed to send message");
       // Keep the input disabled briefly so the user can read the toast
       // before the send button becomes mashable again.
       setTimeout(() => setIsSending(false), 600);

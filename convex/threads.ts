@@ -1,27 +1,35 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { normalizeTitle } from "./lib/validation";
+import { requireThread, requireUserId } from "./lib/auth";
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("threads").order("desc").take(100);
+    const userId = await requireUserId(ctx);
+    return await ctx.db
+      .query("threads")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(100);
   },
 });
 
 export const get = query({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.threadId);
+    return await requireThread(ctx, args.threadId);
   },
 });
 
 export const create = mutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
     const name = normalizeTitle(args.name, "Thread name");
-    const threadId = await ctx.db.insert("threads", { name });
+    const threadId = await ctx.db.insert("threads", { userId, name });
     const rootNodeId = await ctx.db.insert("nodes", {
+      userId,
       threadId,
       parentId: null,
       title: name,
@@ -35,8 +43,7 @@ export const create = mutation({
 export const remove = mutation({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
-    const thread = await ctx.db.get(args.threadId);
-    if (!thread) throw new Error("Thread not found");
+    await requireThread(ctx, args.threadId);
 
     const nodes = await ctx.db
       .query("nodes")

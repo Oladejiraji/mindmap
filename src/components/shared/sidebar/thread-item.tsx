@@ -18,7 +18,8 @@ import { useRemoveThread } from "@/services/threads/mutations";
 import type { Thread } from "@/services/threads/queries";
 import type { Id } from "@convex/dataModel";
 import { collectSubtree, flattenTree, type FlatNode } from "@/lib/tree";
-import { showError } from "@/lib/toast";
+import { handleError } from "@/lib/handle-error";
+import { routes } from "@/lib/routes";
 
 const focusAndSelect = (el: HTMLInputElement | null) => {
   el?.focus();
@@ -63,7 +64,7 @@ function NodeItem({
   const deleteSubtree = useDeleteSubtree();
   const removeThread = useRemoveThread();
 
-  const isActive = pathname === `/t/${threadId}/n/${node._id}`;
+  const isActive = pathname === routes.node(threadId, node._id);
   const canDelete = node.isLeaf || node.parentId === null;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -74,9 +75,9 @@ function NodeItem({
   const handleBranch = async () => {
     try {
       const { childId } = await createEmptyBranch({ parentId: node._id });
-      router.push(`/t/${threadId}/n/${childId}`);
+      router.push(routes.node(threadId, childId));
     } catch (err) {
-      showError(err, "Failed to create branch");
+      handleError(err, "Failed to create branch");
     }
   };
 
@@ -85,9 +86,9 @@ function NodeItem({
     const currentNodeId = match?.[1];
     if (!currentNodeId || !subtreeIds.has(currentNodeId as Id<"nodes">)) return;
     if (node.parentId === null) {
-      router.push("/");
+      router.push(routes.home);
     } else {
-      router.push(`/t/${threadId}/n/${node.parentId}`);
+      router.push(routes.node(threadId, node.parentId));
     }
   };
 
@@ -100,7 +101,7 @@ function NodeItem({
         ? removeThread({ threadId })
         : deleteLeafNode({ nodeId: node._id });
       deletion.catch((err) =>
-        showError(err, isRoot ? "Failed to delete thread" : "Failed to delete node"),
+        handleError(err, isRoot ? "Failed to delete thread" : "Failed to delete node"),
       );
     } else {
       setConfirmOpen(true);
@@ -113,7 +114,7 @@ function NodeItem({
       ? removeThread({ threadId })
       : deleteSubtree({ nodeId: node._id });
     deletion.catch((err) =>
-      showError(err, isRoot ? "Failed to delete thread" : "Failed to delete subtree"),
+      handleError(err, isRoot ? "Failed to delete thread" : "Failed to delete subtree"),
     );
   };
 
@@ -121,7 +122,7 @@ function NodeItem({
     const next = draft.trim();
     if (next && next !== node.title) {
       renameNode({ nodeId: node._id, title: next }).catch((err) =>
-        showError(err, "Failed to rename"),
+        handleError(err, "Failed to rename"),
       );
     }
     setIsEditing(false);
@@ -161,7 +162,7 @@ function NodeItem({
         </div>
       ) : (
         <Link
-          href={`/t/${threadId}/n/${node._id}`}
+          href={routes.node(threadId, node._id)}
           className={cn(
             "flex h-8 items-center gap-1.5 rounded-md pr-8 text-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             isActive

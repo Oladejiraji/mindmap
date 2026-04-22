@@ -3,10 +3,12 @@ import { v } from "convex/values";
 
 export default defineSchema({
   threads: defineTable({
+    userId: v.string(),
     name: v.string(),
-  }),
+  }).index("by_userId", ["userId"]),
 
   nodes: defineTable({
+    userId: v.string(),
     threadId: v.id("threads"),
     parentId: v.union(v.id("nodes"), v.null()),
     branchedAt: v.optional(v.number()),
@@ -20,7 +22,8 @@ export default defineSchema({
     isStreaming: v.optional(v.boolean()),
   })
     .index("by_threadId", ["threadId"])
-    .index("by_parentId", ["parentId"]),
+    .index("by_parentId", ["parentId"])
+    .index("by_userId_and_threadId", ["userId", "threadId"]),
 
   messages: defineTable({
     nodeId: v.id("nodes"),
