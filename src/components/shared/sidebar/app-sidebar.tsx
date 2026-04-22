@@ -11,16 +11,17 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useThreads } from "@/services/threads/queries";
+import { routes } from "@/lib/routes";
 import { ThreadItem } from "./thread-item";
 import { NewChatButton } from "./new-chat-button";
 
 export function AppSidebar() {
-  const { data: threads, isPending, isError, refetch } = useThreads();
+  const { data: threads, isPending, isError, refetch, error } = useThreads();
 
   return (
     <Sidebar>
       <SidebarHeader className="px-4 py-3">
-        <Link href="/" className="text-sm font-semibold">
+        <Link href={routes.home} className="text-sm font-semibold">
           Mindmap
         </Link>
       </SidebarHeader>

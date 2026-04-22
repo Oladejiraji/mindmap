@@ -1,11 +1,13 @@
 import { useMemo } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
+import { useConvexAuth } from "convex/react";
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@convex/api";
 import type { Doc, Id } from "@convex/dataModel";
 
 import { useNodesByThread, type Node } from "@/services/nodes/queries";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 export type Message = Doc<"messages">;
 
@@ -14,15 +16,14 @@ export type ChatItem =
   | { kind: "branch-marker"; id: string; fromTitle: string; intoTitle: string };
 
 export function useMessagesByNode(nodeId: Id<"nodes">) {
-  return useQuery({
-    ...convexQuery(api.messages.listByNode, { nodeId }),
-  });
+  return useAuthedConvexQuery(api.messages.listByNode, { nodeId });
 }
 
 export function useNodeContextMessages(
   threadId: Id<"threads">,
   nodeId: Id<"nodes">,
 ) {
+  const { isAuthenticated } = useConvexAuth();
   const {
     data: allNodes,
     isLoading: nodesLoading,
@@ -37,7 +38,10 @@ export function useNodeContextMessages(
 
   const queries = useQueries({
     queries: (chain ?? []).map((node) => ({
-      ...convexQuery(api.messages.listByNode, { nodeId: node._id }),
+      ...convexQuery(
+        api.messages.listByNode,
+        isAuthenticated ? { nodeId: node._id } : "skip",
+      ),
     })),
   });
 

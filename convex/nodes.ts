@@ -1,11 +1,14 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { ConvexError } from "convex/values";
+import { internalQuery, mutation, query } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { normalizeTitle } from "./lib/validation";
+import { requireNode, requireThread } from "./lib/auth";
 
 export const listByThread = query({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
+    await requireThread(ctx, args.threadId);
     return await ctx.db
       .query("nodes")
       .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
@@ -16,7 +19,7 @@ export const listByThread = query({
 export const get = query({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.nodeId);
+    return await requireNode(ctx, args.nodeId);
   },
 });
 
@@ -26,6 +29,7 @@ export const rename = mutation({
     title: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireNode(ctx, args.nodeId);
     const title = normalizeTitle(args.title, "Node title");
     await ctx.db.patch(args.nodeId, { title });
     return null;
@@ -38,6 +42,7 @@ export const updatePosition = mutation({
     position: v.object({ x: v.number(), y: v.number() }),
   },
   handler: async (ctx, args) => {
+    await requireNode(ctx, args.nodeId);
     await ctx.db.patch(args.nodeId, { position: args.position });
     return null;
   },
@@ -50,8 +55,7 @@ export const createBranch = mutation({
     firstMessageContent: v.string(),
   },
   handler: async (ctx, args) => {
-    const parent = await ctx.db.get(args.parentId);
-    if (!parent) throw new Error("Parent node not found");
+    const parent = await requireNode(ctx, args.parentId);
 
     const lastParentMessage = await ctx.db
       .query("messages")
@@ -61,6 +65,7 @@ export const createBranch = mutation({
     const branchedAt = (lastParentMessage?.index ?? -1) + 1;
 
     const childId = await ctx.db.insert("nodes", {
+      userId: parent.userId,
       threadId: parent.threadId,
       parentId: args.parentId,
       branchedAt,
@@ -84,8 +89,7 @@ export const createEmptyBranch = mutation({
     position: v.optional(v.object({ x: v.number(), y: v.number() })),
   },
   handler: async (ctx, args) => {
-    const parent = await ctx.db.get(args.parentId);
-    if (!parent) throw new Error("Parent node not found");
+    const parent = await requireNode(ctx, args.parentId);
 
     const lastParentMessage = await ctx.db
       .query("messages")
@@ -95,6 +99,7 @@ export const createEmptyBranch = mutation({
     const branchedAt = (lastParentMessage?.index ?? -1) + 1;
 
     const childId = await ctx.db.insert("nodes", {
+      userId: parent.userId,
       threadId: parent.threadId,
       parentId: args.parentId,
       branchedAt,
@@ -109,14 +114,13 @@ export const createEmptyBranch = mutation({
 export const deleteLeafNode = mutation({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
-    const node = await ctx.db.get(args.nodeId);
-    if (!node) throw new Error("Node not found");
+    await requireNode(ctx, args.nodeId);
 
     const children = await ctx.db
       .query("nodes")
       .withIndex("by_parentId", (q) => q.eq("parentId", args.nodeId))
       .first();
-    if (children) throw new Error("Cannot delete a node with children");
+    if (children) throw new ConvexError("Cannot delete a node with children");
 
     const messages = await ctx.db
       .query("messages")
@@ -134,8 +138,7 @@ export const deleteLeafNode = mutation({
 export const deleteSubtree = mutation({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
-    const node = await ctx.db.get(args.nodeId);
-    if (!node) throw new Error("Node not found");
+    const root = await requireNode(ctx, args.nodeId);
 
     const toDelete: Id<"nodes">[] = [];
     const queue: Id<"nodes">[] = [args.nodeId];
@@ -147,6 +150,9 @@ export const deleteSubtree = mutation({
         .withIndex("by_parentId", (q) => q.eq("parentId", current))
         .take(500);
       for (const child of children) {
+        if (child.userId !== root.userId) {
+          throw new ConvexError({ code: "NOT_FOUND", message: "Not found" });
+        }
         queue.push(child._id);
       }
     }
@@ -163,5 +169,14 @@ export const deleteSubtree = mutation({
     }
 
     return { deletedCount: toDelete.length };
+  },
+});
+
+// Called from actions (which can't read ctx.db directly) to verify ownership
+// before performing work. Returns the node on success, throws on mismatch.
+export const assertOwned = internalQuery({
+  args: { nodeId: v.id("nodes") },
+  handler: async (ctx, args) => {
+    return await requireNode(ctx, args.nodeId);
   },
 });

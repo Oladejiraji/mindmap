@@ -29,7 +29,8 @@ import {
 } from "@/services/nodes/mutations";
 import { layoutNodes, NODE_WIDTH, NODE_HEIGHT } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
-import { showError } from "@/lib/toast";
+import { handleError } from "@/lib/handle-error";
+import { routes } from "@/lib/routes";
 import { MindMapNode, type MindMapNodeData } from "./mind-map-node";
 
 const nodeTypes: NodeTypes = {
@@ -56,7 +57,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
       deleteLeafNode({ nodeId: nodeId as Id<"nodes"> }).catch((err) =>
-        showError(err, "Failed to delete node"),
+        handleError(err, "Failed to delete node"),
       );
     },
     [deleteLeafNode],
@@ -65,7 +66,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const handleRenameNode = useCallback(
     (nodeId: string, title: string) => {
       renameNode({ nodeId: nodeId as Id<"nodes">, title }).catch((err) =>
-        showError(err, "Failed to rename"),
+        handleError(err, "Failed to rename"),
       );
     },
     [renameNode],
@@ -188,14 +189,14 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       updatePosition({
         nodeId: node.id as Id<"nodes">,
         position: { x: node.position.x, y: node.position.y },
-      }).catch((err) => showError(err, "Failed to save position"));
+      }).catch((err) => handleError(err, "Failed to save position"));
     },
     [updatePosition],
   );
 
   const onNodeDoubleClick = useCallback(
     (_event: React.MouseEvent, node: RFNode) => {
-      router.push(`/t/${threadId}/n/${node.id}`);
+      router.push(routes.node(threadId, node.id as Id<"nodes">));
     },
     [router, threadId],
   );
@@ -229,7 +230,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       createEmptyBranch({
         parentId: sourceId as Id<"nodes">,
         position,
-      }).catch((err) => showError(err, "Failed to create branch"));
+      }).catch((err) => handleError(err, "Failed to create branch"));
     },
     [createEmptyBranch, screenToFlowPosition],
   );
