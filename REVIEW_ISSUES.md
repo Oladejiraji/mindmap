@@ -187,6 +187,14 @@ Zero test files in the repo. Given the append-only invariant, the context-assemb
 
 SPEC.md still references auth helpers (`assertNodeOwner`, `assertThreadOwner`) and a `userId` column ([SPEC.md §auth](SPEC.md)), which were intentionally dropped. Either add a note "auth deferred" at the top of SPEC.md, or prune those sections so future readers aren't misled.
 
+### 6.5 Rate limit numbers are unvalidated guesses — **Low**
+
+The initial limits in [convex/lib/rateLimiter.ts](convex/lib/rateLimiter.ts) (`standardWrite` 120/min cap 30, `llmRequest` 20/min cap 5, `llmRequestDaily` 300/day) were picked from intuition, not data. Once there's real usage, pull numbers from Convex dashboard / Anthropic billing and tune. Signals to watch: users hitting `RATE_LIMITED` on normal flows (too tight), or cost/minute climbing without the limit ever biting (too loose). Revisit after ~2 weeks of real traffic.
+
+### 6.6 BYOK (bring-your-own-key) not implemented — **Low**
+
+Today every LLM call goes through our Anthropic key, so `llmRequest` / `llmRequestDaily` exist primarily as a cost-control ceiling. If we let users supply their own Anthropic key, the cost rationale disappears for those users — keep an abuse-only floor but skip the tight cost-shaped cap. Implementation sketch: store an encrypted per-user key on a `userSettings` table, plumb it into [convex/lib/llm.ts](convex/lib/llm.ts), and have the rate-limit helper take a `hasOwnKey` flag that swaps `llmRequest` for a looser `llmRequestBYOK` bucket (or skips entirely).
+
 ---
 
 ## Triage summary

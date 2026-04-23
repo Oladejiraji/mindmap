@@ -1,11 +1,12 @@
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
-import { internalQuery, mutation, query } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { normalizeTitle } from "./lib/validation";
 import { requireNode, requireThread } from "./lib/auth";
+import { userMutation, userQuery } from "./lib/functions";
 
-export const listByThread = query({
+export const listByThread = userQuery({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
     await requireThread(ctx, args.threadId);
@@ -16,14 +17,14 @@ export const listByThread = query({
   },
 });
 
-export const get = query({
+export const get = userQuery({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
     return await requireNode(ctx, args.nodeId);
   },
 });
 
-export const rename = mutation({
+export const rename = userMutation({
   args: {
     nodeId: v.id("nodes"),
     title: v.string(),
@@ -36,7 +37,7 @@ export const rename = mutation({
   },
 });
 
-export const updatePosition = mutation({
+export const updatePosition = userMutation({
   args: {
     nodeId: v.id("nodes"),
     position: v.object({ x: v.number(), y: v.number() }),
@@ -48,7 +49,7 @@ export const updatePosition = mutation({
   },
 });
 
-export const createBranch = mutation({
+export const createBranch = userMutation({
   args: {
     parentId: v.id("nodes"),
     title: v.string(),
@@ -83,7 +84,7 @@ export const createBranch = mutation({
   },
 });
 
-export const createEmptyBranch = mutation({
+export const createEmptyBranch = userMutation({
   args: {
     parentId: v.id("nodes"),
     position: v.optional(v.object({ x: v.number(), y: v.number() })),
@@ -111,7 +112,7 @@ export const createEmptyBranch = mutation({
   },
 });
 
-export const deleteLeafNode = mutation({
+export const deleteLeafNode = userMutation({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
     await requireNode(ctx, args.nodeId);
@@ -135,7 +136,7 @@ export const deleteLeafNode = mutation({
   },
 });
 
-export const deleteSubtree = mutation({
+export const deleteSubtree = userMutation({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
     const root = await requireNode(ctx, args.nodeId);

@@ -1,10 +1,11 @@
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation } from "./_generated/server";
 import { normalizeMessageContent } from "./lib/validation";
 import { requireNode } from "./lib/auth";
+import { userMutation, userQuery } from "./lib/functions";
 
-export const listByNode = query({
+export const listByNode = userQuery({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {
     await requireNode(ctx, args.nodeId);
@@ -15,7 +16,7 @@ export const listByNode = query({
   },
 });
 
-export const append = mutation({
+export const append = userMutation({
   args: {
     nodeId: v.id("nodes"),
     role: v.union(v.literal("user"), v.literal("assistant")),
