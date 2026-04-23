@@ -1,10 +1,10 @@
 import { v } from "convex/values";
-import { action, internalQuery } from "./_generated/server";
+import { internalQuery } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { buildPromptContext, type ChatMessage } from "./lib/context";
 import { maybeGenerateTitle, streamAssistantResponse } from "./lib/llm";
-import { requireUserId } from "./lib/auth";
+import { llmAction } from "./lib/functions";
 
 export const getContext = internalQuery({
   args: { nodeId: v.id("nodes") },
@@ -13,13 +13,12 @@ export const getContext = internalQuery({
   },
 });
 
-export const sendMessage = action({
+export const sendMessage = llmAction({
   args: {
     nodeId: v.id("nodes"),
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireUserId(ctx);
     await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.nodeId });
 
     await ctx.runMutation(api.messages.append, {
@@ -37,14 +36,13 @@ export const sendMessage = action({
   },
 });
 
-export const sendToBranch = action({
+export const sendToBranch = llmAction({
   args: {
     parentId: v.id("nodes"),
     title: v.string(),
     content: v.string(),
   },
   handler: async (ctx, args): Promise<{ childId: Id<"nodes"> }> => {
-    await requireUserId(ctx);
     await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.parentId });
 
     const { childId }: { childId: Id<"nodes"> } = await ctx.runMutation(

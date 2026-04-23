@@ -17,6 +17,9 @@ importers:
       '@convex-dev/better-auth':
         specifier: ^0.11.4
         version: 0.11.4(@standard-schema/spec@1.1.0)(better-auth@1.5.3(next@16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(convex@1.35.1(react@19.2.4))(hono@4.12.14)(react@19.2.4)(typescript@5.9.3)
+      '@convex-dev/rate-limiter':
+        specifier: ^0.3.2
+        version: 0.3.2(convex@1.35.1(react@19.2.4))(react@19.2.4)
       '@convex-dev/react-query':
         specifier: ^0.1.0
         version: 0.1.0(@tanstack/react-query@5.99.0(react@19.2.4))(convex@1.35.1(react@19.2.4))
@@ -44,6 +47,9 @@ importers:
       convex:
         specifier: ^1.35.1
         version: 1.35.1(react@19.2.4)
+      convex-helpers:
+        specifier: ^0.1.115
+        version: 0.1.115(@standard-schema/spec@1.1.0)(convex@1.35.1(react@19.2.4))(hono@4.12.14)(react@19.2.4)(typescript@5.9.3)(zod@4.3.6)
       lucide-react:
         specifier: ^1.8.0
         version: 1.8.0(react@19.2.4)
@@ -337,6 +343,15 @@ packages:
       better-auth: '>=1.5.0 <1.6.0'
       convex: ^1.25.0
       react: ^18.3.1 || ^19.0.0
+
+  '@convex-dev/rate-limiter@0.3.2':
+    resolution: {integrity: sha512-+oBPsBfFbzdxiF/9XaaTQmVnvDlvEfg/c69/v8LxTbw4VLuiflIKlfnPQL8OS0azXQQ11hcPWHmU8ytFmHKDXA==}
+    peerDependencies:
+      convex: ^1.24.8
+      react: ^18.2.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   '@convex-dev/react-query@0.1.0':
     resolution: {integrity: sha512-ULmBZCtAQDUePdBhUv7hj1Yy4QiCelhi6uEIOtMpjW8db6W9CFKvQwLt9heLngccFyMFfAZdOfSrT+cP4AH0Jw==}
@@ -4157,6 +4172,12 @@ snapshots:
       - '@standard-schema/spec'
       - hono
       - typescript
+
+  '@convex-dev/rate-limiter@0.3.2(convex@1.35.1(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      convex: 1.35.1(react@19.2.4)
+    optionalDependencies:
+      react: 19.2.4
 
   '@convex-dev/react-query@0.1.0(@tanstack/react-query@5.99.0(react@19.2.4))(convex@1.35.1(react@19.2.4))':
     dependencies:

@@ -1,35 +1,33 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
 import { normalizeTitle } from "./lib/validation";
-import { requireThread, requireUserId } from "./lib/auth";
+import { requireThread } from "./lib/auth";
+import { userMutation, userQuery } from "./lib/functions";
 
-export const list = query({
+export const list = userQuery({
   args: {},
   handler: async (ctx) => {
-    const userId = await requireUserId(ctx);
     return await ctx.db
       .query("threads")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.userId))
       .order("desc")
       .take(100);
   },
 });
 
-export const get = query({
+export const get = userQuery({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
     return await requireThread(ctx, args.threadId);
   },
 });
 
-export const create = mutation({
+export const create = userMutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
     const name = normalizeTitle(args.name, "Thread name");
-    const threadId = await ctx.db.insert("threads", { userId, name });
+    const threadId = await ctx.db.insert("threads", { userId: ctx.userId, name });
     const rootNodeId = await ctx.db.insert("nodes", {
-      userId,
+      userId: ctx.userId,
       threadId,
       parentId: null,
       title: name,
@@ -40,7 +38,7 @@ export const create = mutation({
 
 // Cascades through every node (and its messages) in the thread. Use this
 // instead of nodes.deleteLeafNode / nodes.deleteSubtree when removing a root.
-export const remove = mutation({
+export const remove = userMutation({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
     await requireThread(ctx, args.threadId);
