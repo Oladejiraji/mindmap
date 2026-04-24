@@ -1,24 +1,12 @@
 # Mindmap — Project Review: Issues
 
-Reviewed: 2026-04-17. Branch: `main` (working tree dirty).
+Reviewed: 2026-04-17 (last pruned 2026-04-23). Branch: `main`.
 
-This review excludes the **intentional absence of user auth** per the user's explicit confirmation. All other security, correctness, structure, and dead-code findings are fair game.
-
----
-
-## 1. Security (excluding intentional lack of auth)
-
-### 1.3 No rate limiting on `chat.sendMessage` — **Medium**
-
-[convex/chat.ts:15-34](convex/chat.ts#L15-L34) is a public action. The UI disables the send button while streaming, but a direct Convex client or a forged WebSocket frame can fire unbounded requests, each spawning an Anthropic call. With no auth and no per-IP/per-thread limit, a bored visitor can drain the API budget in minutes. Add a rate-limit component (e.g. `@convex-dev/rate-limiter`) keyed on threadId and a global bucket.
+Remaining issues after the auth, rate-limit, validation, and streaming-lifecycle work landed. Section numbers are preserved from the original review so line references stay stable — gaps mean that item has been resolved and removed.
 
 ---
 
 ## 2. Dead code & unused files
-
-### 2.1 Empty `convex/lib/auth.ts` — **Low**
-
-[convex/lib/auth.ts](convex/lib/auth.ts) is a zero-byte file, imported by nothing. Either delete it or populate it with the helpers SPEC mentions (even no-op stubs would be clearer than a phantom file).
 
 ### 2.2 Unused `sendToBranch` action — **Low**
 
@@ -39,27 +27,9 @@ Neither is referenced by any component (`grep` confirms zero call sites). Canvas
 
 Generated-at-init boilerplate; adds noise. Replace with a two-line pointer to SPEC / AGENTS, or delete.
 
-### 2.6 Service wrappers that add no value — **Low**
+### 2.6 Mutation / action service wrappers add no value — **Low**
 
-All six files in [src/services/](src/services/) are one-line re-exports of `useMutation(api.x.y)` / `useAction(api.x.y)`. They don't add types, error handling, defaults, or optimistic updates — just indirection. Either (a) delete the layer and import the Convex API directly in components, or (b) earn the layer by adding optimistic updates, toast integration, and typed error handling (see Recommendations doc).
-
----
-
-## 3. File structure
-
-### 3.1 Inconsistent file naming — **Low**
-
-Most component files use kebab-case (`thread-canvas.tsx`, `message-bubble.tsx`, `app-sidebar.tsx`). The single outlier is [src/providers/ConvexClientProvider.tsx](src/providers/ConvexClientProvider.tsx) in PascalCase. Pick one — kebab-case matches the rest of the tree.
-
-### 3.2 `src/providers/` vs the rest — **Low**
-
-`providers/` is a one-file directory. `hooks/` has exactly one file (`use-mobile.ts`). These "category-of-one" folders bloat the tree. Either merge `providers/` into `components/shared/` (or `app/`) or wait until there's a second provider before creating the folder.
-
-### 3.3 `convex/` mixes domain files and `lib/` sub-modules — **Low**
-
-`convex/chat.ts` exposes the action; `convex/lib/llm.ts` contains the Anthropic calls; `convex/lib/context.ts` contains shared query helpers. That's fine. But `convex/lib/auth.ts` being empty-but-present is confusing — see 2.1.
-
----
+[nodes/mutations.ts](src/services/nodes/mutations.ts), [threads/mutations.ts](src/services/threads/mutations.ts), and [chat/actions.ts](src/services/chat/actions.ts) are one-line re-exports of `useMutation` / `useAction`. No types, error handling, defaults, or optimistic updates — just indirection. Either delete them and call the Convex API directly, or earn the layer with optimistic updates / typed error handling (see Recommendations doc).
 
 ## 4. Code quality & correctness
 
@@ -70,10 +40,6 @@ Most component files use kebab-case (`thread-canvas.tsx`, `message-bubble.tsx`, 
 ### 4.2 `useEffect` mutating edges on selection — **Medium**
 
 [src/components/shared/canvas/thread-canvas.tsx:155-165](src/components/shared/canvas/thread-canvas.tsx#L155-L165) mutates `flowEdges` via `setFlowEdges` inside an effect keyed on `ancestorEdgeIds`. Cleaner: derive `edges` inline (`rfEdges.map(e => ancestor ? {...e, animated: true} : e)`) and pass directly. No effect, no duplicated state.
-
-### 4.8 `patchStreamingContent` throws on already-finalized messages — **Medium**
-
-[convex/messages.ts:73-75](convex/messages.ts#L73-L75) throws `"Cannot patch a finalized message"`. The streaming loop patches on a 100 ms timer ([llm.ts:42-48](convex/lib/llm.ts#L42-L48)); if the stream finishes between a tick and the next patch arriving, the patch mutation throws. There's no guard in the loop to stop patching after `finishStreamingMessage`. Low-probability but real. Either make patches idempotent for finalized messages, or check a local `done` flag before enqueueing each patch.
 
 ### 4.9 No concurrency guard on parallel sends to the same node — **Medium**
 
@@ -157,14 +123,6 @@ With the cache on, the JWT is decoded from the cookie locally until it's within 
 
 Do this before prod launch, not before.
 
-### 5.5 Client-auth propagation race on first mount — **Low**
-
-Immediately after sign-in (or on hard-refresh / new-tab open of a protected route), the server layout confirms the session cookie, but the Convex React client hasn't yet finished fetching its JWT via `authClient.convex.token()`. Any Convex query that fires in that window hits the backend without a token → [convex/lib/auth.ts](convex/lib/auth.ts) `requireUserId` throws `ConvexError({ code: "UNAUTHORIZED" })` → the consumer renders an error UI briefly, then recovers once the token arrives and Convex re-subscribes.
-
-Already patched for `useThreads` (sidebar always mounts on fresh sign-in) via [src/lib/use-authed-query.ts](src/lib/use-authed-query.ts), which holds the query in `pending` state until `useConvexAuth().isAuthenticated` flips true.
-
-All Convex query hooks now go through `useAuthedConvexQuery` (or inline `"skip"` for the `useQueries` case in `useNodeContextMessages`) so the propagation race can't fire a live subscription without a token. Paired with the `ClientAuthWatcher` in §5.6, this is resolved.
-
 ### 5.6 `ClientAuthWatcher` redirects on transient Convex auth blips — **Low**
 
 [src/components/shared/client-auth-watcher.tsx](src/components/shared/client-auth-watcher.tsx) bounces the user to `/sign-in` whenever `useConvexAuth().isAuthenticated` becomes false mid-session. That's the right call for real session expiry or cookie loss, but Convex will also briefly report `isAuthenticated: false` on transient network failures — e.g., one failed `/api/auth/convex/token` fetch during a flaky connection or a Convex cold-start. In those cases the session cookie is still valid; the very next request would recover. Instead, we teleport the user to sign-in with any in-flight UI state lost (unsent optimistic UI, form contents, canvas positions).
@@ -179,14 +137,6 @@ All Convex query hooks now go through `useAuthedConvexQuery` (or inline `"skip"`
 
 Zero test files in the repo. Given the append-only invariant, the context-assembly algorithm, and the branchedAt math, this is the exact surface that deserves unit coverage. At minimum: `buildPromptContext` with a fabricated in-memory chain, and a property test for "descendants never see sibling messages."
 
-### 6.3 Dirty working tree — **Informational**
-
-`git status` shows 17 modified files and 7 untracked new files on `main`. Two commits in the log. The repo looks like a "code as you go, commit later" project; no separate feature branches. Fine for a solo prototype, but worth mentioning before the next checkpoint.
-
-### 6.4 `SPEC.md` and code have drifted — **Low**
-
-SPEC.md still references auth helpers (`assertNodeOwner`, `assertThreadOwner`) and a `userId` column ([SPEC.md §auth](SPEC.md)), which were intentionally dropped. Either add a note "auth deferred" at the top of SPEC.md, or prune those sections so future readers aren't misled.
-
 ### 6.5 Rate limit numbers are unvalidated guesses — **Low**
 
 The initial limits in [convex/lib/rateLimiter.ts](convex/lib/rateLimiter.ts) (`standardWrite` 120/min cap 30, `llmRequest` 20/min cap 5, `llmRequestDaily` 300/day) were picked from intuition, not data. Once there's real usage, pull numbers from Convex dashboard / Anthropic billing and tune. Signals to watch: users hitting `RATE_LIMITED` on normal flows (too tight), or cost/minute climbing without the limit ever biting (too loose). Revisit after ~2 weeks of real traffic.
@@ -199,10 +149,9 @@ Today every LLM call goes through our Anthropic key, so `llmRequest` / `llmReque
 
 ## Triage summary
 
-| Severity | Count | Top items                                                                                                                            |
-| -------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| High     | 1     | §1.1 prompt injection in title gen                                                                                                   |
-| Medium   | ~13   | Rate limiting, validation, orphan streaming messages, concurrency, N+1, useEffect misuse, silent `.take(500)`, duplicated tree walks |
-| Low      | ~15   | Dead hooks/actions, empty auth.ts, naming inconsistencies, missing env docs, unused `threadId` prop                                  |
+| Severity | Count | Top items                                                                           |
+| -------- | ----- | ----------------------------------------------------------------------------------- |
+| Medium   | ~7    | Concurrency guard, N+1 walks, useEffect misuse, silent `.take(500)`, prod JWT cache |
+| Low      | ~12   | Dead hooks/actions, naming inconsistencies, drifted SPEC, BYOK, rate-limit tuning   |
 
-Start with §4.7 (orphan streaming) and §4.9 (concurrency) — those break the append-only invariant. Then §1.3/§1.4 (rate limit + length caps) because they're cheap and gate runaway cost. Then the dead-code sweep from §2.
+Start with §4.9 (concurrency) — that one still threatens the append-only invariant. Then §5.4 (JWT cache) before prod launch. Then the dead-code sweep from §2.
