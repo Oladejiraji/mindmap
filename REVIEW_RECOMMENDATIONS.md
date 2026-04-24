@@ -15,9 +15,6 @@ Every file in [src/services/](src/services/) is a one-liner `useQuery(api.x.y)` 
 
 Pick one. The current middle ground gives you the cost of the layer with none of the benefit.
 
-### A.2 Extract shared tree helpers — **S**
-Create `src/lib/tree.ts` with `buildNodeMap`, `walkAncestors`, `collectSubtree`, `flattenTree`. Replace the three duplicated implementations (REVIEW_ISSUES §3.4). Also makes testing the append-only invariant feasible.
-
 ### A.3 Move canvas state off `useEffect` — **M**
 Refactor [thread-canvas.tsx](src/components/shared/canvas/thread-canvas.tsx) so React Flow consumes derived data directly:
 - Pass `rfNodes`/`rfEdges` from `useMemo` straight into `<ReactFlow nodes=... edges=...>`.
@@ -26,52 +23,14 @@ Refactor [thread-canvas.tsx](src/components/shared/canvas/thread-canvas.tsx) so 
 
 Eliminates both effects, removes the fingerprint hack, and aligns with AGENTS.md's "avoid useEffect."
 
-### A.4 Harden the streaming lifecycle — **S**
-In [convex/lib/llm.ts](convex/lib/llm.ts):
-```ts
-try {
-  for await (...) { ... }
-  await finishStreamingMessage(...);
-} catch (err) {
-  await finishStreamingMessage({ messageId, content: buffer + "\n\n[error]" });
-  throw err;
-}
-```
-Plus guard `patchStreamingContent` to no-op (not throw) on a finalized message. Closes the orphan-streaming failure mode (REVIEW_ISSUES §4.7, §4.8).
-
 ### A.5 Add a serialization lock per node — **M**
 Before `sendMessage` accepts input, check in an internal mutation whether the node is currently `isStreaming`. If yes, throw `"Node busy"`. UI already disables the button, but a lock at the backend makes this an actual invariant. Pairs well with A.4.
-
-### A.6 Add basic rate limiting — **S**
-Drop in `@convex-dev/rate-limiter`. Two buckets:
-- Per-nodeId, 1 send / 500 ms
-- Global, 120 sends / minute
-
-Five-line change once the component is installed, and it single-handedly protects your Anthropic budget.
-
-### A.7 Enforce content bounds at the boundary — **S**
-In `messages.append`, `nodes.rename`, `threads.create`, `nodes.createEmptyBranch`:
-- Trim whitespace
-- Reject empty strings after trim
-- Reject `content.length > 32_000` (pick a number; document it)
-
-Cheap, catches real abuse, prevents a 1 MiB document surprise.
 
 ### A.8 Paginate messages and nodes — **M**
 Replace `.take(500)` with Convex's paginated queries, both on the frontend (`usePaginatedQuery`) and in the context builder. For prompt context, chunk by message-count and respect the model's input budget.
 
 ### A.9 Memoize message rendering — **S**
 `React.memo` around `MessageBubble`; `useMemo` on the markdown render. Streaming re-renders drop from O(all-messages) to O(1).
-
-### A.10 Document env setup — **S**
-Add `.env.example`:
-```
-NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
-```
-And a README section that points users at `npx convex env set ANTHROPIC_API_KEY=...`. Fixes the silent-failure onboarding cliff.
-
-### A.11 Consistent file naming — **S**
-Rename [src/providers/ConvexClientProvider.tsx](src/providers/ConvexClientProvider.tsx) → `convex-client-provider.tsx`. One git mv and an import update. Optional but worth it for grep-ability.
 
 ### A.12 Type the error path — **S**
 Wrap all mutations in a small `useSafeMutation` that catches, surfaces a toast, and returns `{ ok, error }`. Replace silent fire-and-forget patterns (REVIEW_ISSUES §4.3).
@@ -168,8 +127,8 @@ GitHub Action: `pnpm install`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test
 
 ## Suggested order of operations
 
-1. **Stabilize (week 1):** A.4 + A.5 + A.6 + A.7 — invariant + cost protection.
-2. **Clean (week 1):** §2 dead code sweep, A.1, A.2, A.11.
+1. **Stabilize (week 1):** A.5 — serialization lock closes the last append-only gap.
+2. **Clean (week 1):** §2 dead code sweep, A.1.
 3. **Refactor (week 2):** A.3, A.9, A.12.
 4. **Test (week 2):** A.13.
 5. **Feature (week 3+):** B.1, B.6, B.9, B.15 — highest leverage for a branching chat app.

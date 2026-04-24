@@ -16,26 +16,29 @@ Three tables:
 
 ```ts
 threads: defineTable({
-  userId: v.id("users"),
+  userId: v.string(),                                             // Better Auth subject — opaque string, not an Id<"users">
   name: v.string(),
-}).index("by_user", ["userId"]),
+}).index("by_userId", ["userId"]),
 
 nodes: defineTable({
+  userId: v.string(),                                             // denormalized for cheap auth checks
   threadId: v.id("threads"),
-  userId: v.id("users"),                                          // denormalized for cheap auth checks
   parentId: v.union(v.id("nodes"), v.null()),                     // null = root of the thread
   branchedAt: v.optional(v.number()),                             // # of parent messages inherited
   title: v.string(),
   position: v.optional(v.object({ x: v.number(), y: v.number() })), // manual layout override, see "Layout"
+  isStreaming: v.optional(v.boolean()),                           // true while an assistant reply is in flight
 })
   .index("by_threadId", ["threadId"])
-  .index("by_parentId", ["parentId"]),
+  .index("by_parentId", ["parentId"])
+  .index("by_userId_and_threadId", ["userId", "threadId"]),
 
 messages: defineTable({
   nodeId: v.id("nodes"),
   role: v.union(v.literal("user"), v.literal("assistant")),
   content: v.string(),
   index: v.number(),
+  isStreaming: v.optional(v.boolean()),                           // true while this row is being appended to
 }).index("by_nodeId_and_index", ["nodeId", "index"]),
 ```
 
@@ -128,19 +131,20 @@ When it starts to bother users, the right answer is probably **archive** (hide f
 
 The app is multi-user. Nothing in Convex enforces row-level security — every query and mutation must check ownership manually.
 
-A small helper used everywhere:
+A small helper used everywhere ([convex/lib/auth.ts](convex/lib/auth.ts)):
 
 ```ts
-async function assertNodeOwner(ctx, nodeId) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) throw new Error("Not authenticated");
+async function requireNode(ctx, nodeId) {
+  const userId = await requireUserId(ctx);
   const node = await ctx.db.get(nodeId);
-  if (!node || node.userId !== identity.subject) throw new Error("Not authorized");
+  if (!node || node.userId !== userId) {
+    throw new ConvexError({ code: "NOT_FOUND", message: "Not found" });
+  }
   return node;
 }
 ```
 
-Ancestor walks should also assert ownership defensively on every hop — a bug that lets user A branch off user B's node would silently leak B's context into A's LLM calls.
+Errors use structured `ConvexError` codes (`UNAUTHORIZED`, `NOT_FOUND`) so the client can branch on intent without regex-matching messages — see [src/lib/auth-errors.ts](src/lib/auth-errors.ts). Ancestor walks should also assert ownership defensively on every hop — a bug that lets user A branch off user B's node would silently leak B's context into A's LLM calls.
 
 ## Layout (React Flow)
 
@@ -219,7 +223,7 @@ convex/
 ├── messages.ts            # api.messages.*  — queries/mutations over messages.
 ├── chat.ts                # api.chat.*      — actions that orchestrate LLM calls.
 ├── lib/
-│   ├── auth.ts            # assertThreadOwner, assertNodeOwner — ownership checks.
+│   ├── auth.ts            # requireUserId, requireThread, requireNode — ownership checks.
 │   └── context.ts         # walkAncestors, buildPromptContext — ancestor walk + prompt assembly.
 └── _generated/            # Auto-managed by Convex. Never edit.
 ```
@@ -240,7 +244,7 @@ convex/
 | `nodes.ts` | Node CRUD and branching. | `listByThread`, `createBranch`, `updatePosition`, `get` |
 | `messages.ts` | Message reads and appends. | `listByNode`, `append` |
 | `chat.ts` | LLM orchestration. | `sendMessage` (the action that reads context, calls the model, and writes the assistant response) |
-| `lib/auth.ts` | Ownership helpers. Not Convex functions — plain TS modules. | `assertThreadOwner(ctx, threadId)`, `assertNodeOwner(ctx, nodeId)` |
+| `lib/auth.ts` | Ownership helpers. Not Convex functions — plain TS modules. | `requireUserId(ctx)`, `requireThread(ctx, threadId)`, `requireNode(ctx, nodeId)` |
 | `lib/context.ts` | Tree traversal and prompt building. Plain TS modules. | `walkAncestors(ctx, nodeId)`, `buildPromptContext(ctx, nodeId)` |
 
 ### Runtime note
