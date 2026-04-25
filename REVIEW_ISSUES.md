@@ -96,33 +96,6 @@ Parallelize ancestor message fetches with `Promise.all`. For `deleteSubtree`, fe
 
 [convex/threads.ts:4-9](convex/threads.ts#L4-L9) uses `.order("desc")` over the full table, keyed on `_creationTime`. For ~100 threads this is fine; past that, scanning without an index becomes a cost. Not urgent.
 
-### 5.3 Public functions that could be internal — **Low**
-
-`chat.getContext` is already `internalQuery` ✓. But `nodes.createEmptyBranch`, `nodes.createBranch` (if kept), and `nodes.updatePosition` are all public yet should never be called from outside the app. With no auth, "public" = "internet-exposed." Making them internal doesn't help much (no auth anyway), but combined with a small server-rendered page that proxies them via an action, you'd get a chance to add rate-limiting at one chokepoint.
-
-### 5.4 Per-navigation JWT round-trip to Convex in production — **Medium** (prod-only)
-
-Every protected page render calls `isAuthenticated()` from [src/lib/auth-server.ts](src/lib/auth-server.ts) in the `(app)` server layout. That's an HTTP fetch to `${convexSiteUrl}/api/auth/convex/token` on each request, memoized once per RSC fetch via `React.cache`. In dev the latency is invisible; in prod it adds ~50–200ms to TTFB on every protected nav and bills a Convex HTTP-action invocation per page load. Also a SPOF — if the Convex site URL is unreachable, every page 500s.
-
-**Fix:** turn on `jwtCache` when constructing the helper:
-
-```ts
-// src/lib/auth-server.ts
-convexBetterAuthNextJs({
-  convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL!,
-  convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL!,
-  jwtCache: {
-    enabled: true,
-    expirationToleranceSeconds: 60,
-    isAuthError, // from src/lib/auth-errors.ts
-  },
-});
-```
-
-With the cache on, the JWT is decoded from the cookie locally until it's within 60s of expiry or a downstream query rejects it. Turns per-nav round-trip into "once every ~55 minutes." Trade-off: a server-side revoked session keeps validating locally for up to `expirationToleranceSeconds` seconds. Acceptable — revocation is rare and the client-side `redirectToSignInIfAuthError` still catches reject responses from any live query.
-
-Do this before prod launch, not before.
-
 ### 5.6 `ClientAuthWatcher` redirects on transient Convex auth blips — **Low**
 
 [src/components/shared/client-auth-watcher.tsx](src/components/shared/client-auth-watcher.tsx) bounces the user to `/sign-in` whenever `useConvexAuth().isAuthenticated` becomes false mid-session. That's the right call for real session expiry or cookie loss, but Convex will also briefly report `isAuthenticated: false` on transient network failures — e.g., one failed `/api/auth/convex/token` fetch during a flaky connection or a Convex cold-start. In those cases the session cookie is still valid; the very next request would recover. Instead, we teleport the user to sign-in with any in-flight UI state lost (unsent optimistic UI, form contents, canvas positions).
@@ -149,9 +122,9 @@ Today every LLM call goes through our Anthropic key, so `llmRequest` / `llmReque
 
 ## Triage summary
 
-| Severity | Count | Top items                                                                           |
-| -------- | ----- | ----------------------------------------------------------------------------------- |
-| Medium   | ~7    | Concurrency guard, N+1 walks, useEffect misuse, silent `.take(500)`, prod JWT cache |
-| Low      | ~12   | Dead hooks/actions, naming inconsistencies, drifted SPEC, BYOK, rate-limit tuning   |
+| Severity | Count | Top items                                                                |
+| -------- | ----- | ------------------------------------------------------------------------ |
+| Medium   | ~6    | Concurrency guard, N+1 walks, useEffect misuse, silent `.take(500)`      |
+| Low      | ~11   | Dead hooks/actions, naming inconsistencies, BYOK, rate-limit tuning      |
 
-Start with §4.9 (concurrency) — that one still threatens the append-only invariant. Then §5.4 (JWT cache) before prod launch. Then the dead-code sweep from §2.
+Start with §4.9 (concurrency) — that one still threatens the append-only invariant. Then the dead-code sweep from §2.
