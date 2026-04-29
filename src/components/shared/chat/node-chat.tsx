@@ -38,8 +38,8 @@ export function NodeChat({
   };
 
   return (
-    <div className="flex h-[calc(100svh-3.5rem)] flex-col items-center">
-      <div className="flex w-full max-w-175 flex-1 flex-col overflow-hidden">
+    <div className="flex h-[calc(100svh-3.5rem)] flex-col items-center overflow-y-auto">
+      <div className="flex w-full max-w-175 min-h-full flex-col">
         {error ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
             <p className="text-sm text-muted-foreground">
@@ -55,7 +55,9 @@ export function NodeChat({
         ) : (
           <MessageList items={items} isLoading={isLoading} />
         )}
-        <ChatInput onSend={handleSend} disabled={isBusy || !!error} />
+        <div className="sticky bottom-0 bg-background">
+          <ChatInput onSend={handleSend} disabled={isBusy || !!error} />
+        </div>
       </div>
     </div>
   );

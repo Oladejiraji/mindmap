@@ -3,7 +3,13 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Folder, GitBranch, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Folder,
+  GitBranch,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { Menu } from "@base-ui/react/menu";
 import { cn } from "@/lib/utils";
 import { DeleteNodeDialog } from "@/components/shared/delete-node-dialog";
@@ -101,7 +107,10 @@ function NodeItem({
         ? removeThread({ threadId })
         : deleteLeafNode({ nodeId: node._id });
       deletion.catch((err) =>
-        handleError(err, isRoot ? "Failed to delete thread" : "Failed to delete node"),
+        handleError(
+          err,
+          isRoot ? "Failed to delete thread" : "Failed to delete node",
+        ),
       );
     } else {
       setConfirmOpen(true);
@@ -114,7 +123,10 @@ function NodeItem({
       ? removeThread({ threadId })
       : deleteSubtree({ nodeId: node._id });
     deletion.catch((err) =>
-      handleError(err, isRoot ? "Failed to delete thread" : "Failed to delete subtree"),
+      handleError(
+        err,
+        isRoot ? "Failed to delete thread" : "Failed to delete subtree",
+      ),
     );
   };
 
@@ -164,9 +176,9 @@ function NodeItem({
         <Link
           href={routes.node(threadId, node._id)}
           className={cn(
-            "flex h-8 items-center gap-1.5 rounded-md pr-8 text-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            "flex h-8 items-center gap-1.5 rounded-md pr-8 text-xs hover:bg-background-5 hover:text-sidebar-accent-foreground",
             isActive
-              ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              ? "bg-background-5 text-sidebar-accent-foreground font-medium"
               : "text-sidebar-foreground/70",
           )}
           style={{ paddingLeft }}
@@ -181,7 +193,7 @@ function NodeItem({
           <Menu.Trigger
             aria-label="Node options"
             className={cn(
-              "absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent",
+              "absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md text-sidebar-foreground hover:bg-background-5",
               isActive || menuOpen
                 ? "opacity-100"
                 : "opacity-0 group-hover/node:opacity-100",
@@ -233,4 +245,3 @@ function NodeItem({
     </div>
   );
 }
-
