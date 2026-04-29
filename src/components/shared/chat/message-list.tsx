@@ -51,7 +51,7 @@ export function MessageList({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-6">
+    <div className="flex flex-1 flex-col gap-6 px-4 py-6">
       {items.map((item, i) => {
         const isLast = i === items.length - 1;
         const key = item.kind === "message" ? item.message._id : item.id;
