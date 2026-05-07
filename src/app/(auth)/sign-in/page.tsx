@@ -89,7 +89,7 @@ export default function SignInPage() {
               isLoading={isSubmitting}
               className="relative w-full flex items-center justify-center"
             >
-              <p>Sign in</p>
+              <p className="text-13 font-medium">Sign in</p>
               <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-sidebar-ring rounded-[3px] h-4 w-9.5 flex items-center justify-center">
                 <p className="text-background/87 text-11 font-medium">return</p>
               </div>
@@ -104,8 +104,8 @@ export default function SignInPage() {
         </form>
         <div>
           <p className="text-background/67 text-11 text-center max-w-78">
-            By signing in, you agree Mindmap’s Terms of Use, and acknowledge
-            its Information Collection Notice and Privacy Policy.
+            By signing in, you agree Mindmap’s Terms of Use, and acknowledge its
+            Information Collection Notice and Privacy Policy.
           </p>
         </div>
       </div>

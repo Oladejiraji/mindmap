@@ -15,7 +15,7 @@ type Props = {
 export function BranchDropdown({
   branchCount = 26,
   triggerClassName,
-  iconClassName = "size-2.5",
+  iconClassName = "size-3",
   triggerIcon,
 }: Props) {
   return (

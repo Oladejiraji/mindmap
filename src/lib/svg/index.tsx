@@ -77,3 +77,18 @@ export const AnthropicIcon = () => (
     ></path>
   </svg>
 );
+
+export const CursorIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="19"
+    height="21"
+    fill="none"
+    viewBox="0 0 19 21"
+  >
+    <path
+      fill="#51AC65"
+      d="M3.672 19.51.023 1.2A1 1 0 0 1 1.488.13l16.106 8.918c.764.423.656 1.554-.174 1.826L9.545 13.45a1 1 0 0 0-.552.444L5.515 19.82c-.466.793-1.664.591-1.843-.31"
+    ></path>
+  </svg>
+);
