@@ -25,7 +25,6 @@ import { motion } from "motion/react";
 import { BrandCardNode } from "./brand-card-node";
 import { ResearchCardNode } from "./research-card-node";
 import { GradientEdge } from "./gradient-edge";
-import { CustomCursor } from "./custom-cursor";
 import { usePulseConfig } from "./pulse-config";
 import AuthAssets from "@/lib/asset-export/auth";
 
@@ -174,30 +173,12 @@ const NODE_INSET_PX = 8;
 function AuthCanvasInner() {
   const PULSE_CONFIG = usePulseConfig();
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, getNode } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [pulses, setPulses] = useState<Pulse[]>([]);
 
   const reconnectSuccessful = useRef(true);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const cursor = cursorRef.current;
-    if (!cursor) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    if (cursorRef.current) cursorRef.current.style.opacity = "1";
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (cursorRef.current) cursorRef.current.style.opacity = "0";
-  }, []);
 
   const isValidConnection = useCallback(
     (conn: Connection | Edge) => {
@@ -322,10 +303,7 @@ function AuthCanvasInner() {
   return (
     <div
       ref={wrapperRef}
-      className="auth-canvas relative h-full w-full cursor-none overflow-hidden rounded-xl bg-background"
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className="auth-canvas relative h-full w-full overflow-hidden rounded-xl bg-background"
     >
       <ReactFlow
         nodes={nodes}
@@ -548,7 +526,6 @@ function AuthCanvasInner() {
           })}
         </ViewportPortal>
       </ReactFlow>
-      <CustomCursor ref={cursorRef} />
     </div>
   );
 }
