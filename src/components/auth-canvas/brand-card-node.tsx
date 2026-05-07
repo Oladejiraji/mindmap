@@ -1,9 +1,12 @@
 import { AnthropicIcon, BranchIcon, GptIcon } from "@/lib/svg";
 import { Position, type NodeProps } from "@xyflow/react";
 import Image, { StaticImageData } from "next/image";
+import { useAnimate } from "motion/react";
+import { useEffect } from "react";
 import { BranchDropdown } from "./branch-dropdown";
 import { CustomHandle, type HandleVariant } from "./custom-handle";
 import { EditableTitle } from "./editable-title";
+import { usePulseConfig } from "./pulse-config";
 import { PlusIcon } from "lucide-react";
 
 type HandleSide = "top" | "bottom" | "left" | "right";
@@ -16,9 +19,13 @@ export type BrandCardData = {
   showModel?: boolean;
   handles?: HandleSide[];
   handleVariant?: HandleVariant;
+  pulseTrigger?: number;
 };
 
 const ALL_HANDLES: HandleSide[] = ["top", "bottom", "left", "right"];
+
+const BASE_SHADOW = "0px 8px 30px -12px rgba(37, 99, 235, 0.27)";
+const PEAK_SHADOW = "0px 8px 30px -12px rgba(37, 99, 235, 0.6)";
 
 export function BrandCardNode({ data }: NodeProps) {
   const {
@@ -29,7 +36,19 @@ export function BrandCardNode({ data }: NodeProps) {
     width = 280,
     handles = ALL_HANDLES,
     handleVariant,
+    pulseTrigger,
   } = data as BrandCardData;
+  const { duration } = usePulseConfig();
+  const [scope, animate] = useAnimate();
+
+  useEffect(() => {
+    if (!pulseTrigger || !scope.current) return;
+    animate(
+      scope.current,
+      { boxShadow: [BASE_SHADOW, PEAK_SHADOW, BASE_SHADOW] },
+      { duration, times: [0, 0.15, 1], ease: "easeOut" },
+    );
+  }, [pulseTrigger, duration, animate, scope]);
 
   return (
     <div className="font-diatype" style={{ width }}>
@@ -51,12 +70,17 @@ export function BrandCardNode({ data }: NodeProps) {
             <span className="text-background text-11 ">{author.name}</span>
           </div>
           {author.role ? (
-            <p className="text-foreground-3/30 text-11">{author.role}</p>
+            <p className="gradient-text-shimmer text-11 opacity-50">
+              {author.role}
+            </p>
           ) : null}
         </div>
       ) : null}
 
-      <div className="relative rounded-[16px] bg-primary p-2 text-white shadow-[0_8px_30px_-12px_rgba(37,99,235,0.6)]">
+      <div
+        ref={scope}
+        className="relative rounded-[16px] bg-primary p-2 text-white shadow-[0_8px_30px_-12px_rgba(37,99,235,0.27)]"
+      >
         <div className="h-5  flex items-center justify-between">
           <div className="flex items-center gap-1 text-13 text-background/87">
             <div className="size-5 flex items-center justify-center">
@@ -67,10 +91,10 @@ export function BrandCardNode({ data }: NodeProps) {
           <BranchDropdown iconClassName="size-2.5 text-background/87" />
         </div>
         <div className="bg-ring p-2 shadow-[0_1px_3px_0_#82A7F121,0_0_0_0.5px_#82A7F1] mt-3 rounded-[8px]">
-          <p className="text-sm text-background/50 leading-tight">
+          <p className="text-xs text-background/50 leading-tight">
             {pages} pages of research…
           </p>
-          <p className="pt-2 text-xs leading-snug text-background">{body}</p>
+          <p className="pt-2 text-13 leading-snug text-background">{body}</p>
         </div>
 
         {handles.includes("top") ? (

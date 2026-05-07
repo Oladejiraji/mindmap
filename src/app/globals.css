@@ -308,6 +308,13 @@
   transition: opacity 150ms;
 }
 
+.auth-pulse {
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+  overflow: visible;
+}
+
 @property --gradient-angle {
   syntax: "<angle>";
   initial-value: 191.3deg;
@@ -321,17 +328,114 @@
 }
 
 @keyframes spinner-clip {
-  0%    { clip-path: polygon(50% 50%, 0      0,    50%  0%,   50%   0%,   50%   0%,   50%   0%,   50%   0%); }
-  12.5% { clip-path: polygon(50% 50%, 0      0,    50%  0%,   100%  0%,   100%  0%,   100%  0%,   100%  0%); }
-  25%   { clip-path: polygon(50% 50%, 0      0,    50%  0%,   100%  0%,   100% 100%,  100% 100%,  100% 100%); }
-  50%   { clip-path: polygon(50% 50%, 0      0,    50%  0%,   100%  0%,   100% 100%,  50%  100%,  0%   100%); }
-  62.5% { clip-path: polygon(50% 50%, 100%   0,    100% 0%,   100%  0%,   100% 100%,  50%  100%,  0%   100%); }
-  75%   { clip-path: polygon(50% 50%, 100% 100%,   100% 100%, 100% 100%,  100% 100%,  50%  100%,  0%   100%); }
-  100%  { clip-path: polygon(50% 50%, 50%  100%,   50% 100%,  50%  100%,  50%  100%,  50%  100%,  0%   100%); }
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+  }
+  12.5% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 0%,
+      100% 0%,
+      100% 0%
+    );
+  }
+  25% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 100%,
+      100% 100%,
+      100% 100%
+    );
+  }
+  50% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+  62.5% {
+    clip-path: polygon(
+      50% 50%,
+      100% 0,
+      100% 0%,
+      100% 0%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+  75% {
+    clip-path: polygon(
+      50% 50%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+  100% {
+    clip-path: polygon(
+      50% 50%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
 }
 @keyframes spinner-flip {
-  0%     { transform: scaleY(1)  rotate(0deg); }
-  49.99% { transform: scaleY(1)  rotate(135deg); }
-  50%    { transform: scaleY(-1) rotate(0deg); }
-  100%   { transform: scaleY(-1) rotate(-135deg); }
+  0% {
+    transform: scaleY(1) rotate(0deg);
+  }
+  49.99% {
+    transform: scaleY(1) rotate(135deg);
+  }
+  50% {
+    transform: scaleY(-1) rotate(0deg);
+  }
+  100% {
+    transform: scaleY(-1) rotate(-135deg);
+  }
 }
+
+@keyframes gradient-text-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-text-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--foreground-3) 0%,
+    var(--foreground-3) 35%,
+    var(--primary) 50%,
+    var(--foreground-3) 65%,
+    var(--foreground-3) 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-text-shimmer 1.8s linear infinite;
+}
+
