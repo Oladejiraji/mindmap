@@ -257,9 +257,11 @@ function AuthCanvasInner() {
       if (!w || !h) return;
       const trigger = Date.now();
       const offsetY =
-        node.type === "brandCard"
-          ? PULSE_CONFIG.originOffsetY - 0.15
-          : PULSE_CONFIG.originOffsetY;
+        node.id === "top-brand"
+          ? PULSE_CONFIG.originOffsetY - 0.03
+          : node.type === "brandCard"
+            ? PULSE_CONFIG.originOffsetY - 0.15
+            : PULSE_CONFIG.originOffsetY;
       setPulses((prev) => [
         ...prev.filter((p) => p.nodeId !== node.id),
         {
