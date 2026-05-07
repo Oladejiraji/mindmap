@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function BranchDropdown({
-  branchCount = 26,
+  branchCount = 4,
   triggerClassName,
   iconClassName = "size-3",
   triggerIcon,
