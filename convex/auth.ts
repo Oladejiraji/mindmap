@@ -11,7 +11,16 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
   betterAuth({
     database: authComponent.adapter(ctx),
     baseURL: process.env.SITE_URL,
-    trustedOrigins: [process.env.SITE_URL ?? ""],
+    trustedOrigins: (request) => {
+      const siteUrl = process.env.SITE_URL ?? "";
+      const origin = request?.headers.get("origin") ?? "";
+      try {
+        if (new URL(origin).hostname === new URL(siteUrl).hostname) {
+          return [origin];
+        }
+      } catch {}
+      return [siteUrl];
+    },
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,

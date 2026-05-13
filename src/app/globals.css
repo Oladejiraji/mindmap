@@ -304,6 +304,122 @@
   font-weight: 600;
 }
 
+.node-markdown {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.node-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.node-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.node-markdown h1,
+.node-markdown h2,
+.node-markdown h3,
+.node-markdown h4,
+.node-markdown h5,
+.node-markdown h6 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.node-markdown p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.node-markdown ul,
+.node-markdown ol {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding-left: 1.125rem;
+}
+
+.node-markdown ul {
+  list-style-type: disc;
+}
+
+.node-markdown ol {
+  list-style-type: decimal;
+}
+
+.node-markdown li {
+  margin-top: 0.125rem;
+  margin-bottom: 0.125rem;
+}
+
+.node-markdown blockquote {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  padding-left: 0.625rem;
+  border-left: 2px solid var(--border);
+  color: var(--muted-foreground);
+}
+
+.node-markdown pre {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--muted);
+  overflow-x: auto;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.node-markdown code {
+  font-family: var(--font-geist-mono);
+  font-size: 0.6875rem;
+}
+
+.node-markdown :not(pre) > code {
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.1875rem;
+  background-color: var(--muted);
+}
+
+.node-markdown hr {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+.node-markdown table {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.6875rem;
+}
+
+.node-markdown th,
+.node-markdown td {
+  padding: 0.1875rem 0.375rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.node-markdown th {
+  font-weight: 600;
+}
+
+.node-markdown a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.node-markdown strong {
+  font-weight: 600;
+}
+
 .auth-canvas .react-flow__handle {
   transition: opacity 150ms;
 }
@@ -439,3 +555,10 @@
   animation: gradient-text-shimmer 1.8s linear infinite;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px white inset; /* covers the blue bg */
+  -webkit-text-fill-color: #fff; /* controls text color */
+  transition: background-color 5000s ease-in-out 0s;
+}

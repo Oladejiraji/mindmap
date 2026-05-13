@@ -8,14 +8,16 @@ import { MessageBubble } from "./message-bubble";
 export function MessageList({
   items,
   isLoading,
+  isStreaming,
 }: {
   items: ChatItem[];
   isLoading: boolean;
+  isStreaming: boolean;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const lastItemRef = useCallback((node: HTMLDivElement | null) => {
-    node?.scrollIntoView({ behavior: "smooth" });
+    node?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   if (isLoading) {
@@ -51,7 +53,7 @@ export function MessageList({
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 px-4 py-6">
+    <div className={`flex flex-1 flex-col gap-6 px-4 py-6 ${isStreaming ? "pb-[60vh]" : ""}`}>
       {items.map((item, i) => {
         const isLast = i === items.length - 1;
         const key = item.kind === "message" ? item.message._id : item.id;
