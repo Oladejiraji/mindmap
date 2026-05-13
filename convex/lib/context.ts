@@ -2,19 +2,23 @@ import type { QueryCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
 
 export type ChatMessage = {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
 };
 
-async function getNodeMessages(
+async function getChatMessages(
   ctx: QueryCtx,
   nodeId: Id<"nodes">,
-  limit?: number,
 ): Promise<Doc<"messages">[]> {
+  const chat = await ctx.db
+    .query("chats")
+    .withIndex("by_nodeId", (q) => q.eq("nodeId", nodeId))
+    .first();
+  if (!chat) return [];
   return await ctx.db
     .query("messages")
-    .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", nodeId))
-    .take(limit ?? 500);
+    .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
+    .take(500);
 }
 
 export async function walkAncestors(
@@ -43,15 +47,23 @@ export async function buildPromptContext(
 
   const context: ChatMessage[] = [];
 
-  for (let i = 0; i < chain.length; i++) {
-    const node = chain[i];
-    const isTarget = i === chain.length - 1;
-    const sliceLimit = isTarget ? undefined : (chain[i + 1].branchedAt ?? 0);
+  const ancestorContent = chain
+    .slice(0, -1)
+    .filter((node) => node.content)
+    .map((node) => node.content!)
+    .join("\n\n");
 
-    const messages = await getNodeMessages(ctx, node._id, sliceLimit);
-    for (const msg of messages) {
-      context.push({ role: msg.role, content: msg.content });
-    }
+  if (ancestorContent) {
+    context.push({
+      role: "system",
+      content: `Research context from parent nodes:\n\n${ancestorContent}`,
+    });
+  }
+
+  const targetNode = chain[chain.length - 1];
+  const messages = await getChatMessages(ctx, targetNode._id);
+  for (const msg of messages) {
+    context.push({ role: msg.role, content: msg.content });
   }
 
   return context;

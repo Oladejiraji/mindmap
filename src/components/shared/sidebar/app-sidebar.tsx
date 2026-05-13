@@ -16,7 +16,7 @@ import { ThreadItem } from "./thread-item";
 import { NewChatButton } from "./new-chat-button";
 
 export function AppSidebar() {
-  const { data: threads, isPending, isError, refetch, error } = useThreads();
+  const { data: threads, isPending, isError, refetch } = useThreads();
 
   return (
     <Sidebar>
@@ -32,7 +32,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup className="pt-1">
-          <SidebarGroupLabel>Chats</SidebarGroupLabel>
+          <SidebarGroupLabel>Workspaces</SidebarGroupLabel>
           <SidebarGroupContent>
             {isPending ? (
               <div className="flex flex-col gap-2 px-2">
@@ -43,7 +43,7 @@ export function AppSidebar() {
             ) : isError ? (
               <div className="flex flex-col gap-1 px-2 py-1">
                 <p className="text-xs text-muted-foreground">
-                  Couldn&apos;t load chats.
+                  Couldn&apos;t load workspaces.
                 </p>
                 <button
                   onClick={() => void refetch()}
@@ -54,7 +54,7 @@ export function AppSidebar() {
               </div>
             ) : !threads?.length ? (
               <p className="px-2 py-1 text-xs text-muted-foreground">
-                No chats yet.
+                No workspaces yet.
               </p>
             ) : (
               <div className="flex flex-col gap-0.5">

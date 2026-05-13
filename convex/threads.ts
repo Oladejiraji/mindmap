@@ -49,12 +49,19 @@ export const remove = userMutation({
       .take(500);
 
     for (const node of nodes) {
-      const messages = await ctx.db
-        .query("messages")
-        .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", node._id))
-        .take(500);
-      for (const msg of messages) {
-        await ctx.db.delete(msg._id);
+      const chat = await ctx.db
+        .query("chats")
+        .withIndex("by_nodeId", (q) => q.eq("nodeId", node._id))
+        .first();
+      if (chat) {
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
+          .take(500);
+        for (const msg of messages) {
+          await ctx.db.delete(msg._id);
+        }
+        await ctx.db.delete(chat._id);
       }
       await ctx.db.delete(node._id);
     }

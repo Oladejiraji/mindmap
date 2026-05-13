@@ -8,13 +8,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Mindmap
 
-A branching chat app. Conversations are a tree of nodes; each node is a whole chat. Children inherit parent context up to a branch point and stay isolated from siblings. See [SPEC.md](./SPEC.md) for the full data model and rationale.
+A spatial research tool where you think through problems with AI, and the output is a living graph of structured knowledge. Each node is a research unit with distilled content. Nodes form a tree — children inherit parent context through node content, not chat transcripts. The chat inside each node is an optional tool for exploration; the node's content is the artifact. See [SPEC.md](./SPEC.md) for the full data model and rationale.
 
 ## Non-negotiables
 
 - **Package manager: pnpm.** Never use `npm` or `yarn`. All install/run commands go through `pnpm`.
-- **Messages are append-only.** No edits, no deletes. Ever. The `branchedAt` index depends on this — breaking the invariant silently corrupts every descendant's context.
-- **Auth checks are manual.** Convex has no row-level security. Every query/mutation that touches a `node` or `message` must verify ownership via the thread/node's `userId`.
+- **Messages are append-only.** No edits, no deletes once finalized. The chat is a record of exploration.
+- **Node is the primary entity, chat is secondary.** A node can exist without a chat. Context inheritance flows through node `content`, not messages.
+- **Auth checks are manual.** Convex has no row-level security. Every query/mutation that touches a `node`, `chat`, or `message` must verify ownership via the thread/node's `userId`.
 - **LLM calls happen in Convex actions**, not mutations or queries. Actions read context via `ctx.runQuery` and write results via `ctx.runMutation`.
 
 ## Stack notes

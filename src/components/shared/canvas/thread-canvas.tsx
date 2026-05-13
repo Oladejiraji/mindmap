@@ -8,7 +8,6 @@ import {
   Controls,
   MiniMap,
   useNodesState,
-  useEdgesState,
   useReactFlow,
   type Node as RFNode,
   type Edge as RFEdge,
@@ -27,14 +26,20 @@ import {
   useDeleteLeafNode,
   useRenameNode,
 } from "@/services/nodes/mutations";
-import { layoutNodes, NODE_WIDTH, NODE_HEIGHT } from "@/lib/layout";
+import { layoutNodes } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
-import { MindMapNode, type MindMapNodeData } from "./mind-map-node";
+import {
+  ParentNode,
+  LeafNode,
+  CANVAS_NODE_WIDTH,
+  type MindMapNodeData,
+} from "./nodes";
 
 const nodeTypes: NodeTypes = {
-  mindmap: MindMapNode,
+  parent: ParentNode,
+  leaf: LeafNode,
 };
 
 export function ThreadCanvas({ threadId }: { threadId: Id<"threads"> }) {
@@ -72,80 +77,8 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     [renameNode],
   );
 
-  const { rfNodes, rfEdges } = useMemo(() => {
-    if (!nodes) return { rfNodes: [], rfEdges: [] };
-
-    const positions = layoutNodes(nodes);
-
-    const childCounts = new Map<string, number>();
-    for (const node of nodes) {
-      if (node.parentId) {
-        childCounts.set(
-          node.parentId,
-          (childCounts.get(node.parentId) ?? 0) + 1,
-        );
-      }
-    }
-
-    const rfNodes: RFNode<MindMapNodeData>[] = nodes.map((node) => {
-      const pos = positions.get(node._id) ?? { x: 0, y: 0 };
-      return {
-        id: node._id,
-        type: "mindmap",
-        position: pos,
-        dragHandle: ".mindmap-drag-handle",
-        data: {
-          title: node.title,
-          isRoot: node.parentId === null,
-          isParent: (childCounts.get(node._id) ?? 0) > 0,
-          isStreaming: node.isStreaming === true,
-          onDelete: handleDeleteNode,
-          onRename: handleRenameNode,
-        },
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
-      };
-    });
-
-    const rfEdges: RFEdge[] = nodes
-      .filter((n) => n.parentId !== null)
-      .map((node) => ({
-        id: `${node.parentId}-${node._id}`,
-        source: node.parentId!,
-        target: node._id,
-        type: "smoothstep",
-      }));
-
-    return { rfNodes, rfEdges };
-  }, [nodes, handleDeleteNode, handleRenameNode]);
-
-  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
-  const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(rfEdges);
-
-  // Sync Convex data → React Flow when topology/data actually changes
-  const fingerprint = useMemo(
-    () =>
-      nodes
-        ?.map(
-          (n) =>
-            `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${n.isStreaming ?? ""}`,
-        )
-        .join("|") ?? "",
-    [nodes],
-  );
-  const lastSyncedRef = useRef(fingerprint);
-  useEffect(() => {
-    if (fingerprint && fingerprint !== lastSyncedRef.current) {
-      lastSyncedRef.current = fingerprint;
-      setFlowNodes(rfNodes);
-      setFlowEdges(rfEdges);
-    }
-  }, [fingerprint, rfNodes, rfEdges, setFlowNodes, setFlowEdges]);
-
-  // Ancestor path highlighting on selection
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  // Edge IDs on the ancestor path of the selected node
   const ancestorEdgeIds = useMemo(() => {
     if (!selectedNodeId || !nodes) return new Set<string>();
     const chain = walkAncestors(
@@ -159,18 +92,96 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     return edgeIds;
   }, [selectedNodeId, nodes]);
 
-  // Apply animated state to edges on the ancestor path
+  const rfNodes = useMemo(() => {
+    if (!nodes) return [];
+
+    const positions = layoutNodes(nodes);
+
+    const childCounts = new Map<string, number>();
+    for (const node of nodes) {
+      if (node.parentId) {
+        childCounts.set(
+          node.parentId,
+          (childCounts.get(node.parentId) ?? 0) + 1,
+        );
+      }
+    }
+
+    return nodes.map((node): RFNode<MindMapNodeData> => {
+      const pos = positions.get(node._id) ?? { x: 0, y: 0 };
+      const isRoot = node.parentId === null;
+      const isParent = (childCounts.get(node._id) ?? 0) > 0;
+      return {
+        id: node._id,
+        type: isRoot || isParent ? "parent" : "leaf",
+        position: pos,
+        dragHandle: ".mindmap-drag-handle",
+        data: {
+          title: node.title,
+          isRoot,
+          isParent,
+          content: node.content,
+          onDelete: handleDeleteNode,
+          onRename: handleRenameNode,
+        },
+        width: CANVAS_NODE_WIDTH,
+      };
+    });
+  }, [nodes, handleDeleteNode, handleRenameNode]);
+
+  const rfEdges: RFEdge[] = useMemo(() => {
+    if (!nodes) return [];
+    return nodes
+      .filter((n) => n.parentId !== null)
+      .map((node) => {
+        const edgeId = `${node.parentId}-${node._id}`;
+        const isAncestor = ancestorEdgeIds.has(edgeId);
+        return {
+          id: edgeId,
+          source: node.parentId!,
+          target: node._id,
+          type: "smoothstep",
+          animated: isAncestor,
+          style: isAncestor
+            ? { stroke: "var(--ring)", strokeWidth: 2 }
+            : undefined,
+        };
+      });
+  }, [nodes, ancestorEdgeIds]);
+
+  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
+
+  // Sync Convex data → React Flow when topology/data actually changes
+  const fingerprint = useMemo(
+    () =>
+      nodes
+        ?.map(
+          (n) =>
+            `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${n.content ?? ""}`,
+        )
+        .join("|") ?? "",
+    [nodes],
+  );
+  const lastSyncedRef = useRef(fingerprint);
   useEffect(() => {
-    setFlowEdges((edges) =>
-      edges.map((e) => ({
-        ...e,
-        animated: ancestorEdgeIds.has(e.id),
-        style: ancestorEdgeIds.has(e.id)
-          ? { stroke: "var(--ring)", strokeWidth: 2 }
-          : undefined,
-      })),
-    );
-  }, [ancestorEdgeIds, setFlowEdges]);
+    if (fingerprint && fingerprint !== lastSyncedRef.current) {
+      lastSyncedRef.current = fingerprint;
+      setFlowNodes((prev) => {
+        const incoming = new Map(rfNodes.map((n) => [n.id, n]));
+        const prevIds = new Set(prev.map((n) => n.id));
+        const merged = prev
+          .filter((n) => incoming.has(n.id))
+          .map((existing) => {
+            const next = incoming.get(existing.id)!;
+            return { ...existing, data: next.data, type: next.type };
+          });
+        for (const n of rfNodes) {
+          if (!prevIds.has(n.id)) merged.push({ ...n, type: n.type ?? "leaf" });
+        }
+        return merged;
+      });
+    }
+  }, [fingerprint, rfNodes, setFlowNodes]);
 
   // Track which node a connection drag started from
   const connectSourceRef = useRef<string | null>(null);
@@ -255,9 +266,8 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     <div className="h-[calc(100svh-3.5rem)] w-full">
       <ReactFlow
         nodes={flowNodes}
-        edges={flowEdges}
+        edges={rfEdges}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
         onNodeDragStop={onNodeDragStop}
         onNodeDoubleClick={onNodeDoubleClick}
         onConnectStart={onConnectStart}

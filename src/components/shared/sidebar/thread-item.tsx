@@ -3,19 +3,11 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Folder,
-  GitBranch,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-} from "lucide-react";
-import { Menu } from "@base-ui/react/menu";
+import { Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DeleteNodeDialog } from "@/components/shared/delete-node-dialog";
 import { useNodesByThread, type Node } from "@/services/nodes/queries";
 import {
-  useCreateEmptyBranch,
   useDeleteLeafNode,
   useDeleteSubtree,
   useRenameNode,
@@ -26,6 +18,7 @@ import type { Id } from "@convex/dataModel";
 import { collectSubtree, flattenTree, type FlatNode } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
+import EditDropdown from "./edit-dropdown";
 
 const focusAndSelect = (el: HTMLInputElement | null) => {
   el?.focus();
@@ -53,52 +46,51 @@ export function ThreadItem({ thread }: { thread: Thread }) {
   );
 }
 
-function NodeItem({
-  threadId,
-  node,
-  allNodes,
-}: {
+interface INodeItemProps {
   threadId: Id<"threads">;
   node: FlatNode;
   allNodes: Node[];
-}) {
+}
+
+function NodeItem({ threadId, node, allNodes }: INodeItemProps) {
   const pathname = usePathname();
   const router = useRouter();
   const renameNode = useRenameNode();
-  const createEmptyBranch = useCreateEmptyBranch();
+
   const deleteLeafNode = useDeleteLeafNode();
   const deleteSubtree = useDeleteSubtree();
   const removeThread = useRemoveThread();
 
-  const isActive = pathname === routes.node(threadId, node._id);
-  const canDelete = node.isLeaf || node.parentId === null;
+  const isRoot = node.parentId === null;
+  const nodeRoute = isRoot
+    ? routes.thread(threadId)
+    : routes.node(threadId, node._id);
+  const isActive = pathname === nodeRoute;
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(node.title);
-  const [menuOpen, setMenuOpen] = useState(false);
+
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const handleBranch = async () => {
-    try {
-      const { childId } = await createEmptyBranch({ parentId: node._id });
-      router.push(routes.node(threadId, childId));
-    } catch (err) {
-      handleError(err, "Failed to create branch");
-    }
-  };
-
   const redirectIfViewing = (subtreeIds: Set<Id<"nodes">>) => {
-    const match = pathname.match(/^\/t\/[^/]+\/n\/([^/]+)/);
-    const currentNodeId = match?.[1];
-    if (!currentNodeId || !subtreeIds.has(currentNodeId as Id<"nodes">)) return;
-    if (node.parentId === null) {
+    const isOnCanvas = pathname === routes.thread(threadId);
+    const nodeMatch = pathname.match(/^\/t\/[^/]+\/n\/([^/]+)/);
+    const viewingNodeId = nodeMatch?.[1];
+
+    const shouldRedirect =
+      (isOnCanvas && isRoot) ||
+      (viewingNodeId && subtreeIds.has(viewingNodeId as Id<"nodes">));
+
+    if (!shouldRedirect) return;
+
+    if (isRoot) {
       router.push(routes.home);
+    } else if (isOnCanvas) {
+      return;
     } else {
-      router.push(routes.node(threadId, node.parentId));
+      router.push(routes.node(threadId, node.parentId!));
     }
   };
-
-  const isRoot = node.parentId === null;
 
   const handleDeleteClick = () => {
     if (node.isLeaf) {
@@ -174,7 +166,7 @@ function NodeItem({
         </div>
       ) : (
         <Link
-          href={routes.node(threadId, node._id)}
+          href={nodeRoute}
           className={cn(
             "flex h-8 items-center gap-1.5 rounded-md pr-8 text-xs hover:bg-background-5 hover:text-sidebar-accent-foreground",
             isActive
@@ -189,51 +181,14 @@ function NodeItem({
       )}
 
       {!isEditing && (
-        <Menu.Root open={menuOpen} onOpenChange={setMenuOpen}>
-          <Menu.Trigger
-            aria-label="Node options"
-            className={cn(
-              "absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md text-sidebar-foreground hover:bg-background-5",
-              isActive || menuOpen
-                ? "opacity-100"
-                : "opacity-0 group-hover/node:opacity-100",
-            )}
-          >
-            <MoreHorizontal size={12} />
-          </Menu.Trigger>
-          <Menu.Portal>
-            <Menu.Positioner sideOffset={4} align="end" className="z-50">
-              <Menu.Popup className="min-w-32 rounded-md border bg-popover p-1 shadow-md">
-                <Menu.Item
-                  className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-muted"
-                  onClick={() => {
-                    setDraft(node.title);
-                    setIsEditing(true);
-                  }}
-                >
-                  <Pencil className="size-3" />
-                  Rename
-                </Menu.Item>
-                <Menu.Item
-                  className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-muted"
-                  onClick={handleBranch}
-                >
-                  <GitBranch className="size-3" />
-                  Branch here
-                </Menu.Item>
-                {canDelete && (
-                  <Menu.Item
-                    className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-destructive hover:bg-muted"
-                    onClick={handleDeleteClick}
-                  >
-                    <Trash2 className="size-3" />
-                    Delete
-                  </Menu.Item>
-                )}
-              </Menu.Popup>
-            </Menu.Positioner>
-          </Menu.Portal>
-        </Menu.Root>
+        <EditDropdown
+          handleDeleteClick={handleDeleteClick}
+          node={node}
+          threadId={threadId}
+          isActive={isActive}
+          setDraft={setDraft}
+          setIsEditing={setIsEditing}
+        />
       )}
 
       <DeleteNodeDialog

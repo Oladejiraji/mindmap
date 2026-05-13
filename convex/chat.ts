@@ -1,9 +1,12 @@
 import { v } from "convex/values";
 import { internalQuery } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
 import { buildPromptContext, type ChatMessage } from "./lib/context";
-import { maybeGenerateTitle, streamAssistantResponse } from "./lib/llm";
+import {
+  maybeGenerateTitle,
+  streamAssistantResponse,
+  distillChatToContent,
+} from "./lib/llm";
 import { llmAction } from "./lib/functions";
 
 export const getContext = internalQuery({
@@ -36,26 +39,18 @@ export const sendMessage = llmAction({
   },
 });
 
-export const sendToBranch = llmAction({
-  args: {
-    parentId: v.id("nodes"),
-    title: v.string(),
-    content: v.string(),
-  },
-  handler: async (ctx, args): Promise<{ childId: Id<"nodes"> }> => {
-    await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.parentId });
+export const distillContent = llmAction({
+  args: { nodeId: v.id("nodes") },
+  handler: async (ctx, args) => {
+    await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.nodeId });
 
-    const { childId }: { childId: Id<"nodes"> } = await ctx.runMutation(
-      api.nodes.createBranch,
-      {
-        parentId: args.parentId,
-        title: args.title,
-        firstMessageContent: args.content,
-      },
-    );
+    const messages = await ctx.runQuery(api.messages.listByNode, {
+      nodeId: args.nodeId,
+    });
+    if (!messages || messages.length === 0) return null;
 
-    await streamAssistantResponse(ctx, childId);
+    await distillChatToContent(ctx, args.nodeId, messages);
 
-    return { childId };
+    return null;
   },
 });

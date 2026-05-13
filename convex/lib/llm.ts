@@ -4,6 +4,7 @@ import type { ActionCtx } from "../_generated/server";
 import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { ChatMessage } from "./context";
+import type { Doc } from "../_generated/dataModel";
 import { CHAT_MODEL, TITLE_MODEL } from "./models";
 
 const PATCH_INTERVAL_MS = 100;
@@ -87,4 +88,28 @@ export async function maybeGenerateTitle(
   } catch (err) {
     console.error("title generation failed", err);
   }
+}
+
+export async function distillChatToContent(
+  ctx: ActionCtx,
+  nodeId: Id<"nodes">,
+  messages: Doc<"messages">[],
+): Promise<void> {
+  if (messages.length === 0) return;
+
+  const transcript = messages
+    .map((m) => `${m.role}: ${m.content}`)
+    .join("\n\n");
+
+  const { text } = await generateText({
+    model: anthropic(CHAT_MODEL),
+    system:
+      "You are a research assistant. Distill the following conversation into concise, structured knowledge. Focus on key findings, decisions, and insights. Use markdown. Be concise but comprehensive. Output only the distilled content — no preamble.",
+    prompt: transcript,
+  });
+
+  const content = text.trim();
+  if (!content) return;
+
+  await ctx.runMutation(api.nodes.updateContent, { nodeId, content });
 }

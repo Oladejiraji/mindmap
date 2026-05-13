@@ -49,41 +49,6 @@ export const updatePosition = userMutation({
   },
 });
 
-export const createBranch = userMutation({
-  args: {
-    parentId: v.id("nodes"),
-    title: v.string(),
-    firstMessageContent: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const parent = await requireNode(ctx, args.parentId);
-
-    const lastParentMessage = await ctx.db
-      .query("messages")
-      .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", args.parentId))
-      .order("desc")
-      .first();
-    const branchedAt = (lastParentMessage?.index ?? -1) + 1;
-
-    const childId = await ctx.db.insert("nodes", {
-      userId: parent.userId,
-      threadId: parent.threadId,
-      parentId: args.parentId,
-      branchedAt,
-      title: args.title,
-    });
-
-    await ctx.db.insert("messages", {
-      nodeId: childId,
-      role: "user",
-      content: args.firstMessageContent,
-      index: 0,
-    });
-
-    return { childId };
-  },
-});
-
 export const createEmptyBranch = userMutation({
   args: {
     parentId: v.id("nodes"),
@@ -92,23 +57,27 @@ export const createEmptyBranch = userMutation({
   handler: async (ctx, args) => {
     const parent = await requireNode(ctx, args.parentId);
 
-    const lastParentMessage = await ctx.db
-      .query("messages")
-      .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", args.parentId))
-      .order("desc")
-      .first();
-    const branchedAt = (lastParentMessage?.index ?? -1) + 1;
-
     const childId = await ctx.db.insert("nodes", {
       userId: parent.userId,
       threadId: parent.threadId,
       parentId: args.parentId,
-      branchedAt,
       title: "Untitled",
       position: args.position,
     });
 
     return { childId };
+  },
+});
+
+export const updateContent = userMutation({
+  args: {
+    nodeId: v.id("nodes"),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireNode(ctx, args.nodeId);
+    await ctx.db.patch(args.nodeId, { content: args.content });
+    return null;
   },
 });
 
@@ -123,12 +92,19 @@ export const deleteLeafNode = userMutation({
       .first();
     if (children) throw new ConvexError("Cannot delete a node with children");
 
-    const messages = await ctx.db
-      .query("messages")
-      .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", args.nodeId))
-      .take(500);
-    for (const msg of messages) {
-      await ctx.db.delete(msg._id);
+    const chat = await ctx.db
+      .query("chats")
+      .withIndex("by_nodeId", (q) => q.eq("nodeId", args.nodeId))
+      .first();
+    if (chat) {
+      const messages = await ctx.db
+        .query("messages")
+        .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
+        .take(500);
+      for (const msg of messages) {
+        await ctx.db.delete(msg._id);
+      }
+      await ctx.db.delete(chat._id);
     }
 
     await ctx.db.delete(args.nodeId);
@@ -159,12 +135,19 @@ export const deleteSubtree = userMutation({
     }
 
     for (const id of toDelete) {
-      const messages = await ctx.db
-        .query("messages")
-        .withIndex("by_nodeId_and_index", (q) => q.eq("nodeId", id))
-        .take(500);
-      for (const msg of messages) {
-        await ctx.db.delete(msg._id);
+      const chat = await ctx.db
+        .query("chats")
+        .withIndex("by_nodeId", (q) => q.eq("nodeId", id))
+        .first();
+      if (chat) {
+        const messages = await ctx.db
+          .query("messages")
+          .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
+          .take(500);
+        for (const msg of messages) {
+          await ctx.db.delete(msg._id);
+        }
+        await ctx.db.delete(chat._id);
       }
       await ctx.db.delete(id);
     }
@@ -173,8 +156,6 @@ export const deleteSubtree = userMutation({
   },
 });
 
-// Called from actions (which can't read ctx.db directly) to verify ownership
-// before performing work. Returns the node on success, throws on mismatch.
 export const assertOwned = internalQuery({
   args: { nodeId: v.id("nodes") },
   handler: async (ctx, args) => {

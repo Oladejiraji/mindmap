@@ -4,6 +4,7 @@ import Link from "next/link";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ChatBreadcrumb } from "@/components/shared/chat-breadcrumb";
 import { CanvasToggle } from "@/components/shared/canvas-toggle";
+import { DistillButton } from "@/components/shared/distill-button";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
 
@@ -15,6 +16,7 @@ export function Header() {
       <SidebarTrigger />
       <ChatBreadcrumb />
       <div className="ml-auto flex items-center gap-3">
+        <DistillButton />
         <CanvasToggle />
         {session?.user && (
           <Link

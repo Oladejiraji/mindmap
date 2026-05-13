@@ -46,6 +46,8 @@ export async function requireMessageNode(
 ): Promise<{ message: Doc<"messages">; node: Doc<"nodes"> }> {
   const message = await ctx.db.get(messageId);
   if (!message) throw notFound();
-  const node = await requireNode(ctx, message.nodeId);
+  const chat = await ctx.db.get(message.chatId);
+  if (!chat) throw notFound();
+  const node = await requireNode(ctx, chat.nodeId);
   return { message, node };
 }

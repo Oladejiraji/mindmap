@@ -1,8 +1,8 @@
 # Mindmap — Recommendations & Feature Ideas
 
-Reviewed: 2026-04-17. Pair with [REVIEW_ISSUES.md](REVIEW_ISSUES.md).
+Reviewed: 2026-05-13. Pair with [REVIEW_ISSUES.md](REVIEW_ISSUES.md).
 
-This doc is forward-looking: improvements to existing code and net-new features worth considering. Each item includes rough effort (**S/M/L**) and why it matters.
+Updated after the node-first pivot. Architecture: 4-table schema (threads → nodes → chats → messages), content-based context inheritance via `node.content`, canvas-first UX, distill feature. Items reference the current codebase, not the pre-pivot structure.
 
 ---
 
@@ -10,127 +10,127 @@ This doc is forward-looking: improvements to existing code and net-new features 
 
 ### A.1 Collapse the service wrapper layer — **S**
 Every file in [src/services/](src/services/) is a one-liner `useQuery(api.x.y)` / `useMutation(api.x.y)`. Two paths:
-- **Delete** the folder; import `api` directly in components. Fewer files, one less indirection.
-- **Earn** it: add optimistic updates, toast-on-error, and typed return shapes. Recommended if you plan to grow the app.
+- **Delete** the folder; import `api` directly in components.
+- **Earn** it: add optimistic updates, toast-on-error, and typed return shapes.
 
-Pick one. The current middle ground gives you the cost of the layer with none of the benefit.
-
-### A.3 Move canvas state off `useEffect` — **M**
-Refactor [thread-canvas.tsx](src/components/shared/canvas/thread-canvas.tsx) so React Flow consumes derived data directly:
-- Pass `rfNodes`/`rfEdges` from `useMemo` straight into `<ReactFlow nodes=... edges=...>`.
-- Handle drags via `onNodesChange` → local patch → debounced `updatePosition`.
-- Compute ancestor-edge styling inline in the edges memo.
-
-Eliminates both effects, removes the fingerprint hack, and aligns with AGENTS.md's "avoid useEffect."
+### A.3 Move canvas state off `useEffect` — ~~M~~ **Done (partial)**
+Edges are now fully derived (`useMemo` → passed directly to `<ReactFlow>`). The edge-selection effect is eliminated. The Convex → React Flow node sync effect remains but uses a merge strategy (preserves React Flow internals, skips position overwrite) instead of full replacement. Remaining opportunity: investigate whether nodes can also go fully controlled once React Flow supports external-source patterns better.
 
 ### A.5 Add a serialization lock per node — **M**
-Before `sendMessage` accepts input, check in an internal mutation whether the node is currently `isStreaming`. If yes, throw `"Node busy"`. UI already disables the button, but a lock at the backend makes this an actual invariant. Pairs well with A.4.
+Before `sendMessage` accepts input, check in an internal mutation whether the node's chat is currently `isStreaming`. If yes, throw `"Node busy"`. UI already disables the button, but a lock at the backend makes this an actual invariant.
+
+### A.6 Guard `getOrCreateChat` against duplicate creation — **S**
+[convex/messages.ts:124-134](convex/messages.ts#L124-L134) can create two chats for the same node under concurrent mutations. Either add a unique constraint on `chats.by_nodeId` or re-query after insert and delete the duplicate.
+
+### A.7 Guard `distillContent` against concurrent runs — **S**
+Add a `isDistilling` flag on the node (or the chat) that's set before the LLM call and cleared after. The action checks this flag before proceeding. Prevents two concurrent distill calls from racing.
 
 ### A.8 Paginate messages and nodes — **M**
-Replace `.take(500)` with Convex's paginated queries, both on the frontend (`usePaginatedQuery`) and in the context builder. For prompt context, chunk by message-count and respect the model's input budget.
+Replace `.take(500)` with Convex's paginated queries, both on the frontend (`usePaginatedQuery`) and in the context builder. For prompt context, respect the model's input budget.
 
 ### A.9 Memoize message rendering — **S**
 `React.memo` around `MessageBubble`; `useMemo` on the markdown render. Streaming re-renders drop from O(all-messages) to O(1).
 
+### A.10 Move `CustomHandle` to shared — **S**
+[mind-map-node.tsx](src/components/shared/canvas/mind-map-node.tsx) imports `CustomHandle` from `@/components/auth-canvas/`. Move it to `src/components/shared/canvas/` or `src/components/ui/` so the dependency direction is correct.
+
 ### A.12 Type the error path — **S**
-Wrap all mutations in a small `useSafeMutation` that catches, surfaces a toast, and returns `{ ok, error }`. Replace silent fire-and-forget patterns (REVIEW_ISSUES §4.3).
+Wrap all mutations in a small `useSafeMutation` that catches, surfaces a toast, and returns `{ ok, error }`. Replace silent fire-and-forget `.catch(handleError)` patterns.
 
 ### A.13 Add a minimal test suite — **M**
 Vitest + Convex's test harness. Start with:
-- `buildPromptContext` against a fabricated chain
-- `branchedAt` math (root has none; child inherits first N)
+- `buildPromptContext` against a fabricated chain (ancestor content → system message)
+- `getOrCreateChat` idempotency
 - `deleteSubtree` against a known tree shape
-
-These are pure-ish functions and high-value — they guard the non-negotiable invariant.
-
-### A.14 Consolidate or delete the dead branches code — **S**
-Either wire up `sendToBranch` / `createBranch` (REVIEW_ISSUES §2.2, §2.3) behind a feature like "branch with a first prompt in one shot," or delete them and their service wrappers.
+- `distillChatToContent` output format
 
 ### A.15 Surface streaming errors in the UI — **S**
-If an assistant message finalizes with an `[error]` sentinel (see A.4), render a retry button in `MessageBubble`. Users currently see a silent truncation and reload.
+If an assistant message finalizes with an `[error]` sentinel, render a retry button in `MessageBubble`. Users currently see a silent truncation.
+
+### A.16 Remove or sync `threads.name` — **S**
+The field is dead data (REVIEW_ISSUES §2.7). Either remove it from the schema or update it when the root node is renamed.
 
 ---
 
 ## B. Feature ideas
 
-### B.1 Branch off a specific message — **M**
-Right-click a message → "Branch from here." Creates a child node with `branchedAt = message.index + 1`, seeds the first user message with an empty prompt. This is already the logical next step given SPEC — it's what `branchedAt` was designed for. Today you can only branch from "now."
+### B.1 Manual content editing on nodes — **S**
+Nodes should be editable directly — the user mentioned this. Add an inline editor or an edit view accessible from the canvas (click-to-edit on the content area, or a dedicated edit panel). This completes the "content can be added manually" flow alongside distillation.
 
-### B.2 Node quick-prompt from canvas — **S**
-Double-click an empty area or a node on the canvas → inline prompt input → creates branch + sends message. Today canvas branching makes an empty node and forces navigation to chat. One-shot branching feels much better for ideation.
+### B.2 Content import — **M**
+"Content can be added manually, emerge from chat, and maybe imported." Support pasting / uploading a document into a node's content field. Start with plain text / markdown paste; later add file upload via Convex file storage.
 
-### B.3 Keyboard navigation — **S**
+### B.3 Node quick-prompt from canvas — **S**
+Double-click an empty area or a node on the canvas → inline prompt input → creates branch + sends message. Today canvas branching makes an empty node and forces navigation to chat.
+
+### B.4 Keyboard navigation — **S**
 Arrow keys move between sibling nodes in canvas; `Enter` opens chat; `b` creates branch. Mindmap apps live or die on keyboard ergonomics.
 
-### B.4 Search across all messages — **M**
-Convex has full-text search on indexes. Add a `by_content` search index on messages; sidebar gets a `/` hotkey for global search. Given branches multiply content, search becomes critical past ~5 threads.
-
-### B.5 Export / share a thread — **M**
-"Export as Markdown" for a node's ancestor chain. "Share read-only link" creates a tokenized URL + internal query. Doubles as a dogfooding story: you'll find rendering bugs fast.
+### B.5 Search across all content and messages — **M**
+Convex has full-text search on indexes. Add search indexes on `nodes.content` and `messages.content`. Sidebar gets a `/` hotkey for global search. With the node-first model, searching node content is the primary use case.
 
 ### B.6 Collapse / expand subtrees — **S**
-Both in sidebar and canvas. Canvas gets a `+`/`−` affordance per parent; sidebar folders collapse. Cheap, big UX win as trees grow.
+Both in sidebar and canvas. Canvas gets a `+`/`−` affordance per parent node; sidebar folders collapse. Cheap, big UX win as trees grow.
 
 ### B.7 Canvas mini-preview on hover — **M**
-Hover a canvas node → floating preview of last assistant message. Saves navigation for triage.
+Hover a canvas node → floating preview of the full node content. Saves navigation for triage, especially for nodes with distilled content.
 
 ### B.8 Per-node model / temperature — **M**
-Some branches are "explore wildly" (Opus, temp=1.0), some are "summarize tightly" (Haiku, temp=0.2). Store `modelConfig` on node, inherit from parent, expose a small dropdown. Aligns with the app's "each branch has its own context" thesis.
+Some nodes are "explore wildly" (Opus, temp=1.0), some are "summarize tightly" (Haiku, temp=0.2). Store `modelConfig` on node, inherit from parent, expose a small dropdown. Aligns with "each node has its own context" thesis.
 
-### B.9 System prompt per thread — **S**
-Currently there's no system prompt. Adding one to the root (and making it inheritable but overrideable per-node) lets a user set a persona / constraint per tree.
+### B.9 System prompt per workspace — **S**
+Add a system prompt to the root node (inheritable but overrideable per-node). Lets a user set a persona / constraint per tree.
 
 ### B.10 Regenerate last assistant reply — **S**
-Append-only means you can't edit, but you *can* append a new assistant message and soft-hide the previous one in the UI. Flag: `regeneratedAt: message.index`. A small extension that respects the invariant.
+Append-only means you can't edit, but you *can* append a new assistant message and soft-hide the previous one in the UI. Flag: `regeneratedAt: message.index`.
 
 ### B.11 Attachments / image input — **L**
-Anthropic supports images. Add a file-upload on `ChatInput`; store in Convex file storage; thread the `content` array format through the prompt builder. Meaningful effort because the schema changes to a richer `content` union type.
+Anthropic supports images. Add file-upload on `ChatInput`; store in Convex file storage; thread the `content` array format through the prompt builder.
 
 ### B.12 Cost / token meter — **S**
-Anthropic stream returns usage. Store `inputTokens` / `outputTokens` / `costUSD` on each message. Sidebar shows per-thread totals. Essential for any serious LLM app.
+Anthropic stream returns usage. Store `inputTokens` / `outputTokens` / `costUSD` on each message. Sidebar shows per-workspace totals.
 
 ### B.13 Auto-layout toggles — **S**
 Dagre does hierarchical top-down today. Add radial and horizontal options. Minor code change ([src/lib/layout.ts](src/lib/layout.ts) gains a `mode` arg); large visual impact.
 
-### B.14 Markdown shortcuts in chat-input — **S**
-`Cmd+B` wraps selection in `**`, etc. Also support pasting images (B.11 ties in).
+### B.14 Gradient edges on main canvas — **S**
+The auth-canvas already has a [GradientEdge](src/components/auth-canvas/gradient-edge.tsx) component with animated gradient strokes. Bring it into the main canvas to match the node design language (currently using plain `smoothstep` edges).
 
 ### B.15 Read-cache prompts with Claude prompt caching — **M**
-Ancestor chains don't change. Mark the common prefix with `cache_control: "ephemeral"` in the Anthropic request and you pay once per hour per prefix. At deep-branch scale this is real money saved. Pairs well with B.12.
+Ancestor content doesn't change often. Mark the common prefix with `cache_control: "ephemeral"` in the Anthropic request and you pay once per hour per prefix. At deep-branch scale this saves real money.
 
 ### B.16 Session persistence hints — **S**
-Remember which node the user was last viewing in a thread (localStorage keyed on threadId). Reopening a thread returns to that node rather than the root. Tiny change, big "it remembers me" feel.
+Remember which node the user was last viewing in a workspace (localStorage keyed on threadId). Reopening a workspace returns to that node rather than the root.
 
-### B.17 Telemetry hook — **S**
-Add a `lib/analytics.ts` no-op shim. Instrument `sendMessage` outcomes, branch creations, delete-subtree confirmations. Even without wiring a backend, the calls make it trivial to add one later.
+### B.17 Auto-distill option — **S**
+Optionally auto-distill after N messages or when a chat goes idle. Today distill is manual (Sparkles button in header). A setting per node or per workspace to auto-distill would keep content fresh without user intervention.
 
 ### B.18 Opus/Sonnet/Haiku per-turn selector — **S**
-A tiny dropdown in the chat input that overrides the model for a single send. Useful for "let me quickly get a summary in Haiku" without opening a branch. Ties to B.8.
+A tiny dropdown in the chat input that overrides the model for a single send. Useful for "let me quickly get a summary in Haiku" without opening a branch.
 
 ---
 
 ## C. Project hygiene
 
 ### C.1 Add `CONTRIBUTING.md` — **S**
-Document: pnpm only, append-only invariant, auth deliberately off, manual security-review checklist. Saves future-you ten minutes every time.
+Document: pnpm only, append-only invariant, node-first architecture, manual auth checks. Saves future-you ten minutes every time.
 
 ### C.2 Update SPEC.md — **S**
-Mark the auth section "deferred" with rationale. Drop mentions of `userId` columns unless you plan to add them back. Cross-link this review.
+Ensure it reflects the current 4-table schema and content-based context inheritance. Remove any references to `branchedAt` or message-slicing.
 
 ### C.3 CI pipeline — **M**
-GitHub Action: `pnpm install`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test`. Ten-minute setup, catches 80% of the regressions this codebase would otherwise accumulate.
+GitHub Action: `pnpm install`, `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test`. Ten-minute setup, catches 80% of regressions.
 
 ### C.4 Pre-commit hook — **S**
-`lint-staged` running `eslint --fix` and `tsc --noEmit`. Catches issues before they land in the dirty-working-tree soup.
+`lint-staged` running `eslint --fix` and `tsc --noEmit`.
 
 ---
 
 ## Suggested order of operations
 
-1. **Stabilize (week 1):** A.5 — serialization lock closes the last append-only gap.
-2. **Clean (week 1):** §2 dead code sweep, A.1.
-3. **Refactor (week 2):** A.3, A.9, A.12.
-4. **Test (week 2):** A.13.
-5. **Feature (week 3+):** B.1, B.6, B.9, B.15 — highest leverage for a branching chat app.
-
-Everything below that depends on how far you want to take the product.
+1. **Stabilize (week 1):** A.5 serialization lock, A.6 getOrCreateChat guard, A.7 distill guard — closes data integrity gaps.
+2. **Clean (week 1):** §2 dead code sweep (A.14), A.1 service layer, A.16 threads.name, A.10 move CustomHandle.
+3. **Ship content editing (week 2):** B.1 manual content editing on nodes — completes the core content flow.
+4. **Refactor (week 2):** A.3 canvas effects, A.9 memo, A.12 error typing.
+5. **Test (week 3):** A.13 test suite.
+6. **Feature (week 3+):** B.3 quick-prompt, B.6 collapse/expand, B.9 system prompt, B.14 gradient edges, B.15 prompt caching.

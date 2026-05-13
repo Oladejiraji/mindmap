@@ -29,7 +29,7 @@ const diatype = localFont({
 
 export const metadata: Metadata = {
   title: "Mindmap",
-  description: "A branching chat app for learning",
+  description: "A spatial research tool for thinking through problems with AI",
 };
 
 export default function RootLayout({

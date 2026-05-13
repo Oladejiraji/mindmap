@@ -1,8 +1,8 @@
 import dagre from "@dagrejs/dagre";
 import type { Node } from "@/services/nodes/queries";
 
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 60;
+const NODE_WIDTH = 360;
+const NODE_HEIGHT = 120;
 
 export interface LayoutPosition {
   x: number;

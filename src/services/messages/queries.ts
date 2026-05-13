@@ -1,13 +1,8 @@
 import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
-import { useConvexAuth } from "convex/react";
-import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@convex/api";
 import type { Doc, Id } from "@convex/dataModel";
 
-import { useNodesByThread, type Node } from "@/services/nodes/queries";
-import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+import { api } from "@convex/api";
 
 export type Message = Doc<"messages">;
 
@@ -23,78 +18,25 @@ export function useNodeContextMessages(
   threadId: Id<"threads">,
   nodeId: Id<"nodes">,
 ) {
-  const { isAuthenticated } = useConvexAuth();
   const {
-    data: allNodes,
-    isLoading: nodesLoading,
-    error: nodesError,
-    refetch: refetchNodes,
-  } = useNodesByThread(threadId);
-
-  const chain = useMemo<Node[] | null>(() => {
-    if (!allNodes) return null;
-    return walkAncestors(buildNodeMap(allNodes), nodeId);
-  }, [allNodes, nodeId]);
-
-  const queries = useQueries({
-    queries: (chain ?? []).map((node) => ({
-      ...convexQuery(
-        api.messages.listByNode,
-        isAuthenticated ? { nodeId: node._id } : "skip",
-      ),
-    })),
-  });
-
-  const messagesError = queries.find((q) => q.error)?.error ?? null;
-  const error = nodesError ?? messagesError;
-
-  const messagesLoaded =
-    chain !== null &&
-    chain.length > 0 &&
-    queries.every((q) => q.data !== undefined);
+    data: messages,
+    isLoading,
+    error,
+    refetch,
+  } = useMessagesByNode(nodeId);
 
   const items = useMemo<ChatItem[]>(() => {
-    if (!chain || !messagesLoaded) return [];
-    const result: ChatItem[] = [];
-    for (let i = 0; i < chain.length; i++) {
-      const node = chain[i];
-      const msgs = (queries[i].data ?? []) as Message[];
-      const isTarget = i === chain.length - 1;
-      const sliceLimit = isTarget ? msgs.length : (chain[i + 1].branchedAt ?? 0);
-      const sliced = msgs.slice(0, sliceLimit);
-
-      if (i > 0) {
-        result.push({
-          kind: "branch-marker",
-          id: `branch-${node._id}`,
-          fromTitle: chain[i - 1].title,
-          intoTitle: node.title,
-        });
-      }
-      for (const m of sliced) {
-        result.push({ kind: "message", message: m });
-      }
-    }
-    return result;
-  }, [chain, queries, messagesLoaded]);
-
-  const targetMessages =
-    chain && messagesLoaded
-      ? ((queries[queries.length - 1].data ?? []) as Message[])
-      : [];
-
-  const retry = () => {
-    if (nodesError) void refetchNodes();
-    for (const q of queries) {
-      if (q.error) void q.refetch();
-    }
-  };
+    if (!messages) return [];
+    return messages.map((m) => ({ kind: "message" as const, message: m }));
+  }, [messages]);
 
   return {
     items,
-    targetMessages,
-    isLoading: nodesLoading || (!error && !messagesLoaded),
+    targetMessages: messages ?? [],
+    isLoading,
     error,
-    retry,
+    retry: () => {
+      if (error) void refetch();
+    },
   };
 }
