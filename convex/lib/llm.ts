@@ -33,6 +33,7 @@ export async function streamAssistantResponse(
 
   const result = streamText({
     model: anthropic(CHAT_MODEL),
+    system: "You are a research assistant. Never use emojis.",
     messages,
   });
 

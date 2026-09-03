@@ -108,6 +108,9 @@ Optionally auto-distill after N messages or when a chat goes idle. Today distill
 ### B.18 Opus/Sonnet/Haiku per-turn selector — **S**
 A tiny dropdown in the chat input that overrides the model for a single send. Useful for "let me quickly get a summary in Haiku" without opening a branch.
 
+### B.19 Agent tool use — **L**
+Enable Claude to call tools during chat (web search, code execution, file read, etc.). Requires switching from plain `streamText` to a tool-use loop in [convex/lib/llm.ts](convex/lib/llm.ts): define tools via the Vercel AI SDK `tools` param, handle `tool-call` / `tool-result` parts in the stream, and render tool invocations in the message UI. Start with a small set (e.g., web search via an external API) and expand. Pairs well with B.8 (per-node model config) since research nodes benefit from tools while summary nodes don't.
+
 ---
 
 ## C. Project hygiene

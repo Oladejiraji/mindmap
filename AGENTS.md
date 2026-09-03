@@ -29,6 +29,29 @@ A spatial research tool where you think through problems with AI, and the output
 - **Avoid `useEffect` as much as possible.** Before reaching for one, read [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) — it lists the exact patterns where `useEffect` is the wrong tool. Most "I need an effect" situations are actually one of: transforming data for rendering (use `useMemo` or compute inline), responding to user input (use an event handler), or caching expensive computation (use `useMemo`). Legitimate uses are narrow: synchronizing with an external (non-React) system, subscribing to a browser API, or running cleanup on unmount. If your effect fires a fetch, updates state based on props, or resets state when something changes — it's probably the wrong tool.
 - **Use `@base-ui/react` patterns, not Radix.** This project uses shadcn's `base-nova` style with `@base-ui/react` as the primitive layer. Use the `render` prop for polymorphism (e.g., `render={<Link href="..." />}`), not `asChild` which is a Radix concept.
 
+## Role check (start of every session)
+
+At the very start of every new conversation, before doing any work, ask the user:
+
+> **What role are you working in — developer or designer?**
+
+Remember the answer for the rest of the session. If the user says **designer**, apply the rules in "Designer constraints" below. If they say **developer**, skip that section entirely.
+
+## Designer constraints
+
+These rules apply only when the user identified as **designer** in the role check above.
+
+### Scope of changes
+
+- **Cosmetic and minor functional changes are fair game.** CSS/Tailwind classes, spacing, colors, typography, layout tweaks, animations, icons, copy, and small functional adjustments are all fine.
+- **Pause before core changes.** If a change touches data flow, Convex functions, API calls, auth logic, or component architecture, flag it to the user before proceeding. Explain what it involves and recommend they check with their dev. It's okay to proceed if the user gives the go-ahead.
+
+### Commit discipline
+
+- **Split changes into small, reviewable commits.** One commit per logical change (e.g., "update button styles", "adjust sidebar spacing", "change heading font weights"). Do not batch unrelated changes into a single commit.
+- **Do not make sweeping changes across many files at once.** Work incrementally so each commit is easy to review and revert if needed.
+- **Write clear commit messages** that describe what changed visually and why.
+
 ## Design principles
 
 - **Minimal design.** Strip out everything that isn't essential. No decorative elements, no heavy borders, no excess padding.

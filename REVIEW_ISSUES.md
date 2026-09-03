@@ -93,6 +93,34 @@ A user who blows past 500 messages in one node gets silently truncated chat cont
 
 ---
 
+## 7. Chat reliability
+
+### 7.1 Orphaned `isStreaming` state on action crash — **Medium**
+
+If the Convex action runtime crashes (OOM, hard timeout) after `startAssistantMessage` ([messages.ts:56](convex/messages.ts#L56)) but before the `finally` block in [llm.ts:55](convex/lib/llm.ts#L55) runs, both the message and chat stay `isStreaming: true` forever. The send button is permanently disabled and the streaming cursor never disappears. Recovery requires manual DB edits. Proposed approach: add a `lastStreamedAt` heartbeat timestamp to messages, updated on each streaming patch. Frontend treats streaming as dead if `lastStreamedAt` is stale (>10s). Needs a re-render mechanism (interval or hook) to re-evaluate staleness when no more DB updates arrive.
+
+### 7.2 No retry on LLM failure — **High**
+
+If `streamText()` in [llm.ts:34](convex/lib/llm.ts#L34) throws (API error, network timeout, content policy), the `finally` block finalizes the message with whatever partial content exists (often empty). The user has no way to retry — they must manually delete the orphaned message and resend. Add exponential backoff within the action, and/or a "Regenerate" button on the frontend for failed/empty assistant messages.
+
+### 7.3 No stream timeout — **High**
+
+No per-chunk or overall timeout on the streaming loop in [llm.ts:44-54](convex/lib/llm.ts#L44-L54). If the Claude API stalls mid-stream, the action hangs until Convex's hard action timeout (~10-15 min). Add a per-chunk timeout (e.g., abort if no chunk arrives within 30s) and an overall stream timeout.
+
+### 7.4 No error details surfaced to user — **Medium**
+
+When the LLM call fails, the user sees a generic "Failed to send message" toast ([handle-error.ts](src/lib/handle-error.ts)). No distinction between network errors, API rate limits, content policy violations, or auth failures. Surface structured error information so the user knows whether to retry, wait, or rephrase.
+
+### 7.5 No stop-generation affordance — **Low**
+
+Once streaming starts, the user cannot cancel it. A "Stop" button that aborts the stream and finalizes the message with current content would improve UX, especially for long or unwanted responses.
+
+### 7.6 No message regeneration — **Low**
+
+No way to regenerate the last assistant response without deleting and resending. A "Regenerate" button on the last assistant message would delete it and re-invoke `streamAssistantResponse`.
+
+---
+
 ## 6. Other
 
 ### 6.2 No tests — **Medium**
@@ -113,7 +141,8 @@ All LLM calls go through the project's Anthropic key. If users supply their own 
 
 | Severity | Count | Top items |
 | -------- | ----- | --------- |
-| Medium   | ~7    | Concurrency (§4.9, §4.17, §4.18), useEffect misuse (§4.1, §4.2), silent `.take(500)`, N+1 walks |
-| Low      | ~9    | Dead hooks/actions, naming, BYOK, rate-limit tuning, auth watcher debounce |
+| High     | 2     | No LLM retry (§7.2), no stream timeout (§7.3) |
+| Medium   | ~9    | Orphaned streaming (§7.1), error details (§7.4), concurrency (§4.9, §4.17, §4.18), silent `.take(500)`, N+1 walks |
+| Low      | ~11   | Stop generation (§7.5), regeneration (§7.6), dead hooks/actions, naming, BYOK, rate-limit tuning, auth watcher debounce |
 
-Start with §4.17 (getOrCreateChat race) and §4.9 (append concurrency) — those threaten data integrity. Then the dead-code sweep from §2.
+Start with §7.2 (LLM retry) and §7.3 (stream timeout) — those are the highest-impact reliability gaps. Then §4.17 (getOrCreateChat race) and §4.9 (append concurrency) for data integrity.

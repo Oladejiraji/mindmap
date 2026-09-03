@@ -54,7 +54,7 @@ export function NodeTitle({
         onDoubleClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
         className={cn(
-          "h-5 min-w-0 flex-1 cursor-text rounded bg-transparent px-0.5 text-13 font-medium leading-5 outline-none",
+          "h-5 min-w-0 cursor-text rounded bg-transparent px-0.5 text-13 font-medium leading-5 outline-none",
           className,
         )}
       />
@@ -64,7 +64,7 @@ export function NodeTitle({
   return (
     <span
       className={cn(
-        "block h-5 min-w-0 flex-1 cursor-pointer truncate text-13 font-medium leading-5",
+        "block h-5 min-w-0 cursor-pointer truncate text-13 font-medium leading-5",
         className,
       )}
       onDoubleClick={(e) => {
