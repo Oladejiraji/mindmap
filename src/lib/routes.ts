@@ -8,9 +8,8 @@ export const routes = {
   signIn: "/sign-in",
   signUp: "/sign-up",
   signOut: "/sign-out",
-  thread: (threadId: Id<"threads">) => `/t/${threadId}`,
-  node: (threadId: Id<"threads">, nodeId: Id<"nodes">) =>
-    `/t/${threadId}/n/${nodeId}`,
+  thread: (threadId: string) => `/t/${threadId}`,
+  node: (threadId: string, nodeId: Id<"nodes">) => `/t/${threadId}/n/${nodeId}`,
 } as const;
 
 // Paths where a client-side auth-error redirect should be a no-op

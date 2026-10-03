@@ -71,6 +71,10 @@ A user who blows past 500 messages in one node gets silently truncated chat cont
 
 [convex/chat.ts:72-86](convex/chat.ts#L72-L86): nothing prevents two concurrent distill calls. Both would LLM-generate content and call `updateContent`, with the last write winning. The button is disabled client-side during the call, but stale tabs or network retries can bypass this. Add a server-side guard (e.g., a `isDistilling` flag on the node, or deduplicate via Convex's scheduler).
 
+### 4.20 Context inheritance is silent-fail when parent is not distilled — **Medium**
+
+[convex/lib/context.ts:50-54](convex/lib/context.ts#L50-L54): `buildPromptContext` filters ancestors by `node.content`, so any parent that hasn't been manually distilled is silently skipped. A user can branch into a child node expecting it to "know" what the parent discussed, but the child's AI gets zero context from that parent. There's no visual indicator on the canvas showing which nodes have been distilled and which haven't, so users have no way to know context is missing. Options: auto-distill when branching, show an undistilled warning on the parent, or surface a hint in the child's chat.
+
 ### 4.19 Shared component imported from feature directory — **Low**
 
 [mind-map-node.tsx:9](src/components/shared/canvas/mind-map-node.tsx#L9) imports `CustomHandle` from `@/components/auth-canvas/custom-handle`. Auth-canvas is a feature-specific directory for the sign-in/sign-up pages. Move `CustomHandle` to a shared location (e.g., `src/components/shared/canvas/` or `src/components/ui/`).

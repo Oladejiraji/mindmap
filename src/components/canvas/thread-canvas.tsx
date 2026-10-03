@@ -248,7 +248,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-full min-h-[calc(100svh-3.5rem)] items-center justify-center">
+      <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
         <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     );
@@ -256,14 +256,14 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
   if (!nodes?.length) {
     return (
-      <div className="flex h-full min-h-[calc(100svh-3.5rem)] items-center justify-center">
+      <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
         <p className="text-sm text-muted-foreground">No nodes in this thread</p>
       </div>
     );
   }
 
   return (
-    <div className="h-[calc(100svh-3.5rem)] w-full">
+    <div className="h-[calc(100svh-3.125rem)] w-full">
       <ReactFlow
         nodes={flowNodes}
         edges={rfEdges}

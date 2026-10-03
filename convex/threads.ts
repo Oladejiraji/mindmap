@@ -32,6 +32,7 @@ export const create = userMutation({
       parentId: null,
       title: name,
     });
+
     return { threadId, rootNodeId };
   },
 });

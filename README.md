@@ -1,16 +1,19 @@
 # Mindmap
 
-A chat app where conversations branch like a mindmap. When a thread goes deep on a tangent, you fork into a child node instead of polluting the parent — each branch inherits its parent's context up to the branch point and stays isolated from siblings.
+A spatial thinking tool where you build structured knowledge through AI-assisted exploration. Each node is a research unit with rich, editable block content. Nodes form a tree on an infinite canvas — children inherit parent context through block content, not chat transcripts.
 
-Built for learning: when a single linear chat forces you to choose between "go deeper here" and "keep the main thread clean," a tree of chats fixes that.
+Think of it as a company brain you build deliberately through active thinking.
+
+See [SPEC.md](./doc/SPEC.md) for the full product spec, data model, and architecture decisions.
 
 ## Stack
 
 - **Next.js** (App Router) + **TypeScript**
 - **Convex** — backend, database, and auth
-- **React Flow** (`@xyflow/react`) — mindmap visualization
+- **React Flow** (`@xyflow/react`) — spatial canvas
+- **BlockNote** — Notion-like block editor for node content
 - **Tailwind CSS v4** + **tailwindcss-motion** — styling and animation
-- **shadcn/ui** — component primitives
+- **shadcn/ui** (`base-nova` style) — component primitives
 
 ## Getting started
 
@@ -23,8 +26,6 @@ pnpm dev            # in another — starts Next.js
 Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment
-
-Two things need to be set — they live in different places.
 
 **Frontend** (`.env.local` — `pnpm convex dev` populates these on first run):
 
@@ -39,16 +40,11 @@ See `.env.example` for the shape.
 npx convex env set ANTHROPIC_API_KEY sk-ant-...
 ```
 
-Without `ANTHROPIC_API_KEY` the chat action throws a 500 at stream time.
-
 ## Project layout
 
 ```
 src/app/           Next.js routes (App Router)
 convex/            Convex functions (queries, mutations, actions) and schema
 src/components/    UI components (shadcn lives in src/components/ui)
+doc/               Product spec and reference docs
 ```
-
-## Design
-
-See [SPEC.md](./SPEC.md) for the data model, branching semantics, and the decisions behind them. Read it before touching the schema — several design choices have subtle implications (append-only messages, frozen-prefix branching, etc.).

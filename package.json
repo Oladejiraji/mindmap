@@ -15,6 +15,7 @@
     "@convex-dev/rate-limiter": "^0.3.2",
     "@convex-dev/react-query": "^0.1.0",
     "@dagrejs/dagre": "^3.0.0",
+    "@outpacelabs/avatars": "^0.6.0",
     "@tanstack/react-query": "^5.99.0",
     "@xyflow/react": "^12.10.2",
     "ai": "^6.0.162",

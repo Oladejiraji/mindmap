@@ -12,7 +12,8 @@ export default defineSchema({
     threadId: v.id("threads"),
     parentId: v.union(v.id("nodes"), v.null()),
     title: v.string(),
-    content: v.optional(v.string()),
+    content: v.optional(v.any()),
+    summary: v.optional(v.string()),
     position: v.optional(
       v.object({
         x: v.number(),

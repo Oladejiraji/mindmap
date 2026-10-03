@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import type { Id } from "@convex/dataModel";
-import { NodeChat } from "@/components/shared/chat/node-chat";
+import { NodeChat } from "@/components/chat/node-chat";
 
 export default function ChatPage({
   params,

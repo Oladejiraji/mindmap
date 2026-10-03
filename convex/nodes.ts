@@ -72,7 +72,7 @@ export const createEmptyBranch = userMutation({
 export const updateContent = userMutation({
   args: {
     nodeId: v.id("nodes"),
-    content: v.string(),
+    content: v.any(),
   },
   handler: async (ctx, args) => {
     await requireNode(ctx, args.nodeId);

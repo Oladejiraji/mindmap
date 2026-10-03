@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import type { Id } from "@convex/dataModel";
-import { ThreadCanvas } from "@/components/shared/canvas/thread-canvas";
+import { ThreadCanvas } from "@/components/canvas/thread-canvas";
 
 export default function CanvasPage({
   params,

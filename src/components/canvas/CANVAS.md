@@ -8,7 +8,7 @@ The canvas renders a thread's node tree as a draggable mindmap using React Flow.
 
 1. **Query.** `useNodesByThread(threadId)` subscribes to all nodes in the thread via Convex. This is reactive — any mutation (new branch, position update, title rename, content change, deletion) triggers a re-delivery.
 
-2. **Layout.** The node list is passed to `layoutNodes()` (`src/lib/layout.ts`), which runs dagre in top-to-bottom mode over the parent-child topology. Every node gets a computed `(x, y)`. If a node has a stored `position`, the stored value wins — this is the hybrid model described in SPEC.md.
+2. **Layout.** The node list is passed to `layoutNodes()` (`src/lib/layout.ts`), which runs dagre in top-to-bottom mode over the parent-child topology. Every node gets a computed `(x, y)`. If a node has a stored `position`, the stored value wins — this is the hybrid model described in [SPEC.md](../../../../doc/SPEC.md).
 
 3. **React Flow state.** `useNodesState` gives React Flow ownership of the node array. This is critical — React Flow tracks internal state per node (measured dimensions, drag position, selection) that gets destroyed if you replace the array externally mid-interaction. Edges are derived directly via `useMemo` and passed as a prop — they have no internal drag state, so there's no need for `useEdgesState`.
 

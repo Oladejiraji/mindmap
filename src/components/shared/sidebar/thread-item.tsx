@@ -25,10 +25,22 @@ const focusAndSelect = (el: HTMLInputElement | null) => {
   el?.select();
 };
 
-export function ThreadItem({ thread }: { thread: Thread }) {
+interface ThreadItemProps {
+  thread: Thread;
+  hideRoot?: boolean;
+}
+
+export function ThreadItem({ thread, hideRoot }: ThreadItemProps) {
   const { data: nodes } = useNodesByThread(thread._id);
 
-  const flat = useMemo(() => (nodes ? flattenTree(nodes) : []), [nodes]);
+  const flat = useMemo(() => {
+    if (!nodes) return [];
+    const tree = flattenTree(nodes);
+    if (!hideRoot) return tree;
+    return tree
+      .filter((n) => n.parentId !== null)
+      .map((n) => ({ ...n, depth: Math.max(0, n.depth - 1) }));
+  }, [nodes, hideRoot]);
 
   if (flat.length === 0) return null;
 
