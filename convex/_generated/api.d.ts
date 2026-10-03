@@ -21,6 +21,7 @@ import type * as lib_validation from "../lib/validation.js";
 import type * as messages from "../messages.js";
 import type * as nodes from "../nodes.js";
 import type * as threads from "../threads.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   nodes: typeof nodes;
   threads: typeof threads;
+  users: typeof users;
 }>;
 
 /**

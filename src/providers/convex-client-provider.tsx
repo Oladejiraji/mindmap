@@ -12,6 +12,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { isAuthError } from "@/lib/auth-errors";
 import { redirectToSignInIfAuthError } from "@/lib/handle-error";
+import { StoreUserProvider } from "@/components/shared/store-user-provider";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -38,7 +39,9 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
 
   return (
     <ConvexBetterAuthProvider client={convex} authClient={authClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <StoreUserProvider>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </StoreUserProvider>
     </ConvexBetterAuthProvider>
   );
 }

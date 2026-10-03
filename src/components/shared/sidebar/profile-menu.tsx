@@ -38,13 +38,16 @@ export function ProfileMenu() {
         <ChevronDownIcon className="size-4 text-foreground/40 group-data-[collapsible=icon]:hidden" />
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Positioner sideOffset={6} align="start" side="bottom" className="z-50">
+        <Menu.Positioner
+          sideOffset={6}
+          align="start"
+          side="bottom"
+          className="z-50"
+        >
           <Menu.Popup className="min-w-37 rounded-lg border border-foreground/8 bg-background p-1 shadow-lg outline-none">
             <div className="px-2 py-1.5">
               <p className="text-xs text-foreground/50">Signed in as</p>
-              <p className="truncate text-xs font-medium text-foreground">
-                {email}
-              </p>
+              <p className="truncate text-xs  text-foreground">{email}</p>
             </div>
             <Menu.Separator className="my-1 h-px bg-foreground/8" />
             <Menu.Item

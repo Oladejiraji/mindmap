@@ -15,7 +15,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider className="bg-sidebar">
       <ClientAuthWatcher />
       <HomeSidebar />
-      <div className="flex-1 overflow-auto py-1 pr-1">
+      <div className="flex-1 min-h-0 py-1 pr-1">
         <div className="h-full overflow-auto rounded-sm bg-background">
           {children}
         </div>

@@ -25,7 +25,7 @@ export const create = userMutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {
     const name = normalizeTitle(args.name, "Thread name");
-    const threadId = await ctx.db.insert("threads", { userId: ctx.userId, name });
+    const threadId = await ctx.db.insert("threads", { userId: ctx.userId, name, updatedAt: Date.now() });
     const rootNodeId = await ctx.db.insert("nodes", {
       userId: ctx.userId,
       threadId,
@@ -42,7 +42,7 @@ export const rename = userMutation({
   handler: async (ctx, args) => {
     await requireThread(ctx, args.threadId);
     const name = normalizeTitle(args.name, "Thread name");
-    await ctx.db.patch(args.threadId, { name });
+    await ctx.db.patch(args.threadId, { name, updatedAt: Date.now() });
     return null;
   },
 });
