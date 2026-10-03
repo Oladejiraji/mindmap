@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Plus, LayoutGrid, List } from "lucide-react";
+import { api } from "@convex/api";
 import { Button } from "@/components/ui/button";
 import { useThreads } from "@/services/threads/queries";
-import { useCreateThread } from "@/services/threads/mutations";
+import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
@@ -14,17 +14,13 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
   const { data: threads, isPending } = useThreads();
-  const createThread = useCreateThread();
-  const [isCreating, setIsCreating] = useState(false);
+  const { mutate: createThread, isPending: isCreating } = useConvexMutation(api.threads.create);
 
   const handleCreate = async () => {
-    if (isCreating) return;
-    setIsCreating(true);
     try {
       const { threadId } = await createThread({ name: "Untitled" });
       router.push(routes.thread(threadId));
     } catch (err) {
-      setIsCreating(false);
       handleError(err, "Failed to create project");
     }
   };

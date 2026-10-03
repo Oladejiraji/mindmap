@@ -37,6 +37,16 @@ export const create = userMutation({
   },
 });
 
+export const rename = userMutation({
+  args: { threadId: v.id("threads"), name: v.string() },
+  handler: async (ctx, args) => {
+    await requireThread(ctx, args.threadId);
+    const name = normalizeTitle(args.name, "Thread name");
+    await ctx.db.patch(args.threadId, { name });
+    return null;
+  },
+});
+
 // Cascades through every node (and its messages) in the thread. Use this
 // instead of nodes.deleteLeafNode / nodes.deleteSubtree when removing a root.
 export const remove = userMutation({

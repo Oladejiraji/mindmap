@@ -5,14 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Folder } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@convex/api";
 import { DeleteNodeDialog } from "@/components/shared/delete-node-dialog";
 import { useNodesByThread, type Node } from "@/services/nodes/queries";
-import {
-  useDeleteLeafNode,
-  useDeleteSubtree,
-  useRenameNode,
-} from "@/services/nodes/mutations";
-import { useRemoveThread } from "@/services/threads/mutations";
+import { useConvexMutation } from "@/lib/use-convex-mutation";
 import type { Thread } from "@/services/threads/queries";
 import type { Id } from "@convex/dataModel";
 import { collectSubtree, flattenTree, type FlatNode } from "@/lib/tree";
@@ -67,11 +63,10 @@ interface INodeItemProps {
 function NodeItem({ threadId, node, allNodes }: INodeItemProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const renameNode = useRenameNode();
-
-  const deleteLeafNode = useDeleteLeafNode();
-  const deleteSubtree = useDeleteSubtree();
-  const removeThread = useRemoveThread();
+  const { mutate: renameNode } = useConvexMutation(api.nodes.rename);
+  const { mutate: deleteLeafNode } = useConvexMutation(api.nodes.deleteLeafNode);
+  const { mutate: deleteSubtree } = useConvexMutation(api.nodes.deleteSubtree);
+  const { mutate: removeThread } = useConvexMutation(api.threads.remove);
 
   const isRoot = node.parentId === null;
   const nodeRoute = isRoot

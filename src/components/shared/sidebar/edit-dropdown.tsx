@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { routes } from "@/lib/routes";
 import { handleError } from "@/lib/handle-error";
+import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
 import { type FlatNode } from "@/lib/tree";
-import { useCreateEmptyBranch } from "@/services/nodes/mutations";
+import { useConvexMutation } from "@/lib/use-convex-mutation";
 
 interface INodeItemProps {
   threadId: Id<"threads">;
@@ -29,7 +30,7 @@ const EditDropdown = ({
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const createEmptyBranch = useCreateEmptyBranch();
+  const { mutate: createEmptyBranch } = useConvexMutation(api.nodes.createEmptyBranch);
 
   const canDelete = node.isLeaf || node.parentId === null;
 

@@ -19,13 +19,9 @@ import "@xyflow/react/dist/style.css";
 import { useRouter } from "next/navigation";
 import type { Id } from "@convex/dataModel";
 
+import { api } from "@convex/api";
 import { useNodesByThread } from "@/services/nodes/queries";
-import {
-  useUpdatePosition,
-  useCreateEmptyBranch,
-  useDeleteLeafNode,
-  useRenameNode,
-} from "@/services/nodes/mutations";
+import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { layoutNodes } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
@@ -52,10 +48,10 @@ export function ThreadCanvas({ threadId }: { threadId: Id<"threads"> }) {
 
 function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const { data: nodes, isLoading } = useNodesByThread(threadId);
-  const updatePosition = useUpdatePosition();
-  const createEmptyBranch = useCreateEmptyBranch();
-  const deleteLeafNode = useDeleteLeafNode();
-  const renameNode = useRenameNode();
+  const { mutate: updatePosition } = useConvexMutation(api.nodes.updatePosition);
+  const { mutate: createEmptyBranch } = useConvexMutation(api.nodes.createEmptyBranch);
+  const { mutate: deleteLeafNode } = useConvexMutation(api.nodes.deleteLeafNode);
+  const { mutate: renameNode } = useConvexMutation(api.nodes.rename);
   const { screenToFlowPosition } = useReactFlow();
   const router = useRouter();
 
