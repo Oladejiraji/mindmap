@@ -29,6 +29,7 @@ A spatial thinking tool where you build structured knowledge through AI-assisted
 
 - **Avoid `useEffect` as much as possible.** Before reaching for one, read [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) — it lists the exact patterns where `useEffect` is the wrong tool. Most "I need an effect" situations are actually one of: transforming data for rendering (use `useMemo` or compute inline), responding to user input (use an event handler), or caching expensive computation (use `useMemo`). Legitimate uses are narrow: synchronizing with an external (non-React) system, subscribing to a browser API, or running cleanup on unmount. If your effect fires a fetch, updates state based on props, or resets state when something changes — it's probably the wrong tool.
 - **Use `@base-ui/react` patterns, not Radix.** This project uses shadcn's `base-nova` style with `@base-ui/react` as the primitive layer. Use the `render` prop for polymorphism (e.g., `render={<Link href="..." />}`), not `asChild` which is a Radix concept.
+- **Use `RenderIf` for conditional rendering.** Use the `<RenderIf condition={...}>` component (`src/components/shared/render-if.tsx`) instead of ternary chains for conditional rendering.
 
 ## Role check (start of every session)
 

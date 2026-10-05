@@ -1,3 +1,5 @@
+/** @deprecated Not currently used. Kept for potential reuse. */
+
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { GitBranch, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { Menu } from "@base-ui/react/menu";
