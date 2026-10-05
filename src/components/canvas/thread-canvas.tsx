@@ -48,9 +48,15 @@ export function ThreadCanvas({ threadId }: { threadId: Id<"threads"> }) {
 
 function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const { data: nodes, isLoading } = useNodesByThread(threadId);
-  const { mutate: updatePosition } = useConvexMutation(api.nodes.updatePosition);
-  const { mutate: createEmptyBranch } = useConvexMutation(api.nodes.createEmptyBranch);
-  const { mutate: deleteLeafNode } = useConvexMutation(api.nodes.deleteLeafNode);
+  const { mutate: updatePosition } = useConvexMutation(
+    api.nodes.updatePosition,
+  );
+  const { mutate: createEmptyBranch } = useConvexMutation(
+    api.nodes.createEmptyBranch,
+  );
+  const { mutate: deleteLeafNode } = useConvexMutation(
+    api.nodes.deleteLeafNode,
+  );
   const { mutate: renameNode } = useConvexMutation(api.nodes.rename);
   const { screenToFlowPosition } = useReactFlow();
   const router = useRouter();
@@ -245,7 +251,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-sm text-muted-foreground"></p>
       </div>
     );
   }
