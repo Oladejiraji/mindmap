@@ -1,90 +1,69 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText } from "lucide-react";
-import {
-  HomeIcon,
-  LogoIcon,
-  SettingsIcon,
-} from "@/components/icons/sidebar-toggle";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarSeparator,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { CanvasIcon } from "@/components/icons/canvas-icon";
+import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
-import { routes } from "@/lib/routes";
-import { useThreads } from "@/services/threads/queries";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useThread } from "@/services/threads/queries";
+import type { Id } from "@convex/dataModel";
 import { ThreadItem } from "./thread-item";
+import { capitalizeFirst } from "@/lib/helpers";
+import { formatRelativeTime } from "@/lib/format-time";
+
+function useThreadIdFromRoute() {
+  const pathname = usePathname();
+  const match = pathname.match(/^\/t\/([^/]+)/);
+  return match?.[1] as Id<"threads"> | undefined;
+}
 
 export function AppSidebar() {
-  const pathname = usePathname();
-  const { state } = useSidebar();
-  const { data: threads, isPending } = useThreads();
-  const collapsed = state === "collapsed";
+  const { open, toggleSidebar } = useSidebar();
+  const threadId = useThreadIdFromRoute();
+  const { data: thread, isPending } = useThread(threadId);
 
   return (
-    <Sidebar collapsible="icon" className="border-none">
-      <SidebarHeader className="px-4 pt-3 pb-0">
-        <div className="size-6 flex items-center justify-center">
-          <LogoIcon className={collapsed ? "mx-auto" : ""} />
+    <aside className="flex h-full w-60 shrink-0 flex-col ">
+      <div className="flex h-10.5 shrink-0 items-center gap-2 px-3 ">
+        <div className="flex size-6 items-center justify-center rounded-md bg-foreground/8">
+          <CanvasIcon className="size-3.5 text-foreground/20" />
         </div>
-      </SidebarHeader>
+        <div className="min-w-0 flex-1">
+          {isPending ? (
+            <Skeleton className="h-4 w-24" />
+          ) : (
+            <>
+              <p className="truncate text-xs font-medium text-foreground">
+                {capitalizeFirst(thread?.name || "") ?? "Untitled"}
+              </p>
+              <p className="text-11 leading-none text-foreground/35">
+                {formatRelativeTime(thread?._creationTime ?? 0)}
+              </p>
+            </>
+          )}
+        </div>
+        <button
+          onClick={toggleSidebar}
+          className="flex size-7 items-center justify-center text-foreground/40 hover:text-foreground/60 transition-colors"
+        >
+          <SidebarToggleIcon open={open} className="text-current" />
+        </button>
+      </div>
 
-      <SidebarContent className="pt-14">
-        <SidebarGroup className="gap-1 px-3 pt-0">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={pathname === routes.home}
-                tooltip="Home"
-                size="sm"
-                render={<Link href={routes.home} />}
-              >
-                <HomeIcon className="size-4" />
-                <span>Home</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Settings" size="sm">
-                <SettingsIcon className="size-4" />
-                <span>Settings</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {collapsed ? (
-          <SidebarGroup className="gap-1 px-3 pt-9">
-            <div className="mx-auto h-4 w-8 rounded bg-[#E1E1E1]/50" />
-          </SidebarGroup>
-        ) : (
-          <SidebarGroup className="gap-1 px-3 pt-0">
-            <SidebarGroupLabel className="px-2 text-xs text-sidebar-foreground/40">
-              Threads
-            </SidebarGroupLabel>
-            {isPending ? (
-              <div className="flex flex-col gap-1 px-2">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-6 w-5/6" />
-              </div>
-            ) : (
-              threads?.map((thread) => (
-                <ThreadItem key={thread._id} thread={thread} />
-              ))
-            )}
-          </SidebarGroup>
-        )}
-      </SidebarContent>
-    </Sidebar>
+      <div className="flex-1 overflow-y-aut mt-4 px-2 py-2">
+        <p className="px-2 pb-1.5 text-11 font-medium text-foreground/35">
+          Nodes
+        </p>
+        {isPending ? (
+          <div className="flex flex-col gap-1 px-2">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-6 w-5/6" />
+          </div>
+        ) : thread ? (
+          <ThreadItem thread={thread} />
+        ) : null}
+      </div>
+    </aside>
   );
 }

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useThread } from "@/services/threads/queries";
-import { capitalizeFirst } from "@/lib/helpers";
 import { formatRelativeTime } from "@/lib/format-time";
+import { handleError } from "@/lib/handle-error";
+import { useRenameThread } from "@/services/threads/mutations";
 import { ThreadItem } from "./sidebar/thread-item";
 import type { Id } from "@convex/dataModel";
 import { cn } from "@/lib/utils";
@@ -21,40 +22,92 @@ function useThreadIdFromRoute() {
 
 export function CanvasPanel() {
   const [open, setOpen] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const threadId = useThreadIdFromRoute();
   const { data: thread, isPending } = useThread(threadId);
+  const { mutate: renameThread } = useRenameThread();
+
+  const startEditing = () => {
+    setDraft(thread?.name || "");
+    setIsEditing(true);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    });
+  };
+
+  const commitRename = () => {
+    const next = draft.trim();
+    if (next && next !== thread?.name && threadId) {
+      renameThread({ threadId, name: next }).catch((err) =>
+        handleError(err, "Failed to rename"),
+      );
+    }
+    setIsEditing(false);
+  };
+
+  const cancelRename = () => {
+    setDraft(thread?.name || "");
+    setIsEditing(false);
+  };
 
   return (
     <div className="absolute left-3 top-3 z-10 w-56">
       <div className="overflow-hidden rounded-lg border border-border/40 bg-white shadow-sm">
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="flex h-10 w-full items-center gap-2 px-3"
-        >
+        <div className="flex h-11 w-full items-center gap-2 px-3">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-foreground/8">
             <CanvasIcon className="size-3.5 text-foreground/20" />
           </div>
-          <div className="min-w-0 flex-1 text-left">
+          <div className="min-w-0 flex-1 text-left mb-1.5">
             {isPending ? (
               <Skeleton className="h-4 w-24" />
             ) : (
               <>
-                <p className="truncate text-xs font-medium text-foreground">
-                  {capitalizeFirst(thread?.name || "") ?? "Untitled"}
-                </p>
-                <p className="text-11 leading-none text-foreground/35">
+                {isEditing ? (
+                  <input
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={cancelRename}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        commitRename();
+                      } else if (e.key === "Escape") {
+                        e.preventDefault();
+                        cancelRename();
+                      }
+                    }}
+                    className="flex h-5 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-xs font-medium text-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.08)] outline-none"
+                  />
+                ) : (
+                  <p
+                    onClick={startEditing}
+                    className="cursor-text truncate rounded px-1 py-0.5 text-xs font-medium text-foreground transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08)]"
+                  >
+                    {thread?.name ?? "Untitled"}
+                  </p>
+                )}
+                <p className="px-1 text-11 leading-none text-foreground/35">
                   {formatRelativeTime(thread?._creationTime ?? 0)}
                 </p>
               </>
             )}
           </div>
-          <ChevronDownIcon
-            className={cn(
-              "size-3.5 shrink-0 text-foreground/30 transition-transform duration-200",
-              !open && "-rotate-90",
-            )}
-          />
-        </button>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-foreground/8"
+          >
+            <ChevronDownIcon
+              className={cn(
+                "size-3.5 text-foreground/30 transition-transform duration-200",
+                !open && "-rotate-90",
+              )}
+            />
+          </button>
+        </div>
 
         <AnimatePresence initial={false}>
           {open && (

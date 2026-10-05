@@ -11,29 +11,12 @@ import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { handleError } from "@/lib/handle-error";
-import type { Doc, Id } from "@convex/dataModel";
-import type { OptimisticLocalStore } from "convex/browser";
+import { useRenameThread } from "@/services/threads/mutations";
+import type { Id } from "@convex/dataModel";
 
 const menuItemClass =
   "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
 
-const renameOptimisticUpdate = (
-  localStore: OptimisticLocalStore,
-  args: { threadId: Id<"threads">; name: string },
-) => {
-  const threads = localStore.getQuery(api.threads.list, {}) as
-    | Doc<"threads">[]
-    | undefined;
-  if (threads) {
-    localStore.setQuery(
-      api.threads.list,
-      {},
-      threads.map((t) =>
-        t._id === args.threadId ? { ...t, name: args.name } : t,
-      ),
-    );
-  }
-};
 
 export function ProjectRow({
   name,
@@ -48,10 +31,7 @@ export function ProjectRow({
 }) {
   const router = useRouter();
   const { mutate: removeThread } = useConvexMutation(api.threads.remove);
-  const { mutate: renameThread } = useConvexMutation(
-    api.threads.rename,
-    renameOptimisticUpdate,
-  );
+  const { mutate: renameThread } = useRenameThread();
   const [showDelete, setShowDelete] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);
