@@ -44,11 +44,11 @@ export function LeafNode({ id, data, selected }: NodeProps) {
               "linear-gradient(var(--gradient-angle), #DFFBFF 5.2%, #C2DAF9 21.33%, #AEB3E4 37.46%, #E2909C 54.48%, #FFA189 69.71%, #FFD060 94.8%)",
             boxShadow:
               "0px 24px 40px 0px #0000000A, 0px 0px 2px 0px #0000000A",
-            animation: "rotate-gradient-angle 6s linear infinite",
+            animation: "none",
           }}
         >
-          <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-[7.5px] bg-background-2 p-2 text-foreground">
-            <NodeContent content={content} />
+          <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-[7.5px] bg-background-2 text-foreground">
+            <NodeContent nodeId={id} content={content} />
           </div>
         </div>
 

@@ -271,7 +271,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
         edges={rfEdges}
         onNodesChange={onNodesChange}
         onNodeDragStop={onNodeDragStop}
-        onNodeDoubleClick={onNodeDoubleClick}
+        // onNodeDoubleClick={onNodeDoubleClick}
         onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
         onSelectionChange={onSelectionChange}

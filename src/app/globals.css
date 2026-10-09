@@ -420,6 +420,57 @@
   font-weight: 600;
 }
 
+.inline-node-editor,
+.inline-node-editor .bn-container,
+.inline-node-editor .bn-editor {
+  background: transparent !important;
+  font-family: inherit;
+}
+
+.inline-node-editor .bn-editor {
+  padding: 0 !important;
+  padding-inline: 0 !important;
+  --bn-colors-editor-background: transparent;
+}
+
+.inline-node-editor .bn-default-styles {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.inline-node-editor .bn-block-group {
+  padding-left: 0;
+}
+
+.inline-node-editor .bn-block-outer {
+  padding: 0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.inline-node-editor .bn-block-content {
+  padding: 0;
+  min-height: 0;
+}
+
+.inline-node-editor .bn-inline-content {
+  padding: 0;
+  margin: 0;
+}
+
+.inline-node-editor .bn-default-styles p {
+  min-height: 0 !important;
+}
+
+.inline-node-editor .bn-trailing-block {
+  display: none;
+}
+
+.inline-node-editor,
+.inline-node-editor * {
+  cursor: text !important;
+}
+
 .auth-canvas .react-flow__handle {
   transition: opacity 150ms;
 }

@@ -38,7 +38,7 @@ export function NodeChat({
   };
 
   return (
-    <div className="flex h-[calc(100svh-3.5rem)] flex-col items-center overflow-y-auto">
+    <div className="flex h-full flex-col items-center overflow-y-auto">
       <div className="flex w-full max-w-175 min-h-full flex-col">
         {error ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">

@@ -2,9 +2,9 @@
 
 import { use } from "react";
 import type { Id } from "@convex/dataModel";
-import { NodeChat } from "@/components/chat/node-chat";
+import { NodeEditorView } from "@/components/editor/node-editor-view";
 
-export default function ChatPage({
+export default function NodePage({
   params,
 }: {
   params: Promise<{ threadId: string; nodeId: string }>;
@@ -12,7 +12,7 @@ export default function ChatPage({
   const { threadId, nodeId } = use(params);
 
   return (
-    <NodeChat
+    <NodeEditorView
       threadId={threadId as Id<"threads">}
       nodeId={nodeId as Id<"nodes">}
     />

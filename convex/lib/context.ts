@@ -1,5 +1,6 @@
 import type { QueryCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
+import { contentToMarkdown } from "./blocks";
 
 export type ChatMessage = {
   role: "user" | "assistant" | "system";
@@ -49,8 +50,8 @@ export async function buildPromptContext(
 
   const ancestorContent = chain
     .slice(0, -1)
-    .filter((node) => node.content)
-    .map((node) => node.content!)
+    .map((node) => contentToMarkdown(node.content))
+    .filter(Boolean)
     .join("\n\n");
 
   if (ancestorContent) {
