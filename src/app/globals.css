@@ -331,8 +331,7 @@
 }
 
 .node-markdown p {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
+  margin: 0;
 }
 
 .node-markdown ul,
@@ -449,7 +448,7 @@
 }
 
 .inline-node-editor .bn-block-content {
-  padding: 0;
+  padding: 0 !important;
   min-height: 0;
 }
 
@@ -469,6 +468,16 @@
 .inline-node-editor,
 .inline-node-editor * {
   cursor: text !important;
+}
+
+.inline-node-editor-dark .bn-editor,
+.inline-node-editor-dark .bn-inline-content,
+.inline-node-editor-dark .bn-default-styles p {
+  color: white !important;
+}
+
+.inline-node-editor-dark .bn-inline-content::before {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .auth-canvas .react-flow__handle {
