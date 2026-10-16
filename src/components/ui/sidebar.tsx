@@ -27,7 +27,7 @@ import { PanelLeftIcon } from "lucide-react"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "14.5rem"
+const SIDEBAR_WIDTH = "17.5rem" // 280px, matches design.interfere.com
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3.25rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
@@ -474,11 +474,12 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
   )
 }
 
-// Design-system nav row: body-sm in the secondary foreground, transparent
-// hover tint, pressed fill + primary text for the current page, tertiary
-// icons that brighten on hover/active, and the shared focus ring.
+// Design-system nav row (design.interfere.com shell): 28px, 6px radius,
+// body-sm medium in the secondary foreground; hover and the current page
+// share the transparent-hover tint, the current page adds primary text.
+// Tertiary icons brighten on hover/active. Shared focus ring.
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-body-sm text-fg-secondary outline-none transition-[width,height,padding,background-color,color] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-transparent-active disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:bg-transparent-hover data-active:bg-transparent-active data-active:font-medium data-active:text-fg-primary [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-fg-tertiary [&_svg]:transition-colors hover:[&_svg]:text-fg-secondary data-active:[&_svg]:text-fg-primary [&>span:last-child]:truncate",
+  "peer/menu-button group/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-md px-2 text-left text-body-sm font-medium text-fg-secondary outline-none transition-[width,height,padding,background-color,color] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-transparent-active disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:bg-transparent-hover data-active:bg-transparent-hover data-active:text-fg-primary [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-fg-tertiary [&_svg]:transition-colors hover:[&_svg]:text-fg-secondary data-active:[&_svg]:text-fg-primary [&>span:last-child]:truncate",
   {
     variants: {
       variant: {
@@ -487,7 +488,7 @@ const sidebarMenuButtonVariants = cva(
       },
       size: {
         default: "h-8",
-        sm: "h-8",
+        sm: "h-7",
         lg: "h-12 group-data-[collapsible=icon]:p-0!",
       },
     },

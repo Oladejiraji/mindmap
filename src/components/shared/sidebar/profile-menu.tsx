@@ -30,9 +30,11 @@ export function ProfileMenu() {
 
   return (
     <Menu.Root modal={false}>
-      <Menu.Trigger className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg px-1 py-1 outline-none transition-colors hover:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover">
-        <GradientAvatar seed={email || name} size={24} />
-        <span className="truncate text-left text-body-sm font-medium text-fg-primary group-data-[collapsible=icon]:hidden">
+      <Menu.Trigger className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-1 outline-none transition-colors hover:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover">
+        <span className="relative flex size-6 shrink-0 overflow-hidden rounded-full outline-[0.5px] outline-offset-[-0.5px] outline-border-default">
+          <GradientAvatar seed={email || name} size={24} />
+        </span>
+        <span className="flex-1 truncate text-left text-body-sm font-medium text-fg-primary group-data-[collapsible=icon]:hidden">
           {name}
         </span>
         <ChevronDownIcon className="size-4 text-fg-tertiary group-data-[collapsible=icon]:hidden" />
@@ -41,7 +43,7 @@ export function ProfileMenu() {
         <Menu.Positioner
           sideOffset={6}
           align="start"
-          side="bottom"
+          side="top"
           className="z-50"
         >
           <Menu.Popup className="min-w-48 rounded-lg bg-surface-modal p-1 font-diatype text-13 text-foreground-subtle shadow-large outline-none">

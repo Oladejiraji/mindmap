@@ -45,9 +45,9 @@ export default function Home() {
 
   return (
     <div className="flex min-h-full flex-col bg-background">
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pt-8">
+      <main className="mx-auto w-full max-w-[808px] flex-1 px-6 pt-14 pb-16">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-medium text-foreground">Recents</h1>
+          <h1 className="text-heading-6 font-semibold text-fg-primary">Recents</h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => void handleCreate()}
@@ -97,9 +97,10 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <div className="mt-8 h-px bg-border-default" />
 
         {layout === "grid" ? (
-          <div className="mt-12 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mt-11 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
             {isPending
               ? Array.from({ length: 8 }).map((_, i) => (
                   <div key={i}>
@@ -120,7 +121,7 @@ export default function Home() {
                 ))}
           </div>
         ) : (
-          <div className="mt-12 flex flex-col">
+          <div className="mt-11 flex flex-col">
             <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-xs text-foreground/40">
               <span>Name</span>
               <span>Created</span>
