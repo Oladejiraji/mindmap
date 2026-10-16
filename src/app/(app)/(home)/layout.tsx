@@ -4,10 +4,10 @@ import { HomeSidebar } from "@/components/shared/sidebar/home-sidebar";
 
 export default function HomeLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider className="bg-sidebar">
+    <SidebarProvider className="h-svh overflow-hidden bg-sidebar">
       <HomeSidebar />
       <div className="flex-1 min-h-0 py-1 pr-1">
-        <div className="h-full overflow-auto rounded-md bg-background">
+        <div className="h-full overflow-auto overscroll-contain rounded-md bg-background">
           {children}
         </div>
       </div>

@@ -234,6 +234,9 @@
   }
   html {
     @apply font-sans;
+    /* No vertical rubber-band on the document; panels scroll internally.
+     * Horizontal is left alone so swipe-to-go-back still works. */
+    overscroll-behavior-y: none;
   }
 }
 
