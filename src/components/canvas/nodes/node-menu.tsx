@@ -28,11 +28,7 @@ export function NodeMenu({
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" className="z-50">
           <Menu.Popup
-            className="font-diatype w-44 rounded-lg bg-white p-1.5 text-13 text-foreground-subtle ring-1 ring-black/5 outline-none"
-            style={{
-              boxShadow:
-                "0px 0px 0px 1px #11111105, 0px 24px 40px 0px #0000000A, 0px 16px 28px 0px #0000000A, 0px 0px 2px 0px #0000000A",
-            }}
+            className="font-diatype w-44 rounded-lg bg-white p-1.5 text-13 text-foreground-subtle shadow-large outline-none"
           >
             <Menu.Item
               className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-destructive outline-none hover:bg-background-4"

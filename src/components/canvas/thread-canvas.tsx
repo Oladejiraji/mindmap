@@ -286,7 +286,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           nodeStrokeWidth={3}
           zoomable
           pannable
-          className="bg-muted/50! border! border-border! rounded-xl! shadow-sm!"
+          className="bg-muted/50! border! border-border! rounded-xl! shadow-default!"
         />
       </ReactFlow>
     </div>

@@ -113,7 +113,7 @@ export function ProjectCard({
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
           <ContextMenu.Positioner sideOffset={4} className="z-50">
-            <ContextMenu.Popup className="min-w-40 rounded-xl border border-foreground/8 bg-background p-1 shadow-lg outline-none">
+            <ContextMenu.Popup className="min-w-40 rounded-xl border border-foreground/8 bg-background p-1 shadow-large outline-none">
               <ContextMenu.Item
                 className={itemClass}
                 onClick={() => router.push(href)}

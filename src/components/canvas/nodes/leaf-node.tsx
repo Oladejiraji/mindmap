@@ -16,7 +16,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
     <div className="group font-diatype" style={{ width: CANVAS_NODE_WIDTH }}>
       <div
         className={cn(
-          "relative rounded-3xl bg-white p-2 shadow-[0_0_0_1px_#1251CB09,0_3px_12px_0_#0B0B0B10,0_8px_24px_0_#00000009]",
+          "relative rounded-3xl bg-white p-2 shadow-node",
           selected && "ring-2 ring-ring",
         )}
       >
@@ -38,12 +38,10 @@ export function LeafNode({ id, data, selected }: NodeProps) {
         </div>
 
         <div
-          className="mt-3 rounded-lg p-[0.5px]"
+          className="mt-3 rounded-lg p-[0.5px] shadow-default"
           style={{
             backgroundImage:
               "linear-gradient(var(--gradient-angle), #DFFBFF 5.2%, #C2DAF9 21.33%, #AEB3E4 37.46%, #E2909C 54.48%, #FFA189 69.71%, #FFD060 94.8%)",
-            boxShadow:
-              "0px 24px 40px 0px #0000000A, 0px 0px 2px 0px #0000000A",
             animation: "none",
           }}
         >

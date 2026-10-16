@@ -48,7 +48,7 @@ export function ResearchCardNode({ data }: NodeProps) {
       {author ? (
         <div className="flex items-center mb-2 gap-1">
           <div
-            className=" flex items-center gap-1 border border-black/2 rounded-md px-1 py-0.5 shadow-[0_24px_40px_0_#8C8C8C0A,0_0_2px_0_#0000000A]"
+            className=" flex items-center gap-1 border border-black/2 rounded-md px-1 py-0.5 shadow-default"
             style={{ backgroundColor: author.bg || "#2D2D2D" }}
           >
             <div className="shrink-0">
@@ -73,7 +73,7 @@ export function ResearchCardNode({ data }: NodeProps) {
       <div className="relative">
         <div
           ref={scope}
-          className="relative rounded-3xl bg-white p-2 text-white shadow-[0_0_0_1px_#1251CB09,0_3px_12px_0_#0B0B0B10,0_8px_24px_0_#00000009]"
+          className="relative rounded-3xl bg-white p-2 text-white shadow-node"
         >
           <div className="h-5  flex items-center justify-between">
             <div className="flex items-center gap-1 text-13 text-foreground/87">
@@ -85,12 +85,10 @@ export function ResearchCardNode({ data }: NodeProps) {
             <BranchDropdown iconClassName="size-2.5 text-foreground" />
           </div>
           <div
-            className="mt-3 rounded-lg p-[0.5px]"
+            className="mt-3 rounded-lg p-[0.5px] shadow-default"
             style={{
               backgroundImage:
                 "linear-gradient(var(--gradient-angle), #DFFBFF 5.2%, #C2DAF9 21.33%, #AEB3E4 37.46%, #E2909C 54.48%, #FFA189 69.71%, #FFD060 94.8%)",
-              boxShadow:
-                "0px 24px 40px 0px #0000000A, 0px 0px 2px 0px #0000000A",
               animation: "rotate-gradient-angle 6s linear infinite",
             }}
           >

@@ -55,7 +55,7 @@ export function CanvasPanel() {
 
   return (
     <div className="absolute left-3 top-3 z-10 w-56">
-      <div className="overflow-hidden rounded-xl border border-border/40 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border/40 bg-white shadow-default">
         <div className="flex h-11 w-full items-center gap-2 px-3">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
             <CanvasIcon className="size-3.5 text-foreground/20" />
@@ -80,12 +80,12 @@ export function CanvasPanel() {
                         cancelRename();
                       }
                     }}
-                    className="flex h-5 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-xs font-medium text-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.08)] outline-none"
+                    className="flex h-5 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-xs font-medium text-foreground shadow-border outline-none"
                   />
                 ) : (
                   <p
                     onClick={startEditing}
-                    className="cursor-text truncate rounded px-1 py-0.5 text-xs font-medium text-foreground transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08)]"
+                    className="cursor-text truncate rounded px-1 py-0.5 text-xs font-medium text-foreground transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
                   >
                     {thread?.name ?? "Untitled"}
                   </p>

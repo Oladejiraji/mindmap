@@ -44,7 +44,7 @@ export function ProfileMenu() {
           side="bottom"
           className="z-50"
         >
-          <Menu.Popup className="min-w-37 rounded-xl border border-foreground/8 bg-background p-1 shadow-lg outline-none">
+          <Menu.Popup className="min-w-37 rounded-xl border border-foreground/8 bg-background p-1 shadow-large outline-none">
             <div className="px-2 py-1.5">
               <p className="text-xs text-foreground/50">Signed in as</p>
               <p className="truncate text-xs  text-foreground">{email}</p>

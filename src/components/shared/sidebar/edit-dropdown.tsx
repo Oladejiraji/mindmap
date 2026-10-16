@@ -60,7 +60,7 @@ const EditDropdown = ({
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={4} align="end" className="z-50">
-          <Menu.Popup className="min-w-32 rounded-lg border bg-popover p-1 shadow-md">
+          <Menu.Popup className="min-w-32 rounded-lg border bg-popover p-1 shadow-large">
             <Menu.Item
               className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-background-5"
               onClick={() => {

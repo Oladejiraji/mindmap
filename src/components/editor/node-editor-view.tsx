@@ -106,7 +106,7 @@ export function NodeEditorView({
       {!chatOpen && (
         <button
           onClick={() => setChatOpen(true)}
-          className="absolute right-4 bottom-4 flex size-10 items-center justify-center rounded-full bg-foreground text-background shadow-md transition-transform hover:scale-105"
+          className="absolute right-4 bottom-4 flex size-10 items-center justify-center rounded-full bg-foreground text-background shadow-large transition-transform hover:scale-105"
         >
           <MessageSquare className="size-4" />
         </button>

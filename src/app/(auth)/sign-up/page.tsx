@@ -36,12 +36,7 @@ export default function SignUpPage() {
 
   return (
     <div
-      className="flex h-full items-center justify-center px-4 py-8 font-diatype rounded-l-lg"
-      style={{
-        background:
-          "linear-gradient(180deg, #0B0B0B -14.91%, #111111 63.07%, #252525 102.06%, #ABABAB 112.89%, #2E2E2E 112.89%)",
-        boxShadow: "0px 0px 0px 1px #00000008",
-      }}
+      className="flex h-full items-center justify-center px-4 py-8 font-diatype rounded-l-lg bg-(image:--gradient-auth-panel) shadow-border"
     >
       <div className="flex flex-col justify-center items-center h-full w-full">
         <div>

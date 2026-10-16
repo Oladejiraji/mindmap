@@ -54,11 +54,7 @@ const VARIANT_B_ROUNDED: Record<Position, string> = {
 function VariantB({ position }: { position: Position }) {
   return (
     <div
-      className={`bg-primary ${VARIANT_B_ROUNDED[position]} size-3 flex items-center justify-center`}
-      style={{
-        boxShadow:
-          "inset 0px 1.17px 2.33px 0px #00000040, inset 0.18px 0.18px 0.58px 0px #4080FD, inset -0.18px -0.18px 0.58px 0px #4080FD",
-      }}
+      className={`bg-primary ${VARIANT_B_ROUNDED[position]} size-3 flex items-center justify-center shadow-handle`}
     >
       <div className="bg-background-2 rounded-full size-[3.5px]" />
     </div>
