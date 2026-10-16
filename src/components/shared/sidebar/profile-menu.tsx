@@ -30,12 +30,12 @@ export function ProfileMenu() {
 
   return (
     <Menu.Root modal={false}>
-      <Menu.Trigger className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-foreground/6 focus-visible:outline-none">
+      <Menu.Trigger className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg px-1 py-1 outline-none transition-colors hover:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover">
         <GradientAvatar seed={email || name} size={24} />
-        <span className="truncate text-left text-13 font-medium text-foreground group-data-[collapsible=icon]:hidden">
+        <span className="truncate text-left text-body-sm font-medium text-fg-primary group-data-[collapsible=icon]:hidden">
           {name}
         </span>
-        <ChevronDownIcon className="size-4 text-foreground/40 group-data-[collapsible=icon]:hidden" />
+        <ChevronDownIcon className="size-4 text-fg-tertiary group-data-[collapsible=icon]:hidden" />
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner
@@ -44,14 +44,14 @@ export function ProfileMenu() {
           side="bottom"
           className="z-50"
         >
-          <Menu.Popup className="min-w-37 rounded-xl border border-foreground/8 bg-background p-1 shadow-large outline-none">
+          <Menu.Popup className="min-w-48 rounded-lg bg-surface-modal p-1 font-diatype text-13 text-foreground-subtle shadow-large outline-none">
             <div className="px-2 py-1.5">
-              <p className="text-xs text-foreground/50">Signed in as</p>
-              <p className="truncate text-xs  text-foreground">{email}</p>
+              <p className="text-caption-lg text-fg-tertiary">Signed in as</p>
+              <p className="truncate text-caption-lg text-fg-primary">{email}</p>
             </div>
-            <Menu.Separator className="my-1 h-px bg-foreground/8" />
+            <Menu.Separator className="-mx-1 my-1 h-px bg-border-default" />
             <Menu.Item
-              className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-foreground/70 transition-colors hover:bg-foreground/6 hover:text-foreground data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground"
+              className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-2 outline-none transition-colors select-none hover:bg-transparent-hover data-highlighted:bg-transparent-hover"
               onClick={() => void handleSignOut()}
             >
               <LogoutIcon className="size-3.5" />

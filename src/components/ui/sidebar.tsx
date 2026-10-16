@@ -474,19 +474,21 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
   )
 }
 
+// Design-system nav row: body-sm in the secondary foreground, transparent
+// hover tint, pressed fill + primary text for the current page, tertiary
+// icons that brighten on hover/active, and the shared focus ring.
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-lg p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate",
+  "peer/menu-button group/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-lg px-2 text-left text-body-sm text-fg-secondary outline-none transition-[width,height,padding,background-color,color] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-transparent-active disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:bg-transparent-hover data-active:bg-transparent-active data-active:font-medium data-active:text-fg-primary [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-fg-tertiary [&_svg]:transition-colors hover:[&_svg]:text-fg-secondary data-active:[&_svg]:text-fg-primary [&>span:last-child]:truncate",
   {
     variants: {
       variant: {
-        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        outline:
-          "bg-background shadow-border hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_var(--border-strong)]",
+        default: "",
+        outline: "bg-background shadow-border hover:shadow-[0_0_0_1px_var(--border-strong)]",
       },
       size: {
-        default: "h-8 text-sm",
-        sm: "h-7 text-xs",
-        lg: "h-12 text-sm group-data-[collapsible=icon]:p-0!",
+        default: "h-8",
+        sm: "h-8",
+        lg: "h-12 group-data-[collapsible=icon]:p-0!",
       },
     },
     defaultVariants: {
