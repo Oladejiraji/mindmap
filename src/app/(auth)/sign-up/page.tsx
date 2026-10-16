@@ -36,7 +36,7 @@ export default function SignUpPage() {
 
   return (
     <div
-      className="flex h-full items-center justify-center px-4 py-8 font-diatype rounded-l-md"
+      className="flex h-full items-center justify-center px-4 py-8 font-diatype rounded-l-lg"
       style={{
         background:
           "linear-gradient(180deg, #0B0B0B -14.91%, #111111 63.07%, #252525 102.06%, #ABABAB 112.89%, #2E2E2E 112.89%)",
@@ -105,7 +105,7 @@ export default function SignUpPage() {
               className="relative w-full flex items-center justify-center"
             >
               <p>Continue</p>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-sidebar-ring rounded-[3px] h-4 w-9.5 flex items-center justify-center">
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-sidebar-ring rounded-sm h-4 w-9.5 flex items-center justify-center">
                 <p className="text-background/87 text-11 font-medium">return</p>
               </div>
             </Button>

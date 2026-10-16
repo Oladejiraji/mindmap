@@ -92,7 +92,7 @@ export function NodeEditorView({
             <span className="text-xs font-medium text-foreground/60">Chat</span>
             <button
               onClick={() => setChatOpen(false)}
-              className="flex size-6 items-center justify-center rounded-md text-foreground/40 transition-colors hover:bg-foreground/5 hover:text-foreground/60"
+              className="flex size-6 items-center justify-center rounded-lg text-foreground/40 transition-colors hover:bg-foreground/5 hover:text-foreground/60"
             >
               <X className="size-3.5" />
             </button>

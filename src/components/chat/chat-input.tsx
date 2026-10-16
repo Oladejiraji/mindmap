@@ -39,7 +39,7 @@ export function ChatInput({
 
   return (
     <div className="px-4 py-3">
-      <div className="border flex items-end gap-2 rounded-3xl min-h-14 pl-6 pr-2.5 py-2.5">
+      <div className="border flex items-end gap-2 rounded-4xl min-h-14 pl-6 pr-2.5 py-2.5">
         <textarea
           autoFocus
           value={value}

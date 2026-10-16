@@ -39,7 +39,7 @@ export function CustomHandle({ variant = "b", style, ...props }: Props) {
 function VariantA() {
   return (
     <div className="p-0.5 border-[0.5px] border-ring rounded-full bg-primary">
-      <div className="size-1 rounded-sm bg-ring"></div>
+      <div className="size-1 rounded-md bg-ring"></div>
     </div>
   );
 }

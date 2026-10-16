@@ -18,7 +18,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
     <div className="group font-diatype" style={{ width: CANVAS_NODE_WIDTH }}>
       <div
         className={cn(
-          "relative rounded-[16px] bg-primary p-2 text-white shadow-[0_8px_30px_-12px_rgba(37,99,235,0.27)]",
+          "relative rounded-3xl bg-primary p-2 text-white shadow-[0_8px_30px_-12px_rgba(37,99,235,0.27)]",
           selected && "ring-2 ring-white/30",
         )}
       >
@@ -41,7 +41,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
           {isLeaf && <NodeMenu id={id} onDelete={onDelete} />}
         </div>
 
-        <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-[8px] bg-ring p-2 text-background shadow-[0_1px_3px_0_#82A7F121,0_0_0_0.5px_#82A7F1]">
+        <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-ring p-2 text-background shadow-[0_1px_3px_0_#82A7F121,0_0_0_0.5px_#82A7F1]">
           <NodeContent content={content} />
         </div>
 

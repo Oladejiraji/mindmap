@@ -17,7 +17,7 @@ export function CanvasToggle() {
     <Link
       href={routes.thread(threadId)}
       aria-label="Canvas view"
-      className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       <Network className="size-4" />
     </Link>

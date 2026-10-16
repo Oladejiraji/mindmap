@@ -30,7 +30,7 @@ export function ProfileMenu() {
 
   return (
     <Menu.Root modal={false}>
-      <Menu.Trigger className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-foreground/6 focus-visible:outline-none">
+      <Menu.Trigger className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg px-1 py-1 transition-colors hover:bg-foreground/6 focus-visible:outline-none">
         <GradientAvatar seed={email || name} size={24} />
         <span className="truncate text-left text-13 font-medium text-foreground group-data-[collapsible=icon]:hidden">
           {name}
@@ -44,14 +44,14 @@ export function ProfileMenu() {
           side="bottom"
           className="z-50"
         >
-          <Menu.Popup className="min-w-37 rounded-lg border border-foreground/8 bg-background p-1 shadow-lg outline-none">
+          <Menu.Popup className="min-w-37 rounded-xl border border-foreground/8 bg-background p-1 shadow-lg outline-none">
             <div className="px-2 py-1.5">
               <p className="text-xs text-foreground/50">Signed in as</p>
               <p className="truncate text-xs  text-foreground">{email}</p>
             </div>
             <Menu.Separator className="my-1 h-px bg-foreground/8" />
             <Menu.Item
-              className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground/70 transition-colors hover:bg-foreground/6 hover:text-foreground data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-foreground/70 transition-colors hover:bg-foreground/6 hover:text-foreground data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground"
               onClick={() => void handleSignOut()}
             >
               <LogoutIcon className="size-3.5" />

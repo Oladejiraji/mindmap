@@ -55,9 +55,9 @@ export function CanvasPanel() {
 
   return (
     <div className="absolute left-3 top-3 z-10 w-56">
-      <div className="overflow-hidden rounded-lg border border-border/40 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border/40 bg-white shadow-sm">
         <div className="flex h-11 w-full items-center gap-2 px-3">
-          <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-foreground/8">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
             <CanvasIcon className="size-3.5 text-foreground/20" />
           </div>
           <div className="min-w-0 flex-1 text-left mb-1.5">
@@ -98,7 +98,7 @@ export function CanvasPanel() {
           </div>
           <button
             onClick={() => setOpen((o) => !o)}
-            className="flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-foreground/8"
+            className="flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-foreground/8"
           >
             <ChevronDownIcon
               className={cn(

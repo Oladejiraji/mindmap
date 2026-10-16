@@ -24,7 +24,7 @@ export function MessageList({
     return (
       <div className="flex flex-1 flex-col gap-6 px-4 py-6">
         <div className="flex justify-end">
-          <Skeleton className="h-10 w-48 rounded-lg" />
+          <Skeleton className="h-10 w-48 rounded-xl" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-3/4 rounded" />
@@ -32,7 +32,7 @@ export function MessageList({
           <Skeleton className="h-4 w-2/3 rounded" />
         </div>
         <div className="flex justify-end">
-          <Skeleton className="h-10 w-36 rounded-lg" />
+          <Skeleton className="h-10 w-36 rounded-xl" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-2/3 rounded" />

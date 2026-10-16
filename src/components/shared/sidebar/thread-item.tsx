@@ -94,7 +94,7 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
     <Link
       href={nodeRoute}
       className={cn(
-        "flex h-7 items-center rounded-md text-xs transition-colors",
+        "flex h-7 items-center rounded-lg text-xs transition-colors",
         isActive
           ? "bg-foreground/8 font-medium text-sidebar-accent-foreground"
           : "text-sidebar-foreground/70 hover:bg-foreground/5 hover:text-sidebar-accent-foreground",

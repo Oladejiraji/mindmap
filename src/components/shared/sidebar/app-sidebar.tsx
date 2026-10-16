@@ -25,7 +25,7 @@ export function AppSidebar() {
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col ">
       <div className="flex h-10.5 shrink-0 items-center gap-2 px-3 ">
-        <div className="flex size-6 items-center justify-center rounded-md bg-foreground/8">
+        <div className="flex size-6 items-center justify-center rounded-lg bg-foreground/8">
           <CanvasIcon className="size-3.5 text-foreground/20" />
         </div>
         <div className="min-w-0 flex-1">

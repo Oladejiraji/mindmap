@@ -303,7 +303,7 @@ function AuthCanvasInner() {
   return (
     <div
       ref={wrapperRef}
-      className="auth-canvas relative h-full w-full overflow-hidden rounded-xl bg-background"
+      className="auth-canvas relative h-full w-full overflow-hidden rounded-2xl bg-background"
     >
       <ReactFlow
         nodes={nodes}

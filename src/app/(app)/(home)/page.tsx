@@ -57,7 +57,7 @@ export default function Home() {
               <Plus className="size-3.5" />
               New
             </Button>
-            <div className="relative flex h-8 items-center rounded-lg border border-foreground/8">
+            <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
               <button
                 onClick={() => updateLayout("grid")}
                 className={cn(
@@ -71,7 +71,7 @@ export default function Home() {
                 {layout === "grid" && (
                   <motion.div
                     layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-[6px] bg-foreground/6"
+                    className="absolute inset-0.5 rounded-md bg-foreground/6"
                     transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
                   />
                 )}
@@ -89,7 +89,7 @@ export default function Home() {
                 {layout === "list" && (
                   <motion.div
                     layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-md bg-foreground/6"
+                    className="absolute inset-0.5 rounded-lg bg-foreground/6"
                     transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
                   />
                 )}
@@ -103,7 +103,7 @@ export default function Home() {
             {isPending
               ? Array.from({ length: 8 }).map((_, i) => (
                   <div key={i}>
-                    <div className="aspect-4/3 animate-pulse rounded-lg bg-background-5" />
+                    <div className="aspect-4/3 animate-pulse rounded-xl bg-background-5" />
                     <div className="px-0.5 pt-2.5">
                       <div className="h-4 w-3/4 animate-pulse rounded bg-background-5" />
                       <div className="mt-1.5 h-3 w-1/2 animate-pulse rounded bg-background-5" />
@@ -133,7 +133,7 @@ export default function Home() {
                     className="grid grid-cols-[1fr_8rem_8rem] items-center gap-3 px-2 py-2"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="size-8 animate-pulse rounded-md bg-background-5" />
+                      <div className="size-8 animate-pulse rounded-lg bg-background-5" />
                       <div className="h-4 w-1/3 animate-pulse rounded bg-background-5" />
                     </div>
                     <div className="h-3 w-16 animate-pulse rounded bg-background-5" />
