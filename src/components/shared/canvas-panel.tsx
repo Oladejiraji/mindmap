@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
@@ -27,6 +27,7 @@ function useThreadIdFromRoute() {
  */
 export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "embedded" }) {
   const pathname = usePathname();
+  const inChat = useSearchParams().get("view") === "chat";
   const embedded = variant === "embedded";
   const [open, setOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -64,7 +65,18 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
   const expanded = embedded || open;
 
   return (
-    <div className={embedded ? "h-full" : "absolute left-3 top-3 z-10 w-56"}>
+    <div
+      className={
+        embedded
+          ? "h-full"
+          : cn(
+              "absolute z-10 w-56 transition-[left,top] duration-300 ease-out motion-reduce:transition-none",
+              // Chat view: sit just right of the 720px chat column, level with
+              // its first line; canvas view: top-left corner.
+              inChat ? "top-20 left-[min(calc(50%+384px),calc(100%-236px))]" : "top-3 left-3",
+            )
+      }
+    >
       <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
         <div className="flex h-11 w-full items-center gap-2 px-3">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
