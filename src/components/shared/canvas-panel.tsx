@@ -70,10 +70,10 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
         embedded
           ? "h-full"
           : cn(
-              "absolute z-10 w-56 transition-[left,top] duration-300 ease-out motion-reduce:transition-none",
-              // Chat view: sit just right of the 720px chat column, level with
-              // its first line; canvas view: top-left corner.
-              inChat ? "top-20 left-[min(calc(50%+384px),calc(100%-236px))]" : "top-3 left-3",
+              "absolute z-10 w-56 transition-[left] duration-300 ease-out motion-reduce:transition-none",
+              // Chat view: beside the composer, bottom edges level, so it
+              // never covers the conversation; canvas view: top-left corner.
+              inChat ? "bottom-6 left-[min(calc(50%+376px),calc(100%-236px))]" : "top-3 left-3",
             )
       }
     >
