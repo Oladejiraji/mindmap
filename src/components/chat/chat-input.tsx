@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
+import { useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
 import { Menu } from "@base-ui/react/menu";
-import { ArrowUp, AudioLines, Brain, GitBranch, Mic, Plus, Square } from "lucide-react";
+import { ArrowUp, GitBranch, Mic, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Must match MAX_MESSAGE_CONTENT in convex/lib/validation.ts.
@@ -11,17 +11,19 @@ const MAX_MESSAGE_CONTENT = 32_000;
 const COUNTER_THRESHOLD = MAX_MESSAGE_CONTENT * 0.8;
 
 /*
- * ChatGPT-style composer.
- *   [+]  Ask Mindmap…            Think  [mic]  (●)
- * - "+" opens a menu (New branch, when a handler is given).
- * - Think mirrors ChatGPT's reasoning toggle; it's shown but inactive until
- *   the backend supports a reasoning mode.
- * - Mic dictates into the box via the browser's SpeechRecognition (hidden
- *   where unsupported).
- * - The blue button is a voice waveform while empty (starts dictation) and
- *   an up-arrow once there's text (sends).
- * The pill grows into a rounded panel as the text wraps.
+ * Card composer (modelled on Vercel's assistant):
+ *   ┌───────────────────────────────────────────────┐
+ *   │ (●) Project   (●) Branch        ← context      │
+ *   │ Send a message…                                │
+ *   │ (+) (mic)                                (↑)   │
+ *   └───────────────────────────────────────────────┘
+ * Context chips show what the reply draws on (the project and the branch
+ * you're in). "+" opens a menu (New branch); mic dictates via the
+ * browser's SpeechRecognition (hidden where unsupported). Send is a grey
+ * disc that turns ink once there's text.
  */
+
+export type ContextChip = { icon: ReactNode; label: string };
 
 type Recognition = {
   continuous: boolean;
@@ -39,16 +41,22 @@ function getRecognitionCtor(): (new () => Recognition) | null {
 }
 const noopSubscribe = () => () => {};
 
+const roundButton =
+  "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-fg-secondary inset-ring-[0.5px] inset-ring-border-strong outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:text-fg-disabled disabled:hover:bg-transparent [&_svg]:size-4.5";
+
 export function ChatInput({
   onSend,
   disabled,
-  placeholder = "Ask Mindmap",
+  placeholder = "Send a message…",
+  context,
   onNewBranch,
   className,
 }: {
   onSend: (content: string) => void;
   disabled: boolean;
   placeholder?: string;
+  /** Chips shown above the box: what the reply draws on. */
+  context?: ContextChip[];
   /** Adds "New branch" to the + menu. */
   onNewBranch?: () => void;
   className?: string;
@@ -104,33 +112,23 @@ export function ChatInput({
     }
   };
 
-  const iconButton =
-    "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-fg-primary outline-none transition-colors hover:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:text-fg-disabled disabled:hover:bg-transparent";
-
   return (
     <div className={className}>
-      <div className="flex min-h-13 items-end gap-1 rounded-[26px] bg-surface-container p-2 shadow-default inset-ring-[0.5px] inset-ring-border-default transition-shadow focus-within:shadow-large">
-        {onNewBranch ? (
-          <Menu.Root>
-            <Menu.Trigger aria-label="More" className={iconButton}>
-              <Plus className="size-5" strokeWidth={1.75} />
-            </Menu.Trigger>
-            <Menu.Portal>
-              <Menu.Positioner side="top" align="start" sideOffset={8} className="z-50">
-                <Menu.Popup className="min-w-48 rounded-lg bg-surface-modal p-1 text-body-sm text-fg-primary shadow-large outline-none">
-                  <Menu.Item
-                    onClick={onNewBranch}
-                    className="flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 outline-none data-highlighted:bg-transparent-hover [&_svg]:size-4 [&_svg]:text-fg-tertiary"
-                  >
-                    <GitBranch />
-                    New branch
-                  </Menu.Item>
-                </Menu.Popup>
-              </Menu.Positioner>
-            </Menu.Portal>
-          </Menu.Root>
-        ) : (
-          <span className="w-2 shrink-0" />
+      <div className="flex flex-col gap-2 rounded-[20px] bg-surface-container p-3 inset-ring-[0.5px] inset-ring-border-strong transition-shadow focus-within:shadow-default">
+        {context && context.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5" aria-label="Context">
+            {context.map((c) => (
+              <span
+                key={c.label}
+                className="inline-flex h-8 max-w-60 items-center gap-1.5 rounded-full pr-3 pl-1 text-body-base text-fg-primary inset-ring-[0.5px] inset-ring-border-strong"
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg [&_svg]:size-3.5">
+                  {c.icon}
+                </span>
+                <span className="truncate">{c.label}</span>
+              </span>
+            ))}
+          </div>
         )}
 
         <textarea
@@ -141,53 +139,52 @@ export function ChatInput({
           placeholder={listening ? "Listening…" : placeholder}
           aria-label="Message"
           disabled={disabled}
-          rows={1}
-          className="field-sizing-content max-h-52 min-h-9 w-full resize-none self-center overflow-y-auto bg-transparent px-1 py-1.5 text-body-lg text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
+          rows={2}
+          className="field-sizing-content max-h-60 min-h-14 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-lg text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
         />
 
-        <button
-          type="button"
-          disabled
-          title="Think — extended reasoning isn't available yet"
-          className="flex h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-body-lg text-fg-disabled"
-        >
-          <Brain className="size-5" strokeWidth={1.75} />
-          Think
-        </button>
-
-        {canDictate && (
-          <button
-            type="button"
-            onClick={toggleDictation}
-            aria-label={listening ? "Stop dictation" : "Dictate"}
-            aria-pressed={listening}
-            className={cn(iconButton, listening && "text-brand-fg")}
-          >
-            <Mic className="size-5" strokeWidth={1.75} />
-          </button>
-        )}
-
-        {trimmed.length > 0 || !canDictate ? (
+        <div className="flex items-center gap-1.5">
+          {onNewBranch && (
+            <Menu.Root>
+              <Menu.Trigger aria-label="More" className={roundButton}>
+                <Plus strokeWidth={1.75} />
+              </Menu.Trigger>
+              <Menu.Portal>
+                <Menu.Positioner side="top" align="start" sideOffset={8} className="z-50">
+                  <Menu.Popup className="min-w-48 rounded-lg bg-surface-modal p-1 text-body-sm text-fg-primary shadow-large outline-none">
+                    <Menu.Item
+                      onClick={onNewBranch}
+                      className="flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 outline-none data-highlighted:bg-transparent-hover [&_svg]:size-4 [&_svg]:text-fg-tertiary"
+                    >
+                      <GitBranch />
+                      New branch
+                    </Menu.Item>
+                  </Menu.Popup>
+                </Menu.Positioner>
+              </Menu.Portal>
+            </Menu.Root>
+          )}
+          {canDictate && (
+            <button
+              type="button"
+              onClick={toggleDictation}
+              aria-label={listening ? "Stop dictation" : "Dictate"}
+              aria-pressed={listening}
+              className={cn(roundButton, listening && "bg-brand-subtle text-brand-fg inset-ring-brand-border")}
+            >
+              <Mic strokeWidth={1.75} />
+            </button>
+          )}
           <button
             type="button"
             onClick={handleSend}
             disabled={!canSend}
             aria-label="Send"
-            className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-solid text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-disabled-bg disabled:text-disabled-fg"
+            className="ml-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg outline-none transition-colors hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
           >
-            <ArrowUp className="size-5" strokeWidth={2.25} />
+            <ArrowUp className="size-5" strokeWidth={2} />
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={toggleDictation}
-            disabled={disabled}
-            aria-label={listening ? "Stop voice input" : "Voice input"}
-            className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-solid text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-disabled-bg disabled:text-disabled-fg"
-          >
-            {listening ? <Square className="size-3.5 fill-current" /> : <AudioLines className="size-5" strokeWidth={2} />}
-          </button>
-        )}
+        </div>
       </div>
       {showCounter && (
         <div

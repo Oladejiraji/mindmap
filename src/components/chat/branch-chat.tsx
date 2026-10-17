@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "convex/react";
-import { ChevronLeft, ChevronRight, GitBranch } from "lucide-react";
+import { ArrowDown, ChevronLeft, ChevronRight, GitBranch, Network } from "lucide-react";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import type { Node } from "@/services/nodes/queries";
@@ -93,6 +93,12 @@ export function BranchChat({
   // Keep the newest message in view (scrolling a DOM node is an external
   // system, so an effect is the right tool).
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [awayFromBottom, setAwayFromBottom] = useState(false);
+  const onScroll = () => {
+    const el = scrollRef.current;
+    if (el) setAwayFromBottom(el.scrollHeight - el.scrollTop - el.clientHeight > 160);
+  };
+  const scrollToBottom = () => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   const messageCount = activeMessages?.length ?? 0;
   const lastLength = activeMessages?.at(-1)?.content.length ?? 0;
   useEffect(() => {
@@ -104,7 +110,7 @@ export function BranchChat({
 
   return (
     <div className="flex h-full flex-col">
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div ref={scrollRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="mx-auto flex w-full max-w-[720px] flex-col px-6 pt-20 pb-10">
           {path.map((node, i) => {
             const parent = i > 0 ? path[i - 1] : undefined;
@@ -127,10 +133,30 @@ export function BranchChat({
         </div>
       </div>
 
-      <div className="shrink-0 px-6 pb-6">
+      <div className="relative shrink-0 px-6 pb-6">
+        {/* Jump to latest, shown once you've scrolled up */}
+        <button
+          type="button"
+          onClick={scrollToBottom}
+          aria-label="Scroll to latest"
+          tabIndex={awayFromBottom ? 0 : -1}
+          className={cn(
+            "absolute -top-12 left-1/2 flex size-9 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full bg-surface-container text-fg-primary shadow-large outline-none transition-[opacity,transform] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50",
+            awayFromBottom ? "opacity-100" : "pointer-events-none translate-y-1 opacity-0",
+          )}
+        >
+          <ArrowDown className="size-4.5" />
+        </button>
         <div className="mx-auto w-full max-w-[720px]">
-          <p className="mb-3 text-center text-body-sm text-fg-tertiary">Mindmap can make mistakes. Check important info.</p>
-          <ChatInput onSend={send} disabled={isSending || isStreaming} onNewBranch={() => void branchFrom(activeNodeId)} />
+          <ChatInput
+            onSend={send}
+            disabled={isSending || isStreaming}
+            onNewBranch={() => void branchFrom(activeNodeId)}
+            context={[
+              { icon: <Network />, label: path[0].title },
+              ...(path.length > 1 ? [{ icon: <GitBranch />, label: active.title }] : []),
+            ]}
+          />
         </div>
       </div>
     </div>
