@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "convex/react";
-import { ArrowDown, ChevronLeft, ChevronRight, GitBranch, Network } from "lucide-react";
+import { ArrowDown, ChevronLeft, ChevronRight, GitBranch } from "lucide-react";
+import { CanvasViewIcon } from "@/components/icons/canvas-view-icon";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import type { Node } from "@/services/nodes/queries";
@@ -153,7 +154,7 @@ export function BranchChat({
             disabled={isSending || isStreaming}
             onNewBranch={() => void branchFrom(activeNodeId)}
             context={[
-              { icon: <Network />, label: path[0].title },
+              { icon: <CanvasViewIcon />, label: path[0].title },
               ...(path.length > 1 ? [{ icon: <GitBranch />, label: active.title }] : []),
             ]}
           />
@@ -184,7 +185,7 @@ function ForkHeader({
     <div className={cn("flex items-center gap-3", isRoot ? "mb-6" : "my-8")}>
       <div className="h-px flex-1 bg-border-default" />
       <div className="flex items-center gap-1.5 text-caption-lg text-fg-tertiary">
-        <GitBranch className="size-3.5" />
+        {isRoot ? <CanvasViewIcon className="size-3.5" /> : <GitBranch className="size-3.5" />}
         <span className="max-w-60 truncate font-medium text-fg-secondary">{title}</span>
         {count > 1 && (
           <span className="ml-1 flex items-center gap-0.5 tabular-nums" aria-label={`Branch ${index + 1} of ${count}`}>
