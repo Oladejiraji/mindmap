@@ -5,7 +5,6 @@ import { ViewToggle } from "@/components/shared/view-toggle";
 import {
   ReactFlow,
   ReactFlowProvider,
-  Controls,
   MiniMap,
   useNodesState,
   useReactFlow,
@@ -18,6 +17,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BranchChat } from "@/components/chat/branch-chat";
+import { ZoomControls } from "./zoom-controls";
 import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
@@ -315,7 +315,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           fitViewOptions={{ padding: 0.4 }}
           proOptions={{ hideAttribution: true }}
         >
-          <Controls showInteractive={false} />
+          <ZoomControls />
           <MiniMap
             nodeStrokeWidth={3}
             zoomable
