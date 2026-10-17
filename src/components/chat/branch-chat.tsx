@@ -13,6 +13,7 @@ import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
 import { MessageBubble } from "./message-bubble";
+import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
 
 /*
@@ -119,6 +120,7 @@ export function BranchChat({
             const index = siblings.findIndex((s) => s._id === node._id);
             return (
               <section key={node._id} aria-label={node.title}>
+                {i > 0 && <Divider className="my-10" />}
                 <ForkHeader
                   title={node.title}
                   isRoot={i === 0}
@@ -182,8 +184,7 @@ function ForkHeader({
   onNext: () => void;
 }) {
   return (
-    <div className={cn("flex items-center gap-3", isRoot ? "mb-6" : "my-8")}>
-      <div className="h-px flex-1 bg-border-default" />
+    <div className="mb-6 flex items-center">
       <div className="flex items-center gap-1.5 text-caption-lg text-fg-tertiary">
         {isRoot ? <CanvasViewIcon className="size-3.5" /> : <GitBranch className="size-3.5" />}
         <span className="max-w-60 truncate font-medium text-fg-secondary">{title}</span>
@@ -209,7 +210,6 @@ function ForkHeader({
           </span>
         )}
       </div>
-      <div className="h-px flex-1 bg-border-default" />
     </div>
   );
 }
