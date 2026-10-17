@@ -5,16 +5,16 @@ import { MessageSquare, Network } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /*
- * Canvas ↔ Chat switch (design-system segmented control). Each side is a
- * link so it works with the keyboard, middle-click and history; `onChat`
- * lets the node page switch tabs in place instead of navigating.
+ * Canvas ↔ Chat switch (design-system segmented control). Both views live
+ * in the same tab: `onSelect` swaps them in place. Each side is still a
+ * link (same path, different ?view=) so it works with middle-click.
  */
 export function ViewToggle({
   active,
   canvasHref,
   chatHref,
   chatLabel,
-  onChat,
+  onSelect,
   className,
 }: {
   active: "canvas" | "chat";
@@ -22,7 +22,7 @@ export function ViewToggle({
   chatHref: string;
   /** Shown as the Chat segment's tooltip, e.g. the target node's title. */
   chatLabel?: string;
-  onChat?: () => void;
+  onSelect?: (view: "canvas" | "chat") => void;
   className?: string;
 }) {
   const item = (on: boolean) =>
@@ -32,7 +32,17 @@ export function ViewToggle({
     );
   return (
     <div role="group" aria-label="View" className={cn("flex h-8 items-center gap-0.5 rounded-lg bg-component p-0.5", className)}>
-      <Link href={canvasHref} aria-current={active === "canvas" ? "page" : undefined} className={item(active === "canvas")}>
+      <Link
+        href={canvasHref}
+        aria-current={active === "canvas" ? "page" : undefined}
+        onClick={(e) => {
+          if (onSelect) {
+            e.preventDefault();
+            onSelect("canvas");
+          }
+        }}
+        className={item(active === "canvas")}
+      >
         <Network />
         Canvas
       </Link>
@@ -41,9 +51,9 @@ export function ViewToggle({
         aria-current={active === "chat" ? "page" : undefined}
         title={chatLabel ? `Chat · ${chatLabel}` : "Chat"}
         onClick={(e) => {
-          if (onChat) {
+          if (onSelect) {
             e.preventDefault();
-            onChat();
+            onSelect("chat");
           }
         }}
         className={item(active === "chat")}

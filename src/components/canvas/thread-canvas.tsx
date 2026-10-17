@@ -17,7 +17,9 @@ import {
   type OnSelectionChangeFunc,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { NodeChat } from "@/components/chat/node-chat";
+import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
 import { api } from "@convex/api";
@@ -48,6 +50,9 @@ export function ThreadCanvas({ threadId }: { threadId: Id<"threads"> }) {
 }
 
 function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
+  // Hooks first (before any early return): the view lives in the URL.
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { data: nodes, isLoading } = useNodesByThread(threadId);
   const { mutate: updatePosition } = useConvexMutation(
     api.nodes.updatePosition,
@@ -265,44 +270,83 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     );
   }
 
+  const view = searchParams.get("view") === "chat" ? "chat" : "canvas";
+  const chatNodeParam = searchParams.get("node");
   const chatNode =
+    (chatNodeParam && nodes?.find((n) => n._id === chatNodeParam)) ||
     (selectedNodeId && nodes?.find((n) => n._id === selectedNodeId)) ||
     nodes?.find((n) => n.parentId === null);
+  // Same tab, same path: only the query changes, so the tab stays put and
+  // a reload keeps the view.
+  const setView = (next: "canvas" | "chat") =>
+    router.replace(next === "chat" && chatNode ? `${pathname}?view=chat&node=${chatNode._id}` : pathname, { scroll: false });
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden">
       {chatNode && (
         <ViewToggle
-          active="canvas"
-          canvasHref={routes.thread(threadId)}
-          chatHref={`${routes.node(threadId, chatNode._id)}?tab=chat`}
+          active={view}
+          canvasHref={pathname}
+          chatHref={`${pathname}?view=chat&node=${chatNode._id}`}
           chatLabel={chatNode.title}
-          className="absolute top-3 right-3 z-10 bg-background-5 shadow-default"
+          onSelect={setView}
+          className="absolute top-3 right-3 z-20 bg-background-5 shadow-default"
         />
       )}
-      <ReactFlow
-        nodes={flowNodes}
-        edges={rfEdges}
-        onNodesChange={onNodesChange}
-        onNodeDragStop={onNodeDragStop}
-        // onNodeDoubleClick={onNodeDoubleClick}
-        onConnectStart={onConnectStart}
-        onConnectEnd={onConnectEnd}
-        onSelectionChange={onSelectionChange}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.4 }}
-        proOptions={{ hideAttribution: true }}
+
+      {/* Canvas layer stays mounted so zoom and position survive the switch. */}
+      <div
+        inert={view === "chat"}
+        className={cn(
+          "absolute inset-0 transition-[opacity,transform,filter] duration-300 ease-out motion-reduce:transition-none",
+          view === "chat" && "pointer-events-none scale-[0.98] opacity-0 blur-[2px]",
+        )}
       >
-        <Background gap={16} size={1} />
-        <Controls showInteractive={false} />
-        <MiniMap
-          nodeStrokeWidth={3}
-          zoomable
-          pannable
-          className="bg-muted/50! border! border-border! rounded-xl! shadow-default!"
-        />
-      </ReactFlow>
+        <ReactFlow
+          nodes={flowNodes}
+          edges={rfEdges}
+          onNodesChange={onNodesChange}
+          onNodeDragStop={onNodeDragStop}
+          // onNodeDoubleClick={onNodeDoubleClick}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEnd}
+          onSelectionChange={onSelectionChange}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.4 }}
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background gap={16} size={1} />
+          <Controls showInteractive={false} />
+          <MiniMap
+            nodeStrokeWidth={3}
+            zoomable
+            pannable
+            className="bg-muted/50! border! border-border! rounded-xl! shadow-default!"
+          />
+        </ReactFlow>
+      </div>
+
+      {/* Chat layer: same tab, rises in over the canvas. */}
+      <div
+        inert={view !== "chat"}
+        className={cn(
+          "absolute inset-0 flex justify-center px-6 transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+          view === "chat" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
+        )}
+      >
+        {chatNode && view === "chat" && (
+          <div className="flex h-full w-full max-w-3xl flex-col pt-16">
+            <div className="px-4 pb-3">
+              <p className="text-caption-lg text-fg-tertiary">Chat</p>
+              <h2 className="truncate text-heading-6 font-semibold text-fg-primary">{chatNode.title}</h2>
+            </div>
+            <div className="min-h-0 flex-1">
+              <NodeChat threadId={threadId} nodeId={chatNode._id} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

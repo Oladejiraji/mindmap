@@ -23,7 +23,6 @@ import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
 import { useRegisterTab } from "@/lib/tabs";
 import { TabStrip } from "@/components/shared/tab-strip";
-import { ViewToggle } from "@/components/shared/view-toggle";
 
 /*
  * Node page, laid out like the interfere.com product dashboard:
@@ -167,14 +166,6 @@ export function NodeEditorView({
                 </ol>
               </nav>
             </div>
-            <ViewToggle
-              active="chat"
-              canvasHref={routes.thread(threadId)}
-              chatHref={`${routes.node(threadId, nodeId)}?tab=chat`}
-              chatLabel={node.title}
-              onChat={() => setTab("chat")}
-              className="shrink-0"
-            />
           </header>
 
           <div className="flex min-h-0 flex-1">
