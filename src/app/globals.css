@@ -30,7 +30,6 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-inter);
-  --font-diatype: var(--font-diatype);
   /* Body: Inter 14 / 20, -0.46% tracking */
   --text-sm: 0.875rem; /* 14px */
   --text-sm--line-height: 1.25rem; /* 20px */

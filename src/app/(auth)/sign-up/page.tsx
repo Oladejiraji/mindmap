@@ -36,7 +36,7 @@ export default function SignUpPage() {
 
   return (
     <div
-      className="flex h-full items-center justify-center px-4 py-8 font-diatype rounded-l-lg bg-(image:--gradient-auth-panel) shadow-border"
+      className="flex h-full items-center justify-center px-4 py-8 rounded-l-lg bg-(image:--gradient-auth-panel) shadow-border"
     >
       <div className="flex flex-col justify-center items-center h-full w-full">
         <div>

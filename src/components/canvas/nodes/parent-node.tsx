@@ -15,7 +15,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
   const isLeaf = !(data as MindMapNodeData).isParent && !isRoot;
 
   return (
-    <div className="group font-diatype" style={{ width: CANVAS_NODE_WIDTH }}>
+    <div className="group" style={{ width: CANVAS_NODE_WIDTH }}>
       <div
         className={cn(
           "relative rounded-3xl bg-primary p-2 text-white shadow-node-primary",

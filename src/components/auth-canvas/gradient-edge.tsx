@@ -77,7 +77,7 @@ export function GradientEdge({
       {label ? (
         <EdgeLabelRenderer>
           <div
-            className="font-diatype nodrag nopan"
+            className=" nodrag nopan"
             style={{
               position: "absolute",
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,

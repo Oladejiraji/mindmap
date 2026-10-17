@@ -13,7 +13,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
   const { title, content, onDelete, onRename } = data as MindMapNodeData;
 
   return (
-    <div className="group font-diatype" style={{ width: CANVAS_NODE_WIDTH }}>
+    <div className="group" style={{ width: CANVAS_NODE_WIDTH }}>
       <div
         className={cn(
           "relative rounded-3xl bg-white p-2 shadow-node",

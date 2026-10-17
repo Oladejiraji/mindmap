@@ -45,7 +45,7 @@ export function Header() {
           <div className="flex size-7 items-center justify-center">
             <SidebarToggleIcon open={open} className="text-current" />
           </div>
-          <span className="font-diatype">Mindmap</span>
+          <span className="">Mindmap</span>
         </button>
 
         {threadName && (
@@ -53,7 +53,7 @@ export function Header() {
             <div className="size-4 flex items-center justify-center">
               <ChevronRightIcon className="text-foreground/30" />
             </div>
-            <span className="font-diatype text-body-sm text-foreground/87 truncate">
+            <span className=" text-body-sm text-foreground/87 truncate">
               {threadName}
             </span>
           </>
@@ -64,7 +64,7 @@ export function Header() {
             <div className="size-4 flex items-center justify-center">
               <ChevronRightIcon className="text-foreground/30" />
             </div>
-            <span className="font-diatype text-body-sm text-foreground/60 truncate">
+            <span className=" text-body-sm text-foreground/60 truncate">
               {nodeName}
             </span>
           </>

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 import { ConvexClientProvider } from "@/providers/convex-client-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,18 +15,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const diatype = localFont({
-  variable: "--font-diatype",
-  display: "swap",
-  src: [
-    {
-      path: "./fonts/diatype/ABCDiatype-Variable.ttf",
-      weight: "100 950",
-      style: "normal",
-    },
-  ],
-});
-
 export const metadata: Metadata = {
   title: "Mindmap",
   description: "A spatial research tool for thinking through problems with AI",
@@ -41,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${geistMono.variable} ${diatype.variable}`}
+      className={`${inter.variable} ${geistMono.variable}`}
     >
       <body className="min-h-svh">
         <ConvexClientProvider>{children}</ConvexClientProvider>

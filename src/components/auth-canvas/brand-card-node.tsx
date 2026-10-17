@@ -51,7 +51,7 @@ export function BrandCardNode({ data }: NodeProps) {
   }, [pulseTrigger, duration, animate, scope]);
 
   return (
-    <div className="font-diatype" style={{ width }}>
+    <div className="" style={{ width }}>
       {author ? (
         <div className="flex items-center mb-2 gap-1">
           <div
