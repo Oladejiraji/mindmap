@@ -15,7 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
 
 const menuItemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
+  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
 
 
 export function ProjectRow({
@@ -82,7 +82,7 @@ export function ProjectRow({
           >
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background-5">
-                <CanvasIcon className="size-4 text-foreground/20" />
+                <CanvasIcon className="size-4 text-fg-disabled" />
               </div>
               {isRenaming ? (
                 <input
@@ -99,16 +99,16 @@ export function ProjectRow({
                     }
                   }}
                   onBlur={() => setIsRenaming(false)}
-                  className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-body-base leading-none text-foreground outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
+                  className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-body-base leading-none text-fg-primary outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-body-base text-foreground">{name}</p>
+                <p className="truncate text-body-base text-fg-primary">{name}</p>
               )}
             </div>
-            <span className="text-caption-lg text-foreground/30">
+            <span className="text-caption-lg text-fg-tertiary">
               {formatRelativeTime(createdAt)}
             </span>
-            <span className="text-caption-lg text-foreground/30">
+            <span className="text-caption-lg text-fg-tertiary">
               {formatRelativeTime(updatedAt ?? createdAt)}
             </span>
           </Link>

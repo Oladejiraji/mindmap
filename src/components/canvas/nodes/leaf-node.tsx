@@ -23,7 +23,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
         <CustomHandle type="target" position={Position.Top} />
 
         <div className="mindmap-drag-handle flex h-5 cursor-grab items-center justify-between active:cursor-grabbing">
-          <div className="flex min-w-0 flex-1 items-center gap-1 text-foreground/87">
+          <div className="flex min-w-0 flex-1 items-center gap-1 text-fg-primary">
             <div className="flex size-5 shrink-0 items-center justify-center">
               <BranchIcon pathClassName="fill-foreground" />
             </div>
@@ -31,7 +31,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
               id={id}
               title={title}
               onRename={onRename}
-              className="text-foreground/87 focus:ring-1 focus:ring-ring"
+              className="text-fg-primary focus:ring-1 focus:ring-ring"
             />
           </div>
           <NodeMenu id={id} onDelete={onDelete} />
@@ -45,7 +45,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
             animation: "none",
           }}
         >
-          <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-[7.5px] bg-background-2 text-foreground">
+          <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-[7.5px] bg-background-2 text-fg-primary">
             <NodeContent nodeId={id} content={content} />
           </div>
         </div>

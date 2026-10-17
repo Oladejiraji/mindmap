@@ -145,7 +145,6 @@
   --secondary: oklch(0.731 0.116 263.475); /* #82A7F1 */
   --secondary-foreground: oklch(0.2 0 0); /* #161616 */
   --muted: oklch(0.982 0 0); /* #f9f9f9 */
-  --muted-foreground: oklch(0.2 0 0 / 0.6); /* #161616 @ 60% */
   --accent: oklch(0.731 0.116 263.475); /* #82A7F1 */
   --accent-foreground: oklch(0.2 0 0); /* #161616 */
   --input: oklch(0.2 0 0 / 0.1); /* #161616 @ 10% */
@@ -164,9 +163,6 @@
   --sidebar-ring: oklch(0.6 0.21 262.238); /* #3476FB */
 
   /* Ink ladder + interaction tints (design system) */
-  --ink-strong: oklch(0.2 0 0 / 0.87);
-  --ink-secondary: oklch(0.2 0 0 / 0.6);
-  --ink-faint: oklch(0.2 0 0 / 0.2);
   --placeholder: var(--ink-tertiary);
   --placeholder-inverse: oklch(0.982 0 0 / 0.4);
 
@@ -195,9 +191,14 @@
 .dark {
   --background: var(--surface-page);
   --sidebar: var(--surface-shell);
-  --foreground: var(--fg-primary);
+  /* Solid ink: also used as a fill (dark input, tooltips). Text uses fg-*. */
+  --foreground: var(--inverted-solid);
   --ink-body: var(--fg-secondary);
   --ink-tertiary: var(--fg-tertiary);
+  --ink-strong: var(--fg-primary);
+  --ink-secondary: var(--fg-secondary);
+  --ink-faint: var(--fg-disabled);
+  --muted-foreground: var(--fg-secondary);
   --primary: var(--brand-solid);
   --primary-2: var(--brand-solid-active);
   --ring: var(--brand-border-focus);

@@ -63,8 +63,8 @@ export default function Home() {
                 className={cn(
                   "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
                   layout === "grid"
-                    ? "text-foreground/60"
-                    : "text-foreground/25 hover:text-foreground/40",
+                    ? "text-fg-secondary"
+                    : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
                 <LayoutGrid className="size-3.5" />
@@ -81,8 +81,8 @@ export default function Home() {
                 className={cn(
                   "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
                   layout === "list"
-                    ? "text-foreground/60"
-                    : "text-foreground/25 hover:text-foreground/40",
+                    ? "text-fg-secondary"
+                    : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
                 <List className="size-3.5" />
@@ -122,7 +122,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="mt-11 flex flex-col">
-            <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-caption-lg text-foreground/40">
+            <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-caption-lg text-fg-tertiary">
               <span>Name</span>
               <span>Created</span>
               <span>Edited</span>
@@ -155,8 +155,8 @@ export default function Home() {
 
         {!isPending && threads?.length === 0 && (
           <div className="flex flex-col items-center pt-24 text-center">
-            <CanvasIcon className="size-10 text-foreground/15" />
-            <p className="mt-3 text-body-base text-foreground/40">No projects yet</p>
+            <CanvasIcon className="size-10 text-fg-disabled" />
+            <p className="mt-3 text-body-base text-fg-tertiary">No projects yet</p>
             <Button
               onClick={() => void handleCreate()}
               isLoading={isCreating}

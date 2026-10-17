@@ -86,7 +86,7 @@ export function GradientEdge({
           >
             <div className="inline-flex items-center gap-1.5 rounded-md bg-background-4 px-1.5 py-1.5 text-body-sm text-zinc-300 border border-background-6">
               <SplitIcon />
-              <span className="text-foreground-subtle">
+              <span className="text-fg-primary">
                 {label.name} branched
               </span>
             </div>

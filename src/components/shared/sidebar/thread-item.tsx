@@ -108,7 +108,7 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
             e.stopPropagation();
             onToggleCollapse(node._id);
           }}
-          className="flex size-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground/60"
+          className="flex size-5 shrink-0 items-center justify-center text-fg-secondary hover:text-fg-secondary"
         >
           <ChevronDownIcon
             className={cn(
@@ -121,13 +121,13 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
         <span className="size-5" />
       )}
       <RenderIf condition={isRoot}>
-        <RootNodeIcon className="mx-1.5 size-3.5 shrink-0 text-muted-foreground" />
+        <RootNodeIcon className="mx-1.5 size-3.5 shrink-0 text-fg-secondary" />
       </RenderIf>
       <RenderIf condition={!isRoot && !!onToggleCollapse}>
-        <BranchNodeIcon className="mx-1.5 size-3.5 shrink-0 text-muted-foreground" />
+        <BranchNodeIcon className="mx-1.5 size-3.5 shrink-0 text-fg-secondary" />
       </RenderIf>
       <RenderIf condition={!isRoot && !onToggleCollapse}>
-        <LeafNodeIcon className="mx-1.5 size-3.5 shrink-0 text-muted-foreground" />
+        <LeafNodeIcon className="mx-1.5 size-3.5 shrink-0 text-fg-secondary" />
       </RenderIf>
       <span className="truncate">{node.title}</span>
     </Link>

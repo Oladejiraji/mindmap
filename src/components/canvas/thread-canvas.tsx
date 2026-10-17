@@ -256,7 +256,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-body-base text-muted-foreground"></p>
+        <p className="text-body-base text-fg-secondary"></p>
       </div>
     );
   }
@@ -264,7 +264,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   if (!nodes?.length) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-body-base text-muted-foreground">No nodes in this thread</p>
+        <p className="text-body-base text-fg-secondary">No nodes in this thread</p>
       </div>
     );
   }

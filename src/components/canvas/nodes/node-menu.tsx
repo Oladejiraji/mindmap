@@ -28,7 +28,7 @@ export function NodeMenu({
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" className="z-50">
           <Menu.Popup
-            className=" w-44 rounded-lg bg-white p-1.5 text-body-sm text-foreground-subtle shadow-large outline-none"
+            className=" w-44 rounded-lg bg-white p-1.5 text-body-sm text-fg-primary shadow-large outline-none"
           >
             <Menu.Item
               className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-destructive outline-none hover:bg-background-4"

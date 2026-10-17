@@ -190,7 +190,7 @@ export function ChatInput({
         <div
           className={cn(
             "mt-1 pr-2 text-right text-caption-lg tabular-nums",
-            isOver ? "text-destructive" : "text-muted-foreground",
+            isOver ? "text-destructive" : "text-fg-secondary",
           )}
         >
           {length.toLocaleString()} / {MAX_MESSAGE_CONTENT.toLocaleString()}

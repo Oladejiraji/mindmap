@@ -32,7 +32,7 @@ export function BranchDropdown({
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" className="z-50">
           <Menu.Popup
-            className=" w-48 rounded-lg bg-white p-1.5 text-body-sm text-foreground-subtle shadow-large outline-none"
+            className=" w-48 rounded-lg bg-white p-1.5 text-body-sm text-fg-primary shadow-large outline-none"
           >
             <Menu.Item className="flex hover:bg-background-4! rounded-md cursor-pointer items-center gap-2  px-2 h-8.5  outline-none data-highlighted:bg-white/5">
               <div className="rotate-180">
@@ -40,11 +40,11 @@ export function BranchDropdown({
               </div>
               Delete research branch
             </Menu.Item>
-            <Menu.Item className="flex cursor-pointer hover:bg-background-4! rounded-md items-center gap-2 px-2 py-1.5 text-foreground-subtle outline-none data-highlighted:bg-white/5">
+            <Menu.Item className="flex cursor-pointer hover:bg-background-4! rounded-md items-center gap-2 px-2 py-1.5 text-fg-primary outline-none data-highlighted:bg-white/5">
               <SplitIcon />
               Add new branch
             </Menu.Item>
-            <Menu.Item className="flex cursor-pointer hover:bg-background-4! border-t-[0.5px] border-foreground-subtle/10 rounded-md items-center justify-between px-2 py-1.5 text-foreground-subtle outline-none data-highlighted:bg-white/5">
+            <Menu.Item className="flex cursor-pointer hover:bg-background-4! border-t-[0.5px] border-foreground-subtle/10 rounded-md items-center justify-between px-2 py-1.5 text-fg-primary outline-none data-highlighted:bg-white/5">
               <span className="flex items-center gap-2">
                 <MergeIcon />
                 All Branches

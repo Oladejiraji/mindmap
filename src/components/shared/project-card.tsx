@@ -15,7 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
 
 const itemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
+  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
 
 
 export function ProjectCard({
@@ -80,7 +80,7 @@ export function ProjectCard({
           >
             <div className="absolute inset-0 rounded-xl bg-foreground/8 scale-[0.97] opacity-0 transition-all duration-200 ease-out group-hover:scale-100 group-hover:opacity-100" />
             <div className="relative flex aspect-4/3 items-center justify-center rounded-lg bg-background-5">
-              <CanvasIcon className="size-8 text-foreground/20" />
+              <CanvasIcon className="size-8 text-fg-disabled" />
             </div>
             <div className="px-0.5 pt-2.5">
               {isRenaming ? (
@@ -98,14 +98,14 @@ export function ProjectCard({
                     }
                   }}
                   onBlur={() => setIsRenaming(false)}
-                  className="block max-w-full truncate rounded-sm bg-transparent text-caption-base font-medium leading-none text-foreground outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
+                  className="block max-w-full truncate rounded-sm bg-transparent text-caption-base font-medium leading-none text-fg-primary outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-caption-base font-medium text-foreground">
+                <p className="truncate text-caption-base font-medium text-fg-primary">
                   {name}
                 </p>
               )}
-              <p className="text-caption-base text-foreground/40">
+              <p className="text-caption-base text-fg-tertiary">
                 {formatRelativeTime(createdAt)}
               </p>
             </div>

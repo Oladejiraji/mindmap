@@ -76,13 +76,13 @@ export function ResearchCardNode({ data }: NodeProps) {
           className="relative rounded-3xl bg-white p-2 text-white shadow-node"
         >
           <div className="h-5  flex items-center justify-between">
-            <div className="flex items-center gap-1 text-body-sm text-foreground/87">
+            <div className="flex items-center gap-1 text-body-sm text-fg-primary">
               <div className="size-5 flex items-center justify-center">
                 <BranchIcon pathClassName="fill-foreground" />
               </div>
               <EditableTitle initial="Brand Guidelines" />
             </div>
-            <BranchDropdown iconClassName="size-2.5 text-foreground" />
+            <BranchDropdown iconClassName="size-2.5 text-fg-primary" />
           </div>
           <div
             className="mt-3 rounded-lg p-[0.5px] shadow-default"
@@ -93,10 +93,10 @@ export function ResearchCardNode({ data }: NodeProps) {
             }}
           >
             <div className="bg-background-2 p-2 rounded-[7.5px]">
-              <p className="text-caption-lg text-foreground/50 leading-tight">
+              <p className="text-caption-lg text-fg-tertiary leading-tight">
                 {pages} pages of research…
               </p>
-              <p className="pt-2 text-body-sm leading-snug text-foreground">
+              <p className="pt-2 text-body-sm leading-snug text-fg-primary">
                 {body}
               </p>
             </div>

@@ -45,7 +45,7 @@ export function MessageList({
   if (items.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-body-base text-muted-foreground">
+        <p className="text-body-base text-fg-secondary">
           No messages yet. Send one to get started.
         </p>
       </div>
@@ -80,11 +80,11 @@ function BranchMarker({
   intoTitle: string;
 }) {
   return (
-    <div className="flex items-center gap-3 py-1 text-caption-lg text-muted-foreground">
+    <div className="flex items-center gap-3 py-1 text-caption-lg text-fg-secondary">
       <div className="h-px flex-1 bg-border" />
       <span>
-        Branched from <span className="text-foreground">{fromTitle}</span> into{" "}
-        <span className="text-foreground">{intoTitle}</span>
+        Branched from <span className="text-fg-primary">{fromTitle}</span> into{" "}
+        <span className="text-fg-primary">{intoTitle}</span>
       </span>
       <div className="h-px flex-1 bg-border" />
     </div>

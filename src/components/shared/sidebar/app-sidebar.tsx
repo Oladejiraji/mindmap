@@ -26,17 +26,17 @@ export function AppSidebar() {
     <aside className="flex h-full w-60 shrink-0 flex-col ">
       <div className="flex h-10.5 shrink-0 items-center gap-2 px-3 ">
         <div className="flex size-6 items-center justify-center rounded-lg bg-foreground/8">
-          <CanvasIcon className="size-3.5 text-foreground/20" />
+          <CanvasIcon className="size-3.5 text-fg-disabled" />
         </div>
         <div className="min-w-0 flex-1">
           {isPending ? (
             <Skeleton className="h-4 w-24" />
           ) : (
             <>
-              <p className="truncate text-caption-lg font-medium text-foreground">
+              <p className="truncate text-caption-lg font-medium text-fg-primary">
                 {capitalizeFirst(thread?.name || "") ?? "Untitled"}
               </p>
-              <p className="text-caption-base leading-none text-foreground/35">
+              <p className="text-caption-base leading-none text-fg-tertiary">
                 {formatRelativeTime(thread?._creationTime ?? 0)}
               </p>
             </>
@@ -44,14 +44,14 @@ export function AppSidebar() {
         </div>
         <button
           onClick={toggleSidebar}
-          className="flex size-7 items-center justify-center text-foreground/40 hover:text-foreground/60 transition-colors"
+          className="flex size-7 items-center justify-center text-fg-tertiary hover:text-fg-secondary transition-colors"
         >
           <SidebarToggleIcon open={open} className="text-current" />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-aut mt-4 px-2 py-2">
-        <p className="px-2 pb-1.5 text-caption-base font-medium text-foreground/35">
+        <p className="px-2 pb-1.5 text-caption-base font-medium text-fg-tertiary">
           Nodes
         </p>
         {isPending ? (

@@ -91,10 +91,10 @@
   --transparent-default: oklch(0.2 0 0 / 0);
   --transparent-hover: oklch(0.2 0 0 / 0.05);
   --transparent-active: oklch(0.2 0 0 / 0.08);
-  --fg-primary: oklch(0.2 0 0);
-  --fg-secondary: rgb(0 0 0 / 0.66);
-  --fg-tertiary: oklch(0.2 0 0 / 0.4);
-  --fg-disabled: oklch(0.2 0 0 / 0.25);
+  --fg-primary: oklch(0 0 0 / 0.875);
+  --fg-secondary: oklch(0 0 0 / 0.608);
+  --fg-tertiary: oklch(0 0 0 / 0.447);
+  --fg-disabled: oklch(0 0 0 / 0.267);
   --brand-solid: oklch(0.558 0.226 261.986);
   --brand-solid-hover: oklch(0.6 0.21 262.238);
   --brand-solid-active: oklch(0.474 0.189 261.933);
@@ -164,10 +164,10 @@
   --transparent-default: oklch(1 0 0 / 0);
   --transparent-hover: oklch(1 0 0 / 0.06);
   --transparent-active: oklch(1 0 0 / 0.1);
-  --fg-primary: oklch(0.95 0 0);
-  --fg-secondary: oklch(1 0 0 / 0.7);
-  --fg-tertiary: oklch(1 0 0 / 0.45);
-  --fg-disabled: oklch(1 0 0 / 0.28);
+  --fg-primary: oklch(1 0 0 / 0.929);
+  --fg-secondary: oklch(1 0 0 / 0.685);
+  --fg-tertiary: oklch(1 0 0 / 0.391);
+  --fg-disabled: oklch(1 0 0 / 0.332);
   --brand-solid: oklch(0.6 0.21 262);
   --brand-solid-hover: oklch(0.66 0.19 262);
   --brand-solid-active: oklch(0.72 0.15 262);
@@ -215,4 +215,19 @@
   --danger-border-subtle: oklch(0.35 0.1 27);
   --disabled-bg: oklch(1 0 0 / 0.05);
   --disabled-fg: oklch(1 0 0 / 0.28);
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --fg-primary: oklch(0 0 0);
+    --fg-secondary: oklch(0 0 0 / 0.875);
+    --fg-tertiary: oklch(0 0 0 / 0.608);
+    --fg-disabled: oklch(0 0 0 / 0.608);
+  }
+  .dark {
+    --fg-primary: oklch(1 0 0);
+    --fg-secondary: oklch(1 0 0 / 0.929);
+    --fg-tertiary: oklch(1 0 0 / 0.685);
+    --fg-disabled: oklch(1 0 0 / 0.685);
+  }
 }

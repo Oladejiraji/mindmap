@@ -132,7 +132,7 @@ export function BrandCardNode({ data }: NodeProps) {
       {showModel ? (
         <div className="pt-2 flex items-center gap-1.5">
           <button
-            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-foreground-2 bg-background-5 shadow-default"
+            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
           >
             <div className="flex items-center justify-center size-4.5">
               <GptIcon />
@@ -140,7 +140,7 @@ export function BrandCardNode({ data }: NodeProps) {
             <p>Chatgpt 5.5</p>
           </button>
           <button
-            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-foreground-2 bg-background-5 shadow-default"
+            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
           >
             <div className="flex items-center justify-center size-4.5">
               <AnthropicIcon />
@@ -148,11 +148,11 @@ export function BrandCardNode({ data }: NodeProps) {
             <p>Anthropic</p>
           </button>
           <button
-            className="size-5 justify-center rounded-md border border-black/2 flex items-center text-caption-base text-foreground-2 bg-background-5 shadow-default"
+            className="size-5 justify-center rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
           >
             <PlusIcon className="size-3" />
           </button>
-          <p className="font-medium text-caption-base text-foreground-3/30">
+          <p className="font-medium text-caption-base text-fg-tertiary">
             Models in use
           </p>
         </div>
