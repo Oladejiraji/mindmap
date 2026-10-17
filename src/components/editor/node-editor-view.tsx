@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { CanvasPanel } from "@/components/shared/canvas-panel";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
+import { useRegisterTab } from "@/lib/tabs";
+import { TabStrip } from "@/components/shared/tab-strip";
 
 /*
  * Node page, laid out like the interfere.com product dashboard:
@@ -45,6 +47,7 @@ export function NodeEditorView({
   const updateContent = useMutation(api.nodes.updateContent);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [sidebarOpen, setSidebarOpen] = useStoredBoolean("mindmap:node-sidebar", true);
+  useRegisterTab(node ? { href: routes.node(threadId, nodeId), kind: "node", title: node.title } : null);
 
   const hasContent =
     node?.content &&
@@ -88,7 +91,7 @@ export function NodeEditorView({
 
   if (isPending || !node) {
     return (
-      <div className="flex h-svh items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <p className="text-body-base text-fg-tertiary">
           {isPending ? "Loading…" : "Node not found"}
         </p>
@@ -102,7 +105,7 @@ export function NodeEditorView({
   const kindLabel = kind === "root" ? "Root node" : kind === "branch" ? "Branch" : "Leaf";
 
   return (
-    <div className="flex h-svh bg-background">
+    <div className="flex h-full bg-background">
       {/* Collapsible project sidebar */}
       <aside
         aria-label="Project"
@@ -116,126 +119,129 @@ export function NodeEditorView({
         </div>
       </aside>
 
-      <div className={cn("flex min-w-0 flex-1 flex-col bg-surface-container", sidebarOpen && "md:border-l md:border-border-default")}>
-        {/* Top bar */}
-        <header className="flex h-12 shrink-0 items-center justify-between border-b border-border-default px-3">
-          <div className="flex min-w-0 items-center gap-1">
-            <button
-              onClick={() => setSidebarOpen((o) => !o)}
-              aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-              aria-expanded={sidebarOpen}
-              className="hidden size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 md:flex"
+      <div className="flex min-w-0 flex-1 flex-col bg-sidebar">
+        <TabStrip className={sidebarOpen ? "md:px-0" : undefined} />
+        <div className={cn("flex min-h-0 flex-1 flex-col bg-surface-container", sidebarOpen && "md:border-l md:border-border-default")}>
+          {/* Top bar */}
+          <header className="flex h-12 shrink-0 items-center justify-between border-b border-border-default px-3">
+            <div className="flex min-w-0 items-center gap-1">
+              <button
+                onClick={() => setSidebarOpen((o) => !o)}
+                aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+                aria-expanded={sidebarOpen}
+                className="hidden size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 md:flex"
+              >
+                <SidebarToggleIcon open={sidebarOpen} className="size-4" />
+              </button>
+              <nav aria-label="Breadcrumb" className="min-w-0">
+                <ol className="flex min-w-0 items-center text-body-sm font-medium text-fg-secondary">
+                  <li className="min-w-0">
+                    <Crumb href={routes.thread(threadId)}>{thread?.name ?? "Project"}</Crumb>
+                  </li>
+                  {ancestors.length > 1 && (
+                    <>
+                      <Separator />
+                      <li className="px-1 text-fg-tertiary" title={ancestors.slice(0, -1).map((a) => a.title).join(" › ")}>
+                        …
+                      </li>
+                    </>
+                  )}
+                  {parent && (
+                    <>
+                      <Separator />
+                      <li className="min-w-0">
+                        <Crumb href={routes.node(threadId, parent._id)}>{parent.title}</Crumb>
+                      </li>
+                    </>
+                  )}
+                  <Separator />
+                  <li className="min-w-0">
+                    <span aria-current="page" className="block truncate px-2 py-1 text-fg-primary">
+                      {node.title}
+                    </span>
+                  </li>
+                </ol>
+              </nav>
+            </div>
+            <Link
+              href={routes.thread(threadId)}
+              className="flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <SidebarToggleIcon open={sidebarOpen} className="size-4" />
-            </button>
-            <nav aria-label="Breadcrumb" className="min-w-0">
-              <ol className="flex min-w-0 items-center text-body-sm font-medium text-fg-secondary">
-                <li className="min-w-0">
-                  <Crumb href={routes.thread(threadId)}>{thread?.name ?? "Project"}</Crumb>
-                </li>
-                {ancestors.length > 1 && (
-                  <>
-                    <Separator />
-                    <li className="px-1 text-fg-tertiary" title={ancestors.slice(0, -1).map((a) => a.title).join(" › ")}>
-                      …
-                    </li>
-                  </>
-                )}
-                {parent && (
-                  <>
-                    <Separator />
-                    <li className="min-w-0">
-                      <Crumb href={routes.node(threadId, parent._id)}>{parent.title}</Crumb>
-                    </li>
-                  </>
-                )}
-                <Separator />
-                <li className="min-w-0">
-                  <span aria-current="page" className="block truncate px-2 py-1 text-fg-primary">
-                    {node.title}
-                  </span>
-                </li>
-              </ol>
-            </nav>
-          </div>
-          <Link
-            href={routes.thread(threadId)}
-            className="flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <Network className="size-4 text-fg-tertiary" />
-            Canvas
-          </Link>
-        </header>
+              <Network className="size-4 text-fg-tertiary" />
+              Canvas
+            </Link>
+          </header>
 
-        <div className="flex min-h-0 flex-1">
-          {/* Detail column */}
-          <aside className="w-105 shrink-0 overflow-y-auto overscroll-contain border-r border-border-default">
-            <div className="px-6 pt-8 pb-10">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
-                <KindIcon className="size-5" />
-              </div>
-              <p className="mt-6 text-caption-lg text-fg-tertiary">{kindLabel}</p>
-              <h1 className="mt-1 text-heading-5 font-semibold text-pretty text-fg-primary">{node.title}</h1>
-              {node.summary && <p className="mt-3 text-body-base text-fg-secondary">{node.summary}</p>}
-
-              <dl className="mt-8 grid grid-cols-[112px_minmax(0,1fr)] gap-y-1 text-body-base">
-                <Property label="Project">
-                  <Link href={routes.thread(threadId)} className="truncate hover:underline">
-                    {thread?.name ?? "—"}
-                  </Link>
-                </Property>
-                <Property label="Parent">
-                  {parent ? (
-                    <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
-                      {parent.title}
-                    </Link>
-                  ) : (
-                    <span className="text-fg-tertiary">None</span>
-                  )}
-                </Property>
-                <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
-                <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
-                <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
-              </dl>
-            </div>
-          </aside>
-
-          {/* Main column */}
-          <section className="flex min-w-0 flex-1 flex-col">
-            <div role="tablist" aria-label="Node views" className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border-default px-3">
-              {(["content", "chat"] as const).map((t) => (
-                <button
-                  key={t}
-                  role="tab"
-                  aria-selected={tab === t}
-                  onClick={() => setTab(t)}
-                  className={cn(
-                    "h-7 cursor-pointer rounded-lg px-2.5 text-body-sm font-medium capitalize outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
-                    tab === t
-                      ? "bg-transparent-hover text-fg-primary shadow-border"
-                      : "text-fg-secondary shadow-border hover:bg-transparent-hover hover:text-fg-primary",
-                  )}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-
-            <div className="min-h-0 flex-1">
-              {tab === "content" ? (
-                <div className="h-full overflow-y-auto overscroll-contain">
-                  <div className="mx-auto max-w-3xl px-8 py-8">
-                    <BlockEditor
-                      initialContent={Array.isArray(node.content) ? (node.content as Block[]) : undefined}
-                      onChange={handleContentChange}
-                    />
-                  </div>
+          <div className="flex min-h-0 flex-1">
+            {/* Detail column */}
+            <aside className="w-105 shrink-0 overflow-y-auto overscroll-contain border-r border-border-default">
+              <div className="px-6 pt-8 pb-10">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
+                  <KindIcon className="size-5" />
                 </div>
-              ) : (
-                <NodeChat threadId={threadId} nodeId={nodeId} />
-              )}
-            </div>
-          </section>
+                <p className="mt-6 text-caption-lg text-fg-tertiary">{kindLabel}</p>
+                <h1 className="mt-1 text-heading-5 font-semibold text-pretty text-fg-primary">{node.title}</h1>
+                {node.summary && <p className="mt-3 text-body-base text-fg-secondary">{node.summary}</p>}
+
+                <dl className="mt-8 grid grid-cols-[112px_minmax(0,1fr)] gap-y-1 text-body-base">
+                  <Property label="Project">
+                    <Link href={routes.thread(threadId)} className="truncate hover:underline">
+                      {thread?.name ?? "—"}
+                    </Link>
+                  </Property>
+                  <Property label="Parent">
+                    {parent ? (
+                      <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
+                        {parent.title}
+                      </Link>
+                    ) : (
+                      <span className="text-fg-tertiary">None</span>
+                    )}
+                  </Property>
+                  <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
+                  <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
+                  <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
+                </dl>
+              </div>
+            </aside>
+
+            {/* Main column */}
+            <section className="flex min-w-0 flex-1 flex-col">
+              <div role="tablist" aria-label="Node views" className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border-default px-3">
+                {(["content", "chat"] as const).map((t) => (
+                  <button
+                    key={t}
+                    role="tab"
+                    aria-selected={tab === t}
+                    onClick={() => setTab(t)}
+                    className={cn(
+                      "h-7 cursor-pointer rounded-lg px-2.5 text-body-sm font-medium capitalize outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+                      tab === t
+                        ? "bg-transparent-hover text-fg-primary shadow-border"
+                        : "text-fg-secondary shadow-border hover:bg-transparent-hover hover:text-fg-primary",
+                    )}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              <div className="min-h-0 flex-1">
+                {tab === "content" ? (
+                  <div className="h-full overflow-y-auto overscroll-contain">
+                    <div className="mx-auto max-w-3xl px-8 py-8">
+                      <BlockEditor
+                        initialContent={Array.isArray(node.content) ? (node.content as Block[]) : undefined}
+                        onChange={handleContentChange}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <NodeChat threadId={threadId} nodeId={nodeId} />
+                )}
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </div>
