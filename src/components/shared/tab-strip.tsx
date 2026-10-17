@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { PencilLine, Plus, X } from "lucide-react";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { BranchNodeIcon } from "@/components/icons/node-icons";
 import { closeTab, useTabs } from "@/lib/tabs";
+import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /*
@@ -22,8 +23,6 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
   // Node pages sit on the container surface; the canvas on the page surface.
   const panelColor = /\/n\//.test(pathname) ? "var(--surface-container)" : "var(--background)";
 
-  if (tabs.length === 0) return <div className={cn("h-10 shrink-0", className)} />;
-
   const activeIndex = tabs.findIndex((t) => t.href === pathname);
 
   return (
@@ -35,7 +34,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
     >
       {tabs.map((tab, i) => {
         const active = i === activeIndex;
-        const Icon = tab.kind === "project" ? CanvasIcon : BranchNodeIcon;
+        const Icon = tab.kind === "project" ? CanvasIcon : tab.kind === "new" ? PencilLine : BranchNodeIcon;
         const showDivider = i > 0 && !active && i - 1 !== activeIndex;
         return (
           <div
@@ -81,6 +80,14 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
           </div>
         );
       })}
+      <Link
+        href={routes.newProject}
+        aria-label="New project"
+        title="New project"
+        className="mb-1 ml-1 flex size-7 shrink-0 items-center justify-center self-end rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <Plus className="size-4" />
+      </Link>
     </div>
   );
 }

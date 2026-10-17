@@ -7,7 +7,7 @@ import { useEffect, useSyncExternalStore } from "react";
  */
 export type OpenTab = {
   href: string;
-  kind: "project" | "node";
+  kind: "project" | "node" | "new";
   title: string;
 };
 

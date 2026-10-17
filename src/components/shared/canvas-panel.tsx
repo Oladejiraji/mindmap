@@ -60,7 +60,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
     setIsEditing(false);
   };
 
-  if (!embedded && /\/n\//.test(pathname)) return null;
+  if (!threadId || (!embedded && /\/n\//.test(pathname))) return null;
   const expanded = embedded || open;
 
   return (
