@@ -67,10 +67,10 @@ export function BrandCardNode({ data }: NodeProps) {
                 height={16}
               />
             </div>
-            <span className="text-background text-11 ">{author.name}</span>
+            <span className="text-background text-caption-base ">{author.name}</span>
           </div>
           {author.role ? (
-            <p className="gradient-text-shimmer text-11 opacity-50">
+            <p className="gradient-text-shimmer text-caption-base opacity-50">
               {author.role}
             </p>
           ) : null}
@@ -82,7 +82,7 @@ export function BrandCardNode({ data }: NodeProps) {
         className="relative rounded-3xl bg-primary p-2 text-white shadow-node-primary"
       >
         <div className="h-5  flex items-center justify-between">
-          <div className="flex items-center gap-1 text-13 text-background/87">
+          <div className="flex items-center gap-1 text-body-sm text-background/87">
             <div className="size-5 flex items-center justify-center">
               <BranchIcon />
             </div>
@@ -91,10 +91,10 @@ export function BrandCardNode({ data }: NodeProps) {
           <BranchDropdown iconClassName="size-2.5 text-background/87" />
         </div>
         <div className="bg-ring p-2 shadow-node-inset mt-3 rounded-lg">
-          <p className="text-xs text-background/50 leading-tight">
+          <p className="text-caption-lg text-background/50 leading-tight">
             {pages} pages of research…
           </p>
-          <p className="pt-2 text-13 leading-snug text-background">{body}</p>
+          <p className="pt-2 text-body-sm leading-snug text-background">{body}</p>
         </div>
 
         {handles.includes("top") ? (
@@ -132,7 +132,7 @@ export function BrandCardNode({ data }: NodeProps) {
       {showModel ? (
         <div className="pt-2 flex items-center gap-1.5">
           <button
-            className="px-1 py-px rounded-md border border-black/2 flex items-center text-11 text-foreground-2 bg-background-5 shadow-default"
+            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-foreground-2 bg-background-5 shadow-default"
           >
             <div className="flex items-center justify-center size-4.5">
               <GptIcon />
@@ -140,7 +140,7 @@ export function BrandCardNode({ data }: NodeProps) {
             <p>Chatgpt 5.5</p>
           </button>
           <button
-            className="px-1 py-px rounded-md border border-black/2 flex items-center text-11 text-foreground-2 bg-background-5 shadow-default"
+            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-foreground-2 bg-background-5 shadow-default"
           >
             <div className="flex items-center justify-center size-4.5">
               <AnthropicIcon />
@@ -148,11 +148,11 @@ export function BrandCardNode({ data }: NodeProps) {
             <p>Anthropic</p>
           </button>
           <button
-            className="size-5 justify-center rounded-md border border-black/2 flex items-center text-11 text-foreground-2 bg-background-5 shadow-default"
+            className="size-5 justify-center rounded-md border border-black/2 flex items-center text-caption-base text-foreground-2 bg-background-5 shadow-default"
           >
             <PlusIcon className="size-3" />
           </button>
-          <p className="font-medium text-11 text-foreground-3/30">
+          <p className="font-medium text-caption-base text-foreground-3/30">
             Models in use
           </p>
         </div>

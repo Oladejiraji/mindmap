@@ -15,7 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
 
 const menuItemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
+  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
 
 
 export function ProjectRow({
@@ -99,16 +99,16 @@ export function ProjectRow({
                     }
                   }}
                   onBlur={() => setIsRenaming(false)}
-                  className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-sm leading-none text-foreground outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
+                  className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-body-base leading-none text-foreground outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-sm text-foreground">{name}</p>
+                <p className="truncate text-body-base text-foreground">{name}</p>
               )}
             </div>
-            <span className="text-xs text-foreground/30">
+            <span className="text-caption-lg text-foreground/30">
               {formatRelativeTime(createdAt)}
             </span>
-            <span className="text-xs text-foreground/30">
+            <span className="text-caption-lg text-foreground/30">
               {formatRelativeTime(updatedAt ?? createdAt)}
             </span>
           </Link>
@@ -133,7 +133,7 @@ export function ProjectRow({
                 Rename
               </ContextMenu.Item>
               <ContextMenu.Item
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
                 onClick={() => setShowDelete(true)}
               >
                 Delete

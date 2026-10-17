@@ -48,7 +48,7 @@ export function ChatInput({
           placeholder="Send a message..."
           disabled={disabled}
           rows={1}
-          className="w-full resize-none field-sizing-content max-h-40 overflow-y-auto bg-transparent py-1.5 text-sm outline-none transition-colors placeholder:text-muted-foreground disabled:opacity-50"
+          className="w-full resize-none field-sizing-content max-h-40 overflow-y-auto bg-transparent py-1.5 text-body-base outline-none transition-colors placeholder:text-muted-foreground disabled:opacity-50"
         />
         <button
           onClick={handleSend}
@@ -61,7 +61,7 @@ export function ChatInput({
       {showCounter && (
         <div
           className={cn(
-            "mt-1 pr-2 text-right text-xs tabular-nums",
+            "mt-1 pr-2 text-right text-caption-lg tabular-nums",
             isOver ? "text-destructive" : "text-muted-foreground",
           )}
         >

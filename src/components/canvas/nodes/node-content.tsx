@@ -43,7 +43,7 @@ export function NodeContent({
         className={nodeId ? "cursor-text p-2" : "p-2"}
         onClick={nodeId ? () => setIsEditing(true) : undefined}
       >
-        <p className="text-xs opacity-50" style={{ lineHeight: 1.5 }}>
+        <p className="text-caption-lg opacity-50" style={{ lineHeight: 1.5 }}>
           {nodeId ? "Click to start writing…" : "No content yet"}
         </p>
       </div>

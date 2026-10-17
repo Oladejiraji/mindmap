@@ -32,7 +32,7 @@ export function BranchDropdown({
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" className="z-50">
           <Menu.Popup
-            className="font-diatype w-48 rounded-lg bg-white p-1.5 text-13 text-foreground-subtle shadow-large outline-none"
+            className="font-diatype w-48 rounded-lg bg-white p-1.5 text-body-sm text-foreground-subtle shadow-large outline-none"
           >
             <Menu.Item className="flex hover:bg-background-4! rounded-md cursor-pointer items-center gap-2  px-2 h-8.5  outline-none data-highlighted:bg-white/5">
               <div className="rotate-180">

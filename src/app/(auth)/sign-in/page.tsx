@@ -46,7 +46,7 @@ export default function SignInPage() {
           className="flex w-full max-w-78 flex-col justify-center  flex-1"
         >
           <div className="space-y-1.5">
-            <h1 className=" font-medium text-center text-white text-lg pb-8">
+            <h1 className=" font-medium text-center text-white text-heading-6 pb-8">
               Welcome back
             </h1>
           </div>
@@ -84,13 +84,13 @@ export default function SignInPage() {
               isLoading={isSubmitting}
               className="relative w-full flex items-center justify-center"
             >
-              <p className="text-13 font-medium">Sign in</p>
+              <p className="text-body-sm font-medium">Sign in</p>
               <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-sidebar-ring rounded-sm h-4 w-9.5 flex items-center justify-center">
-                <p className="text-background/87 text-11 font-medium">return</p>
+                <p className="text-background/87 text-caption-base font-medium">return</p>
               </div>
             </Button>
           </div>
-          <p className="text-center text-background/67 text-11">
+          <p className="text-center text-background/67 text-caption-base">
             No account?{" "}
             <Link href={routes.signUp} className=" hover:underline">
               Sign up
@@ -98,7 +98,7 @@ export default function SignInPage() {
           </p>
         </form>
         <div>
-          <p className="text-background/67 text-11 text-center max-w-78">
+          <p className="text-background/67 text-caption-base text-center max-w-78">
             By signing in, you agree Mindmap’s Terms of Use, and acknowledge its
             Information Collection Notice and Privacy Policy.
           </p>

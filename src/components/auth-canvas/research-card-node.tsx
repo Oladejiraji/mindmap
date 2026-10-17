@@ -60,10 +60,10 @@ export function ResearchCardNode({ data }: NodeProps) {
                 height={16}
               />
             </div>
-            <span className="text-background text-11 ">{author.name}</span>
+            <span className="text-background text-caption-base ">{author.name}</span>
           </div>
           {author.role ? (
-            <p className="gradient-text-shimmer text-11 opacity-50">
+            <p className="gradient-text-shimmer text-caption-base opacity-50">
               {author.role}
             </p>
           ) : null}
@@ -76,7 +76,7 @@ export function ResearchCardNode({ data }: NodeProps) {
           className="relative rounded-3xl bg-white p-2 text-white shadow-node"
         >
           <div className="h-5  flex items-center justify-between">
-            <div className="flex items-center gap-1 text-13 text-foreground/87">
+            <div className="flex items-center gap-1 text-body-sm text-foreground/87">
               <div className="size-5 flex items-center justify-center">
                 <BranchIcon pathClassName="fill-foreground" />
               </div>
@@ -93,10 +93,10 @@ export function ResearchCardNode({ data }: NodeProps) {
             }}
           >
             <div className="bg-background-2 p-2 rounded-[7.5px]">
-              <p className="text-xs text-foreground/50 leading-tight">
+              <p className="text-caption-lg text-foreground/50 leading-tight">
                 {pages} pages of research…
               </p>
-              <p className="pt-2 text-13 leading-snug text-foreground">
+              <p className="pt-2 text-body-sm leading-snug text-foreground">
                 {body}
               </p>
             </div>

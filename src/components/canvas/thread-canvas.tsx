@@ -251,7 +251,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground"></p>
+        <p className="text-body-base text-muted-foreground"></p>
       </div>
     );
   }
@@ -259,7 +259,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   if (!nodes?.length) {
     return (
       <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">No nodes in this thread</p>
+        <p className="text-body-base text-muted-foreground">No nodes in this thread</p>
       </div>
     );
   }

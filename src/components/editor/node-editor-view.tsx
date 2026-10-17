@@ -57,7 +57,7 @@ export function NodeEditorView({
   if (isPending) {
     return (
       <div className="flex h-[calc(100svh-3.5rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-body-base text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export function NodeEditorView({
   if (!node) {
     return (
       <div className="flex h-[calc(100svh-3.5rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Node not found</p>
+        <p className="text-body-base text-muted-foreground">Node not found</p>
       </div>
     );
   }
@@ -74,7 +74,7 @@ export function NodeEditorView({
     <div className="flex h-[calc(100svh-3.5rem)]">
       <div className={cn("flex-1 min-w-0 overflow-y-auto", chatOpen && "border-r border-border/40")}>
         <div className="mx-auto max-w-3xl px-6 py-8">
-          <h1 className="mb-6 text-xl font-semibold text-foreground">
+          <h1 className="mb-6 text-heading-6 font-semibold text-foreground">
             {node.title}
           </h1>
           <BlockEditor
@@ -89,7 +89,7 @@ export function NodeEditorView({
       {chatOpen && (
         <div className="w-[400px] shrink-0 flex flex-col">
           <div className="flex h-10 items-center justify-between border-b border-border/40 px-3">
-            <span className="text-xs font-medium text-foreground/60">Chat</span>
+            <span className="text-caption-lg font-medium text-foreground/60">Chat</span>
             <button
               onClick={() => setChatOpen(false)}
               className="flex size-6 items-center justify-center rounded-lg text-foreground/40 transition-colors hover:bg-foreground/5 hover:text-foreground/60"

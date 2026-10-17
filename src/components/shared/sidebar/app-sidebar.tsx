@@ -33,10 +33,10 @@ export function AppSidebar() {
             <Skeleton className="h-4 w-24" />
           ) : (
             <>
-              <p className="truncate text-xs font-medium text-foreground">
+              <p className="truncate text-caption-lg font-medium text-foreground">
                 {capitalizeFirst(thread?.name || "") ?? "Untitled"}
               </p>
-              <p className="text-11 leading-none text-foreground/35">
+              <p className="text-caption-base leading-none text-foreground/35">
                 {formatRelativeTime(thread?._creationTime ?? 0)}
               </p>
             </>
@@ -51,7 +51,7 @@ export function AppSidebar() {
       </div>
 
       <div className="flex-1 overflow-y-aut mt-4 px-2 py-2">
-        <p className="px-2 pb-1.5 text-11 font-medium text-foreground/35">
+        <p className="px-2 pb-1.5 text-caption-base font-medium text-foreground/35">
           Nodes
         </p>
         {isPending ? (

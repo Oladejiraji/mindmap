@@ -80,17 +80,17 @@ export function CanvasPanel() {
                         cancelRename();
                       }
                     }}
-                    className="flex h-5 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-xs font-medium text-foreground shadow-border outline-none"
+                    className="flex h-5 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-caption-lg font-medium text-foreground shadow-border outline-none"
                   />
                 ) : (
                   <p
                     onClick={startEditing}
-                    className="cursor-text truncate rounded px-1 py-0.5 text-xs font-medium text-foreground transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
+                    className="cursor-text truncate rounded px-1 py-0.5 text-caption-lg font-medium text-foreground transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
                   >
                     {thread?.name ?? "Untitled"}
                   </p>
                 )}
-                <p className="px-1 text-11 leading-none text-foreground/35">
+                <p className="px-1 text-caption-base leading-none text-foreground/35">
                   {formatRelativeTime(thread?._creationTime ?? 0)}
                 </p>
               </>
@@ -119,7 +119,7 @@ export function CanvasPanel() {
               className="overflow-hidden"
             >
               <div className="border-t border-border/40 px-2 py-2">
-                <p className="px-2 pb-1.5 text-11 font-medium text-foreground/35">
+                <p className="px-2 pb-1.5 text-caption-base font-medium text-foreground/35">
                   Nodes
                 </p>
                 {isPending ? (

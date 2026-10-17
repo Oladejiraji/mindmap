@@ -122,7 +122,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="mt-11 flex flex-col">
-            <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-xs text-foreground/40">
+            <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-caption-lg text-foreground/40">
               <span>Name</span>
               <span>Created</span>
               <span>Edited</span>
@@ -156,7 +156,7 @@ export default function Home() {
         {!isPending && threads?.length === 0 && (
           <div className="flex flex-col items-center pt-24 text-center">
             <CanvasIcon className="size-10 text-foreground/15" />
-            <p className="mt-3 text-sm text-foreground/40">No projects yet</p>
+            <p className="mt-3 text-body-base text-foreground/40">No projects yet</p>
             <Button
               onClick={() => void handleCreate()}
               isLoading={isCreating}

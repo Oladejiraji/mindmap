@@ -62,7 +62,7 @@ const EditDropdown = ({
         <Menu.Positioner sideOffset={4} align="end" className="z-50">
           <Menu.Popup className="min-w-32 rounded-lg border bg-popover p-1 shadow-large">
             <Menu.Item
-              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-background-5"
+              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-caption-lg hover:bg-background-5"
               onClick={() => {
                 setDraft(node.title);
                 setIsEditing(true);
@@ -72,7 +72,7 @@ const EditDropdown = ({
               Rename
             </Menu.Item>
             <Menu.Item
-              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-background-5"
+              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-caption-lg hover:bg-background-5"
               onClick={handleBranch}
             >
               <GitBranch className="size-3" />
@@ -80,7 +80,7 @@ const EditDropdown = ({
             </Menu.Item>
             {canDelete && (
               <Menu.Item
-                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-destructive hover:bg-background-5"
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-caption-lg text-destructive hover:bg-background-5"
                 onClick={handleDeleteClick}
               >
                 <Trash2 className="size-3" />
