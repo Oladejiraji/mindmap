@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, Network } from "lucide-react";
+import { Network } from "lucide-react";
+import { ChatIcon } from "@/components/icons/chat-icon";
 import { cn } from "@/lib/utils";
 
 /*
@@ -58,7 +59,7 @@ export function ViewToggle({
         }}
         className={item(active === "chat")}
       >
-        <MessageSquare />
+        <ChatIcon />
         Chat
       </Link>
     </div>
