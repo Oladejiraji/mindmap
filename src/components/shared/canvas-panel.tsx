@@ -20,7 +20,14 @@ function useThreadIdFromRoute() {
   return match?.[1] as Id<"threads"> | undefined;
 }
 
-export function CanvasPanel() {
+/*
+ * Project panel: project name (click to rename) + node tree.
+ * - floating: the card over the canvas (hidden on node pages, which embed it)
+ * - embedded: fills a sidebar column on the node page; always expanded
+ */
+export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "embedded" }) {
+  const pathname = usePathname();
+  const embedded = variant === "embedded";
   const [open, setOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -53,9 +60,12 @@ export function CanvasPanel() {
     setIsEditing(false);
   };
 
+  if (!embedded && /\/n\//.test(pathname)) return null;
+  const expanded = embedded || open;
+
   return (
-    <div className="absolute left-3 top-3 z-10 w-56">
-      <div className="overflow-hidden rounded-xl border border-border/40 bg-white shadow-default">
+    <div className={embedded ? "h-full" : "absolute left-3 top-3 z-10 w-56"}>
+      <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
         <div className="flex h-11 w-full items-center gap-2 px-3">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
             <CanvasIcon className="size-3.5 text-foreground/20" />
@@ -96,7 +106,7 @@ export function CanvasPanel() {
               </>
             )}
           </div>
-          <button
+          {!embedded && <button
             onClick={() => setOpen((o) => !o)}
             className="flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-foreground/8"
           >
@@ -106,11 +116,11 @@ export function CanvasPanel() {
                 !open && "-rotate-90",
               )}
             />
-          </button>
+          </button>}
         </div>
 
         <AnimatePresence initial={false}>
-          {open && (
+          {expanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -118,7 +128,7 @@ export function CanvasPanel() {
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <div className="border-t border-border/40 px-2 py-2">
+              <div className={embedded ? "px-2 pt-4" : "border-t border-border/40 px-2 py-2"}>
                 <p className="px-2 pb-1.5 text-caption-base font-medium text-foreground/35">
                   Nodes
                 </p>

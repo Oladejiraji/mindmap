@@ -17,13 +17,17 @@ import { BranchNodeIcon, LeafNodeIcon, RootNodeIcon } from "@/components/icons/n
 import { BlockEditor } from "./block-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
+import { CanvasPanel } from "@/components/shared/canvas-panel";
+import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
+import { useStoredBoolean } from "@/lib/use-stored-boolean";
 
 /*
  * Node page, laid out like the interfere.com product dashboard:
  *   top bar     breadcrumb (project › ancestors › node), canvas link
  *   left        detail column: type tile, title, summary, property rows
  *   right       pill tabs (Content, Chat) over the active panel
- * The floating project panel keeps its own column on the far left.
+ * The project panel is a collapsible 280px sidebar on the left, toggled
+ * from the start of the top bar; the choice persists across visits.
  */
 
 type Tab = "content" | "chat";
@@ -40,6 +44,7 @@ export function NodeEditorView({
   const { data: nodes } = useNodesByThread(threadId);
   const updateContent = useMutation(api.nodes.updateContent);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const [sidebarOpen, setSidebarOpen] = useStoredBoolean("mindmap:node-sidebar", true);
 
   const hasContent =
     node?.content &&
@@ -98,41 +103,61 @@ export function NodeEditorView({
 
   return (
     <div className="flex h-svh bg-background">
-      {/* Room for the floating project panel (CanvasPanel, left-3 w-56). */}
-      <div className="hidden w-62 shrink-0 md:block" />
+      {/* Collapsible project sidebar */}
+      <aside
+        aria-label="Project"
+        className={cn(
+          "hidden shrink-0 overflow-hidden bg-sidebar transition-[width] duration-200 ease-out md:block",
+          sidebarOpen ? "w-70" : "w-0",
+        )}
+      >
+        <div className="h-full w-70 px-2 pt-2">
+          <CanvasPanel variant="embedded" />
+        </div>
+      </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col border-l border-border-default bg-surface-container">
+      <div className={cn("flex min-w-0 flex-1 flex-col bg-surface-container", sidebarOpen && "md:border-l md:border-border-default")}>
         {/* Top bar */}
         <header className="flex h-12 shrink-0 items-center justify-between border-b border-border-default px-3">
-          <nav aria-label="Breadcrumb" className="min-w-0">
-            <ol className="flex min-w-0 items-center text-body-sm font-medium text-fg-secondary">
-              <li className="min-w-0">
-                <Crumb href={routes.thread(threadId)}>{thread?.name ?? "Project"}</Crumb>
-              </li>
-              {ancestors.length > 1 && (
-                <>
-                  <Separator />
-                  <li className="px-1 text-fg-tertiary" title={ancestors.slice(0, -1).map((a) => a.title).join(" › ")}>
-                    …
-                  </li>
-                </>
-              )}
-              {parent && (
-                <>
-                  <Separator />
-                  <li className="min-w-0">
-                    <Crumb href={routes.node(threadId, parent._id)}>{parent.title}</Crumb>
-                  </li>
-                </>
-              )}
-              <Separator />
-              <li className="min-w-0">
-                <span aria-current="page" className="block truncate px-2 py-1 text-fg-primary">
-                  {node.title}
-                </span>
-              </li>
-            </ol>
-          </nav>
+          <div className="flex min-w-0 items-center gap-1">
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              aria-expanded={sidebarOpen}
+              className="hidden size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 md:flex"
+            >
+              <SidebarToggleIcon open={sidebarOpen} className="size-4" />
+            </button>
+            <nav aria-label="Breadcrumb" className="min-w-0">
+              <ol className="flex min-w-0 items-center text-body-sm font-medium text-fg-secondary">
+                <li className="min-w-0">
+                  <Crumb href={routes.thread(threadId)}>{thread?.name ?? "Project"}</Crumb>
+                </li>
+                {ancestors.length > 1 && (
+                  <>
+                    <Separator />
+                    <li className="px-1 text-fg-tertiary" title={ancestors.slice(0, -1).map((a) => a.title).join(" › ")}>
+                      …
+                    </li>
+                  </>
+                )}
+                {parent && (
+                  <>
+                    <Separator />
+                    <li className="min-w-0">
+                      <Crumb href={routes.node(threadId, parent._id)}>{parent.title}</Crumb>
+                    </li>
+                  </>
+                )}
+                <Separator />
+                <li className="min-w-0">
+                  <span aria-current="page" className="block truncate px-2 py-1 text-fg-primary">
+                    {node.title}
+                  </span>
+                </li>
+              </ol>
+            </nav>
+          </div>
           <Link
             href={routes.thread(threadId)}
             className="flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"

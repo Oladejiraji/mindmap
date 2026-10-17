@@ -1,13 +1,15 @@
 import type { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { HomeSidebar } from "@/components/shared/sidebar/home-sidebar";
+import { SidebarToggleButton } from "@/components/shared/sidebar/sidebar-toggle-button";
 
 export default function HomeLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider className="h-svh overflow-hidden bg-sidebar">
       <HomeSidebar />
       <div className="flex-1 min-h-0 py-1 pr-1">
-        <div className="h-full overflow-auto overscroll-contain rounded-3xl bg-background shadow-default">
+        <div className="relative h-full overflow-auto overscroll-contain rounded-3xl bg-background shadow-default">
+          <SidebarToggleButton className="absolute top-3 left-3 z-10" />
           {children}
         </div>
       </div>
