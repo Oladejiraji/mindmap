@@ -18,7 +18,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { NodeChat } from "@/components/chat/node-chat";
+import { BranchChat } from "@/components/chat/branch-chat";
 import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
@@ -331,19 +331,18 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       <div
         inert={view !== "chat"}
         className={cn(
-          "absolute inset-0 flex justify-center px-6 transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+          "absolute inset-0 flex justify-center transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
           view === "chat" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
         )}
       >
-        {chatNode && view === "chat" && (
-          <div className="flex h-full w-full max-w-3xl flex-col pt-16">
-            <div className="px-4 pb-3">
-              <p className="text-caption-lg text-fg-tertiary">Chat</p>
-              <h2 className="truncate text-heading-6 font-semibold text-fg-primary">{chatNode.title}</h2>
-            </div>
-            <div className="min-h-0 flex-1">
-              <NodeChat threadId={threadId} nodeId={chatNode._id} />
-            </div>
+        {chatNode && nodes && view === "chat" && (
+          <div className="h-full w-full">
+            <BranchChat
+              threadId={threadId}
+              nodes={nodes}
+              activeNodeId={chatNode._id}
+              onActiveNodeChange={(id) => router.replace(`${pathname}?view=chat&node=${id}`, { scroll: false })}
+            />
           </div>
         )}
       </div>

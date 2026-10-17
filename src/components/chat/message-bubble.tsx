@@ -14,10 +14,9 @@ export function MessageBubble({ message }: { message: Message }) {
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "rounded-xl text-body-base",
-          isUser
-            ? "max-w-[80%] bg-foreground text-background px-3 py-2"
-            : ""
+          "text-body-base text-fg-primary",
+          // ChatGPT-style: your turns in a soft grey bubble, replies as plain text
+          isUser ? "max-w-[75%] rounded-3xl bg-component px-4 py-2.5" : "w-full"
         )}
       >
         {isEmpty && isStreaming ? (
