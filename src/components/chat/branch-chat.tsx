@@ -129,10 +129,8 @@ export function BranchChat({
 
       <div className="shrink-0 px-6 pb-6">
         <div className="mx-auto w-full max-w-[720px]">
-          <ChatInput onSend={send} disabled={isSending || isStreaming} placeholder={`Message ${active.title}`} />
-          <p className="mt-2 text-center text-caption-base text-fg-tertiary">
-            Replies continue <span className="text-fg-secondary">{active.title}</span>. Branch from any reply to explore another direction.
-          </p>
+          <p className="mb-3 text-center text-body-sm text-fg-tertiary">Mindmap can make mistakes. Check important info.</p>
+          <ChatInput onSend={send} disabled={isSending || isStreaming} onNewBranch={() => void branchFrom(activeNodeId)} />
         </div>
       </div>
     </div>
