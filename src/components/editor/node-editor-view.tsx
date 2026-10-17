@@ -2,8 +2,9 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
-import { ChevronRight, Network } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { Block } from "@blocknote/core";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
@@ -22,6 +23,7 @@ import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
 import { useRegisterTab } from "@/lib/tabs";
 import { TabStrip } from "@/components/shared/tab-strip";
+import { ViewToggle } from "@/components/shared/view-toggle";
 
 /*
  * Node page, laid out like the interfere.com product dashboard:
@@ -59,11 +61,13 @@ export function NodeEditorView({
       (!node.content[0].content || node.content[0].content.length === 0)
     );
 
-  // Same rule as before: an empty node opens on the chat.
+  // ?tab=chat (from the canvas toggle) wins; otherwise an empty node opens
+  // on the chat, as before.
+  const requestedTab = useSearchParams().get("tab");
   const [tab, setTab] = useState<Tab>("content");
   const [tabInitialized, setTabInitialized] = useState(false);
   if (!tabInitialized && node) {
-    setTab(hasContent ? "content" : "chat");
+    setTab(requestedTab === "chat" || requestedTab === "content" ? requestedTab : hasContent ? "content" : "chat");
     setTabInitialized(true);
   }
 
@@ -163,13 +167,14 @@ export function NodeEditorView({
                 </ol>
               </nav>
             </div>
-            <Link
-              href={routes.thread(threadId)}
-              className="flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <Network className="size-4 text-fg-tertiary" />
-              Canvas
-            </Link>
+            <ViewToggle
+              active="chat"
+              canvasHref={routes.thread(threadId)}
+              chatHref={`${routes.node(threadId, nodeId)}?tab=chat`}
+              chatLabel={node.title}
+              onChat={() => setTab("chat")}
+              className="shrink-0"
+            />
           </header>
 
           <div className="flex min-h-0 flex-1">

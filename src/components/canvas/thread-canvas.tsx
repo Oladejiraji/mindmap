@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useEffect, useRef, useState } from "react";
+import { ViewToggle } from "@/components/shared/view-toggle";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -264,8 +265,21 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     );
   }
 
+  const chatNode =
+    (selectedNodeId && nodes?.find((n) => n._id === selectedNodeId)) ||
+    nodes?.find((n) => n.parentId === null);
+
   return (
-    <div className="h-full w-full">
+    <div className="relative h-full w-full">
+      {chatNode && (
+        <ViewToggle
+          active="canvas"
+          canvasHref={routes.thread(threadId)}
+          chatHref={`${routes.node(threadId, chatNode._id)}?tab=chat`}
+          chatLabel={chatNode.title}
+          className="absolute top-3 right-3 z-10 bg-background-5 shadow-default"
+        />
+      )}
       <ReactFlow
         nodes={flowNodes}
         edges={rfEdges}
