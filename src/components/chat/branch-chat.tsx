@@ -120,7 +120,7 @@ export function BranchChat({
             const index = siblings.findIndex((s) => s._id === node._id);
             return (
               <section key={node._id} aria-label={node.title}>
-                {i > 0 && <Divider className="my-10" />}
+                {i > 0 && <Divider color="strong" className="my-10" />}
                 <ForkHeader
                   title={node.title}
                   isRoot={i === 0}
