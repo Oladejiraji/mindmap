@@ -5,7 +5,6 @@ import { ViewToggle } from "@/components/shared/view-toggle";
 import {
   ReactFlow,
   ReactFlowProvider,
-  Background,
   Controls,
   MiniMap,
   useNodesState,
@@ -316,7 +315,6 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           fitViewOptions={{ padding: 0.4 }}
           proOptions={{ hideAttribution: true }}
         >
-          <Background gap={16} size={1} />
           <Controls showInteractive={false} />
           <MiniMap
             nodeStrokeWidth={3}
