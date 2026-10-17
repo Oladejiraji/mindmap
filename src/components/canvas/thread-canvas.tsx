@@ -18,6 +18,7 @@ import "@xyflow/react/dist/style.css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BranchChat } from "@/components/chat/branch-chat";
 import { ZoomControls } from "./zoom-controls";
+import { CanvasShortcuts } from "./canvas-shortcuts";
 import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
@@ -253,6 +254,36 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     [createEmptyBranch, screenToFlowPosition],
   );
 
+  // Canvas keyboard shortcuts. Only act when focus is on the page or the
+  // canvas itself, so Tab/Enter keep working in inputs, menus and buttons.
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const isChatView = searchParams.get("view") === "chat";
+  useEffect(() => {
+    if (isChatView || !nodes) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      const onCanvas = !el || el === document.body || !!el.closest(".react-flow__pane, .react-flow__node, .react-flow__renderer");
+      if (!onCanvas || el?.isContentEditable || el?.tagName === "INPUT" || el?.tagName === "TEXTAREA") return;
+      const root = nodes.find((n) => n.parentId === null);
+      const selected = (selectedNodeId && nodes.find((n) => n._id === selectedNodeId)) || null;
+      if (e.key === "?") {
+        e.preventDefault();
+        setShortcutsOpen((o) => !o);
+      } else if (e.key === "Tab" && !e.shiftKey) {
+        const parent = selected ?? root;
+        if (!parent) return;
+        e.preventDefault();
+        createEmptyBranch({ parentId: parent._id }).catch((err) => handleError(err, "Failed to create branch"));
+      } else if (e.key === "Enter" && selected?.parentId) {
+        e.preventDefault();
+        createEmptyBranch({ parentId: selected.parentId }).catch((err) => handleError(err, "Failed to create branch"));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isChatView, nodes, selectedNodeId, createEmptyBranch]);
+
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -323,6 +354,14 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
             className="bg-muted/50! border! border-border! rounded-xl! shadow-default!"
           />
         </ReactFlow>
+        {nodes && (
+          <CanvasShortcuts
+            hasSelection={!!selectedNodeId}
+            isRootSelected={!!selectedNodeId && nodes.find((n) => n._id === selectedNodeId)?.parentId === null}
+            expanded={shortcutsOpen}
+            onExpandedChange={setShortcutsOpen}
+          />
+        )}
       </div>
 
       {/* Chat layer: same tab, rises in over the canvas. */}
