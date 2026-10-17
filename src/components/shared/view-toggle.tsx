@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Network } from "lucide-react";
+import { CanvasViewIcon } from "@/components/icons/canvas-view-icon";
 import { ChatIcon } from "@/components/icons/chat-icon";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ export function ViewToggle({
         }}
         className={item(active === "canvas")}
       >
-        <Network />
+        <CanvasViewIcon />
         Canvas
       </Link>
       <Link
