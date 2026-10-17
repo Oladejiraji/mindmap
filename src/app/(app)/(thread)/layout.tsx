@@ -6,7 +6,7 @@ export default function ThreadLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-svh w-full flex-col bg-sidebar">
       <TabStrip skipOnNodePages />
-      <div className="relative min-h-0 w-full flex-1 bg-background">
+      <div className="relative min-h-0 w-full flex-1 bg-background bg-(image:--gradient-panel)">
         {children}
         <CanvasPanel />
       </div>

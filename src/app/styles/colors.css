@@ -7,6 +7,7 @@
   --color-surface-card: var(--surface-card);
   --color-surface-sunken: var(--surface-sunken);
   --color-surface-modal: var(--surface-modal);
+  --color-surface-panel-edge: var(--surface-panel-edge);
   --color-surface-standout: var(--surface-standout);
   --color-component: var(--component);
   --color-component-hover: var(--component-hover);
@@ -72,12 +73,13 @@
 }
 
 :root {
-  --surface-page: oklch(0.982 0 0);
-  --surface-shell: oklch(0.956 0 0);
+  --surface-page: oklch(0.976 0 0);
+  --surface-shell: oklch(0.879 0 0);
   --surface-container: oklch(1 0 0);
   --surface-card: oklch(0.976 0 0);
   --surface-sunken: oklch(0.952 0 0);
   --surface-modal: oklch(1 0 0);
+  --surface-panel-edge: oklch(0.962 0 0);
   --surface-standout: oklch(0.946 0 0);
   --component: oklch(0 0 0 / 0.06);
   --component-hover: oklch(0 0 0 / 0.09);
@@ -150,6 +152,7 @@
   --surface-card: oklch(0.22 0 0);
   --surface-sunken: oklch(0.155 0 0);
   --surface-modal: oklch(0.235 0 0);
+  --surface-panel-edge: oklch(0.16 0 0);
   --surface-standout: oklch(0.26 0 0);
   --component: oklch(1 0 0 / 0.07);
   --component-hover: oklch(1 0 0 / 0.105);

@@ -205,6 +205,10 @@
   --hover: var(--transparent-hover);
   --pressed: var(--transparent-active);
   --border: var(--border-default);
+  /* Main-panel surface, matching how define.app renders: lightest at the
+   * top centre, easing to a slightly darker edge. One line — the CSS build
+   * drops multi-line custom properties. */
+  --gradient-panel: radial-gradient(120% 95% at 50% 0%, var(--surface-page) 35%, var(--surface-panel-edge) 100%);
 }
 
 /* Elevation scale values, light and dark */

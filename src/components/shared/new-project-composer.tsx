@@ -77,7 +77,7 @@ export function NewProjectComposer() {
   const email = session?.user?.email ?? "";
 
   return (
-    <div className="flex h-full flex-col items-center justify-end bg-background px-4 pb-[12vh]">
+    <div className="flex h-full flex-col items-center justify-end px-4 pb-[12vh]">
       <div className="w-full max-w-[600px]">
         {session && (
           <div className="mb-3 inline-flex h-11 items-center gap-2 rounded-full bg-surface-container px-3 shadow-large">

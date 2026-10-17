@@ -44,7 +44,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-full flex-col bg-background">
+    <div className="flex min-h-full flex-col">
       <main className="mx-auto w-full max-w-[808px] flex-1 px-6 pt-14 pb-16">
         <div className="flex items-center justify-between">
           <h1 className="text-heading-6 font-semibold text-fg-primary">Recents</h1>
