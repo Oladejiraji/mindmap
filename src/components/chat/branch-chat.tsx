@@ -184,7 +184,7 @@ function ForkHeader({
   onNext: () => void;
 }) {
   return (
-    <div className="mb-6 flex items-center">
+    <div className="mb-6 flex items-center justify-center">
       <div className="flex items-center gap-1.5 text-caption-lg text-fg-tertiary">
         {isRoot ? <CanvasViewIcon className="size-3.5" /> : <GitBranch className="size-3.5" />}
         <span className="max-w-60 truncate font-medium text-fg-secondary">{title}</span>
