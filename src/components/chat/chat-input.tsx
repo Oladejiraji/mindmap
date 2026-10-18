@@ -120,7 +120,7 @@ export function ChatInput({
             {context.map((c) => (
               <span
                 key={c.label}
-                className="inline-flex h-8 max-w-60 items-center gap-1.5 rounded-full pr-3 pl-1 text-body-base text-fg-primary inset-ring-[0.5px] inset-ring-border-strong"
+                className="inline-flex h-8 max-w-60 items-center gap-1.5 rounded-full pr-3 pl-1 text-body-sm text-fg-primary inset-ring-[0.5px] inset-ring-border-strong"
               >
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg [&_svg]:size-3.5">
                   {c.icon}
@@ -140,7 +140,7 @@ export function ChatInput({
           aria-label="Message"
           disabled={disabled}
           rows={2}
-          className="field-sizing-content max-h-60 min-h-14 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-lg text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
+          className="field-sizing-content max-h-60 min-h-14 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-base text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
         />
 
         <div className="flex items-center gap-1.5">
