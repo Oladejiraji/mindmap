@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { MessageBubble } from "./message-bubble";
 import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
+import { CanvasPanel } from "@/components/shared/canvas-panel";
 
 /*
  * ChatGPT-style view of a project's tree.
@@ -150,7 +151,8 @@ export function BranchChat({
         >
           <ArrowDown className="size-4.5" />
         </button>
-        <div className="mx-auto w-full max-w-[720px]">
+        <div className="relative mx-auto w-full max-w-[720px]">
+          <CanvasPanel variant="docked" />
           <ChatInput
             onSend={send}
             disabled={isSending || isStreaming}

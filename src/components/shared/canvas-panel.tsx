@@ -24,8 +24,10 @@ function useThreadIdFromRoute() {
  * Project panel: project name (click to rename) + node tree.
  * - floating: the card over the canvas (hidden on node pages, which embed it)
  * - embedded: fills a sidebar column on the node page; always expanded
+ * - docked: in chat view, sits above the composer, right-aligned (the
+ *   chat renders it; the floating one steps aside)
  */
-export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "embedded" }) {
+export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "embedded" | "docked" }) {
   const pathname = usePathname();
   const inChat = useSearchParams().get("view") === "chat";
   const embedded = variant === "embedded";
@@ -62,6 +64,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
   };
 
   if (!threadId || (!embedded && /\/n\//.test(pathname))) return null;
+  if (variant === "floating" && inChat) return null;
   const expanded = embedded || open;
 
   return (
@@ -69,12 +72,9 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
       className={
         embedded
           ? "h-full"
-          : cn(
-              "absolute z-10 w-56 transition-[left] duration-300 ease-out motion-reduce:transition-none",
-              // Chat view: beside the composer, bottom edges level, so it
-              // never covers the conversation; canvas view: top-left corner.
-              inChat ? "bottom-6 left-[min(calc(50%+376px),calc(100%-236px))]" : "top-3 left-3",
-            )
+          : variant === "docked"
+            ? "absolute right-0 bottom-full z-10 mb-4 w-56"
+            : "absolute top-3 left-3 z-10 w-56"
       }
     >
       <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
