@@ -123,7 +123,7 @@ export function CreateMenu({ className }: { className?: string }) {
               onKeyDown={onKeyDown}
               placeholder={view === "projects" ? "Search projects…" : "Search…"}
               aria-label="Search"
-              className="h-11 w-full border-b border-border-default bg-transparent px-4 text-body-base text-fg-primary outline-none placeholder:text-fg-tertiary"
+              className="h-9.5 w-full border-b border-border-default bg-transparent px-4 text-body-base text-fg-primary outline-none placeholder:text-fg-tertiary"
             />
             <div className="max-h-72 overflow-y-auto overscroll-contain p-1.5" role="listbox" aria-label="Actions">
               {view === "projects" && !q && (
