@@ -78,11 +78,11 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
       }
     >
       <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
-        <div className="flex h-11 w-full items-center gap-2 px-3">
+        <div className="flex w-full items-start gap-2 p-3">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
             <CanvasIcon className="size-3.5 text-fg-disabled" />
           </div>
-          <div className="min-w-0 flex-1 text-left mb-1.5">
+          <div className="min-w-0 flex-1 text-left">
             {isPending ? (
               <Skeleton className="h-4 w-24" />
             ) : (
