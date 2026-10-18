@@ -8,7 +8,8 @@ import { api } from "@convex/api";
 import { closeTab, useRegisterTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
-import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { SendIcon } from "@/components/icons/send-icon";
 
 /*
  * New-tab empty state, modelled on define.app: an empty panel with the
@@ -113,9 +114,17 @@ export function NewProjectComposer() {
             </button>
             <div className="flex items-center gap-3">
               <span className="hidden text-caption-lg text-fg-tertiary sm:inline">⌘↵ to create</span>
-              <Button onClick={() => void create()} disabled={!canCreate} isLoading={creating}>
-                Create project
-              </Button>
+              {/* Same send disc as the chat composer: grey until there's a name. */}
+              <button
+                type="button"
+                onClick={() => void create()}
+                disabled={!canCreate}
+                aria-label="Create project"
+                title="Create project (⌘↵)"
+                className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg outline-none transition-colors hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+              >
+                {creating ? <Spinner className="size-4" /> : <SendIcon className="size-5" />}
+              </button>
             </div>
           </div>
         </div>
