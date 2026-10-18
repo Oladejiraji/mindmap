@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { NewTabIcon } from "@/components/icons/new-tab-icon";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
-import { BranchNodeIcon } from "@/components/icons/node-icons";
+import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { closeTab, useTabs } from "@/lib/tabs";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
     >
       {tabs.map((tab, i) => {
         const active = i === activeIndex;
-        const Icon = tab.kind === "project" ? CanvasIcon : tab.kind === "new" ? NewTabIcon : BranchNodeIcon;
+        const Icon = tab.kind === "project" ? CanvasIcon : tab.kind === "new" ? NewTabIcon : NodeTabIcon;
         const showDivider = i > 0 && !active && i - 1 !== activeIndex;
         return (
           <div
