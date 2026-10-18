@@ -22,7 +22,8 @@ import { routes } from "@/lib/routes";
 
 /*
  * App sidebar, structured like Pond's:
- *   header   logo tile + name · collapse toggle, new project (on the tab row)
+ *   header   logo tile + name · collapse toggle, new project (on the tab row);
+ *            the tile centres over the nav icons, the name on the nav labels
  *   nav      32px rows, 16px icon, 10px to the label, 14px text
  *   sections muted label with a trailing +, then its rows (Projects)
  *   footer   account, pinned bottom-left
@@ -40,11 +41,11 @@ export function HomeSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-none">
-      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-[18px] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
         <Link
           href={routes.home}
           aria-label="Mindmap home"
-          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:group-hover/header:hidden group-data-[collapsible=icon]:group-focus-within/header:hidden"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:group-hover/header:hidden group-data-[collapsible=icon]:group-focus-within/header:hidden"
         >
           <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-inverted-solid text-on-inverted-fg">
             <LogoIcon className="h-1.75 w-auto" />
@@ -76,7 +77,7 @@ export function HomeSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:hidden">
-          <div className="flex h-7 items-center justify-between pr-0.5 pl-2">
+          <div className="flex h-7 items-center justify-between pl-2">
             <span className="text-body-sm text-fg-tertiary">Projects</span>
             <Link href={routes.newProject} aria-label="New project" className={iconButton}>
               <Plus className="size-4" />
