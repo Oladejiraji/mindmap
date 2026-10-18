@@ -141,7 +141,7 @@ export function ChatInput({
           aria-label="Message"
           disabled={disabled}
           rows={2}
-          className="field-sizing-content max-h-60 min-h-14 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-base text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
+          className="field-sizing-content max-h-60 min-h-14 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-sm text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
         />
 
         <div className="flex items-center gap-1.5">

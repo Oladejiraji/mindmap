@@ -232,7 +232,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-sm text-ink-body;
+    /* Default body text: 13px/20px (body-sm). */
+    @apply bg-background text-body-sm text-ink-body;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -245,7 +246,7 @@
 }
 
 .markdown-body {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.25rem;
   letter-spacing: -0.0046em;
   color: var(--ink-body);
