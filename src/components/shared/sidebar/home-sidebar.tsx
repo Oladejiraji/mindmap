@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, Star } from "lucide-react";
 import { HomeIcon, LogoIcon } from "@/components/icons/sidebar-toggle";
-import { CanvasIcon } from "@/components/icons/canvas-icon";
+import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import {
   Sidebar,
   SidebarContent,
@@ -77,9 +77,9 @@ export function HomeSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:hidden">
-          <div className="flex h-7 items-center justify-between pl-2">
+          <div className="flex h-6 items-center justify-between pl-2">
             <span className="text-body-sm text-fg-tertiary">Projects</span>
-            <Link href={routes.newProject} aria-label="New project" className={iconButton}>
+            <Link href={routes.newProject} aria-label="New project" className={`${iconButton} size-6`}>
               <Plus className="size-4" />
             </Link>
           </div>
@@ -91,7 +91,7 @@ export function HomeSidebar() {
                   className={row}
                   render={<Link href={routes.thread(t._id)} />}
                 >
-                  <CanvasIcon className="size-4" />
+                  <NodeTabIcon className="size-4" />
                   <span>{t.name || "Untitled"}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
