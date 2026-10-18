@@ -16,7 +16,7 @@ import { handleError } from "@/lib/handle-error";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { BranchNodeIcon, LeafNodeIcon, RootNodeIcon } from "@/components/icons/node-icons";
+import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { BlockEditor } from "./block-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
@@ -113,7 +113,6 @@ export function NodeEditorView({
 
   const parent = ancestors.at(-1);
   const kind = !node.parentId ? "root" : children > 0 ? "branch" : "leaf";
-  const KindIcon = kind === "root" ? RootNodeIcon : kind === "branch" ? BranchNodeIcon : LeafNodeIcon;
   const kindLabel = kind === "root" ? "Root node" : kind === "branch" ? "Branch" : "Leaf";
 
   return (
@@ -157,11 +156,11 @@ export function NodeEditorView({
         <aside className="w-72 shrink-0 overflow-y-auto overscroll-contain border-r border-border-default">
           <div className="px-5 pt-6 pb-8">
             <div className="flex size-10 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
-              <KindIcon className="size-5" />
+              <NodeTabIcon className="size-5" />
             </div>
-            <p className="mt-5 text-caption-lg text-fg-tertiary">{kindLabel}</p>
-            <h1 className="mt-1 text-heading-5 font-semibold text-pretty text-fg-primary">{node.title}</h1>
-            {node.summary && <p className="mt-3 text-body-base text-fg-secondary">{node.summary}</p>}
+            <p className="mt-5 text-body-sm text-fg-tertiary">{kindLabel}</p>
+            <h1 className="mt-1 text-heading-5/6 font-semibold text-pretty text-fg-primary">{node.title}</h1>
+            {node.summary && <p className="mt-3 text-body-sm text-fg-secondary">{node.summary}</p>}
 
             <dl className="mt-6 grid grid-cols-[104px_minmax(0,1fr)] gap-y-1 text-body-sm">
               <Property label="Project">
