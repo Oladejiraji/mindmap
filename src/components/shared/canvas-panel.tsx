@@ -74,7 +74,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
           ? "h-full"
           : variant === "docked"
             ? "absolute right-0 bottom-full z-10 mb-4 w-56"
-            : "absolute top-3 left-12 z-10 w-56"
+            : "absolute top-3 left-3 z-10 w-56"
       }
     >
       <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
