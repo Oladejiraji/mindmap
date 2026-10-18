@@ -2,7 +2,8 @@
 
 import { useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
 import { Menu } from "@base-ui/react/menu";
-import { ArrowUp, GitBranch, Mic, Plus } from "lucide-react";
+import { GitBranch, Mic, Plus } from "lucide-react";
+import { SendIcon } from "@/components/icons/send-icon";
 import { cn } from "@/lib/utils";
 
 // Must match MAX_MESSAGE_CONTENT in convex/lib/validation.ts.
@@ -182,7 +183,7 @@ export function ChatInput({
             aria-label="Send"
             className="ml-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg outline-none transition-colors hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
           >
-            <ArrowUp className="size-5" strokeWidth={2} />
+            <SendIcon className="size-5" />
           </button>
         </div>
       </div>
