@@ -3,10 +3,8 @@
 import { useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
-import { GradientAvatar } from "@outpacelabs/avatars";
 import { Trash2 } from "lucide-react";
 import { api } from "@convex/api";
-import { authClient } from "@/lib/auth-client";
 import { closeTab, useRegisterTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
@@ -14,14 +12,12 @@ import { Button } from "@/components/ui/button";
 
 /*
  * New-tab empty state, modelled on define.app: an empty panel with the
- * composer sitting low and centred, under a pill showing who you're
- * creating as. Creating uses existing mutations only: threads.create
+ * composer sitting low and centred. Creating uses existing mutations only: threads.create
  * (which also makes the root node) and, if a question was written,
  * nodes.updateContent on that root node.
  */
 export function NewProjectComposer() {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
   const createThread = useMutation(api.threads.create);
   const updateContent = useMutation(api.nodes.updateContent);
   const [name, setName] = useState("");
@@ -73,22 +69,9 @@ export function NewProjectComposer() {
     }
   };
 
-  const userName = session?.user?.name ?? "";
-  const email = session?.user?.email ?? "";
-
   return (
     <div className="flex h-full flex-col items-center justify-end px-4 pb-[12vh]">
       <div className="w-full max-w-[600px]">
-        {session && (
-          <div className="mb-3 inline-flex h-11 items-center gap-2 rounded-full bg-surface-container px-3 shadow-large">
-            <span className="flex size-6 shrink-0 overflow-hidden rounded-full outline-[0.5px] outline-offset-[-0.5px] outline-border-default">
-              <GradientAvatar seed={email || userName} size={24} />
-            </span>
-            <span className="text-body-sm font-medium text-fg-primary">{userName}</span>
-            <span className="text-body-sm text-fg-tertiary">{email}</span>
-          </div>
-        )}
-
         <div className="overflow-hidden rounded-3xl bg-surface-container shadow-large" onKeyDown={onKeyDown}>
           <div className="px-6 pt-5 pb-3">
             <input
@@ -104,7 +87,7 @@ export function NewProjectComposer() {
               }}
               placeholder="Project name"
               aria-label="Project name"
-              className="w-full bg-transparent text-body-lg font-medium text-fg-primary outline-none placeholder:text-placeholder"
+              className="w-full bg-transparent text-body-base font-medium text-fg-primary outline-none placeholder:text-placeholder"
             />
           </div>
           <div className="border-t border-border-subtle px-6 pt-4 pb-2">
