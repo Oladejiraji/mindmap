@@ -1,18 +1,9 @@
-import { Suspense, type ReactNode } from "react";
-import { CanvasPanel } from "@/components/shared/canvas-panel";
-import { TabStrip } from "@/components/shared/tab-strip";
+import type { ReactNode } from "react";
+import { cookies } from "next/headers";
+import { ThreadShell } from "@/components/shared/thread-shell";
 
-export default function ThreadLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex h-svh w-full flex-col bg-sidebar">
-      <TabStrip skipOnNodePages />
-      <div className="relative min-h-0 w-full flex-1 bg-background bg-(image:--gradient-panel)">
-        {children}
-        {/* CanvasPanel reads ?view=, so it needs a Suspense boundary */}
-        <Suspense>
-          <CanvasPanel />
-        </Suspense>
-      </div>
-    </div>
-  );
+export default async function ThreadLayout({ children }: { children: ReactNode }) {
+  // Same cookie the sidebar writes, so it stays open/closed across pages.
+  const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false";
+  return <ThreadShell defaultOpen={defaultOpen}>{children}</ThreadShell>;
 }
