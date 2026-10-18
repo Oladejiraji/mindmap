@@ -71,7 +71,7 @@ export function NewProjectComposer() {
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-end px-4 pb-[12vh]">
+    <div className="flex h-full flex-col items-center justify-end px-4 pb-[2.4vh]">
       <div className="w-full max-w-[600px]">
         <div className="overflow-hidden rounded-3xl bg-surface-container shadow-large" onKeyDown={onKeyDown}>
           <div className="px-6 pt-5 pb-3">
@@ -113,17 +113,15 @@ export function NewProjectComposer() {
               <Trash2 className="size-4" />
             </button>
             <div className="flex items-center gap-3">
-              <span className="hidden text-caption-lg text-fg-tertiary sm:inline">⌘↵ to create</span>
               {/* Same send disc as the chat composer: grey until there's a name. */}
               <button
                 type="button"
                 onClick={() => void create()}
                 disabled={!canCreate}
                 aria-label="Create project"
-                title="Create project (⌘↵)"
-                className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg outline-none transition-colors hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+                className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg outline-none transition-colors hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
               >
-                {creating ? <Spinner className="size-4" /> : <SendIcon className="size-5" />}
+                {creating ? <Spinner className="size-4" /> : <SendIcon className="size-4.5" />}
               </button>
             </div>
           </div>
