@@ -25,7 +25,7 @@ import { routes } from "@/lib/routes";
 /*
  * App sidebar, structured like Pond's:
  *   header   logo tile + name · collapse toggle, new project (on the tab row);
- *            the 28px brand tile centres over the nav icons
+ *            the 24px brand tile (14px m) centres over the nav icons
  *   nav      32px rows, 16px icon, 10px to the label, 13px text
  *   sections muted label with a trailing +, then its rows (Projects)
  *   footer   account, pinned bottom-left (no divider)
@@ -43,14 +43,14 @@ export function HomeSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-none">
-      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-3.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
         <Link
           href={routes.home}
           aria-label="Mindmap home"
           className="flex min-w-0 flex-1 items-center gap-2 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:group-hover/header:hidden group-data-[collapsible=icon]:group-focus-within/header:hidden"
         >
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
-            <LogoIcon className="h-2.5 w-auto" />
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-brand-solid text-on-brand-solid">
+            <LogoIcon className="h-auto w-3.5" />
           </span>
           <span className="truncate text-body-base font-medium text-fg-primary group-data-[collapsible=icon]:hidden">Mindmap</span>
         </Link>
