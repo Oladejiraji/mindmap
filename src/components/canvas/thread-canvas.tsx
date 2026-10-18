@@ -328,7 +328,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       <div
         inert={view === "chat"}
         className={cn(
-          "absolute inset-0 transition-[opacity,transform,filter] duration-300 ease-out motion-reduce:transition-none",
+          "@container absolute inset-0 transition-[opacity,transform,filter] duration-300 ease-out motion-reduce:transition-none",
           view === "chat" && "pointer-events-none scale-[0.98] opacity-0 blur-[2px]",
         )}
       >

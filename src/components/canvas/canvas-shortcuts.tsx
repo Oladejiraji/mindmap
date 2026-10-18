@@ -72,17 +72,17 @@ export function CanvasShortcuts({
         </div>
       )}
 
-      <div className="flex h-10 items-center gap-3 rounded-full bg-surface-container pr-1.5 pl-4 text-body-sm text-fg-secondary shadow-default inset-ring-[0.5px] inset-ring-border-default">
+      <div className="flex h-10 items-center gap-3 rounded-full bg-surface-container pr-1.5 pl-4 whitespace-nowrap text-body-sm text-fg-secondary shadow-default inset-ring-[0.5px] inset-ring-border-default">
         {hasSelection ? (
           <>
             <span className="flex items-center gap-1.5"><Kbd>Tab</Kbd> Add branch</span>
             {!isRootSelected && <span className="flex items-center gap-1.5"><Kbd>↵</Kbd> Add sibling</span>}
-            <span className="hidden items-center gap-1.5 sm:flex">Double-click to rename</span>
+            <span className="hidden items-center gap-1.5 @2xl:flex">Double-click to rename</span>
           </>
         ) : (
           <>
             <span className="flex items-center gap-1.5"><Kbd>Tab</Kbd> Add a branch</span>
-            <span className="hidden sm:inline">or drag from a node&apos;s handle</span>
+            <span className="hidden @2xl:inline">or drag from a node&apos;s handle</span>
           </>
         )}
         <span className="flex items-center gap-0.5">
