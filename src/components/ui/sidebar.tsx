@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -277,17 +278,23 @@ function SidebarTrigger({
   )
 }
 
+// The sidebar's edge: a resize cursor plus a Pond-style chip that follows
+// the pointer ("Click to collapse ⌘B"); clicking toggles the sidebar.
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, open } = useSidebar()
+  // Viewport position of the pointer chip; portalled so the page panel
+  // beside the sidebar can't cover it.
+  const [hover, setHover] = React.useState<{ x: number; y: number } | null>(null)
 
   return (
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label="Toggle Sidebar"
+      aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      onMouseMove={(e) => setHover({ x: e.currentTarget.getBoundingClientRect().right, y: e.clientY })}
+      onMouseLeave={() => setHover(null)}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
@@ -298,7 +305,20 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
         className
       )}
       {...props}
-    />
+    >
+      {hover &&
+        createPortal(
+        <span
+          aria-hidden
+          style={{ left: hover.x + 4, top: hover.y }}
+          className="pointer-events-none fixed z-50 flex -translate-y-1/2 items-center gap-2 rounded-md bg-surface-modal py-1 pr-1 pl-2 text-caption-lg whitespace-nowrap text-fg-secondary shadow-large"
+        >
+          {open ? "Click to collapse" : "Click to expand"}
+          <kbd className="rounded-sm px-1 font-sans text-fg-tertiary inset-ring-[0.5px] inset-ring-border-strong">⌘B</kbd>
+        </span>,
+          document.body,
+        )}
+    </button>
   )
 }
 

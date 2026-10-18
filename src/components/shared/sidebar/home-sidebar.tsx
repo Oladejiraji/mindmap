@@ -14,6 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import { ProfileMenu } from "@/components/shared/sidebar/profile-menu";
 import { SidebarToggleButton } from "@/components/shared/sidebar/sidebar-toggle-button";
@@ -102,6 +103,7 @@ export function HomeSidebar() {
       <SidebarFooter className="mx-4 mb-4 border-t border-border-default px-0 pt-4 pb-0 group-data-[collapsible=icon]:mx-2">
         <ProfileMenu />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
