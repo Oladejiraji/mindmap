@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { Trash2 } from "lucide-react";
 import { api } from "@convex/api";
@@ -21,7 +21,15 @@ export function NewProjectComposer() {
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
   const updateContent = useMutation(api.nodes.updateContent);
-  const [name, setName] = useState("");
+  // The + menu can hand over a name typed into its search (?name=).
+  const initialName = useSearchParams().get("name") ?? "";
+  const [name, setName] = useState(initialName);
+  // A new ?name= while already on this page (picked from the + menu) replaces it.
+  const [seenName, setSeenName] = useState(initialName);
+  if (initialName !== seenName) {
+    setSeenName(initialName);
+    setName(initialName);
+  }
   const [question, setQuestion] = useState("");
   const [creating, setCreating] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -74,7 +82,7 @@ export function NewProjectComposer() {
     <div className="flex h-full flex-col items-center justify-end px-4 pb-[2.4vh]">
       <div className="w-full max-w-[600px]">
         <div className="overflow-hidden rounded-3xl bg-surface-container shadow-large" onKeyDown={onKeyDown}>
-          <div className="px-6 pt-5 pb-3">
+          <div className="px-6 pt-3 pb-2">
             <input
               ref={nameRef}
               autoFocus
@@ -91,18 +99,18 @@ export function NewProjectComposer() {
               className="w-full bg-transparent text-body-base font-medium text-fg-primary outline-none placeholder:text-placeholder"
             />
           </div>
-          <div className="border-t border-border-subtle px-6 pt-4 pb-2">
+          <div className="border-t border-border-subtle px-6 pt-2.5 pb-1">
             <textarea
               id="new-project-question"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              rows={3}
+              rows={1}
               placeholder="What are you trying to figure out? This becomes the root node."
               aria-label="Root question"
-              className="field-sizing-content max-h-60 min-h-18 w-full resize-none bg-transparent text-body-base text-fg-primary outline-none placeholder:text-placeholder"
+              className="field-sizing-content max-h-60 min-h-5 w-full resize-none bg-transparent text-body-base text-fg-primary outline-none placeholder:text-placeholder"
             />
           </div>
-          <div className="flex items-center justify-between px-4 pb-4">
+          <div className="flex items-center justify-between px-4 pb-2.5">
             <button
               type="button"
               onClick={discard}

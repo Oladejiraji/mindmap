@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ProfileMenu } from "@/components/shared/sidebar/profile-menu";
 import { SidebarToggleButton } from "@/components/shared/sidebar/sidebar-toggle-button";
+import { CreateMenu } from "@/components/shared/sidebar/create-menu";
 import { useThreads } from "@/services/threads/queries";
 import { routes } from "@/lib/routes";
 
@@ -53,9 +54,7 @@ export function HomeSidebar() {
           <span className="truncate text-body-base font-medium text-fg-primary group-data-[collapsible=icon]:hidden">Mindmap</span>
         </Link>
         <SidebarToggleButton className="group-data-[collapsible=icon]:hidden group-data-[collapsible=icon]:group-hover/header:flex group-data-[collapsible=icon]:group-focus-within/header:flex" />
-        <Link href={routes.newProject} aria-label="New project" title="New project" className={`${iconButton} group-data-[collapsible=icon]:hidden`}>
-          <Plus className="size-4" />
-        </Link>
+        <CreateMenu className="group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
 
       <SidebarContent className="gap-6 pt-5">
