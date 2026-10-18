@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 /*
  * Browser-style tab strip (modelled on define.app). The active tab takes
  * the colour of the panel below (--tab-bg) and joins it with inverted
- * corners; inactive tabs fade their titles out and are split by hairlines.
+ * corners. Every title fades out across the back half of the tab (no hard
+ * truncation); close appears on hover. Inactive tabs are split by hairlines.
  */
 export function TabStrip({ className, skipOnNodePages = false }: { className?: string; skipOnNodePages?: boolean }) {
   const tabs = useTabs();
@@ -56,11 +57,11 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
               title={tab.title}
               className={cn(
                 "flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pr-7 pl-3 text-body-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                active ? "font-medium text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
+                active ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
               )}
             >
               <Icon className={cn("size-4 shrink-0", active ? "text-fg-secondary" : "text-fg-tertiary")} />
-              <span className="min-w-0 flex-1 overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,black_calc(100%-20px),transparent)]">
+              <span className="min-w-0 flex-1 overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,black_30%,transparent_78%)]">
                 {tab.title}
               </span>
             </Link>
@@ -71,8 +72,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
                 if (next) router.push(next);
               }}
               className={cn(
-                "absolute right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-opacity hover:bg-transparent-hover hover:text-fg-primary focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",
-                active ? "opacity-100" : "opacity-0 group-hover/tab:opacity-100",
+                "absolute right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-md text-fg-tertiary opacity-0 outline-none transition-opacity group-hover/tab:opacity-100 hover:bg-transparent-hover hover:text-fg-primary focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",
               )}
             >
               <X className="size-3.5" />
