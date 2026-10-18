@@ -45,7 +45,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
             key={tab.href}
             role="presentation"
             className={cn(
-              "group/tab relative flex h-9 max-w-60 min-w-28 flex-1 basis-52 items-center",
+              "group/tab relative flex h-8 max-w-60 min-w-28 flex-1 basis-52 items-center",
               active && "z-10 rounded-t-xl bg-(--tab-bg)",
               // inverted corners that join the active tab to the panel
               active &&
@@ -90,7 +90,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
         href={routes.newProject}
         aria-label="New project"
         title="New project"
-        className="mb-1 ml-1 flex size-7 shrink-0 items-center justify-center self-end rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="mb-0.5 ml-1 flex size-7 shrink-0 items-center justify-center self-end rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <Plus className="size-4" />
       </Link>

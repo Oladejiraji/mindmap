@@ -40,7 +40,7 @@ export function HomeSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-none">
-      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-1 pr-3 pl-5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
         <Link
           href={routes.home}
           aria-label="Mindmap home"
