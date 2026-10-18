@@ -45,7 +45,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
             key={tab.href}
             role="presentation"
             className={cn(
-              "group/tab relative flex h-8 max-w-60 min-w-28 flex-1 basis-52 items-center",
+              "group/tab relative flex h-8 max-w-42 min-w-28 flex-1 basis-42 items-center",
               active && "z-10 rounded-t-xl bg-(--tab-bg)",
               // inverted corners that join the active tab to the panel
               active &&
