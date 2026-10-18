@@ -25,13 +25,13 @@ import { routes } from "@/lib/routes";
  * App sidebar, structured like Pond's:
  *   header   logo tile + name · collapse toggle, new project (on the tab row);
  *            the tile centres over the nav icons, the name on the nav labels
- *   nav      32px rows, 16px icon, 10px to the label, 14px text
+ *   nav      32px rows, 16px icon, 10px to the label, 13px text
  *   sections muted label with a trailing +, then its rows (Projects)
  *   footer   account, pinned bottom-left
  * Collapses to a 48px icon rail; there the logo tile swaps to the toggle
  * on hover, and sections hide.
  */
-const row = "h-8 gap-2.5 text-body-base font-semimedium";
+const row = "h-8 gap-2.5 text-body-sm font-semimedium";
 const iconButton =
   "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50";
 
