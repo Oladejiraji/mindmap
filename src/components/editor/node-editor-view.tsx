@@ -4,7 +4,9 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, Plus, X } from "lucide-react";
+import { GradientAvatar } from "@outpacelabs/avatars";
+import { authClient } from "@/lib/auth-client";
 import type { Block } from "@blocknote/core";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
@@ -161,7 +163,7 @@ export function NodeEditorView({
             <h1 className="mt-1 text-heading-5 font-semibold text-pretty text-fg-primary">{node.title}</h1>
             {node.summary && <p className="mt-3 text-body-base text-fg-secondary">{node.summary}</p>}
 
-            <dl className="mt-6 grid grid-cols-[88px_minmax(0,1fr)] gap-y-1 text-body-sm">
+            <dl className="mt-6 grid grid-cols-[104px_minmax(0,1fr)] gap-y-1 text-body-sm">
               <Property label="Project">
                 <span className="truncate">{thread?.name ?? "—"}</span>
               </Property>
@@ -181,6 +183,9 @@ export function NodeEditorView({
               <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
               <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
               <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
+              <Property label="Collaborators">
+                <Collaborators />
+              </Property>
             </dl>
           </div>
         </aside>
@@ -224,6 +229,38 @@ export function NodeEditorView({
         </section>
       </div>
     </div>
+  );
+}
+
+/* Avatar stack with a dashed "+" at the end. Projects are single-owner
+ * today, so the stack is just you; inviting needs a sharing model in the
+ * backend, so the + is disabled until then. */
+function Collaborators() {
+  const { data: session } = authClient.useSession();
+  const name = session?.user?.name ?? "You";
+  const email = session?.user?.email ?? "";
+  const people = [{ id: email || name, name, email }];
+  return (
+    <span className="flex items-center -space-x-1.5">
+      {people.map((p) => (
+        <span
+          key={p.id}
+          title={`${p.name} (owner)`}
+          className="relative flex size-6 shrink-0 overflow-hidden rounded-full ring-2 ring-surface-container"
+        >
+          <GradientAvatar seed={p.email || p.name} size={24} />
+        </span>
+      ))}
+      <button
+        type="button"
+        disabled
+        aria-label="Invite collaborators"
+        title="Inviting collaborators isn't available yet"
+        className="relative flex size-6 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border-strong bg-surface-container text-fg-tertiary ring-2 ring-surface-container"
+      >
+        <Plus className="size-3.5" />
+      </button>
+    </span>
   );
 }
 
