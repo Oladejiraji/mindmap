@@ -30,6 +30,8 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
     <div
       role="tablist"
       aria-label="Open tabs"
+      // Lets the panel below square its top-left corner under a flush first tab.
+      data-first-active={activeIndex === 0 || undefined}
       className={cn("flex h-10 shrink-0 items-end overflow-x-auto px-3 [scrollbar-width:none]", className)}
       style={{ ["--tab-bg" as string]: panelColor }}
     >
@@ -46,7 +48,10 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
               active && "z-10 rounded-t-xl bg-(--tab-bg)",
               // inverted corners that join the active tab to the panel
               active &&
-                "before:pointer-events-none before:absolute before:bottom-0 before:-left-3 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--tab-bg)_12.5px)] after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--tab-bg)_12.5px)]",
+                i > 0 &&
+                "before:pointer-events-none before:absolute before:bottom-0 before:-left-3 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--tab-bg)_12.5px)]",
+              active &&
+                "after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--tab-bg)_12.5px)]",
             )}
           >
             {showDivider && <span aria-hidden className="absolute top-1/2 left-0 h-4 w-px -translate-y-1/2 bg-border-default" />}

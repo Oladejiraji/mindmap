@@ -28,7 +28,7 @@ export function ThreadShell({ defaultOpen, children }: { defaultOpen: boolean; c
       <HomeSidebar />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col pr-1 pb-1">
         <TabStrip className="px-0" />
-        <div className="relative min-h-0 flex-1 overflow-hidden rounded-3xl bg-background bg-(image:--gradient-panel) shadow-default">
+        <div className="relative min-h-0 flex-1 overflow-hidden rounded-3xl [[data-first-active]+&]:rounded-tl-none bg-background bg-(image:--gradient-panel) shadow-default">
           {children}
           {/* CanvasPanel reads ?view=, so it needs a Suspense boundary */}
           <Suspense>
