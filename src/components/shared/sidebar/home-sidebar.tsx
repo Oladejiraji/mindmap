@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus, Star } from "lucide-react";
 import { HomeIcon, LogoIcon } from "@/components/icons/sidebar-toggle";
-import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +18,7 @@ import {
 import { ProfileMenu } from "@/components/shared/sidebar/profile-menu";
 import { SidebarToggleButton } from "@/components/shared/sidebar/sidebar-toggle-button";
 import { CreateMenu } from "@/components/shared/sidebar/create-menu";
+import { ProjectRow } from "@/components/shared/sidebar/project-row";
 import { useThreads } from "@/services/threads/queries";
 import { routes } from "@/lib/routes";
 
@@ -85,16 +85,7 @@ export function HomeSidebar() {
           </div>
           <SidebarMenu className="gap-0.5">
             {projects.map((t) => (
-              <SidebarMenuItem key={t._id}>
-                <SidebarMenuButton
-                  isActive={pathname.startsWith(routes.thread(t._id))}
-                  className={row}
-                  render={<Link href={routes.thread(t._id)} />}
-                >
-                  <NodeTabIcon className="size-4" />
-                  <span>{t.name || "Untitled"}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <ProjectRow key={t._id} thread={t} rowClassName={row} />
             ))}
           </SidebarMenu>
         </SidebarGroup>
