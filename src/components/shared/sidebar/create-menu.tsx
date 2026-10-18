@@ -3,7 +3,8 @@
 import { useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Popover } from "@base-ui/react/popover";
-import { ChevronLeft, ChevronRight, FolderOpen, FolderPlus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { FolderIcon, FolderPlusIcon } from "@/components/icons/folder-icons";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { useThreads } from "@/services/threads/queries";
 import { routes } from "@/lib/routes";
@@ -50,7 +51,7 @@ export function CreateMenu({ className }: { className?: string }) {
         ? []
         : [{
             key: "create",
-            icon: <FolderPlus />,
+            icon: <FolderPlusIcon />,
             label: <>Create “{query.trim()}”</>,
             run: () => go(`${routes.newProject}?name=${encodeURIComponent(query.trim())}`),
           }]),
@@ -59,8 +60,8 @@ export function CreateMenu({ className }: { className?: string }) {
     entries = projects;
   } else {
     entries = [
-      { key: "new", icon: <FolderPlus />, label: "New project", run: () => go(routes.newProject) },
-      { key: "open", icon: <FolderOpen />, label: "Open project", chevron: true, run: () => { setView("projects"); setActive(0); } },
+      { key: "new", icon: <FolderPlusIcon />, label: "New project", run: () => go(routes.newProject) },
+      { key: "open", icon: <FolderIcon />, label: "Open project", chevron: true, run: () => { setView("projects"); setActive(0); } },
     ];
   }
   const current = Math.min(active, Math.max(entries.length - 1, 0));
