@@ -120,18 +120,23 @@ export function BranchChat({
             const siblings = parent ? (childrenOf.get(parent._id) ?? []) : [];
             const index = siblings.findIndex((s) => s._id === node._id);
             return (
-              <section key={node._id} aria-label={node.title}>
-                {i > 0 && <Divider color="strong" className="my-10" />}
-                <ForkHeader
-                  title={node.title}
-                  isRoot={i === 0}
-                  index={index}
-                  count={siblings.length}
-                  onPrev={() => index > 0 && onActiveNodeChange(deepest(siblings[index - 1]._id))}
-                  onNext={() => index < siblings.length - 1 && onActiveNodeChange(deepest(siblings[index + 1]._id))}
-                />
-                <NodeMessages nodeId={node._id} onBranch={() => void branchFrom(node._id)} />
-              </section>
+              <NodeSection
+                key={node._id}
+                nodeId={node._id}
+                title={node.title}
+                showDivider={i > 0}
+                onBranch={() => void branchFrom(node._id)}
+                header={
+                  <ForkHeader
+                    title={node.title}
+                    isRoot={i === 0}
+                    index={index}
+                    count={siblings.length}
+                    onPrev={() => index > 0 && onActiveNodeChange(deepest(siblings[index - 1]._id))}
+                    onNext={() => index < siblings.length - 1 && onActiveNodeChange(deepest(siblings[index + 1]._id))}
+                  />
+                }
+              />
             );
           })}
         </div>
@@ -216,12 +221,40 @@ function ForkHeader({
   );
 }
 
-function NodeMessages({ nodeId, onBranch }: { nodeId: Id<"nodes">; onBranch: () => void }) {
+/* One node's part of the conversation. The divider above it is as wide as
+ * the section's text: the full column when there are messages, just the
+ * empty-state line when there aren't. */
+function NodeSection({
+  nodeId,
+  title,
+  showDivider,
+  header,
+  onBranch,
+}: {
+  nodeId: Id<"nodes">;
+  title: string;
+  showDivider: boolean;
+  header: React.ReactNode;
+  onBranch: () => void;
+}) {
   const { data: messages, isLoading } = useMessagesByNode(nodeId);
-  if (isLoading) return <div className="h-10" />;
-  if (!messages?.length) {
-    return <p className="text-center text-body-sm text-fg-tertiary">No messages in this branch yet.</p>;
-  }
+  const empty = !isLoading && !messages?.length;
+  return (
+    <section aria-label={title} className={cn(empty && "mx-auto w-fit max-w-full")}>
+      {showDivider && <Divider color="strong" className="my-10" />}
+      {header}
+      {isLoading ? (
+        <div className="h-10" />
+      ) : empty ? (
+        <p className="text-center text-body-sm text-fg-tertiary">No messages in this branch yet.</p>
+      ) : (
+        <NodeMessages messages={messages ?? []} onBranch={onBranch} />
+      )}
+    </section>
+  );
+}
+
+function NodeMessages({ messages, onBranch }: { messages: Message[]; onBranch: () => void }) {
   return (
     <div className="flex flex-col gap-6">
       {messages.map((m: Message) => (
