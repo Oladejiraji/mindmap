@@ -52,7 +52,7 @@ export function CreateMenu({ className }: { className?: string }) {
         : [{
             key: "create",
             icon: <FolderPlusIcon />,
-            label: <>Create “{query.trim()}”</>,
+            label: <>Start a chat: “{query.trim()}”</>,
             run: () => go(`${routes.newProject}?name=${encodeURIComponent(query.trim())}`),
           }]),
     ];

@@ -51,6 +51,7 @@ export function ChatInput({
   placeholder = "Send a message…",
   context,
   onNewBranch,
+  defaultValue = "",
   className,
 }: {
   onSend: (content: string) => void;
@@ -60,9 +61,11 @@ export function ChatInput({
   context?: ContextChip[];
   /** Adds "New branch" to the + menu. */
   onNewBranch?: () => void;
+  /** Starting text (e.g. handed over from the + menu). */
+  defaultValue?: string;
   className?: string;
 }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(defaultValue);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<Recognition | null>(null);
   const baseRef = useRef("");
