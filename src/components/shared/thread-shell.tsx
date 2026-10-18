@@ -9,8 +9,8 @@ import { TabStrip } from "@/components/shared/tab-strip";
 
 /*
  * Shell for project pages: the collapsible app sidebar, the tab strip and
- * an inset panel. Inside the panel the canvas (or chat) fills the space
- * left of the node side panel, which opens with ?panel=<nodeId>.
+ * the page as cards on the shell. The canvas (or chat) is one card; a
+ * node opened with ?panel=<nodeId> is a second card beside it, 8px apart.
  */
 export function ThreadShell({ defaultOpen, children }: { defaultOpen: boolean; children: ReactNode }) {
   return (
@@ -18,8 +18,8 @@ export function ThreadShell({ defaultOpen, children }: { defaultOpen: boolean; c
       <HomeSidebar />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col pr-1 pb-1">
         <TabStrip className="px-0" />
-        <div className="flex min-h-0 flex-1 overflow-hidden rounded-3xl [[data-first-active]+&]:rounded-tl-none bg-background bg-(image:--gradient-panel) shadow-default">
-          <div className="relative min-w-0 flex-1">
+        <div className="flex min-h-0 flex-1 gap-2">
+          <div className="relative min-w-0 flex-1 overflow-hidden rounded-3xl [[data-first-active]+*>&]:rounded-tl-none bg-background bg-(image:--gradient-panel) shadow-default">
             {children}
             {/* CanvasPanel and NodePanel read the query, so they need Suspense */}
             <Suspense>
