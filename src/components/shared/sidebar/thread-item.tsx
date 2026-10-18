@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { RootNodeIcon, BranchNodeIcon, LeafNodeIcon } from "@/components/icons/node-icons";
 import { RenderIf } from "@/components/shared/render-if";
@@ -81,12 +81,13 @@ interface INodeItemProps {
 
 function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemProps) {
   const pathname = usePathname();
+  const panelId = useSearchParams().get("panel");
 
   const isRoot = node.parentId === null;
   const nodeRoute = isRoot
     ? routes.thread(threadId)
     : routes.node(threadId, node._id);
-  const isActive = pathname === nodeRoute;
+  const isActive = isRoot ? pathname === nodeRoute && !panelId : panelId === node._id;
 
   const paddingLeft = `${node.depth * 12 + 8}px`;
 

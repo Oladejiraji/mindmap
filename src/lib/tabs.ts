@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 /*
- * Open tabs (projects and nodes), persisted in localStorage and shared
+ * Open tabs (projects and new-project), persisted in localStorage and shared
  * across the tab strip and pages via useSyncExternalStore. Purely client
  * state — nothing is stored on the backend.
  */
@@ -32,7 +32,8 @@ function snapshot(): OpenTab[] {
   let tabs: OpenTab[] = EMPTY;
   try {
     const parsed = raw ? JSON.parse(raw) : [];
-    if (Array.isArray(parsed)) tabs = parsed;
+    // Nodes open in a side panel now; drop node tabs saved before that.
+    if (Array.isArray(parsed)) tabs = parsed.filter((t: OpenTab) => t.kind !== "node" && !t.href.includes("/n/"));
   } catch {
     tabs = EMPTY;
   }

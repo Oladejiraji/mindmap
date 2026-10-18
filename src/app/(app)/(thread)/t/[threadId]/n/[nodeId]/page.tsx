@@ -1,23 +1,13 @@
-"use client";
-
-import { Suspense, use } from "react";
+import { redirect } from "next/navigation";
 import type { Id } from "@convex/dataModel";
-import { NodeEditorView } from "@/components/editor/node-editor-view";
+import { routes } from "@/lib/routes";
 
-export default function NodePage({
+// Nodes open as a side panel over their project; keep old links working.
+export default async function NodePage({
   params,
 }: {
   params: Promise<{ threadId: string; nodeId: string }>;
 }) {
-  const { threadId, nodeId } = use(params);
-
-  // NodeEditorView reads ?tab=, so it needs a Suspense boundary.
-  return (
-    <Suspense>
-      <NodeEditorView
-        threadId={threadId as Id<"threads">}
-        nodeId={nodeId as Id<"nodes">}
-      />
-    </Suspense>
-  );
+  const { threadId, nodeId } = await params;
+  redirect(routes.node(threadId, nodeId as Id<"nodes">));
 }
