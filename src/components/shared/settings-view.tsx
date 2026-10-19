@@ -33,7 +33,7 @@ function SettingsPage({ title, description, children }: { title: string; descrip
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section aria-label={title}>
-      <h2 className="px-4 pb-2.5 text-body-sm text-fg-tertiary">{title}</h2>
+      <h2 className="pb-2.5 text-body-sm text-fg-tertiary">{title}</h2>
       <div className="corner-squircle divide-y divide-border-default/[0.28] overflow-hidden rounded-3xl bg-surface-container shadow-border">{children}</div>
     </section>
   );
