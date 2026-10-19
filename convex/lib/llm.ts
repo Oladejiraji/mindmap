@@ -85,6 +85,9 @@ export async function maybeGenerateTitle(
     if (!title) return;
 
     await ctx.runMutation(api.nodes.rename, { nodeId, title });
+    if (node.parentId === null) {
+      await ctx.runMutation(api.threads.rename, { threadId: node.threadId, name: title });
+    }
   } catch (err) {
     console.error("title generation failed", err);
   }

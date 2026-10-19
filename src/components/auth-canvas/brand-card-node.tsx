@@ -51,11 +51,11 @@ export function BrandCardNode({ data }: NodeProps) {
   }, [pulseTrigger, duration, animate, scope]);
 
   return (
-    <div className="font-diatype" style={{ width }}>
+    <div className="" style={{ width }}>
       {author ? (
         <div className="flex items-center mb-2 gap-1">
           <div
-            className=" flex items-center gap-1 border border-black/2 rounded-[5px] px-1 py-0.5 shadow-[0_24px_40px_0_#8C8C8C0A,0_0_2px_0_#0000000A]"
+            className=" flex items-center gap-1 border border-black/2 rounded-md px-1 py-0.5 shadow-default"
             style={{ backgroundColor: author.bg || "#2D2D2D" }}
           >
             <div className="shrink-0">
@@ -67,10 +67,10 @@ export function BrandCardNode({ data }: NodeProps) {
                 height={16}
               />
             </div>
-            <span className="text-background text-11 ">{author.name}</span>
+            <span className="text-background text-caption-base ">{author.name}</span>
           </div>
           {author.role ? (
-            <p className="gradient-text-shimmer text-11 opacity-50">
+            <p className="gradient-text-shimmer text-caption-base opacity-50">
               {author.role}
             </p>
           ) : null}
@@ -79,10 +79,10 @@ export function BrandCardNode({ data }: NodeProps) {
 
       <div
         ref={scope}
-        className="relative rounded-[16px] bg-primary p-2 text-white shadow-[0_8px_30px_-12px_rgba(37,99,235,0.27)]"
+        className="relative rounded-3xl bg-primary p-2 text-white shadow-node-primary"
       >
         <div className="h-5  flex items-center justify-between">
-          <div className="flex items-center gap-1 text-13 text-background/87">
+          <div className="flex items-center gap-1 text-body-sm text-background/87">
             <div className="size-5 flex items-center justify-center">
               <BranchIcon />
             </div>
@@ -90,11 +90,11 @@ export function BrandCardNode({ data }: NodeProps) {
           </div>
           <BranchDropdown iconClassName="size-2.5 text-background/87" />
         </div>
-        <div className="bg-ring p-2 shadow-[0_1px_3px_0_#82A7F121,0_0_0_0.5px_#82A7F1] mt-3 rounded-[8px]">
-          <p className="text-xs text-background/50 leading-tight">
+        <div className="bg-ring p-2 shadow-node-inset mt-3 rounded-lg">
+          <p className="text-caption-lg text-background/50 leading-tight">
             {pages} pages of research…
           </p>
-          <p className="pt-2 text-13 leading-snug text-background">{body}</p>
+          <p className="pt-2 text-body-sm leading-snug text-background">{body}</p>
         </div>
 
         {handles.includes("top") ? (
@@ -132,11 +132,7 @@ export function BrandCardNode({ data }: NodeProps) {
       {showModel ? (
         <div className="pt-2 flex items-center gap-1.5">
           <button
-            className="px-1 py-px rounded-[5px] border border-black/2 flex items-center text-11 text-foreground-2 bg-background-5"
-            style={{
-              boxShadow:
-                "0px 24px 40px 0px #0000000A, 0px 0px 2px 0px #0000000A",
-            }}
+            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
           >
             <div className="flex items-center justify-center size-4.5">
               <GptIcon />
@@ -144,11 +140,7 @@ export function BrandCardNode({ data }: NodeProps) {
             <p>Chatgpt 5.5</p>
           </button>
           <button
-            className="px-1 py-px rounded-[5px] border border-black/2 flex items-center text-11 text-foreground-2 bg-background-5"
-            style={{
-              boxShadow:
-                "0px 24px 40px 0px #0000000A, 0px 0px 2px 0px #0000000A",
-            }}
+            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
           >
             <div className="flex items-center justify-center size-4.5">
               <AnthropicIcon />
@@ -156,15 +148,11 @@ export function BrandCardNode({ data }: NodeProps) {
             <p>Anthropic</p>
           </button>
           <button
-            className="size-5 justify-center rounded-[5px] border border-black/2 flex items-center text-11 text-foreground-2 bg-background-5"
-            style={{
-              boxShadow:
-                "0px 24px 40px 0px #0000000A, 0px 0px 2px 0px #0000000A",
-            }}
+            className="size-5 justify-center rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
           >
             <PlusIcon className="size-3" />
           </button>
-          <p className="font-medium text-11 text-foreground-3/30">
+          <p className="font-medium text-caption-base text-fg-tertiary">
             Models in use
           </p>
         </div>

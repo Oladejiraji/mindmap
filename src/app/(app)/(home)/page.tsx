@@ -44,10 +44,10 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-svh flex-col bg-background">
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pt-8">
+    <div className="flex min-h-full flex-col">
+      <main className="mx-auto w-full max-w-[808px] flex-1 px-6 pt-14 pb-16">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-medium text-foreground">Recents</h1>
+          <h1 className="text-heading-6 font-semibold text-fg-primary">Recents</h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => void handleCreate()}
@@ -57,21 +57,21 @@ export default function Home() {
               <Plus className="size-3.5" />
               New
             </Button>
-            <div className="relative flex h-8 items-center rounded-lg border border-foreground/8">
+            <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
               <button
                 onClick={() => updateLayout("grid")}
                 className={cn(
                   "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
                   layout === "grid"
-                    ? "text-foreground/60"
-                    : "text-foreground/25 hover:text-foreground/40",
+                    ? "text-fg-secondary"
+                    : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
                 <LayoutGrid className="size-3.5" />
                 {layout === "grid" && (
                   <motion.div
                     layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-[6px] bg-foreground/6"
+                    className="absolute inset-0.5 rounded-md bg-foreground/6"
                     transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
                   />
                 )}
@@ -81,15 +81,15 @@ export default function Home() {
                 className={cn(
                   "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
                   layout === "list"
-                    ? "text-foreground/60"
-                    : "text-foreground/25 hover:text-foreground/40",
+                    ? "text-fg-secondary"
+                    : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
                 <List className="size-3.5" />
                 {layout === "list" && (
                   <motion.div
                     layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-md bg-foreground/6"
+                    className="absolute inset-0.5 rounded-lg bg-foreground/6"
                     transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
                   />
                 )}
@@ -97,13 +97,14 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <div className="mt-8 h-px bg-border-default" />
 
         {layout === "grid" ? (
-          <div className="mt-12 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mt-11 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
             {isPending
               ? Array.from({ length: 8 }).map((_, i) => (
                   <div key={i}>
-                    <div className="aspect-4/3 animate-pulse rounded-lg bg-background-5" />
+                    <div className="aspect-4/3 animate-pulse rounded-xl bg-background-5" />
                     <div className="px-0.5 pt-2.5">
                       <div className="h-4 w-3/4 animate-pulse rounded bg-background-5" />
                       <div className="mt-1.5 h-3 w-1/2 animate-pulse rounded bg-background-5" />
@@ -120,8 +121,8 @@ export default function Home() {
                 ))}
           </div>
         ) : (
-          <div className="mt-12 flex flex-col">
-            <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-xs text-foreground/40">
+          <div className="mt-11 flex flex-col">
+            <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-caption-lg text-fg-tertiary">
               <span>Name</span>
               <span>Created</span>
               <span>Edited</span>
@@ -133,7 +134,7 @@ export default function Home() {
                     className="grid grid-cols-[1fr_8rem_8rem] items-center gap-3 px-2 py-2"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="size-8 animate-pulse rounded-md bg-background-5" />
+                      <div className="size-8 animate-pulse rounded-lg bg-background-5" />
                       <div className="h-4 w-1/3 animate-pulse rounded bg-background-5" />
                     </div>
                     <div className="h-3 w-16 animate-pulse rounded bg-background-5" />
@@ -154,8 +155,8 @@ export default function Home() {
 
         {!isPending && threads?.length === 0 && (
           <div className="flex flex-col items-center pt-24 text-center">
-            <CanvasIcon className="size-10 text-foreground/15" />
-            <p className="mt-3 text-sm text-foreground/40">No projects yet</p>
+            <CanvasIcon className="size-10 text-fg-disabled" />
+            <p className="mt-3 text-body-base text-fg-tertiary">No projects yet</p>
             <Button
               onClick={() => void handleCreate()}
               isLoading={isCreating}

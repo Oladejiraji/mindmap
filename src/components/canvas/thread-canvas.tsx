@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { ViewToggle } from "@/components/shared/view-toggle";
 import {
   ReactFlow,
   ReactFlowProvider,
-  Background,
-  Controls,
   MiniMap,
   useNodesState,
   useReactFlow,
@@ -16,7 +15,12 @@ import {
   type OnSelectionChangeFunc,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { BranchChat } from "@/components/chat/branch-chat";
+import { ZoomControls } from "./zoom-controls";
+import { CanvasShortcuts } from "./canvas-shortcuts";
+import { useSyncConvexToFlow } from "@/hooks/use-sync-convex-to-flow";
+import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
 import { api } from "@convex/api";
@@ -47,6 +51,9 @@ export function ThreadCanvas({ threadId }: { threadId: Id<"threads"> }) {
 }
 
 function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
+  // Hooks first (before any early return): the view lives in the URL.
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { data: nodes, isLoading } = useNodesByThread(threadId);
   const { mutate: updatePosition } = useConvexMutation(
     api.nodes.updatePosition,
@@ -153,37 +160,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
 
-  // Sync Convex data → React Flow when topology/data actually changes
-  const fingerprint = useMemo(
-    () =>
-      nodes
-        ?.map(
-          (n) =>
-            `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${n.content ?? ""}`,
-        )
-        .join("|") ?? "",
-    [nodes],
-  );
-  const lastSyncedRef = useRef(fingerprint);
-  useEffect(() => {
-    if (fingerprint && fingerprint !== lastSyncedRef.current) {
-      lastSyncedRef.current = fingerprint;
-      setFlowNodes((prev) => {
-        const incoming = new Map(rfNodes.map((n) => [n.id, n]));
-        const prevIds = new Set(prev.map((n) => n.id));
-        const merged = prev
-          .filter((n) => incoming.has(n.id))
-          .map((existing) => {
-            const next = incoming.get(existing.id)!;
-            return { ...existing, data: next.data, type: next.type };
-          });
-        for (const n of rfNodes) {
-          if (!prevIds.has(n.id)) merged.push({ ...n, type: n.type ?? "leaf" });
-        }
-        return merged;
-      });
-    }
-  }, [fingerprint, rfNodes, setFlowNodes]);
+  useSyncConvexToFlow(rfNodes, setFlowNodes, nodes);
 
   // Track which node a connection drag started from
   const connectSourceRef = useRef<string | null>(null);
@@ -248,47 +225,109 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     [createEmptyBranch, screenToFlowPosition],
   );
 
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
   if (isLoading) {
     return (
-      <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground"></p>
+      <div className="flex h-full items-center justify-center">
+        <p className="text-body-base text-fg-secondary"></p>
       </div>
     );
   }
 
   if (!nodes?.length) {
     return (
-      <div className="flex h-full min-h-[calc(100svh-3.125rem)] items-center justify-center">
-        <p className="text-sm text-muted-foreground">No nodes in this thread</p>
+      <div className="flex h-full items-center justify-center">
+        <p className="text-body-base text-fg-secondary">No nodes in this thread</p>
       </div>
     );
   }
 
+  const view = searchParams.get("view") === "chat" ? "chat" : "canvas";
+  const chatNodeParam = searchParams.get("node");
+  const chatNode =
+    (chatNodeParam && nodes?.find((n) => n._id === chatNodeParam)) ||
+    (selectedNodeId && nodes?.find((n) => n._id === selectedNodeId)) ||
+    nodes?.find((n) => n.parentId === null);
+  // Same tab, same path: only the query changes, so the tab stays put and
+  // a reload keeps the view.
+  const setView = (next: "canvas" | "chat") =>
+    router.replace(next === "chat" && chatNode ? `${pathname}?view=chat&node=${chatNode._id}` : pathname, { scroll: false });
+
   return (
-    <div className="h-[calc(100svh-3.125rem)] w-full">
-      <ReactFlow
-        nodes={flowNodes}
-        edges={rfEdges}
-        onNodesChange={onNodesChange}
-        onNodeDragStop={onNodeDragStop}
-        // onNodeDoubleClick={onNodeDoubleClick}
-        onConnectStart={onConnectStart}
-        onConnectEnd={onConnectEnd}
-        onSelectionChange={onSelectionChange}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.4 }}
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background gap={16} size={1} />
-        <Controls showInteractive={false} />
-        <MiniMap
-          nodeStrokeWidth={3}
-          zoomable
-          pannable
-          className="bg-muted/50! border! border-border! rounded-lg! shadow-sm!"
+    <div className="relative h-full w-full overflow-hidden">
+      {chatNode && (
+        <ViewToggle
+          active={view}
+          canvasHref={pathname}
+          chatHref={`${pathname}?view=chat&node=${chatNode._id}`}
+          chatLabel={chatNode.title}
+          onSelect={setView}
+          className="absolute top-3 right-3 z-20 bg-background-5 shadow-default"
         />
-      </ReactFlow>
+      )}
+
+      {/* Canvas layer stays mounted so zoom and position survive the switch. */}
+      <div
+        inert={view === "chat"}
+        className={cn(
+          "@container absolute inset-0 transition-[opacity,transform,filter] duration-300 ease-out motion-reduce:transition-none",
+          view === "chat" && "pointer-events-none scale-[0.98] opacity-0 blur-[2px]",
+        )}
+      >
+        <ReactFlow
+          nodes={flowNodes}
+          edges={rfEdges}
+          onNodesChange={onNodesChange}
+          onNodeDragStop={onNodeDragStop}
+          // onNodeDoubleClick={onNodeDoubleClick}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEnd}
+          onSelectionChange={onSelectionChange}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{ padding: 0.4 }}
+          proOptions={{ hideAttribution: true }}
+        >
+          <ZoomControls />
+          <MiniMap
+            nodeStrokeWidth={3}
+            zoomable
+            pannable
+            className="bg-muted/50! border! border-border! rounded-xl! shadow-default!"
+          />
+        </ReactFlow>
+        {nodes && (
+          <CanvasShortcuts
+            nodes={nodes}
+            selectedNodeId={selectedNodeId}
+            createEmptyBranch={createEmptyBranch}
+            enabled={view !== "chat"}
+            expanded={shortcutsOpen}
+            onExpandedChange={setShortcutsOpen}
+          />
+        )}
+      </div>
+
+      {/* Chat layer: same tab, rises in over the canvas. */}
+      <div
+        inert={view !== "chat"}
+        className={cn(
+          "absolute inset-0 flex justify-center transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
+          view === "chat" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
+        )}
+      >
+        {chatNode && nodes && view === "chat" && (
+          <div className="h-full w-full">
+            <BranchChat
+              threadId={threadId}
+              nodes={nodes}
+              activeNodeId={chatNode._id}
+              onActiveNodeChange={(id) => router.replace(`${pathname}?view=chat&node=${id}`, { scroll: false })}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

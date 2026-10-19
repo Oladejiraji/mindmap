@@ -15,7 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
 
 const menuItemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
+  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
 
 
 export function ProjectRow({
@@ -72,17 +72,17 @@ export function ProjectRow({
   return (
     <>
       <ContextMenu.Root>
-        <ContextMenu.Trigger className="rounded-md">
+        <ContextMenu.Trigger className="rounded-lg">
           <Link
             href={href}
-            className="group grid grid-cols-[1fr_8rem_8rem] items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-foreground/4"
+            className="group grid grid-cols-[1fr_8rem_8rem] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-foreground/4"
             onClick={(e) => {
               if (isRenaming) e.preventDefault();
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-background-5">
-                <CanvasIcon className="size-4 text-foreground/20" />
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background-5">
+                <CanvasIcon className="size-4 text-fg-disabled" />
               </div>
               {isRenaming ? (
                 <input
@@ -99,23 +99,23 @@ export function ProjectRow({
                     }
                   }}
                   onBlur={() => setIsRenaming(false)}
-                  className="block min-w-0 max-w-full truncate rounded-[3px] bg-transparent text-sm leading-none text-foreground outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
+                  className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-body-base leading-none text-fg-primary outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-sm text-foreground">{name}</p>
+                <p className="truncate text-body-base text-fg-primary">{name}</p>
               )}
             </div>
-            <span className="text-xs text-foreground/30">
+            <span className="text-caption-lg text-fg-tertiary">
               {formatRelativeTime(createdAt)}
             </span>
-            <span className="text-xs text-foreground/30">
+            <span className="text-caption-lg text-fg-tertiary">
               {formatRelativeTime(updatedAt ?? createdAt)}
             </span>
           </Link>
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
           <ContextMenu.Positioner sideOffset={4} className="z-50">
-            <ContextMenu.Popup className="min-w-40 rounded-lg border border-foreground/8 bg-background p-1 shadow-lg outline-none">
+            <ContextMenu.Popup className="min-w-40 rounded-xl border border-foreground/8 bg-background p-1 shadow-large outline-none">
               <ContextMenu.Item
                 className={menuItemClass}
                 onClick={() => router.push(href)}
@@ -133,7 +133,7 @@ export function ProjectRow({
                 Rename
               </ContextMenu.Item>
               <ContextMenu.Item
-                className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
                 onClick={() => setShowDelete(true)}
               >
                 Delete

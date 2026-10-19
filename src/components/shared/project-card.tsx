@@ -15,7 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
 
 const itemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-foreground/70 transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-foreground outline-none";
+  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
 
 
 export function ProjectCard({
@@ -70,17 +70,17 @@ export function ProjectCard({
   return (
     <>
       <ContextMenu.Root>
-        <ContextMenu.Trigger className="rounded-lg">
+        <ContextMenu.Trigger className="rounded-xl">
           <Link
             href={href}
-            className="group relative block rounded-lg p-2"
+            className="group relative block rounded-xl p-2"
             onClick={(e) => {
               if (isRenaming) e.preventDefault();
             }}
           >
-            <div className="absolute inset-0 rounded-lg bg-foreground/8 scale-[0.97] opacity-0 transition-all duration-200 ease-out group-hover:scale-100 group-hover:opacity-100" />
-            <div className="relative flex aspect-4/3 items-center justify-center rounded-md bg-background-5">
-              <CanvasIcon className="size-8 text-foreground/20" />
+            <div className="absolute inset-0 rounded-xl bg-foreground/8 scale-[0.97] opacity-0 transition-all duration-200 ease-out group-hover:scale-100 group-hover:opacity-100" />
+            <div className="relative flex aspect-4/3 items-center justify-center rounded-lg bg-background-5">
+              <CanvasIcon className="size-8 text-fg-disabled" />
             </div>
             <div className="px-0.5 pt-2.5">
               {isRenaming ? (
@@ -98,14 +98,14 @@ export function ProjectCard({
                     }
                   }}
                   onBlur={() => setIsRenaming(false)}
-                  className="block max-w-full truncate rounded-[3px] bg-transparent text-11 font-medium leading-none text-foreground outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
+                  className="block max-w-full truncate rounded-sm bg-transparent text-caption-base font-medium leading-none text-fg-primary outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-11 font-medium text-foreground">
+                <p className="truncate text-caption-base font-medium text-fg-primary">
                   {name}
                 </p>
               )}
-              <p className="text-11 text-foreground/40">
+              <p className="text-caption-base text-fg-tertiary">
                 {formatRelativeTime(createdAt)}
               </p>
             </div>
@@ -113,7 +113,7 @@ export function ProjectCard({
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
           <ContextMenu.Positioner sideOffset={4} className="z-50">
-            <ContextMenu.Popup className="min-w-40 rounded-lg border border-foreground/8 bg-background p-1 shadow-lg outline-none">
+            <ContextMenu.Popup className="min-w-40 rounded-xl border border-foreground/8 bg-background p-1 shadow-large outline-none">
               <ContextMenu.Item
                 className={itemClass}
                 onClick={() => router.push(href)}
@@ -131,7 +131,7 @@ export function ProjectCard({
                 Rename
               </ContextMenu.Item>
               <ContextMenu.Item
-                className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
                 onClick={() => setShowDelete(true)}
               >
                 Delete

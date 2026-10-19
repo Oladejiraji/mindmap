@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { RootNodeIcon, BranchNodeIcon, LeafNodeIcon } from "@/components/icons/node-icons";
 import { RenderIf } from "@/components/shared/render-if";
@@ -81,12 +81,13 @@ interface INodeItemProps {
 
 function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemProps) {
   const pathname = usePathname();
+  const panelId = useSearchParams().get("panel");
 
   const isRoot = node.parentId === null;
   const nodeRoute = isRoot
     ? routes.thread(threadId)
     : routes.node(threadId, node._id);
-  const isActive = pathname === nodeRoute;
+  const isActive = isRoot ? pathname === nodeRoute && !panelId : panelId === node._id;
 
   const paddingLeft = `${node.depth * 12 + 8}px`;
 
@@ -94,7 +95,7 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
     <Link
       href={nodeRoute}
       className={cn(
-        "flex h-7 items-center rounded-md text-xs transition-colors",
+        "flex h-7 items-center rounded-lg text-caption-lg transition-colors",
         isActive
           ? "bg-foreground/8 font-medium text-sidebar-accent-foreground"
           : "text-sidebar-foreground/70 hover:bg-foreground/5 hover:text-sidebar-accent-foreground",
@@ -108,7 +109,7 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
             e.stopPropagation();
             onToggleCollapse(node._id);
           }}
-          className="flex size-5 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground/60"
+          className="flex size-5 shrink-0 items-center justify-center text-fg-secondary hover:text-fg-secondary"
         >
           <ChevronDownIcon
             className={cn(
@@ -121,13 +122,13 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
         <span className="size-5" />
       )}
       <RenderIf condition={isRoot}>
-        <RootNodeIcon className="mx-1.5 size-3.5 shrink-0 text-muted-foreground" />
+        <RootNodeIcon className="mx-1.5 size-3.5 shrink-0 text-fg-secondary" />
       </RenderIf>
       <RenderIf condition={!isRoot && !!onToggleCollapse}>
-        <BranchNodeIcon className="mx-1.5 size-3.5 shrink-0 text-muted-foreground" />
+        <BranchNodeIcon className="mx-1.5 size-3.5 shrink-0 text-fg-secondary" />
       </RenderIf>
       <RenderIf condition={!isRoot && !onToggleCollapse}>
-        <LeafNodeIcon className="mx-1.5 size-3.5 shrink-0 text-muted-foreground" />
+        <LeafNodeIcon className="mx-1.5 size-3.5 shrink-0 text-fg-secondary" />
       </RenderIf>
       <span className="truncate">{node.title}</span>
     </Link>

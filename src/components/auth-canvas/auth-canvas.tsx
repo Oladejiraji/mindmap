@@ -4,8 +4,6 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
-  Background,
-  BackgroundVariant,
   ViewportPortal,
   addEdge,
   reconnectEdge,
@@ -303,7 +301,7 @@ function AuthCanvasInner() {
   return (
     <div
       ref={wrapperRef}
-      className="auth-canvas relative h-full w-full overflow-hidden rounded-xl bg-background"
+      className="auth-canvas relative h-full w-full overflow-hidden rounded-2xl bg-background"
     >
       <ReactFlow
         nodes={nodes}
@@ -326,12 +324,6 @@ function AuthCanvasInner() {
         zoomOnDoubleClick={false}
         proOptions={{ hideAttribution: true }}
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color="rgba(255,255,255,0.06)"
-        />
         <ViewportPortal>
           {pulses.map((p) => {
             const endWidth = Math.max(

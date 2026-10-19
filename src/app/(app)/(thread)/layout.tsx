@@ -1,11 +1,9 @@
 import type { ReactNode } from "react";
-import { CanvasPanel } from "@/components/shared/canvas-panel";
+import { cookies } from "next/headers";
+import { ThreadShell } from "@/components/shared/thread-shell";
 
-export default function ThreadLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="relative h-full w-full">
-      {children}
-      <CanvasPanel />
-    </div>
-  );
+export default async function ThreadLayout({ children }: { children: ReactNode }) {
+  // Same cookie the sidebar writes, so it stays open/closed across pages.
+  const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false";
+  return <ThreadShell defaultOpen={defaultOpen}>{children}</ThreadShell>;
 }

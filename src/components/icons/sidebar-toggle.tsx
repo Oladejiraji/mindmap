@@ -21,6 +21,11 @@ interface SidebarToggleIconProps extends SVGProps<SVGSVGElement> {
   open?: boolean;
 }
 
+/*
+ * Panel toggle. The two end states are the designed icons: bar at the left
+ * (x 6.25, sidebar closed) and bar at the right (x 17.75, sidebar open);
+ * the bar slides between them.
+ */
 export function SidebarToggleIcon({ open, ...props }: SidebarToggleIconProps) {
   return (
     <svg
@@ -31,20 +36,20 @@ export function SidebarToggleIcon({ open, ...props }: SidebarToggleIconProps) {
       {...props}
     >
       <path
-        d="M3 8C3 6.34315 4.34315 5 6 5H18C19.6569 5 21 6.34315 21 8V16C21 17.6569 19.6569 19 18 19H6C4.34315 19 3 17.6569 3 16V8Z"
+        d="M2.75 7.75C2.75 6.09315 4.09315 4.75 5.75 4.75H18.25C19.9069 4.75 21.25 6.09315 21.25 7.75V16.25C21.25 17.9069 19.9069 19.25 18.25 19.25H5.75C4.09315 19.25 2.75 17.9069 2.75 16.25V7.75Z"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinejoin="round"
       />
       <path
-        d="M0 9V15"
+        d="M0 8.25V15.75"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
         className="transition-transform duration-200 ease-out"
         style={{
           transformBox: "view-box",
-          transform: open ? "translateX(17px)" : "translateX(7px)",
+          transform: open ? "translateX(17.75px)" : "translateX(6.25px)",
         }}
       />
     </svg>

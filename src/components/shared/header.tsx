@@ -40,20 +40,20 @@ export function Header() {
       <nav className="flex min-w-0 flex-1 items-center gap-1">
         <button
           onClick={toggleSidebar}
-          className="flex items-center gap-1 text-13 text-foreground/60 hover:text-foreground/80 transition-colors"
+          className="flex items-center gap-1 text-body-sm text-fg-secondary hover:text-fg-primary transition-colors"
         >
           <div className="flex size-7 items-center justify-center">
             <SidebarToggleIcon open={open} className="text-current" />
           </div>
-          <span className="font-diatype tracking-tight">Mindmap</span>
+          <span className="">Mindmap</span>
         </button>
 
         {threadName && (
           <>
             <div className="size-4 flex items-center justify-center">
-              <ChevronRightIcon className="text-foreground/30" />
+              <ChevronRightIcon className="text-fg-tertiary" />
             </div>
-            <span className="font-diatype text-13 tracking-tight text-foreground/87 truncate">
+            <span className=" text-body-sm text-fg-primary truncate">
               {threadName}
             </span>
           </>
@@ -62,9 +62,9 @@ export function Header() {
         {nodeName && (
           <>
             <div className="size-4 flex items-center justify-center">
-              <ChevronRightIcon className="text-foreground/30" />
+              <ChevronRightIcon className="text-fg-tertiary" />
             </div>
-            <span className="font-diatype text-13 tracking-tight text-foreground/60 truncate">
+            <span className=" text-body-sm text-fg-secondary truncate">
               {nodeName}
             </span>
           </>

@@ -24,7 +24,7 @@ export function MessageList({
     return (
       <div className="flex flex-1 flex-col gap-6 px-4 py-6">
         <div className="flex justify-end">
-          <Skeleton className="h-10 w-48 rounded-lg" />
+          <Skeleton className="h-10 w-48 rounded-xl" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-3/4 rounded" />
@@ -32,7 +32,7 @@ export function MessageList({
           <Skeleton className="h-4 w-2/3 rounded" />
         </div>
         <div className="flex justify-end">
-          <Skeleton className="h-10 w-36 rounded-lg" />
+          <Skeleton className="h-10 w-36 rounded-xl" />
         </div>
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-2/3 rounded" />
@@ -45,7 +45,7 @@ export function MessageList({
   if (items.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-body-base text-fg-secondary">
           No messages yet. Send one to get started.
         </p>
       </div>
@@ -80,11 +80,11 @@ function BranchMarker({
   intoTitle: string;
 }) {
   return (
-    <div className="flex items-center gap-3 py-1 text-xs text-muted-foreground">
+    <div className="flex items-center gap-3 py-1 text-caption-lg text-fg-secondary">
       <div className="h-px flex-1 bg-border" />
       <span>
-        Branched from <span className="text-foreground">{fromTitle}</span> into{" "}
-        <span className="text-foreground">{intoTitle}</span>
+        Branched from <span className="text-fg-primary">{fromTitle}</span> into{" "}
+        <span className="text-fg-primary">{intoTitle}</span>
       </span>
       <div className="h-px flex-1 bg-border" />
     </div>

@@ -40,7 +40,7 @@ export function ConfirmDialog({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="text-foreground">
+          <AlertDialogCancel className="text-fg-primary">
             {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction

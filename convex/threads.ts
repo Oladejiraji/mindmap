@@ -22,9 +22,9 @@ export const get = userQuery({
 });
 
 export const create = userMutation({
-  args: { name: v.string() },
+  args: { name: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const name = normalizeTitle(args.name, "Thread name");
+    const name = normalizeTitle(args.name ?? "Untitled", "Thread name");
     const threadId = await ctx.db.insert("threads", { userId: ctx.userId, name, updatedAt: Date.now() });
     const rootNodeId = await ctx.db.insert("nodes", {
       userId: ctx.userId,

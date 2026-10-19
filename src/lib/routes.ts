@@ -5,11 +5,13 @@ import type { Id } from "@convex/dataModel";
 // group checks read from this registry.
 export const routes = {
   home: "/",
+  newProject: "/new",
   signIn: "/sign-in",
   signUp: "/sign-up",
   signOut: "/sign-out",
   thread: (threadId: string) => `/t/${threadId}`,
-  node: (threadId: string, nodeId: Id<"nodes">) => `/t/${threadId}/n/${nodeId}`,
+  // Nodes open as a side panel over their project, not as their own page.
+  node: (threadId: string, nodeId: Id<"nodes">) => `/t/${threadId}?panel=${nodeId}`,
 } as const;
 
 // Paths where a client-side auth-error redirect should be a no-op

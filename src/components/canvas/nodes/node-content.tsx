@@ -47,7 +47,7 @@ export function NodeContent({
         onClick={nodeId ? () => setIsEditing(true) : undefined}
       >
         <p
-          className="text-xs opacity-50"
+          className="text-caption-lg opacity-50"
           style={{ lineHeight: 1.5, color: editorTheme === "dark" ? "white" : undefined }}
         >
           {nodeId ? "Click to start writing…" : "No content yet"}

@@ -42,12 +42,12 @@ export function NodeChat({
       <div className="flex w-full max-w-175 min-h-full flex-col">
         {error ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-base text-fg-secondary">
               Couldn&apos;t load this conversation.
             </p>
             <button
               onClick={retry}
-              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+              className="text-body-base font-medium text-fg-primary underline-offset-4 hover:underline"
             >
               Try again
             </button>
@@ -56,7 +56,7 @@ export function NodeChat({
           <MessageList items={items} isLoading={isLoading} isStreaming={isStreaming} />
         )}
         <div className="sticky bottom-0 bg-background">
-          <ChatInput onSend={handleSend} disabled={isBusy || !!error} />
+          <ChatInput onSend={handleSend} disabled={isBusy || !!error} className="px-4 py-3" />
         </div>
       </div>
     </div>

@@ -50,7 +50,7 @@ const EditDropdown = ({
       <Menu.Trigger
         aria-label="Node options"
         className={cn(
-          "absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md text-sidebar-foreground hover:bg-background-5",
+          "absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-lg text-sidebar-foreground hover:bg-background-5",
           isActive || menuOpen
             ? "opacity-100"
             : "opacity-0 group-hover/node:opacity-100",
@@ -60,9 +60,9 @@ const EditDropdown = ({
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={4} align="end" className="z-50">
-          <Menu.Popup className="min-w-32 rounded-md border bg-popover p-1 shadow-md">
+          <Menu.Popup className="min-w-32 rounded-lg border bg-popover p-1 shadow-large">
             <Menu.Item
-              className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-background-5"
+              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-caption-lg hover:bg-background-5"
               onClick={() => {
                 setDraft(node.title);
                 setIsEditing(true);
@@ -72,7 +72,7 @@ const EditDropdown = ({
               Rename
             </Menu.Item>
             <Menu.Item
-              className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-background-5"
+              className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-caption-lg hover:bg-background-5"
               onClick={handleBranch}
             >
               <GitBranch className="size-3" />
@@ -80,7 +80,7 @@ const EditDropdown = ({
             </Menu.Item>
             {canDelete && (
               <Menu.Item
-                className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-destructive hover:bg-background-5"
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-caption-lg text-destructive hover:bg-background-5"
                 onClick={handleDeleteClick}
               >
                 <Trash2 className="size-3" />
