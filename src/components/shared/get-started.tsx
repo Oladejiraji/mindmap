@@ -30,7 +30,7 @@ export function GetStarted() {
         <span className="flex size-10 overflow-hidden rounded-full outline-[0.5px] outline-offset-[-0.5px] outline-border-default">
           {session && <GradientAvatar seed={email || name} size={40} />}
         </span>
-        <h2 className="mt-6 font-serif text-[2.5rem] leading-[1.1] tracking-[-0.02em] text-fg-primary">
+        <h2 className="mt-5 font-serif text-heading-5 text-fg-primary">
           Welcome, {firstName}
         </h2>
 
@@ -76,10 +76,10 @@ function Card({
 }) {
   const inner = (
     <>
-      <div className="relative aspect-[7/5] overflow-hidden" style={{ background: backdrop }}>
+      <div className="relative aspect-[12/5] overflow-hidden" style={{ background: backdrop }}>
         {illustration}
       </div>
-      <p className="px-5 pt-4 pb-6 text-body-base text-fg-secondary">
+      <p className="px-5 pt-3.5 pb-4 text-body-base text-fg-secondary">
         <span className="font-medium text-fg-primary">{title}</span> {body}
       </p>
     </>
@@ -114,12 +114,11 @@ const line = "h-1.5 rounded-full bg-fg-primary/10";
 function ChatIllustration() {
   return (
     <Window className="inset-x-[10%] top-[14%] bottom-[-10%]">
-      <div className="flex h-full flex-col items-center px-4 pt-6">
+      <div className="flex h-full flex-col items-center px-4 pt-3">
         <p className="text-[9px] font-semibold text-fg-primary">What are you trying to figure out?</p>
-        <div className={cn(line, "mt-2 w-2/3")} />
-        <div className="mt-auto mb-[18%] w-full rounded-lg bg-surface-container p-2 inset-ring-[0.5px] inset-ring-border-strong">
+        <div className="mt-2.5 w-full rounded-lg bg-surface-container p-2 inset-ring-[0.5px] inset-ring-border-strong">
           <p className="text-[8px] text-fg-tertiary">How should we price the team plan?</p>
-          <div className="mt-2 flex justify-end">
+          <div className="mt-1 flex justify-end">
             <span className="flex size-4 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg">
               <SendIcon className="size-2.5" />
             </span>
@@ -149,13 +148,13 @@ function CanvasIllustration() {
     <Window className="inset-x-[10%] top-[14%] bottom-[-10%]">
       <div className="relative h-full">
         <svg className="absolute inset-0 size-full text-border-strong" viewBox="0 0 100 80" preserveAspectRatio="none" fill="none">
-          <path d="M50 15 V22 H24 V28 M50 22 H76 V28 M24 35 V42 H14 V48 M24 42 H38 V48" stroke="currentColor" strokeWidth="0.6" />
+          <path d="M50 17 V20 H24 V24 M50 20 H76 V24 M24 38 V41 H14 V45 M24 41 H38 V45" stroke="currentColor" strokeWidth="0.6" />
         </svg>
-        <MiniNode primary label="Pricing" className="top-[6%] left-1/2 -translate-x-1/2" />
-        <MiniNode label="Per-seat" className="top-[34%] left-[24%] -translate-x-1/2" />
-        <MiniNode label="Usage-based" className="top-[34%] left-[76%] -translate-x-1/2" />
-        <MiniNode label="Annual" className="top-[60%] left-[14%] -translate-x-1/2" />
-        <MiniNode label="Monthly" className="top-[60%] left-[38%] -translate-x-1/2" />
+        <MiniNode primary label="Pricing" className="top-[4%] left-1/2 -translate-x-1/2" />
+        <MiniNode label="Per-seat" className="top-[30%] left-[24%] -translate-x-1/2" />
+        <MiniNode label="Usage-based" className="top-[30%] left-[76%] -translate-x-1/2" />
+        <MiniNode label="Annual" className="top-[56%] left-[14%] -translate-x-1/2" />
+        <MiniNode label="Monthly" className="top-[56%] left-[38%] -translate-x-1/2" />
       </div>
     </Window>
   );
