@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { NodeTabIcon } from "@/components/icons/node-tab-icon";
+import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
@@ -81,9 +81,9 @@ export function ProjectRow({
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              {/* 20px node tile in the project yellow (as on the canvas panel). */}
+              {/* 20px tile in the project yellow with the Mindmap mark. */}
               <div className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-md bg-[#F4E2AD] text-[#FFB900]">
-                <NodeTabIcon className="size-3" />
+                <LogoIcon className="h-auto w-[11px]" />
               </div>
               {isRenaming ? (
                 <input
