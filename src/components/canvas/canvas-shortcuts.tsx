@@ -1,6 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
 import { Keyboard, X } from "lucide-react";
+import type { Id } from "@convex/dataModel";
+import type { Doc } from "@convex/dataModel";
+import { useCanvasShortcuts } from "@/hooks/use-canvas-shortcuts";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
 import { cn } from "@/lib/utils";
 
@@ -30,17 +34,27 @@ const ALL: { keys: React.ReactNode; label: string }[] = [
 ];
 
 export function CanvasShortcuts({
-  hasSelection,
-  isRootSelected,
+  nodes,
+  selectedNodeId,
+  createEmptyBranch,
+  enabled,
   expanded,
   onExpandedChange,
 }: {
-  hasSelection: boolean;
-  isRootSelected: boolean;
+  nodes: Doc<"nodes">[];
+  selectedNodeId: string | null;
+  createEmptyBranch: (args: { parentId: Id<"nodes">; position?: { x: number; y: number } }) => Promise<unknown>;
+  enabled: boolean;
   expanded: boolean;
   onExpandedChange: (open: boolean) => void;
 }) {
   const [visible, setVisible] = useStoredBoolean("mindmap:canvas-hints", true);
+  const onToggleHelp = useCallback(() => onExpandedChange(!expanded), [onExpandedChange, expanded]);
+
+  useCanvasShortcuts({ nodes, selectedNodeId, createEmptyBranch, onToggleHelp, enabled });
+
+  const hasSelection = !!selectedNodeId;
+  const isRootSelected = hasSelection && nodes.find((n) => n._id === selectedNodeId)?.parentId === null;
 
   if (!visible) {
     return (

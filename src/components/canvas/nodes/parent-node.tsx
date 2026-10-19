@@ -42,7 +42,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
         </div>
 
         <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-ring p-2 text-background shadow-node-inset">
-          <NodeContent content={content} />
+          <NodeContent nodeId={isRoot ? undefined : id} content={content} editorTheme="dark" />
         </div>
 
         <CustomHandle type="source" position={Position.Bottom} variant="a" />

@@ -1,13 +1,19 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { Menu } from "@base-ui/react/menu";
 import { GitBranch, Mic, Plus } from "lucide-react";
 import { SendIcon } from "@/components/icons/send-icon";
 import { cn } from "@/lib/utils";
 
 // Must match MAX_MESSAGE_CONTENT in convex/lib/validation.ts.
-// const MAX_MESSAGE_CONTENT = 100;
 const MAX_MESSAGE_CONTENT = 32_000;
 const COUNTER_THRESHOLD = MAX_MESSAGE_CONTENT * 0.8;
 
@@ -29,7 +35,11 @@ export type ContextChip = { icon: ReactNode; label: string };
 type Recognition = {
   continuous: boolean;
   interimResults: boolean;
-  onresult: ((e: { results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }> }) => void) | null;
+  onresult:
+    | ((e: {
+        results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
+      }) => void)
+    | null;
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
@@ -37,7 +47,10 @@ type Recognition = {
 
 function getRecognitionCtor(): (new () => Recognition) | null {
   if (typeof window === "undefined") return null;
-  const w = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition };
+  const w = window as unknown as {
+    SpeechRecognition?: new () => Recognition;
+    webkitSpeechRecognition?: new () => Recognition;
+  };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 const noopSubscribe = () => () => {};
@@ -70,7 +83,11 @@ export function ChatInput({
   const recognitionRef = useRef<Recognition | null>(null);
   const baseRef = useRef("");
   // Server render: assume no speech support, so hydration matches.
-  const canDictate = useSyncExternalStore(noopSubscribe, () => getRecognitionCtor() !== null, () => false);
+  const canDictate = useSyncExternalStore(
+    noopSubscribe,
+    () => getRecognitionCtor() !== null,
+    () => false,
+  );
 
   const trimmed = value.trim();
   const length = trimmed.length;
@@ -78,8 +95,25 @@ export function ChatInput({
   const canSend = length > 0 && !isOver && !disabled;
   const showCounter = length >= COUNTER_THRESHOLD;
 
+  useEffect(() => {
+    return () => {
+      const r = recognitionRef.current;
+      if (r) {
+        r.onresult = null;
+        r.onend = null;
+        r.stop();
+      }
+    };
+  }, []);
+
   const stopDictation = () => {
-    recognitionRef.current?.stop();
+    const r = recognitionRef.current;
+    if (r) {
+      r.onresult = null;
+      r.onend = null;
+      r.stop();
+      recognitionRef.current = null;
+    }
     setListening(false);
   };
 
@@ -93,7 +127,8 @@ export function ChatInput({
     baseRef.current = value ? `${value.replace(/\s+$/, "")} ` : "";
     r.onresult = (e) => {
       let text = "";
-      for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+      for (let i = 0; i < e.results.length; i++)
+        text += e.results[i][0].transcript;
       setValue(baseRef.current + text);
     };
     r.onend = () => setListening(false);
@@ -120,7 +155,10 @@ export function ChatInput({
     <div className={className}>
       <div className="flex flex-col gap-2 rounded-[20px] bg-surface-container p-3 inset-ring-[0.5px] inset-ring-border-strong transition-shadow focus-within:shadow-default">
         {context && context.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5" aria-label="Context">
+          <div
+            className="flex flex-wrap items-center gap-1.5"
+            aria-label="Context"
+          >
             {context.map((c) => (
               <span
                 key={c.label}
@@ -154,7 +192,12 @@ export function ChatInput({
                 <Plus strokeWidth={1.75} />
               </Menu.Trigger>
               <Menu.Portal>
-                <Menu.Positioner side="top" align="start" sideOffset={8} className="z-50">
+                <Menu.Positioner
+                  side="top"
+                  align="start"
+                  sideOffset={8}
+                  className="z-50"
+                >
                   <Menu.Popup className="min-w-48 rounded-lg bg-surface-modal p-1 text-body-sm text-fg-primary shadow-large outline-none">
                     <Menu.Item
                       onClick={onNewBranch}
@@ -174,7 +217,11 @@ export function ChatInput({
               onClick={toggleDictation}
               aria-label={listening ? "Stop dictation" : "Dictate"}
               aria-pressed={listening}
-              className={cn(roundButton, listening && "bg-brand-subtle text-brand-fg inset-ring-brand-border")}
+              className={cn(
+                roundButton,
+                listening &&
+                  "bg-brand-subtle text-brand-fg inset-ring-brand-border",
+              )}
             >
               <Mic strokeWidth={1.75} />
             </button>
