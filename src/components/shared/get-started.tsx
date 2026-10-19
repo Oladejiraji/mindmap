@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { GradientAvatar } from "@outpacelabs/avatars";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
 import { SendIcon } from "@/components/icons/send-icon";
@@ -17,7 +16,6 @@ import { cn } from "@/lib/utils";
 export function GetStarted() {
   const { data: session } = authClient.useSession();
   const name = session?.user?.name ?? "";
-  const email = session?.user?.email ?? "";
   const firstName = name.split(" ")[0] || "there";
 
   return (
@@ -27,10 +25,12 @@ export function GetStarted() {
       </header>
 
       <div className="mx-auto w-full max-w-[1000px] px-6 pt-14 pb-16">
-        <span className="flex size-10 overflow-hidden rounded-full outline-[0.5px] outline-offset-[-0.5px] outline-border-default">
-          {session && <GradientAvatar seed={email || name} size={40} />}
-        </span>
-        <h2 className="mt-5 font-serif text-heading-5 text-fg-primary">
+        <span
+          aria-hidden
+          className="block size-10 rounded-full"
+          style={{ background: "linear-gradient(135deg, oklch(0.78 0.12 245), var(--brand-solid) 70%)" }}
+        />
+        <h2 className="font-display mt-5 text-heading-5 font-medium text-fg-primary">
           Welcome, {firstName}
         </h2>
 
