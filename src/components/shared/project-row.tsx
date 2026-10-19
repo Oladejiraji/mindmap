@@ -81,9 +81,9 @@ export function ProjectRow({
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              {/* Same blue node tile as the node panel. */}
-              <div className="corner-squircle flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg">
-                <NodeTabIcon className="size-4" />
+              {/* 20px node tile in the project yellow (as on the canvas panel). */}
+              <div className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-md bg-[#F4E2AD] text-[#FFB900]">
+                <NodeTabIcon className="size-3" />
               </div>
               {isRenaming ? (
                 <input
