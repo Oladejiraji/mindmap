@@ -78,7 +78,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
       }
     >
       <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
-        <div className="flex w-full items-start gap-2 p-3">
+        <div className="flex w-full items-center gap-2 p-3">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
             <CanvasIcon className="size-3.5 text-fg-disabled" />
           </div>
@@ -102,17 +102,17 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
                         cancelRename();
                       }
                     }}
-                    className="flex h-5 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-caption-lg font-medium text-fg-primary shadow-border outline-none"
+                    className="flex h-[13px] w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-body-sm/[13px] font-medium text-fg-primary shadow-border outline-none"
                   />
                 ) : (
                   <p
                     onClick={startEditing}
-                    className="cursor-text truncate rounded px-1 py-0.5 text-caption-lg font-medium text-fg-primary transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
+                    className="cursor-text truncate rounded px-1 text-body-sm/[13px] font-medium text-fg-primary transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
                   >
                     {thread?.name ?? "Untitled"}
                   </p>
                 )}
-                <p className="px-1 text-caption-base leading-none text-fg-tertiary">
+                <p className="mt-1.5 px-1 text-caption-base/[11px] text-fg-tertiary">
                   {formatRelativeTime(thread?._creationTime ?? 0)}
                 </p>
               </>
