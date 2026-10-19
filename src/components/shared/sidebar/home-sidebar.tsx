@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Star } from "lucide-react";
+import { PartyPopper, Plus, Star } from "lucide-react";
 import { HomeIcon, LogoIcon } from "@/components/icons/sidebar-toggle";
 import {
   Sidebar,
@@ -61,6 +61,12 @@ export function HomeSidebar() {
       <SidebarContent className="gap-6 pt-5">
         <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:px-2">
           <SidebarMenu className="gap-0.5">
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === routes.getStarted} tooltip="Get started" className={row} render={<Link href={routes.getStarted} />}>
+                <PartyPopper className="size-4" />
+                <span>Get started</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={pathname === routes.home} tooltip="Home" className={row} render={<Link href={routes.home} />}>
                 <HomeIcon className="size-4" />
