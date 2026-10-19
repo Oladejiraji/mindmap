@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils";
 /*
  * Settings shell, modelled on define.app's: the app sidebar gives way to
  * a settings nav (Back to app, grouped pages, What's new at the foot);
- * the page sits in the same inset panel as the rest of the app. Only
+ * the page sits in the same inset panel as the rest of the app, named by
+ * a single tab shaped like the app's tab strip. Only
  * pages that exist; Members is shown disabled until sharing does.
  */
 
@@ -41,6 +42,27 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
     >
       {children}
     </Link>
+  );
+}
+
+const PAGES: Record<string, { title: string; icon: ReactNode }> = {
+  [routes.settingsAccount]: { title: "Account", icon: <UserAvatar size={16} /> },
+  [routes.settingsPreferences]: { title: "Preferences", icon: <PreferencesIcon className="size-4 text-fg-secondary" /> },
+};
+
+/* The current page as one active tab, joined to the panel with an
+ * inverted corner like the app's tab strip. */
+function PageTab() {
+  const page = PAGES[usePathname()];
+  return (
+    <div className="flex h-10 shrink-0 items-end">
+      {page && (
+        <div className="relative flex h-8 w-42 items-center gap-2 rounded-t-xl bg-background pl-3 text-body-sm text-fg-primary after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--background)_12.5px)]">
+          {page.icon}
+          <span className="truncate">{page.title}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -82,8 +104,9 @@ export function SettingsShell({ children }: { children: ReactNode }) {
         </a>
       </nav>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col py-1 pr-1">
-        <main className="relative min-h-0 flex-1 overflow-auto overscroll-contain rounded-3xl bg-background bg-(image:--gradient-panel) shadow-default">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col pr-1 pb-1">
+        <PageTab />
+        <main className="relative min-h-0 flex-1 overflow-auto overscroll-contain rounded-3xl rounded-tl-none bg-background bg-(image:--gradient-panel) shadow-default">
           {children}
         </main>
       </div>

@@ -8,19 +8,17 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 /*
- * Settings pages (inside SettingsShell): a title bar, then sections of
- * one rounded panel with divided rows each.
+ * Settings pages (inside SettingsShell, whose tab names the page):
+ * sections of one rounded panel with divided rows each.
  *   Account      who you're signed in as
  *   Preferences  what can be changed today, stored in this browser
  */
 
 function SettingsPage({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex min-h-full flex-col">
-      <header className="flex h-12 shrink-0 items-center border-b border-border-default px-6">
-        <h1 className="text-body-sm font-medium text-fg-primary">{title}</h1>
-      </header>
-      <div className="mx-auto w-full max-w-[640px] space-y-10 px-6 pt-12 pb-16">{children}</div>
+    <div className="mx-auto w-full max-w-[640px] space-y-10 px-6 pt-12 pb-16">
+      <h1 className="sr-only">{title}</h1>
+      {children}
     </div>
   );
 }
