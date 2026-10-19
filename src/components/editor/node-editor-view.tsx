@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronRightIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
-import { ChevronRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
@@ -285,7 +286,7 @@ function Crumb({ href, children }: { href: string; children: React.ReactNode }) 
 function Separator() {
   return (
     <li role="presentation" aria-hidden className="flex w-3 shrink-0 items-center justify-center text-fg-disabled">
-      <ChevronRight className="size-4" />
+      <ChevronRightIcon className="size-4" />
     </li>
   );
 }

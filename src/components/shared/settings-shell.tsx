@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { ChevronLeftIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, ChevronLeft, Palette } from "lucide-react";
+import { ArrowUpRight, Palette } from "lucide-react";
 import { FlameIcon } from "@/components/icons/flame-icon";
 import { PersonalizationIcon } from "@/components/icons/personalization-icon";
 import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
@@ -91,7 +92,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
     <div className="flex h-svh overflow-hidden bg-sidebar">
       <nav aria-label="Settings" className="flex w-56 shrink-0 flex-col px-3 pt-3 pb-4">
         <Link href={routes.home} className={cn(row, "mb-5 w-fit pr-3")}>
-          <ChevronLeft />
+          <ChevronLeftIcon />
           Back to app
         </Link>
 
