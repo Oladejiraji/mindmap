@@ -50,7 +50,7 @@ export default function Home() {
               <Plus className="size-3.5" />
               New
             </Button>
-            <div className="relative flex h-8 items-center rounded-xl">
+            <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
               <button
                 onClick={() => updateLayout("grid")}
                 className={cn(
@@ -90,7 +90,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="mt-4 h-px bg-border-default" />
+        <div className="mt-8 h-px bg-border-default" />
 
         {layout === "grid" ? (
           <div className="mt-11 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4">
