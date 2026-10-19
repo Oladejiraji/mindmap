@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { CanvasIcon } from "@/components/icons/canvas-icon";
+import { FolderIcon } from "@/components/icons/folder-icons";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useThread } from "@/services/threads/queries";
@@ -79,8 +79,9 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
     >
       <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
         <div className="flex w-full items-center gap-2 p-3">
-          <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-foreground/8">
-            <CanvasIcon className="size-3.5 text-fg-disabled" />
+          {/* Project tile: folder on a warm yellow (the user's picks). */}
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-[#F4E2AD]">
+            <FolderIcon className="size-3.5 text-[#FFB900]" />
           </div>
           <div className="min-w-0 flex-1 text-left">
             {isPending ? (
