@@ -245,6 +245,12 @@
   }
 }
 
+/* iOS-style continuous corners on the element's border-radius. Browsers
+ * without corner-shape keep the plain rounded corners. */
+@utility corner-squircle {
+  corner-shape: squircle;
+}
+
 /* Inter Display: its own font family (layout.tsx), medium weight. */
 .font-display {
   font-family: var(--font-inter-display), var(--font-inter), sans-serif;
