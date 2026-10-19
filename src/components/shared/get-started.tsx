@@ -79,7 +79,7 @@ function Card({
       <div className="relative aspect-[12/5] overflow-hidden" style={{ background: backdrop }}>
         {illustration}
       </div>
-      <p className="px-5 pt-3.5 pb-4 text-body-base text-fg-secondary">
+      <p className="px-5 pt-3.5 pb-4 text-body-sm text-fg-secondary">
         <span className="font-medium text-fg-primary">{title}</span> {body}
       </p>
     </>
