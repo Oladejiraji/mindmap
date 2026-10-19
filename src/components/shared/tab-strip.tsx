@@ -49,6 +49,8 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
             className={cn(
               "group/tab relative flex h-8 max-w-42 min-w-28 flex-1 basis-42 items-center",
               active && "z-10",
+              // Inactive tabs get a soft rounded pill on hover (define.app).
+              !active && "corner-squircle rounded-xl transition-colors duration-150 hover:bg-transparent-hover",
             )}
           >
             {active && (
@@ -65,7 +67,13 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
                 )}
               />
             )}
-            {showDivider && <span aria-hidden className="absolute top-1/2 left-0 h-4 w-px -translate-y-1/2 bg-border-default" />}
+            {/* Hairline between tabs; hidden while either neighbour is hovered. */}
+            {showDivider && (
+              <span
+                aria-hidden
+                className="absolute top-1/2 left-0 h-4 w-px -translate-y-1/2 bg-border-default transition-opacity group-hover/tab:opacity-0 [.group\/tab:hover+.group\/tab>&]:opacity-0"
+              />
+            )}
             <Link
               href={tab.href}
               role="tab"
