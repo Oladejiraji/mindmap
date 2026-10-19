@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  * Settings shell, modelled on define.app's: the app sidebar gives way to
  * a settings nav (Back to app, grouped pages, What's new at the foot);
  * the page sits in the same inset panel as the rest of the app, named by
- * a single tab shaped like the app's tab strip. Only
+ * a tab drawn in the tab strip's hover style (a rounded pill, no join). Only
  * pages that exist; Members is shown disabled until sharing does.
  */
 
@@ -50,14 +50,14 @@ const PAGES: Record<string, { title: string; icon: ReactNode }> = {
   [routes.settingsPreferences]: { title: "Preferences", icon: <PreferencesIcon className="size-4 text-fg-secondary" /> },
 };
 
-/* The current page as one active tab, joined to the panel with an
- * inverted corner like the app's tab strip. */
+/* The current page as a tab in its hover style: a rounded pill on the
+ * strip, not joined to the panel (so no seam line). */
 function PageTab() {
   const page = PAGES[usePathname()];
   return (
     <div className="flex h-10 shrink-0 items-end">
       {page && (
-        <div className="relative flex h-8 w-42 items-center gap-2 rounded-t-xl bg-background pl-3 text-body-sm text-fg-primary after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--background)_12.5px)]">
+        <div className="corner-squircle mb-1 flex h-8 w-42 items-center gap-2 rounded-xl bg-transparent-hover pl-3 text-body-sm text-fg-primary">
           {page.icon}
           <span className="truncate">{page.title}</span>
         </div>
@@ -106,7 +106,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col pr-1 pb-1">
         <PageTab />
-        <main className="relative min-h-0 flex-1 overflow-auto overscroll-contain rounded-3xl rounded-tl-none bg-background bg-(image:--gradient-panel) shadow-default">
+        <main className="relative min-h-0 flex-1 overflow-auto overscroll-contain rounded-3xl bg-background bg-(image:--gradient-panel) shadow-default">
           {children}
         </main>
       </div>
