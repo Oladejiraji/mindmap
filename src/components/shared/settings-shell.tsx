@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, ChevronLeft, Flame, Palette } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, Palette } from "lucide-react";
+import { FlameIcon } from "@/components/icons/flame-icon";
 import { PersonalizationIcon } from "@/components/icons/personalization-icon";
 import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ModelsIcon } from "@/components/icons/models-icon";
@@ -129,7 +130,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
         </div>
 
         <a href={CHANGELOG_URL} target="_blank" rel="noreferrer" className={cn(row, "mt-auto")}>
-          <Flame />
+          <FlameIcon />
           What&apos;s new?
           <ArrowUpRight className="ml-auto size-4 text-fg-tertiary" />
         </a>
