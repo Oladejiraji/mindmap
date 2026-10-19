@@ -51,9 +51,10 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
               "group/tab relative flex h-8 max-w-42 min-w-28 flex-1 basis-42 items-center",
               active && "z-10",
               // Inactive tabs get a soft rounded pill on hover (define.app),
-              // stopping 4px short of the canvas below.
+              // inset 4px top and bottom: centred on the icon and title, with
+              // a 4px gap above the canvas.
               !active &&
-                "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:bottom-1 before:rounded-xl before:bg-transparent-hover before:opacity-0 before:transition-opacity before:duration-150 hover:before:opacity-100",
+                "before:pointer-events-none before:absolute before:inset-x-0 before:top-1 before:bottom-1 before:rounded-xl before:bg-transparent-hover before:opacity-0 before:transition-opacity before:duration-150 hover:before:opacity-100",
             )}
           >
             {active && (
