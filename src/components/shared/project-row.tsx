@@ -102,13 +102,13 @@ export function ProjectRow({
                   className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-body-base leading-none text-fg-primary outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-body-base text-fg-primary">{name}</p>
+                <p className="truncate text-body-sm font-medium text-[#111111]">{name}</p>
               )}
             </div>
-            <span className="text-right text-caption-lg text-fg-tertiary">
+            <span className="text-right text-body-sm font-medium text-[#111111]/60">
               {formatRelativeTime(createdAt)}
             </span>
-            <span className="text-right text-caption-lg text-fg-tertiary">
+            <span className="text-right text-body-sm font-medium text-[#111111]/60">
               {formatRelativeTime(updatedAt ?? createdAt)}
             </span>
           </Link>
