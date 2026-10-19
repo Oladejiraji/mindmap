@@ -31,7 +31,8 @@ export default function SignUpPage() {
       return;
     }
     queryClient.clear();
-    router.replace(routes.home);
+    // New accounts set up their organization first (B2B onboarding).
+    router.replace(routes.onboarding);
   };
 
   return (
