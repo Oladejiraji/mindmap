@@ -81,8 +81,8 @@ export function ProjectRow({
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              {/* 20px tile in the project yellow with the Mindmap mark. */}
-              <div className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-md bg-[#F4E2AD] text-[#FFB900]">
+              {/* 20px Mindmap logo tile, as in the sidebar header (white m on brand blue). */}
+              <div className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
                 <LogoIcon className="h-auto w-[11px]" />
               </div>
               {isRenaming ? (
