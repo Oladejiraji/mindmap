@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Building2, ChevronLeft, Flame, Palette, Sparkles } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, Flame, Palette, Sparkles } from "lucide-react";
+import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ModelsIcon } from "@/components/icons/models-icon";
 import { BillingIcon } from "@/components/icons/billing-icon";
 import { HotkeysIcon } from "@/components/icons/hotkeys-icon";
@@ -53,7 +54,7 @@ const PAGES: Record<string, { title: string; icon: ReactNode }> = {
   [routes.settingsAccount]: { title: "Account", icon: <UserAvatar size={16} /> },
   [routes.settingsPreferences]: { title: "Preferences", icon: <PreferencesIcon className="size-4 text-fg-secondary" /> },
   [routes.settingsHotkeys]: { title: "Hotkeys", icon: <HotkeysIcon className="size-4 text-fg-secondary" /> },
-  [routes.settingsGeneral]: { title: "General", icon: <Building2 className="size-4 text-fg-secondary" /> },
+  [routes.settingsGeneral]: { title: "General", icon: <SettingsGearIcon className="size-4 text-fg-secondary" /> },
 };
 
 /* The current page as a tab in its hover style: a rounded pill on the
@@ -111,7 +112,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
 
           <NavGroup label="Workspace">
             <NavLink href={routes.settingsGeneral}>
-              <Building2 />
+              <SettingsGearIcon />
               General
             </NavLink>
             {/* Members and Billing need organizations on the server. */}
