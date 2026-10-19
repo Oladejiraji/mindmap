@@ -22,14 +22,15 @@ import { cn } from "@/lib/utils";
 /*
  * Account menu, laid out like Pond's: sections split by full-width
  * hairlines, 32px rows with a muted 16px icon, and a right-aligned hint
- * (shortcut, ↗ or ›) where one applies. As wide as its trigger. Only
+ * (shortcut, ↗ or ›) where one applies. 20px squircle corners, rows
+ * concentric at 14px (6px inset). As wide as its trigger. Only
  * actions that work today; preferences live in this browser.
  */
 
 const REPO_URL = "https://github.com/Oladejiraji/mindmap";
 
 const itemClass =
-  "corner-squircle flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-body-sm whitespace-nowrap text-fg-primary outline-none transition-colors select-none data-highlighted:bg-transparent-hover [&>svg:first-child]:size-4 [&>svg:first-child]:shrink-0 [&>svg:first-child]:text-fg-tertiary";
+  "corner-squircle flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-[14px] px-2.5 text-body-sm whitespace-nowrap text-fg-primary outline-none transition-colors select-none data-highlighted:bg-transparent-hover [&>svg:first-child]:size-4 [&>svg:first-child]:shrink-0 [&>svg:first-child]:text-fg-tertiary";
 
 function Hint({ children }: { children: ReactNode }) {
   return <span className="ml-auto pl-4 text-caption-lg text-fg-tertiary">{children}</span>;
@@ -79,7 +80,7 @@ export function ProfileMenu() {
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" side="top" className="z-50">
-          <Menu.Popup className="corner-squircle w-(--anchor-width) origin-(--transform-origin) rounded-xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
+          <Menu.Popup className="corner-squircle w-(--anchor-width) origin-(--transform-origin) rounded-4xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
             <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-3">
               <UserAvatar size={32} />
               <span className="min-w-0">
@@ -108,7 +109,7 @@ export function ProfileMenu() {
                 </Menu.SubmenuTrigger>
                 <Menu.Portal>
                   <Menu.Positioner side="right" align="start" sideOffset={8} alignOffset={-6} className="z-50">
-                    <Menu.Popup className="corner-squircle w-56 rounded-xl bg-surface-modal p-1.5 shadow-large outline-none">
+                    <Menu.Popup className="corner-squircle w-56 rounded-4xl bg-surface-modal p-1.5 shadow-large outline-none">
                       <Menu.CheckboxItem className={itemClass} checked={hints} onCheckedChange={setHints}>
                         <span className="flex size-4 items-center justify-center">
                           <Menu.CheckboxItemIndicator>
