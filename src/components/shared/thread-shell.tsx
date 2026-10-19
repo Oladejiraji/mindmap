@@ -17,7 +17,7 @@ export function ThreadShell({ defaultOpen, children }: { defaultOpen: boolean; c
   return (
     <SidebarProvider defaultOpen={defaultOpen} className="h-svh overflow-hidden bg-sidebar">
       <HomeSidebar />
-      <div className="flex min-h-0 min-w-0 flex-1 gap-2 pr-1 pb-1">
+      <div className="@container flex min-h-0 min-w-0 flex-1 gap-2 pr-1 pb-1">
         {/* Tabs + canvas form one column; the node panel runs the full
             height beside it, its top level with the top of the tabs. */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
