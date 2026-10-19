@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Plus, LayoutGrid, List } from "lucide-react";
 import { motion } from "motion/react";
 import { api } from "@convex/api";
@@ -8,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useThreads } from "@/services/threads/queries";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
-import { getStorageItem, setStorageItem } from "@/lib/storage";
+import { useHomeLayout } from "@/lib/preferences";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
@@ -16,7 +15,6 @@ import { ProjectCard } from "@/components/shared/project-card";
 import { ProjectRow } from "@/components/shared/project-row";
 import { useRouter } from "next/navigation";
 
-type Layout = "grid" | "list";
 
 export default function Home() {
   const router = useRouter();
@@ -24,15 +22,8 @@ export default function Home() {
   const { mutate: createThread, isPending: isCreating } = useConvexMutation(
     api.threads.create,
   );
-  const [layout, setLayout] = useState<Layout>(() => {
-    const stored = getStorageItem<Layout>("home-layout");
-    return stored === "grid" || stored === "list" ? stored : "grid";
-  });
-
-  const updateLayout = (value: Layout) => {
-    setLayout(value);
-    setStorageItem("home-layout", value);
-  };
+  // Shared with the account menu's Preferences and the Settings page.
+  const [layout, updateLayout] = useHomeLayout();
 
   const handleCreate = async () => {
     try {

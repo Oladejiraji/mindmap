@@ -6,6 +6,7 @@ import type { Id } from "@convex/dataModel";
 export const routes = {
   home: "/",
   getStarted: "/get-started",
+  settings: "/settings",
   newProject: "/new",
   signIn: "/sign-in",
   signUp: "/sign-up",
