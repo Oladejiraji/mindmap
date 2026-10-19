@@ -19,7 +19,16 @@ import { cn } from "@/lib/utils";
 
 type Entry = { key: string; icon: React.ReactNode; label: React.ReactNode; chevron?: boolean; run: () => void };
 
-export function CreateMenu({ className }: { className?: string }) {
+export function CreateMenu({
+  className,
+  icon = <Plus className="size-4" />,
+  label = "New",
+}: {
+  className?: string;
+  /** Trigger glyph; the sidebar header uses a search icon. */
+  icon?: React.ReactNode;
+  label?: string;
+}) {
   const router = useRouter();
   const { data: threads } = useThreads();
   const [open, setOpen] = useState(false);
@@ -99,13 +108,14 @@ export function CreateMenu({ className }: { className?: string }) {
       }}
     >
       <Popover.Trigger
-        aria-label="New"
+        aria-label={label}
+        title={label}
         className={cn(
           "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover data-popup-open:text-fg-primary",
           className,
         )}
       >
-        <Plus className="size-4" />
+        {icon}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">

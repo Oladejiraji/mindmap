@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PartyPopper, Plus, Star } from "lucide-react";
+import { PartyPopper, Plus, Search, SquarePen, Star } from "lucide-react";
 import { HomeIcon, LogoIcon } from "@/components/icons/sidebar-toggle";
 import {
   Sidebar,
@@ -32,7 +32,9 @@ import { routes } from "@/lib/routes";
  * Collapses to a 48px icon rail; there the logo tile swaps to the toggle
  * on hover, and sections hide.
  */
-const row = "h-8 gap-2.5 text-body-sm font-semimedium";
+// Rows: 32px, 13px labels; the active row is a raised white pill (define.app).
+const row =
+  "h-8 gap-2.5 text-body-sm font-semimedium data-active:bg-surface-container data-active:shadow-border data-active:hover:bg-surface-container";
 const iconButton =
   "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50";
 
@@ -55,7 +57,10 @@ export function HomeSidebar() {
           <span className="truncate text-body-base font-medium text-fg-primary group-data-[collapsible=icon]:hidden">Mindmap</span>
         </Link>
         <SidebarToggleButton className="group-data-[collapsible=icon]:hidden group-data-[collapsible=icon]:group-hover/header:flex group-data-[collapsible=icon]:group-focus-within/header:flex" />
-        <CreateMenu className="group-data-[collapsible=icon]:hidden" />
+        <CreateMenu label="Search" icon={<Search className="size-4" />} className="group-data-[collapsible=icon]:hidden" />
+        <Link href={routes.newProject} aria-label="New chat" title="New chat" className={`${iconButton} group-data-[collapsible=icon]:hidden`}>
+          <SquarePen className="size-4" />
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="gap-6 pt-5">
@@ -85,9 +90,12 @@ export function HomeSidebar() {
         <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:hidden">
           <div className="flex h-6 items-center justify-between pl-2">
             <span className="text-body-sm text-fg-tertiary">Projects</span>
-            <Link href={routes.newProject} aria-label="New project" className={`${iconButton} size-6`}>
-              <Plus className="size-4" />
-            </Link>
+            <span className="group/count flex items-center">
+              <span className="pr-1.5 text-caption-lg text-fg-tertiary tabular-nums group-hover/count:hidden">{threads?.length ?? ""}</span>
+              <Link href={routes.newProject} aria-label="New project" className={`${iconButton} hidden size-6 group-hover/count:flex`}>
+                <Plus className="size-4" />
+              </Link>
+            </span>
           </div>
           <SidebarMenu className="gap-0.5">
             {projects.map((t) => (

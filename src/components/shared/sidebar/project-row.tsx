@@ -15,6 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import { closeTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
+import { formatRelativeTime } from "@/lib/format-time";
 import { cn } from "@/lib/utils";
 
 /*
@@ -104,7 +105,16 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
         render={<Link href={href} />}
       >
         <NodeTabIcon className="size-4" />
-        <span>{name}</span>
+        <span className="min-w-0 flex-1 truncate">{name}</span>
+        {/* Last activity; the hover actions take its place. */}
+        <span
+          className={cn(
+            "shrink-0 text-caption-lg font-normal text-fg-tertiary tabular-nums group-focus-within/project:hidden group-hover/project:hidden",
+            menuOpen && "hidden",
+          )}
+        >
+          {formatRelativeTime(thread.updatedAt ?? thread._creationTime).replace(/ ago$/, "")}
+        </span>
       </SidebarMenuButton>
 
       <div
