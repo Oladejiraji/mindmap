@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, List } from "lucide-react";
+import { Plus } from "lucide-react";
+import { ListIcon } from "@/components/icons/list-icon";
 import { GridIcon } from "@/components/icons/grid-icon";
 import { motion } from "motion/react";
 import { api } from "@convex/api";
@@ -77,7 +78,7 @@ export default function Home() {
                     : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
-                <List className="size-3.5" />
+                <ListIcon className="size-3.5" />
                 {layout === "list" && (
                   <motion.div
                     layoutId="layout-toggle"
