@@ -70,7 +70,8 @@ export function ProjectCard({
   return (
     <>
       <ContextMenu.Root>
-        <ContextMenu.Trigger className="rounded-xl">
+        {/* -m-2 cancels the hover padding so the thumbnail lines up with the page text. */}
+        <ContextMenu.Trigger className="-m-2 rounded-xl">
           <Link
             href={href}
             className="group relative block rounded-xl p-2"
