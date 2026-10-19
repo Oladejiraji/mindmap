@@ -246,9 +246,24 @@
 }
 
 /* iOS-style continuous corners on the element's border-radius. Browsers
- * without corner-shape keep the plain rounded corners. */
+ * without corner-shape keep the plain rounded corners. Now the default
+ * everywhere (see the base layer); kept for explicit use. */
 @utility corner-squircle {
   corner-shape: squircle;
+}
+
+/* Every radius uses iOS smoothing. Fully round things (avatars, pills,
+ * dots) stay true circles, since a squircle would square them off. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    corner-shape: squircle;
+  }
+  .rounded-full,
+  [class*="rounded-full"] {
+    corner-shape: round;
+  }
 }
 
 /* Inter Display: its own font family (layout.tsx), medium weight. */
