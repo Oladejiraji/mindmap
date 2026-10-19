@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { routes } from "@/lib/routes";
 import { SendIcon } from "@/components/icons/send-icon";
 import { cn } from "@/lib/utils";
@@ -25,11 +26,7 @@ export function GetStarted() {
       </header>
 
       <div className="mx-auto w-full max-w-[1000px] px-6 pt-14 pb-16">
-        <span
-          aria-hidden
-          className="block size-10 rounded-full"
-          style={{ background: "linear-gradient(135deg, oklch(0.78 0.12 245), var(--brand-solid) 70%)" }}
-        />
+        <UserAvatar size={40} />
         <h2 className="font-display mt-5 text-heading-5 font-medium text-fg-primary">
           Welcome, {firstName}
         </h2>

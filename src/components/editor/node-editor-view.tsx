@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { ChevronRight, Plus, X } from "lucide-react";
-import { GradientAvatar } from "@outpacelabs/avatars";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
 import type { Block } from "@blocknote/core";
 import type { Id } from "@convex/dataModel";
@@ -248,7 +248,7 @@ function Collaborators() {
           title={`${p.name} (owner)`}
           className="relative flex size-6 shrink-0 overflow-hidden rounded-full ring-2 ring-surface-container"
         >
-          <GradientAvatar seed={p.email || p.name} size={24} />
+          <UserAvatar size={24} />
         </span>
       ))}
       <button

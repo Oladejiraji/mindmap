@@ -7,7 +7,7 @@ import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { LogoutIcon } from "@/components/icons/logout-icon";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { Menu } from "@base-ui/react/menu";
-import { GradientAvatar } from "@outpacelabs/avatars";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { useSidebar } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
@@ -62,9 +62,7 @@ export function ProfileMenu() {
   return (
     <Menu.Root modal={false}>
       <Menu.Trigger className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-1 outline-none transition-colors hover:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover">
-        <span className="relative flex size-6 shrink-0 overflow-hidden rounded-full outline-[0.5px] outline-offset-[-0.5px] outline-border-default">
-          <GradientAvatar seed={email || name} size={24} />
-        </span>
+        <UserAvatar size={24} />
         <span className="flex-1 truncate text-left text-body-sm font-medium text-fg-primary group-data-[collapsible=icon]:hidden">
           {name}
         </span>
@@ -74,9 +72,7 @@ export function ProfileMenu() {
         <Menu.Positioner sideOffset={6} align="start" side="top" className="z-50">
           <Menu.Popup className="w-64 origin-(--transform-origin) rounded-xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
             <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-3">
-              <span className="flex size-8 shrink-0 overflow-hidden rounded-full outline-[0.5px] outline-offset-[-0.5px] outline-border-default">
-                <GradientAvatar seed={email || name} size={32} />
-              </span>
+              <UserAvatar size={32} />
               <span className="min-w-0">
                 <span className="block truncate text-body-sm font-medium text-fg-primary">{name}</span>
                 <span className="block truncate text-caption-lg text-fg-tertiary">{email}</span>
