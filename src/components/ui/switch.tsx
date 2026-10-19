@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * Gooey switch, ported from rndr-interactions (morph-elements/morph-switch).
  * The thumb is one SVG path: toggling stretches it across the track like
  * liquid, then it settles round with a little overshoot; hovering the far
- * side nudges it toward the pointer. The track turns green when on.
+ * side nudges it toward the pointer. The track turns brand blue when on.
  * 34×20 track, 16×16 thumb. Reduced motion: the thumb just moves. Same
  * API as before (checked, onCheckedChange, aria-label, disabled).
  */
@@ -49,7 +49,7 @@ const nudgeLeft = (t: number) =>
   thumb(ON_X, ON_X + R, ON_X + K, ON_X - R - NUDGE_EDGE * t * GOO, ON_X - K - NUDGE_HANDLE * t * GOO);
 
 const SETTLE: [number, number, number, number] = [0.34, 1.25, 0.64, 1];
-const GREEN = "oklch(0.8 0.18 152)"; // ≈ #4ade80, as in the source
+const ON = "var(--brand-solid)"; // the app's brand blue
 const OFF = "var(--component-active)";
 
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -135,7 +135,7 @@ export function Switch({
           width="34"
           height="20"
           rx="10"
-          style={{ fill: checked ? GREEN : OFF, transition: "fill 400ms ease" }}
+          style={{ fill: checked ? ON : OFF, transition: "fill 400ms ease" }}
         />
         <path ref={pathRef} d={checked ? RIGHT : LEFT} fill="white" />
       </svg>
