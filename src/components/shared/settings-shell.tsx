@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, ChevronLeft, Flame, Palette, Sparkles } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, Flame, Palette } from "lucide-react";
+import { PersonalizationIcon } from "@/components/icons/personalization-icon";
 import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ModelsIcon } from "@/components/icons/models-icon";
 import { BillingIcon } from "@/components/icons/billing-icon";
@@ -123,7 +124,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           <NavGroup label="Intelligence">
             {/* Model choice and custom instructions need backend support. */}
             <Soon icon={<ModelsIcon />}>Models</Soon>
-            <Soon icon={<Sparkles />}>Personalization</Soon>
+            <Soon icon={<PersonalizationIcon />}>Personalization</Soon>
           </NavGroup>
         </div>
 
