@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronRight, UserPlus } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
+import { InviteIcon } from "@/components/icons/invite-icon";
 import { PreferencesIcon } from "@/components/icons/preferences-icon";
 import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
@@ -90,10 +91,10 @@ export function ProfileMenu() {
             <Section>
               {/* Needs a sharing model in the backend (members, invites,
                   access checks); shown so the place is set, disabled. */}
-              <Menu.Item disabled className={cn(itemClass, "cursor-default data-disabled:text-fg-disabled data-disabled:[&>svg:first-child]:text-fg-disabled")}>
-                <UserPlus />
-                Invite people
-                <span className="ml-auto rounded-full bg-component px-1.5 text-caption-base text-fg-tertiary">Soon</span>
+              <Menu.Item disabled className={cn(itemClass, "cursor-default gap-2 data-disabled:text-fg-disabled data-disabled:[&>svg:first-child]:text-fg-disabled")}>
+                <InviteIcon />
+                Invite members
+                <span className="ml-auto rounded-full bg-component px-1 text-caption-sm text-fg-tertiary">Soon</span>
               </Menu.Item>
               <Menu.Item className={itemClass} onClick={() => router.push(routes.settings)}>
                 <SettingsGearIcon />
