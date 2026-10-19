@@ -81,8 +81,11 @@ export function ProjectRow({
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              {/* 20px Mindmap logo tile, as in the sidebar header (white m on brand blue). */}
-              <div className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
+              {/* 20px Mindmap logo tile: white m on the blue gradient (as the avatar). */}
+              <div
+                className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-lg text-white"
+                style={{ background: "linear-gradient(135deg, oklch(0.78 0.12 245), var(--brand-solid) 70%)" }}
+              >
                 <LogoIcon className="h-auto w-[11px]" />
               </div>
               {isRenaming ? (
