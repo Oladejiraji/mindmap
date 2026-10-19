@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ViewToggle } from "@/components/shared/view-toggle";
 import {
   ReactFlow,
@@ -19,6 +19,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BranchChat } from "@/components/chat/branch-chat";
 import { ZoomControls } from "./zoom-controls";
 import { CanvasShortcuts } from "./canvas-shortcuts";
+import { useSyncConvexToFlow } from "@/hooks/use-sync-convex-to-flow";
 import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
@@ -159,37 +160,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
 
-  // Sync Convex data → React Flow when topology/data actually changes
-  const fingerprint = useMemo(
-    () =>
-      nodes
-        ?.map(
-          (n) =>
-            `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${n.content ?? ""}`,
-        )
-        .join("|") ?? "",
-    [nodes],
-  );
-  const lastSyncedRef = useRef(fingerprint);
-  useEffect(() => {
-    if (fingerprint && fingerprint !== lastSyncedRef.current) {
-      lastSyncedRef.current = fingerprint;
-      setFlowNodes((prev) => {
-        const incoming = new Map(rfNodes.map((n) => [n.id, n]));
-        const prevIds = new Set(prev.map((n) => n.id));
-        const merged = prev
-          .filter((n) => incoming.has(n.id))
-          .map((existing) => {
-            const next = incoming.get(existing.id)!;
-            return { ...existing, data: next.data, type: next.type };
-          });
-        for (const n of rfNodes) {
-          if (!prevIds.has(n.id)) merged.push({ ...n, type: n.type ?? "leaf" });
-        }
-        return merged;
-      });
-    }
-  }, [fingerprint, rfNodes, setFlowNodes]);
+  useSyncConvexToFlow(rfNodes, setFlowNodes, nodes);
 
   // Track which node a connection drag started from
   const connectSourceRef = useRef<string | null>(null);
@@ -254,35 +225,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     [createEmptyBranch, screenToFlowPosition],
   );
 
-  // Canvas keyboard shortcuts. Only act when focus is on the page or the
-  // canvas itself, so Tab/Enter keep working in inputs, menus and buttons.
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const isChatView = searchParams.get("view") === "chat";
-  useEffect(() => {
-    if (isChatView || !nodes) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      const onCanvas = !el || el === document.body || !!el.closest(".react-flow__pane, .react-flow__node, .react-flow__renderer");
-      if (!onCanvas || el?.isContentEditable || el?.tagName === "INPUT" || el?.tagName === "TEXTAREA") return;
-      const root = nodes.find((n) => n.parentId === null);
-      const selected = (selectedNodeId && nodes.find((n) => n._id === selectedNodeId)) || null;
-      if (e.key === "?") {
-        e.preventDefault();
-        setShortcutsOpen((o) => !o);
-      } else if (e.key === "Tab" && !e.shiftKey) {
-        const parent = selected ?? root;
-        if (!parent) return;
-        e.preventDefault();
-        createEmptyBranch({ parentId: parent._id }).catch((err) => handleError(err, "Failed to create branch"));
-      } else if (e.key === "Enter" && selected?.parentId) {
-        e.preventDefault();
-        createEmptyBranch({ parentId: selected.parentId }).catch((err) => handleError(err, "Failed to create branch"));
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isChatView, nodes, selectedNodeId, createEmptyBranch]);
 
   if (isLoading) {
     return (
@@ -356,8 +299,10 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
         </ReactFlow>
         {nodes && (
           <CanvasShortcuts
-            hasSelection={!!selectedNodeId}
-            isRootSelected={!!selectedNodeId && nodes.find((n) => n._id === selectedNodeId)?.parentId === null}
+            nodes={nodes}
+            selectedNodeId={selectedNodeId}
+            createEmptyBranch={createEmptyBranch}
+            enabled={view !== "chat"}
             expanded={shortcutsOpen}
             onExpandedChange={setShortcutsOpen}
           />

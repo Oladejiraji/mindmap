@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Id } from "@convex/dataModel";
 import { NodeEditorView } from "@/components/editor/node-editor-view";
@@ -18,13 +18,13 @@ export function NodePanel() {
   const nodeId = searchParams.get("panel") as Id<"nodes"> | null;
   const open = !!(threadId && nodeId);
 
-  const close = () => {
+  const close = useCallback(() => {
     const next = new URLSearchParams(searchParams);
     next.delete("panel");
     next.delete("tab");
     const qs = next.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  };
+  }, [searchParams, pathname, router]);
 
   // Esc closes, unless a field or menu inside the page is handling it.
   useEffect(() => {
@@ -37,7 +37,7 @@ export function NodePanel() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  });
+  }, [open, close]);
 
   if (!open) return null;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
@@ -76,6 +76,12 @@ export function NodeEditorView({
       depth: Math.max(chain.length - 1, 0),
     };
   }, [nodes, nodeId]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const handleContentChange = useCallback(
     (blocks: Block[]) => {

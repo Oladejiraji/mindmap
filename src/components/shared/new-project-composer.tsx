@@ -19,14 +19,6 @@ import { ChatInput } from "@/components/chat/chat-input";
  * so the switch is seamless.
  */
 
-// Until the backend names projects, take the opening words of the message.
-function nameFrom(message: string) {
-  const line = message.replace(/\s+/g, " ").trim();
-  if (line.length <= 60) return line;
-  const cut = line.slice(0, 60);
-  return `${cut.slice(0, cut.lastIndexOf(" ") > 30 ? cut.lastIndexOf(" ") : 60)}…`;
-}
-
 export function NewProjectComposer() {
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
@@ -40,7 +32,7 @@ export function NewProjectComposer() {
   const start = async (content: string) => {
     setStarting(true);
     try {
-      const { threadId, rootNodeId } = await createThread({ name: nameFrom(content) });
+      const { threadId, rootNodeId } = await createThread({});
       closeTab(routes.newProject, routes.newProject);
       router.replace(`${routes.thread(threadId)}?view=chat&node=${rootNodeId}`);
       // The reply streams into the chat view; this tab's page is gone by then.
