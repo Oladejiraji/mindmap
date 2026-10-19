@@ -7,6 +7,8 @@ export const routes = {
   home: "/",
   getStarted: "/get-started",
   settings: "/settings",
+  settingsAccount: "/settings/account",
+  settingsPreferences: "/settings/preferences",
   newProject: "/new",
   signIn: "/sign-in",
   signUp: "/sign-up",

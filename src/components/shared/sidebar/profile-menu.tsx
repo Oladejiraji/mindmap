@@ -120,7 +120,7 @@ export function ProfileMenu() {
                       </Menu.RadioGroup>
                       </Menu.Group>
                       <Menu.Separator className={cn(popupDivider, "-mx-1.5 my-1.5")} />
-                      <Menu.Item className={cn(itemClass, "text-fg-secondary")} onClick={() => router.push(`${routes.settings}#preferences`)}>
+                      <Menu.Item className={cn(itemClass, "text-fg-secondary")} onClick={() => router.push(routes.settingsPreferences)}>
                         <span className="size-4" />
                         All preferences…
                       </Menu.Item>
