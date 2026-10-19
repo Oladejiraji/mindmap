@@ -1,75 +1,77 @@
-# Design-System Branch Review
+# Design-System Branch Review (v2)
 
-**Branch:** `design-system` (76 commits, 80 files, ~2,900 lines added)
+**Branch:** `design-system` (~126 commits, 118 files, ~5,200 lines added)
 **Reviewed:** 2026-10-19
 
 ---
 
 ## Overview
 
-Full design-system implementation: oklch color tokens (light/dark/high-contrast), type scale, radius scale, shadow/elevation scale, Inter font swap. Plus a new UI shell (browser-style tabs, collapsible sidebar, canvas/chat toggle, node side-panel) and several new features (branching chat, canvas shortcuts, new-project composer, create menu).
+Design-system foundation (oklch tokens, type scale, radius, shadows, Inter font) plus a major UI overhaul: browser-style tabs, collapsible sidebar, canvas/chat toggle, node side-panel, settings pages, B2B onboarding flow, get-started page, branching chat, and canvas shortcuts.
 
-**Zero backend (`convex/`) files were changed.** All new UI hooks into existing mutations and queries.
-
----
-
-## Files changed
-
-### New files (23)
-
-| File | Purpose |
-|---|---|
-| `src/app/styles/colors.css` | Full oklch color token system (light, dark, high-contrast) |
-| `src/app/(app)/(thread)/new/page.tsx` | Route for `/new` — renders `NewProjectComposer` |
-| `src/components/canvas/canvas-shortcuts.tsx` | Keyboard shortcut hint pill on canvas |
-| `src/components/canvas/zoom-controls.tsx` | Custom zoom +/- replacing React Flow defaults |
-| `src/components/chat/branch-chat.tsx` | ChatGPT-style branching conversation view |
-| `src/components/shared/new-project-composer.tsx` | New-project page with send-disc composer |
-| `src/components/shared/node-panel.tsx` | Right-hand side panel for node details |
-| `src/components/shared/tab-strip.tsx` | Browser-style tab bar (define.app style) |
-| `src/components/shared/thread-shell.tsx` | Layout shell: sidebar + tabs + content + node panel |
-| `src/components/shared/view-toggle.tsx` | Canvas/Chat segmented control |
-| `src/components/shared/sidebar/create-menu.tsx` | "+" popover with search and project drill-down |
-| `src/components/shared/sidebar/project-row.tsx` | Sidebar project row with hover actions |
-| `src/components/shared/sidebar/sidebar-toggle-button.tsx` | Sidebar collapse/expand button |
-| `src/components/ui/divider.tsx` | Configurable divider with size/color/orientation variants |
-| `src/components/icons/canvas-view-icon.tsx` | Canvas view icon |
-| `src/components/icons/chat-icon.tsx` | Chat icon |
-| `src/components/icons/folder-icons.tsx` | Custom folder icons |
-| `src/components/icons/new-tab-icon.tsx` | New-tab icon |
-| `src/components/icons/node-tab-icon.tsx` | Node-tab icon |
-| `src/components/icons/send-icon.tsx` | Up-arrow send icon |
-| `src/lib/tabs.ts` | Client-only tab state via `useSyncExternalStore` + localStorage |
-| `src/lib/use-stored-boolean.ts` | localStorage-backed boolean hook with cross-component sync |
-| `.mcp.json` | MCP tooling config |
-
-### Modified files (57)
-
-Key changes:
-
-- **`src/app/globals.css`** — Rewired to new tokens; type scale, radius scale, shadow scale, Inter font, body default to 13px
-- **`src/lib/utils.ts`** — Extended `cn()` to handle custom type scale classes
-- **`src/components/editor/node-editor-view.tsx`** — Rewritten: side-panel view with breadcrumb, property grid, content/chat tabs, collaborators stub
-- **`src/components/chat/chat-input.tsx`** — Rich composer with context chips, speech-to-text, character counter, "+" branch menu
-- **`src/components/canvas/thread-canvas.tsx`** — Canvas/Chat toggle, keyboard shortcuts, `BranchChat` integration
-- **`src/components/shared/sidebar/home-sidebar.tsx`** — Full sidebar with logo, nav, project list, profile footer
-- **`src/components/shared/sidebar/profile-menu.tsx`** — Redesigned account dropdown
-- **All UI primitives** (`button.tsx`, `input.tsx`, `sidebar.tsx`, etc.) — Migrated to design-system tokens
-- **All auth-canvas components** — Updated colors, shadows, typography
-- **All canvas node components** — Updated to new token system
+**Backend changes are minimal** — two small tweaks to `convex/threads.ts` and `convex/lib/llm.ts`. Both are correct and safe.
 
 ---
 
 ## Backend status
 
-| UI element | Backend support |
+### Changes made (correct, safe)
+
+- **`convex/threads.ts`** — `create` now accepts optional `name` (was required), falls back to `"Untitled"`. Backward-compatible.
+- **`convex/lib/llm.ts`** — When the root node gets an auto-generated title, the thread is also renamed to match. Inside existing try/catch. Uses `api.threads.rename` which does its own auth check.
+
+### Backend that doesn't exist yet
+
+The spec at `doc/onboarding-orgs-spec.md` describes significant backend work that is entirely absent:
+
+| Spec item | Status |
+|---|---|
+| `organizations` table | Not in schema |
+| `memberships` table | Not in schema |
+| `invites` table | Not in schema |
+| `users.onboardedAt` field | Not in schema |
+| `threads.orgId` field | Not in schema |
+| `organizations.createWithOnboarding` | Not implemented |
+| `organizations.update` / `.current` | Not implemented |
+| `memberships.updateJobRole` | Not implemented |
+| `invites.create` / `accept` / `revoke` | Not implemented |
+| `requireThreadAccess` (replaces per-user ownership) | Not started |
+| Onboarding gate (redirect un-onboarded users) | Not wired |
+
+**All onboarding, teams, and settings data currently lives in localStorage only.** The UI collects B2B data and stores it nowhere durable.
+
+### Existing features with no backend gap
+
+| UI feature | Backend support |
 |---|---|
 | Branch chat (fork switching, sibling nav) | Existing — `nodes.createEmptyBranch`, `messages.listByNode` |
 | New-project composer | Existing — `threads.create`, `chat.sendMessage` |
 | Project row actions (rename, delete) | Existing mutations |
-| Tab strip, sidebar collapse | Client-only (localStorage) — no backend needed |
-| **"Starred" nav item** | **None — dead UI, no handler, no backend flag** |
-| **Collaborators row** | **Stub — hardcoded current user, invite button disabled, no sharing model** |
+| Tab strip, sidebar collapse | Client-only localStorage — no backend needed |
+| Canvas shortcuts, zoom controls | Client-only — no backend needed |
+| Collaborators row in node panel | Stub — hardcoded to current user, invite disabled |
+| "Starred" nav item | Dead — no handler, no backend flag |
+
+### Deleted route
+
+`src/app/(app)/(thread)/t/[threadId]/n/[nodeId]/page.tsx` was removed. Nodes now open as a side panel via `?panel=<nodeId>`. **No broken references** — grep confirms zero hits for the old pattern.
+
+---
+
+## New routes
+
+All route pages exist. All imported components resolve.
+
+| Route | Path | Status |
+|---|---|---|
+| `getStarted` | `/get-started` | Real — renders `<GetStarted />` |
+| `settings` | `/settings` | Redirects to `/settings/account` |
+| `settingsAccount` | `/settings/account` | Real — `<AccountSettings />` |
+| `settingsPreferences` | `/settings/preferences` | Real — `<PreferencesSettings />` |
+| `settingsGeneral` | `/settings/general` | Real — `<GeneralSettings />` |
+| `settingsHotkeys` | `/settings/hotkeys` | Real — `<HotkeysSettings />` |
+| `onboarding` | `/onboarding` | Real — `<OnboardingFlow />` |
+| `newProject` | `/new` | Real — `<NewProjectComposer />` |
 
 ---
 
@@ -77,75 +79,178 @@ Key changes:
 
 ### Bugs (must-fix)
 
-#### ~~1. Missing `useEffect` dependency array — `node-panel.tsx:31`~~ ✅ Fixed
+#### ~~1. `useConvexMutation` wrapper used in 3 files~~ FIXED
 
-~~The keydown listener `useEffect` has no dependency array, so it re-registers on every render. Should include `[open, close]` as dependencies.~~
+Replaced with direct `useMutation` calls in `thread-canvas.tsx`, `project-card.tsx`, `project-row.tsx`, `edit-dropdown.tsx`, `sidebar/project-row.tsx`. `useRenameThread` refactored to use `useMutation().withOptimisticUpdate()`. `useConvexMutation` kept only in `page.tsx` where `isPending` is needed for button loading state.
 
-Added `useCallback` to `close` and `[open, close]` dependency array to the `useEffect`.
+#### ~~2. Autofill text invisible in light mode — `globals.css`~~ FIXED
 
-#### ~~2. `useConvexMutation` wrapper — `thread-canvas.tsx:57-65`~~ ✅ Not a bug
+Changed hardcoded `#fff` text and `white` background to `var(--fg-primary)` and `var(--background)` so autofill adapts to any theme.
 
-~~Uses `useConvexMutation` for `updatePosition`, `createEmptyBranch`, `deleteLeafNode`, and `renameNode`. This directly violates the project rule.~~
+#### 3. Hardcoded `bg-white` on leaf nodes — `leaf-node.tsx:22`
 
-`useConvexMutation` is intentional — it adds pending/error/success state that Convex's `useMutation` doesn't provide natively. Project rules updated to allow it as an exception.
+Won't work if dark mode is enabled. Should use a semantic token like `bg-surface-container`.
 
-#### ~~3. Speech recognition not cleaned up on unmount — `chat-input.tsx:86-103`~~ ✅ Fixed
+#### ~~4. Switch animation has no cleanup — `switch.tsx`~~ FIXED
 
-~~If the component unmounts while listening, the `SpeechRecognition` instance keeps running and its callbacks reference stale state. Needs cleanup in a `useEffect` return.~~
+Added `activeAnimation` ref tracking, a `cancelled` flag, and a cleanup function that calls `.stop()` on unmount. Previous animation is also stopped when `checked` changes mid-flight.
 
-Added unmount cleanup that nulls `onresult`/`onend` callbacks and stops the instance. `stopDictation` also nulls callbacks and clears the ref.
+#### 5. Mutable render-time index in `create-menu.tsx:133`
 
-#### ~~4. Debounce timer not cleared on unmount — `node-editor-view.tsx:83`~~ ✅ Fixed
-
-~~Raw `setTimeout` without cleanup. The mutation fires after unmount. Should clear the timeout in `useEffect` cleanup or use a ref that's cleared on unmount.~~
-
-Added `useEffect` cleanup that clears the debounce timer on unmount.
+`let index = -1` is incremented inside JSX render. Works in sync mode but breaks under React concurrent rendering. Refactor to use `flatMap` with proper indexing.
 
 ### Cleanup (should-fix)
 
-#### 5. Dead UI: "Starred" nav — `home-sidebar.tsx:71`
+#### 6. Dead code: `onNodeDoubleClick` — `thread-canvas.tsx`
 
-Renders a `SidebarMenuButton` with no `href`, no `onClick`, no `isActive` logic. Either remove it or hide behind a feature flag until backend support exists.
+Callback is defined but commented out at the usage site (line ~286). Remove both the definition and the commented reference.
 
-#### 6. Commented-out / dead code
+#### 7. Dead UI: "Starred" nav — `home-sidebar.tsx:83`
 
-- `onNodeDoubleClick` defined but commented out at `thread-canvas.tsx:340`
-- Unused `MAX_MESSAGE_CONTENT = 100` at `chat-input.tsx:10`
+`SidebarMenuButton` with no `href`, no `onClick`, no tooltip. Either remove or add a "coming soon" indicator.
 
-Remove both.
+#### 8. Sign-up page legal links — `sign-up/page.tsx`
 
-#### ~~7. Duplicate `CanvasPanel` rendering~~ ✅ Not a bug
+Mentions "Terms of Use" and "Privacy Policy" but they're plain text, not links. Potential legal issue.
 
-~~`CanvasPanel` is rendered in both `thread-shell.tsx` and `branch-chat.tsx`. If both mount simultaneously, two panels appear. Consolidate to one render location.~~
+#### 9. Projects capped at 12 in sidebar — `home-sidebar.tsx`
 
-The floating variant returns `null` when in chat view, and the docked variant only renders in chat view. They swap, never overlap.
+`slice(0, 12)` with no "show more" button or indication that more projects exist.
+
+#### 10. Hardcoded dark theme colors on sign-up page — `sign-up/page.tsx`
+
+Uses `text-white`, `text-background/87`, `bg-sidebar-ring` on a dark gradient background. Will break if the theme system changes.
+
+#### 11. Settings shell instantiates React elements at module scope — `settings-shell.tsx`
+
+`PAGES` creates `<UserAvatar size={16} />` at module level. If `UserAvatar` ever takes reactive props (real avatar URL), this breaks. Move into a render function.
+
+#### 12. `field-sizing-content` on chat textarea — `chat-input.tsx:185`
+
+Very new CSS property with limited browser support. May not work in Safari or older browsers. Add a fallback.
 
 ### Minor (note for later)
 
-#### 8. Client-side project naming — `new-project-composer.tsx`
+#### 13. `corner-shape: squircle` applied universally — `globals.css:262`
 
-`nameFrom()` derives a project name from message text on the client. If the backend ever names projects differently, these diverge. Consider moving to the backend.
+Cutting-edge CSS with very limited browser support. Progressive enhancement is fine, but test on target browsers.
 
-#### 9. Unconditional thread subscription — `create-menu.tsx`
+#### 14. Get-started page cards 2 and 3 are not clickable
 
-`useThreads()` runs even when the popover is closed, maintaining a live Convex subscription for the full thread list at all times.
+Only the first card has an `href`. The other two are decorative dead-ends.
 
-#### 10. Projects capped at 12 in sidebar — `home-sidebar.tsx:42`
+#### 15. Tab preview fires a query on every hover — `tab-preview.tsx`
 
-`slice(0, 12)` with no "show all" or pagination. Users with many projects can't reach the rest from the sidebar.
+No debounce. Could be expensive if users hover tabs rapidly.
 
-#### 11. Fragile ID parsing — `node-panel.tsx:17`
+#### 16. Fingerprint-based sync in `use-sync-convex-to-flow.ts`
 
-Regex match result cast directly to `Id<"threads">` with no validation that the captured group is a valid Convex ID.
+Concatenates all node data into a string for change detection. O(n) on every render. Fine for small trees, won't scale.
 
-#### 12. Fingerprint-based sync — `thread-canvas.tsx:174`
+#### 17. Team color assignment unstable — `teams.ts`
 
-Builds a string from all node data to detect changes. O(n) on every render; string can grow large for big trees. A targeted comparison (length + last-modified) would be more efficient.
+Color is based on `current.length % palette.length`. Deleting a team shifts colors for all subsequent teams.
+
+#### 18. Hotkeys settings page and `useCanvasShortcuts` have no shared source of truth
+
+Shortcuts are hardcoded in both places independently. If one changes, the other goes stale.
+
+#### 19. `CHANGELOG_URL` in settings shell points to GitHub commits page
+
+Not a real changelog. Either link to actual release notes or remove.
+
+#### 20. Breadcrumb links in node panel open nested panels
+
+`routes.node(threadId, parent._id)` in `node-editor-view.tsx` navigates to `?panel=<nodeId>`. Clicking a breadcrumb in the panel replaces the current panel — may be unexpected UX.
+
+---
+
+## New files inventory
+
+### Components (30 new)
+
+| File | Purpose |
+|---|---|
+| `src/components/onboarding/onboarding-flow.tsx` | B2B onboarding wizard (org, role, use case) |
+| `src/components/shared/get-started.tsx` | Welcome page with tutorial cards |
+| `src/components/shared/settings-shell.tsx` | Settings layout shell |
+| `src/components/shared/settings-view.tsx` | Account, Preferences, General, Hotkeys pages |
+| `src/components/shared/tab-preview.tsx` | Tab hover preview |
+| `src/components/shared/tab-strip.tsx` | Browser-style tab bar |
+| `src/components/shared/thread-shell.tsx` | Thread page layout wrapper |
+| `src/components/shared/user-avatar.tsx` | Gradient circle avatar placeholder |
+| `src/components/shared/view-toggle.tsx` | Canvas/Chat segmented control |
+| `src/components/shared/node-panel.tsx` | Node detail side panel |
+| `src/components/shared/new-project-composer.tsx` | Chat-first project creation |
+| `src/components/canvas/canvas-shortcuts.tsx` | Keyboard shortcut hint pill |
+| `src/components/canvas/zoom-controls.tsx` | Custom zoom +/- buttons |
+| `src/components/chat/branch-chat.tsx` | ChatGPT-style branching conversation |
+| `src/components/shared/sidebar/create-menu.tsx` | "+" popover with search |
+| `src/components/shared/sidebar/project-row.tsx` | Project row with hover actions |
+| `src/components/shared/sidebar/sidebar-toggle-button.tsx` | Sidebar collapse button |
+| `src/components/shared/sidebar/popover-styles.ts` | Shared popover CSS constants |
+| `src/components/ui/divider.tsx` | Configurable divider component |
+| `src/components/ui/switch.tsx` | Gooey animated toggle |
+| `src/components/icons/billing-icon.tsx` | Billing icon |
+| `src/components/icons/canvas-view-icon.tsx` | Canvas view icon |
+| `src/components/icons/chat-icon.tsx` | Chat icon |
+| `src/components/icons/close-icon.tsx` | Close (x) icon |
+| `src/components/icons/flame-icon.tsx` | Flame icon |
+| `src/components/icons/folder-icons.tsx` | Folder icons |
+| `src/components/icons/grid-icon.tsx` | Grid icon |
+| `src/components/icons/hotkeys-icon.tsx` | Hotkeys icon |
+| `src/components/icons/invite-icon.tsx` | Invite icon |
+| `src/components/icons/list-icon.tsx` | List icon |
+| `src/components/icons/models-icon.tsx` | Models icon |
+| `src/components/icons/new-tab-icon.tsx` | New-tab icon |
+| `src/components/icons/node-tab-icon.tsx` | Node-tab icon |
+| `src/components/icons/personalization-icon.tsx` | Personalization icon |
+| `src/components/icons/preferences-icon.tsx` | Preferences icon |
+| `src/components/icons/send-icon.tsx` | Send arrow icon |
+| `src/components/icons/settings-gear-icon.tsx` | Settings gear icon |
+
+### Hooks and lib (7 new)
+
+| File | Purpose |
+|---|---|
+| `src/hooks/use-canvas-shortcuts.ts` | Canvas keyboard shortcut handler |
+| `src/hooks/use-sync-convex-to-flow.ts` | Convex → ReactFlow state sync |
+| `src/lib/onboarding.ts` | Onboarding state (localStorage) |
+| `src/lib/preferences.ts` | User preferences (localStorage) |
+| `src/lib/teams.ts` | Teams CRUD (localStorage) |
+| `src/lib/tabs.ts` | Tab state management (localStorage) |
+| `src/lib/use-stored-boolean.ts` | Generic localStorage boolean hook |
+
+### Routes (8 new)
+
+| File | Purpose |
+|---|---|
+| `src/app/(app)/(home)/get-started/page.tsx` | Get-started page |
+| `src/app/(app)/(onboarding)/onboarding/page.tsx` | Onboarding page |
+| `src/app/(app)/(settings)/settings/layout.tsx` | Settings layout |
+| `src/app/(app)/(settings)/settings/page.tsx` | Settings index (redirects to account) |
+| `src/app/(app)/(settings)/settings/account/page.tsx` | Account settings |
+| `src/app/(app)/(settings)/settings/general/page.tsx` | General settings |
+| `src/app/(app)/(settings)/settings/hotkeys/page.tsx` | Hotkeys settings |
+| `src/app/(app)/(settings)/settings/preferences/page.tsx` | Preferences settings |
+| `src/app/(app)/(thread)/new/page.tsx` | New project page |
+
+### Other
+
+| File | Purpose |
+|---|---|
+| `doc/onboarding-orgs-spec.md` | Backend spec for organizations |
+| `src/app/fonts/inter-display-500.woff2` | Inter Display font file |
+| `src/app/styles/colors.css` | Full oklch color token system |
+| `.mcp.json` | MCP tooling config |
 
 ---
 
 ## Verdict
 
-The design-system foundation is solid — proper token architecture, oklch colors, good light/dark separation, well-structured type and radius scales. The structural UI changes (tab strip, sidebar, shell layout) are ambitious but coherent. No backend work is behind — everything hooks into existing Convex functions correctly.
+The design-system foundation and structural UI work are solid. The backend changes are minimal and correct. The biggest gap is that all B2B features (onboarding, teams, settings) live entirely in localStorage with no server persistence — the spec exists but zero Convex work has been done.
 
-**Action items:** Fix findings 1-4 (bugs), clean up 5-7, and track 8-12 as technical debt.
+**Priority for cleanup before adding backend:**
+1. Fix findings 1–5 (bugs that affect correctness)
+2. Clean up findings 6–12 (dead code, dead UI, fragile patterns)
+3. Track findings 13–20 as tech debt

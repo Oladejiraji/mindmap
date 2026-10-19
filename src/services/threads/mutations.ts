@@ -1,7 +1,7 @@
 import { api } from "@convex/api";
 import type { Doc, Id } from "@convex/dataModel";
 import type { OptimisticLocalStore } from "convex/browser";
-import { useConvexMutation } from "@/lib/use-convex-mutation";
+import { useMutation } from "convex/react";
 
 const renameOptimisticUpdate = (
   localStore: OptimisticLocalStore,
@@ -20,5 +20,5 @@ const renameOptimisticUpdate = (
 };
 
 export function useRenameThread() {
-  return useConvexMutation(api.threads.rename, renameOptimisticUpdate);
+  return useMutation(api.threads.rename).withOptimisticUpdate(renameOptimisticUpdate);
 }
