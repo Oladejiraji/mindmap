@@ -192,7 +192,7 @@ export function NodeEditorView({
 
         {/* Content / Chat */}
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div role="tablist" aria-label="Node views" className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border-default px-3">
+          <div role="tablist" aria-label="Node views" className="flex h-12 shrink-0 items-center gap-1.5 px-3">
             {(["content", "chat"] as const).map((t) => (
               <button
                 key={t}
