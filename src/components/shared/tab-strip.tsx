@@ -52,11 +52,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
             className={cn(
               "group/tab relative flex h-8 max-w-42 min-w-28 flex-1 basis-42 items-center",
               active && "z-10",
-              // Inactive tabs get a soft rounded pill on hover (define.app),
-              // inset 4px top and bottom: centred on the icon and title, with
-              // a 4px gap above the canvas.
-              !active &&
-                "before:pointer-events-none before:absolute before:inset-x-0 before:top-1 before:bottom-1 before:rounded-xl before:bg-transparent-hover before:opacity-0 before:transition-opacity before:duration-150 hover:before:opacity-100",
+
             )}
           >
             {active && (
@@ -71,6 +67,14 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
                     "before:pointer-events-none before:absolute before:bottom-0 before:-left-3 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--tab-bg)_12.5px)]",
                   "after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--tab-bg)_12.5px)]",
                 )}
+              />
+            )}
+            {/* Hover: the tab's own shape in the hover tint (full height,
+                rounded top, inverted feet), so it echoes the active tab. */}
+            {!active && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-t-xl bg-transparent-hover opacity-0 transition-opacity duration-150 group-hover/tab:opacity-100 before:absolute before:bottom-0 before:-left-3 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--transparent-hover)_12.5px)] after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--transparent-hover)_12.5px)]"
               />
             )}
             {/* Hairline between tabs; hidden while either neighbour is hovered. */}
