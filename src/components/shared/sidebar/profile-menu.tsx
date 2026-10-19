@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronRight, Settings, SlidersHorizontal } from "lucide-react";
+import { Check, ChevronRight, Settings, SlidersHorizontal, UserPlus } from "lucide-react";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { LogoutIcon } from "@/components/icons/logout-icon";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
@@ -84,8 +84,15 @@ export function ProfileMenu() {
                 <span className="block truncate text-caption-lg text-fg-tertiary">{email}</span>
               </span>
             </div>
-            <Menu.Separator className="h-px bg-border-default" />
+            <Menu.Separator className="h-px bg-border-default/50" />
             <Section>
+              {/* Needs a sharing model in the backend (members, invites,
+                  access checks); shown so the place is set, disabled. */}
+              <Menu.Item disabled className={cn(itemClass, "cursor-default data-disabled:text-fg-disabled data-disabled:[&>svg:first-child]:text-fg-disabled")}>
+                <UserPlus />
+                Invite people
+                <span className="ml-auto rounded-full bg-component px-1.5 text-caption-base text-fg-tertiary">Soon</span>
+              </Menu.Item>
               <Menu.Item className={itemClass} onClick={() => router.push(routes.settings)}>
                 <Settings />
                 Settings
@@ -107,7 +114,7 @@ export function ProfileMenu() {
                         </span>
                         Canvas shortcut hints
                       </Menu.CheckboxItem>
-                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default" />
+                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default/50" />
                       <Menu.Group>
                       <Menu.GroupLabel className="px-2.5 pt-1 pb-1.5 text-caption-lg text-fg-tertiary">Home layout</Menu.GroupLabel>
                       <Menu.RadioGroup value={layout} onValueChange={(v) => setLayout(v as "grid" | "list")}>
@@ -123,7 +130,7 @@ export function ProfileMenu() {
                         ))}
                       </Menu.RadioGroup>
                       </Menu.Group>
-                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default" />
+                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default/50" />
                       <Menu.Item className={cn(itemClass, "text-fg-secondary")} onClick={() => router.push(`${routes.settings}#preferences`)}>
                         <span className="size-4" />
                         All preferences…
@@ -133,7 +140,7 @@ export function ProfileMenu() {
                 </Menu.Portal>
               </Menu.SubmenuRoot>
             </Section>
-            <Menu.Separator className="h-px bg-border-default" />
+            <Menu.Separator className="h-px bg-border-default/50" />
             <Section>
               <Menu.Item className={itemClass} onClick={toggleSidebar}>
                 <SidebarToggleIcon open={sidebarOpen} />
@@ -141,7 +148,7 @@ export function ProfileMenu() {
                 <Hint>⌘B</Hint>
               </Menu.Item>
             </Section>
-            <Menu.Separator className="h-px bg-border-default" />
+            <Menu.Separator className="h-px bg-border-default/50" />
             <Section>
               <Menu.Item className={itemClass} render={<a href={REPO_URL} target="_blank" rel="noreferrer" />}>
                 <GitHubMark />
@@ -149,7 +156,7 @@ export function ProfileMenu() {
                 <Hint>↗</Hint>
               </Menu.Item>
             </Section>
-            <Menu.Separator className="h-px bg-border-default" />
+            <Menu.Separator className="h-px bg-border-default/50" />
             <Section>
               <Menu.Item className={itemClass} onClick={() => void handleSignOut()}>
                 <LogoutIcon />
