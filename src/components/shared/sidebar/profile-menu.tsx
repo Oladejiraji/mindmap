@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronRight, Settings, SlidersHorizontal, UserPlus } from "lucide-react";
+import { Check, ChevronRight, SlidersHorizontal, UserPlus } from "lucide-react";
+import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { LogoutIcon } from "@/components/icons/logout-icon";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
@@ -94,7 +95,7 @@ export function ProfileMenu() {
                 <span className="ml-auto rounded-full bg-component px-1.5 text-caption-base text-fg-tertiary">Soon</span>
               </Menu.Item>
               <Menu.Item className={itemClass} onClick={() => router.push(routes.settings)}>
-                <Settings />
+                <SettingsGearIcon />
                 Settings
               </Menu.Item>
               <Menu.SubmenuRoot>
