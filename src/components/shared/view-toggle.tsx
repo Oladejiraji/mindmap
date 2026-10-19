@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
  * Canvas ↔ Chat switch (design-system segmented control). Both views live
  * in the same tab: `onSelect` swaps them in place. Each side is still a
  * link (same path, different ?view=) so it works with middle-click.
+ * Icons only; the names are in the tooltip and accessible label.
  */
 export function ViewToggle({
   active,
@@ -28,7 +29,7 @@ export function ViewToggle({
 }) {
   const item = (on: boolean) =>
     cn(
-      "flex h-7 items-center gap-1.5 rounded-md px-2.5 text-body-sm font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5",
+      "flex size-7 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-4",
       on ? "bg-surface-container text-fg-primary shadow-default" : "text-fg-secondary hover:text-fg-primary",
     );
   return (
@@ -42,14 +43,16 @@ export function ViewToggle({
             onSelect("canvas");
           }
         }}
+        aria-label="Canvas"
+        title="Canvas"
         className={item(active === "canvas")}
       >
         <CanvasViewIcon />
-        Canvas
       </Link>
       <Link
         href={chatHref}
         aria-current={active === "chat" ? "page" : undefined}
+        aria-label="Chat"
         title={chatLabel ? `Chat · ${chatLabel}` : "Chat"}
         onClick={(e) => {
           if (onSelect) {
@@ -60,7 +63,6 @@ export function ViewToggle({
         className={item(active === "chat")}
       >
         <ChatIcon />
-        Chat
       </Link>
     </div>
   );
