@@ -41,7 +41,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
           {isLeaf && <NodeMenu id={id} onDelete={onDelete} />}
         </div>
 
-        <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-ring p-2 text-background shadow-node-inset">
+        <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-ring p-2 text-background shadow-node-inset [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NodeContent nodeId={isRoot ? undefined : id} content={content} editorTheme="dark" />
         </div>
 
