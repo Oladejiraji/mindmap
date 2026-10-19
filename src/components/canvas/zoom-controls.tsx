@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { ZoomInIcon, ZoomOutIcon } from "@/components/icons/zoom-icons";
 import { Panel, useReactFlow, useStore } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ export function ZoomControls({ className }: { className?: string }) {
             onClick={() => zoomIn({ duration: 200 })}
             className={button}
           >
-            <Plus className="size-4" strokeWidth={2} />
+            <ZoomInIcon className="size-4" />
           </button>
           <div aria-hidden className="mx-1.5 h-px bg-border-default" />
           <button
@@ -41,7 +41,7 @@ export function ZoomControls({ className }: { className?: string }) {
             onClick={() => zoomOut({ duration: 200 })}
             className={button}
           >
-            <Minus className="size-4" strokeWidth={2} />
+            <ZoomOutIcon className="size-4" />
           </button>
         </div>
       </div>
