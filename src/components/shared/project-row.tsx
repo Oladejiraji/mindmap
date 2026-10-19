@@ -105,10 +105,10 @@ export function ProjectRow({
                 <p className="truncate text-body-base text-fg-primary">{name}</p>
               )}
             </div>
-            <span className="text-caption-lg text-fg-tertiary">
+            <span className="text-right text-caption-lg text-fg-tertiary">
               {formatRelativeTime(createdAt)}
             </span>
-            <span className="text-caption-lg text-fg-tertiary">
+            <span className="text-right text-caption-lg text-fg-tertiary">
               {formatRelativeTime(updatedAt ?? createdAt)}
             </span>
           </Link>

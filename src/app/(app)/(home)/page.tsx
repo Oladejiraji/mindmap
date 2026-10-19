@@ -112,11 +112,13 @@ export default function Home() {
                 ))}
           </div>
         ) : (
-          <div className="mt-11 flex flex-col">
+          // -mx-2 cancels the rows' hover padding so names start on the title
+          // edge and the date columns end on the divider's right edge.
+          <div className="mt-11 -mx-2 flex flex-col">
             <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-caption-lg text-fg-tertiary">
               <span>Name</span>
-              <span>Created</span>
-              <span>Edited</span>
+              <span className="text-right">Created</span>
+              <span className="text-right">Edited</span>
             </div>
             {isPending
               ? Array.from({ length: 6 }).map((_, i) => (
@@ -128,8 +130,8 @@ export default function Home() {
                       <div className="size-8 animate-pulse rounded-lg bg-background-5" />
                       <div className="h-4 w-1/3 animate-pulse rounded bg-background-5" />
                     </div>
-                    <div className="h-3 w-16 animate-pulse rounded bg-background-5" />
-                    <div className="h-3 w-16 animate-pulse rounded bg-background-5" />
+                    <div className="ml-auto h-3 w-16 animate-pulse rounded bg-background-5" />
+                    <div className="ml-auto h-3 w-16 animate-pulse rounded bg-background-5" />
                   </div>
                 ))
               : threads?.map((thread) => (
