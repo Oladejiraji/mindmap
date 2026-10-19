@@ -15,6 +15,7 @@ import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { popupDivider, popupSurface, SIDEBAR_INSET } from "./popover-styles";
 
 /*
  * Search popover, laid out like define.app's: a grey search pill on top,
@@ -34,8 +35,12 @@ export function CreateMenu({
   className,
   icon = <Plus className="size-4" />,
   label = "New",
+  anchor,
 }: {
   className?: string;
+  /** Element to align under (the sidebar header), so the popover lines up
+   * with the sidebar content like the account menu. Defaults to the trigger. */
+  anchor?: React.RefObject<HTMLElement | null>;
   /** Trigger glyph; the sidebar header uses a search icon. */
   icon?: ReactNode;
   label?: string;
@@ -154,13 +159,13 @@ export function CreateMenu({
         {icon}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
+        <Popover.Positioner anchor={anchor} side="bottom" align="start" alignOffset={anchor ? SIDEBAR_INSET : 0} sideOffset={6} className="z-50">
           <Popover.Popup
             initialFocus={false}
-            className="w-80 origin-(--transform-origin) overflow-hidden rounded-2xl bg-surface-modal text-fg-primary shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0"
+            className={popupSurface}
           >
-            <div className="border-b border-border-subtle p-1.5">
-              <label className="flex h-9.5 items-center gap-2 rounded-xl bg-component px-3">
+            <div className="p-1.5">
+              <label className="corner-squircle flex h-8 items-center gap-2 rounded-[14px] bg-component px-2.5">
                 <Search className="size-4 shrink-0 text-fg-tertiary" />
                 <input
                   autoFocus
@@ -176,6 +181,7 @@ export function CreateMenu({
                 />
               </label>
             </div>
+            <div className={popupDivider} />
             <div className="max-h-96 overflow-y-auto overscroll-contain p-1.5" role="listbox" aria-label="Results">
               {groups.map((group) => (
                 <div key={group.label} role="group" aria-label={group.label} className="pb-1">
@@ -192,11 +198,11 @@ export function CreateMenu({
                         onMouseMove={() => setActive(i)}
                         onClick={entry.run}
                         className={cn(
-                          "flex w-full cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-left outline-none",
+                          "corner-squircle flex w-full cursor-pointer items-center gap-2.5 rounded-[14px] px-2.5 py-1.5 text-left outline-none",
                           i === current && "bg-transparent-hover",
                         )}
                       >
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-component text-fg-tertiary [&_svg]:size-4">
+                        <span className="corner-squircle flex size-7 shrink-0 items-center justify-center rounded-lg bg-component text-fg-tertiary [&_svg]:size-4">
                           {entry.icon}
                         </span>
                         <span className="min-w-0 flex-1">

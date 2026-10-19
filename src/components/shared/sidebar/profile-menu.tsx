@@ -18,6 +18,7 @@ import { routes } from "@/lib/routes";
 import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
 import { showError } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { popupDivider, popupRow, popupSection, popupSurface } from "./popover-styles";
 
 /*
  * Account menu, laid out like Pond's: sections split by full-width
@@ -29,15 +30,14 @@ import { cn } from "@/lib/utils";
 
 const REPO_URL = "https://github.com/Oladejiraji/mindmap";
 
-const itemClass =
-  "corner-squircle flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-[14px] px-2.5 text-body-sm whitespace-nowrap text-fg-primary outline-none transition-colors select-none data-highlighted:bg-transparent-hover [&>svg:first-child]:size-4 [&>svg:first-child]:shrink-0 [&>svg:first-child]:text-fg-tertiary";
+const itemClass = popupRow;
 
 function Hint({ children }: { children: ReactNode }) {
   return <span className="ml-auto pl-4 text-caption-lg text-fg-tertiary">{children}</span>;
 }
 
 function Section({ children }: { children: ReactNode }) {
-  return <div className="p-1.5">{children}</div>;
+  return <div className={popupSection}>{children}</div>;
 }
 
 function GitHubMark(props: React.SVGProps<SVGSVGElement>) {
@@ -80,7 +80,7 @@ export function ProfileMenu() {
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" side="top" className="z-50">
-          <Menu.Popup className="corner-squircle w-(--anchor-width) origin-(--transform-origin) rounded-4xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
+          <Menu.Popup className={cn(popupSurface, "w-(--anchor-width)")}>
             <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-3">
               <UserAvatar size={32} />
               <span className="min-w-0">
@@ -88,7 +88,7 @@ export function ProfileMenu() {
                 <span className="block truncate text-caption-lg text-fg-tertiary">{email}</span>
               </span>
             </div>
-            <Menu.Separator className="h-px bg-border-default/50" />
+            <Menu.Separator className={popupDivider} />
             <Section>
               {/* Needs a sharing model in the backend (members, invites,
                   access checks); shown so the place is set, disabled. */}
@@ -109,7 +109,7 @@ export function ProfileMenu() {
                 </Menu.SubmenuTrigger>
                 <Menu.Portal>
                   <Menu.Positioner side="right" align="start" sideOffset={8} alignOffset={-6} className="z-50">
-                    <Menu.Popup className="corner-squircle w-56 rounded-4xl bg-surface-modal p-1.5 shadow-large outline-none">
+                    <Menu.Popup className={cn(popupSurface, "w-56 p-1.5")}>
                       <Menu.CheckboxItem className={itemClass} checked={hints} onCheckedChange={setHints}>
                         <span className="flex size-4 items-center justify-center">
                           <Menu.CheckboxItemIndicator>
@@ -118,7 +118,7 @@ export function ProfileMenu() {
                         </span>
                         Canvas shortcut hints
                       </Menu.CheckboxItem>
-                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default/50" />
+                      <Menu.Separator className={cn(popupDivider, "-mx-1.5 my-1.5")} />
                       <Menu.Group>
                       <Menu.GroupLabel className="px-2.5 pt-1 pb-1.5 text-caption-lg text-fg-tertiary">Home layout</Menu.GroupLabel>
                       <Menu.RadioGroup value={layout} onValueChange={(v) => setLayout(v as "grid" | "list")}>
@@ -134,7 +134,7 @@ export function ProfileMenu() {
                         ))}
                       </Menu.RadioGroup>
                       </Menu.Group>
-                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default/50" />
+                      <Menu.Separator className={cn(popupDivider, "-mx-1.5 my-1.5")} />
                       <Menu.Item className={cn(itemClass, "text-fg-secondary")} onClick={() => router.push(`${routes.settings}#preferences`)}>
                         <span className="size-4" />
                         All preferences…
@@ -144,7 +144,7 @@ export function ProfileMenu() {
                 </Menu.Portal>
               </Menu.SubmenuRoot>
             </Section>
-            <Menu.Separator className="h-px bg-border-default/50" />
+            <Menu.Separator className={popupDivider} />
             <Section>
               <Menu.Item className={itemClass} onClick={toggleSidebar}>
                 <SidebarToggleIcon open={sidebarOpen} />
@@ -152,7 +152,7 @@ export function ProfileMenu() {
                 <Hint>⌘B</Hint>
               </Menu.Item>
             </Section>
-            <Menu.Separator className="h-px bg-border-default/50" />
+            <Menu.Separator className={popupDivider} />
             <Section>
               <Menu.Item className={itemClass} render={<a href={REPO_URL} target="_blank" rel="noreferrer" />}>
                 <GitHubMark />
@@ -160,7 +160,7 @@ export function ProfileMenu() {
                 <Hint>↗</Hint>
               </Menu.Item>
             </Section>
-            <Menu.Separator className="h-px bg-border-default/50" />
+            <Menu.Separator className={popupDivider} />
             <Section>
               <Menu.Item className={itemClass} onClick={() => void handleSignOut()}>
                 <LogoutIcon />

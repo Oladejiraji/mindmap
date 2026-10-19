@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PartyPopper, Plus, Search, SquarePen, Star } from "lucide-react";
@@ -40,12 +41,13 @@ const iconButton =
 
 export function HomeSidebar() {
   const pathname = usePathname();
+  const headerRef = useRef<HTMLDivElement>(null);
   const { data: threads } = useThreads();
   const projects = threads?.slice(0, 12) ?? [];
 
   return (
     <Sidebar collapsible="icon" className="border-none">
-      <SidebarHeader className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+      <SidebarHeader ref={headerRef} className="group/header h-10 flex-row items-center gap-0 py-0 pt-2 pr-3 pl-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
         <Link
           href={routes.home}
           aria-label="Mindmap home"
@@ -57,7 +59,7 @@ export function HomeSidebar() {
           <span className="truncate text-body-base font-medium text-fg-primary group-data-[collapsible=icon]:hidden">Mindmap</span>
         </Link>
         <SidebarToggleButton className="group-data-[collapsible=icon]:hidden group-data-[collapsible=icon]:group-hover/header:flex group-data-[collapsible=icon]:group-focus-within/header:flex" />
-        <CreateMenu label="Search" icon={<Search className="size-4" />} className="group-data-[collapsible=icon]:hidden" />
+        <CreateMenu label="Search" icon={<Search className="size-4" />} anchor={headerRef} className="group-data-[collapsible=icon]:hidden" />
         <Link href={routes.newProject} aria-label="New chat" title="New chat" className={`${iconButton} group-data-[collapsible=icon]:hidden`}>
           <SquarePen className="size-4" />
         </Link>
