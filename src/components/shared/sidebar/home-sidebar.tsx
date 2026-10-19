@@ -88,7 +88,7 @@ export function HomeSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:hidden">
-          <div className="flex h-6 items-center justify-between pl-2">
+          <div className="mb-1.5 flex h-6 items-center justify-between pl-2">
             <span className="text-body-sm text-fg-tertiary">Projects</span>
             <span className="group/count flex items-center">
               <span className="pr-1.5 text-caption-lg text-fg-tertiary tabular-nums group-hover/count:hidden">{threads?.length ?? ""}</span>
