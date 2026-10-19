@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MotionConfig, motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { NewTabIcon } from "@/components/icons/new-tab-icon";
@@ -12,7 +13,8 @@ import { cn } from "@/lib/utils";
 /*
  * Browser-style tab strip (modelled on define.app). The active tab takes
  * the colour of the panel below (--tab-bg) and joins it with inverted
- * corners. Every title fades out across the back half of the tab (no hard
+ * corners; that shape is one shared-layout element, so switching tabs
+ * slides it across instead of snapping (instant with reduced motion). Every title fades out across the back half of the tab (no hard
  * truncation); close appears on hover. Inactive tabs are split by hairlines.
  */
 export function TabStrip({ className, skipOnNodePages = false }: { className?: string; skipOnNodePages?: boolean }) {
@@ -35,6 +37,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
       className={cn("flex h-10 shrink-0 items-end overflow-x-auto px-3 [scrollbar-width:none]", className)}
       style={{ ["--tab-bg" as string]: panelColor }}
     >
+      <MotionConfig reducedMotion="user">
       {tabs.map((tab, i) => {
         const active = i === activeIndex;
         const Icon = tab.kind === "new" ? NewTabIcon : NodeTabIcon;
@@ -45,15 +48,23 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
             role="presentation"
             className={cn(
               "group/tab relative flex h-8 max-w-42 min-w-28 flex-1 basis-42 items-center",
-              active && "z-10 rounded-t-xl bg-(--tab-bg)",
-              // inverted corners that join the active tab to the panel
-              active &&
-                i > 0 &&
-                "before:pointer-events-none before:absolute before:bottom-0 before:-left-3 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--tab-bg)_12.5px)]",
-              active &&
-                "after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--tab-bg)_12.5px)]",
+              active && "z-10",
             )}
           >
+            {active && (
+              <motion.span
+                layoutId="active-tab"
+                aria-hidden
+                transition={{ type: "spring", duration: 0.32, bounce: 0.12 }}
+                className={cn(
+                  "absolute inset-0 rounded-t-xl bg-(--tab-bg)",
+                  // inverted corners that join the active tab to the panel
+                  i > 0 &&
+                    "before:pointer-events-none before:absolute before:bottom-0 before:-left-3 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--tab-bg)_12.5px)]",
+                  "after:pointer-events-none after:absolute after:-right-3 after:bottom-0 after:size-3 after:bg-[radial-gradient(circle_at_100%_0,transparent_12px,var(--tab-bg)_12.5px)]",
+                )}
+              />
+            )}
             {showDivider && <span aria-hidden className="absolute top-1/2 left-0 h-4 w-px -translate-y-1/2 bg-border-default" />}
             <Link
               href={tab.href}
@@ -61,11 +72,11 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
               aria-selected={active}
               title={tab.title}
               className={cn(
-                "flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pr-7 pl-3 text-body-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                "relative flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pr-7 pl-3 text-body-sm outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
                 active ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
               )}
             >
-              <Icon className={cn("size-4 shrink-0", active ? "text-fg-secondary" : "text-fg-tertiary")} />
+              <Icon className={cn("size-4 shrink-0 transition-colors duration-200", active ? "text-fg-secondary" : "text-fg-tertiary")} />
               <span className="min-w-0 flex-1 overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,black_30%,transparent_78%)]">
                 {tab.title}
               </span>
@@ -85,6 +96,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
           </div>
         );
       })}
+      </MotionConfig>
       <Link
         href={routes.newProject}
         aria-label="New project"
