@@ -9,34 +9,44 @@ import { cn } from "@/lib/utils";
  * The thumb is one SVG path: toggling stretches it across the track like
  * liquid, then it settles round with a little overshoot; hovering the far
  * side nudges it toward the pointer. The track turns green when on.
- * Reduced motion: the thumb just moves. Same API as before (checked,
- * onCheckedChange, aria-label, disabled).
+ * 34×20 track, 16×16 thumb. Reduced motion: the thumb just moves. Same
+ * API as before (checked, onCheckedChange, aria-label, disabled).
  */
 
-// Geometry in the source's 80×40 track space (x 5–85, y 20–60).
-const LEFT = "M 25,22 C 34.94,22 43,30.06 43,40 C 43,49.94 34.94,58 25,58 C 15.06,58 7,49.94 7,40 C 7,30.06 15.06,22 25,22 Z";
-const RIGHT = "M 65,22 C 74.94,22 83,30.06 83,40 C 83,49.94 74.94,58 65,58 C 55.06,58 47,49.94 47,40 C 47,30.06 55.06,22 65,22 Z";
+// Geometry in px: a 34×20 track with a 16×16 thumb (2px inset), so the
+// thumb rests centred at x=10 (off) or x=24 (on). The thumb is a circle
+// drawn as four Béziers; stretching moves one side's edge and handle.
+const W = 34;
+const R = 8;
+const K = 4.418; // Bézier circle constant × R
+const OFF_X = 10;
+const ON_X = 24;
+const TRAVEL = ON_X - OFF_X;
+
+function thumb(cx: number, rightEdge: number, rightHandle: number, leftEdge: number, leftHandle: number) {
+  const top = 10 - R;
+  const bottom = 10 + R;
+  return `M ${cx},${top} C ${rightHandle},${top} ${rightEdge},${10 - K} ${rightEdge},10 C ${rightEdge},${10 + K} ${rightHandle},${bottom} ${cx},${bottom} C ${leftHandle},${bottom} ${leftEdge},${10 + K} ${leftEdge},10 C ${leftEdge},${10 - K} ${leftHandle},${top} ${cx},${top} Z`;
+}
+
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 // How gooey it is (1 = the source: the thumb stretches the whole track).
 // Toned down: it stretches halfway, leans half as far, overshoots less.
+// Offsets are the source's, scaled to this track's 14px of travel.
 const GOO = 0.5;
-const se = lerp(43, 83, GOO); // stretched edge
-const sh = lerp(34.94, 50, GOO); // stretched handle
-const STRETCH_RIGHT = `M 25,22 C ${sh},22 ${se},30.06 ${se},40 C ${se},49.94 ${sh},58 25,58 C 15.06,58 7,49.94 7,40 C 7,30.06 15.06,22 25,22 Z`;
-const le = lerp(47, 7, GOO);
-const lh = lerp(55.06, 40, GOO);
-const STRETCH_LEFT = `M 65,22 C 74.94,22 83,30.06 83,40 C 83,49.94 74.94,58 65,58 C ${lh},58 ${le},49.94 ${le},40 C ${le},30.06 ${lh},22 65,22 Z`;
-const nudgeRight = (t: number) => {
-  const h = lerp(34.94, 42, t * GOO);
-  const e = lerp(43, 58, t * GOO);
-  return `M 25,22 C ${h},22 ${e},30.06 ${e},40 C ${e},49.94 ${h},58 25,58 C 15.06,58 7,49.94 7,40 C 7,30.06 15.06,22 25,22 Z`;
-};
-const nudgeLeft = (t: number) => {
-  const h = lerp(55.06, 48, t * GOO);
-  const e = lerp(47, 32, t * GOO);
-  return `M 65,22 C 74.94,22 83,30.06 83,40 C 83,49.94 74.94,58 65,58 C ${h},58 ${e},49.94 ${e},40 C ${e},30.06 ${h},22 65,22 Z`;
-};
+const STRETCH_HANDLE = TRAVEL * (25 / 40);
+const NUDGE_HANDLE = TRAVEL * (7.06 / 40);
+const NUDGE_EDGE = TRAVEL * (15 / 40);
+
+const LEFT = thumb(OFF_X, OFF_X + R, OFF_X + K, OFF_X - R, OFF_X - K);
+const RIGHT = thumb(ON_X, ON_X + R, ON_X + K, ON_X - R, ON_X - K);
+const STRETCH_RIGHT = thumb(OFF_X, lerp(OFF_X + R, W - 2, GOO), lerp(OFF_X + K, OFF_X + STRETCH_HANDLE, GOO), OFF_X - R, OFF_X - K);
+const STRETCH_LEFT = thumb(ON_X, ON_X + R, ON_X + K, lerp(ON_X - R, 2, GOO), lerp(ON_X - K, ON_X - STRETCH_HANDLE, GOO));
+const nudgeRight = (t: number) =>
+  thumb(OFF_X, OFF_X + R + NUDGE_EDGE * t * GOO, OFF_X + K + NUDGE_HANDLE * t * GOO, OFF_X - R, OFF_X - K);
+const nudgeLeft = (t: number) =>
+  thumb(ON_X, ON_X + R, ON_X + K, ON_X - R - NUDGE_EDGE * t * GOO, ON_X - K - NUDGE_HANDLE * t * GOO);
 
 const SETTLE: [number, number, number, number] = [0.34, 1.25, 0.64, 1];
 const GREEN = "oklch(0.8 0.18 152)"; // ≈ #4ade80, as in the source
@@ -116,17 +126,15 @@ export function Switch({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className={cn(
-        "relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "relative inline-flex h-5 w-[34px] shrink-0 cursor-pointer rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
     >
-      <svg viewBox="5 20 80 40" className="size-full overflow-visible" aria-hidden>
+      <svg viewBox="0 0 34 20" className="size-full overflow-visible" aria-hidden>
         <rect
-          x="5"
-          y="20"
-          width="80"
-          height="40"
-          rx="20"
+          width="34"
+          height="20"
+          rx="10"
           style={{ fill: checked ? GREEN : OFF, transition: "fill 400ms ease" }}
         />
         <path ref={pathRef} d={checked ? RIGHT : LEFT} fill="white" />
