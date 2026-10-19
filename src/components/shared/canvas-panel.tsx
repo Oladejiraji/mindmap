@@ -102,17 +102,17 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
                         cancelRename();
                       }
                     }}
-                    className="flex h-[13px] w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-body-sm/[13px] font-medium text-fg-primary shadow-border outline-none"
+                    className="flex h-3 w-full min-w-0 items-center rounded bg-foreground/5 px-1 text-caption-lg/[12px] font-medium text-fg-primary shadow-border outline-none"
                   />
                 ) : (
                   <p
                     onClick={startEditing}
-                    className="cursor-text truncate rounded px-1 text-body-sm/[13px] font-medium text-fg-primary transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
+                    className="cursor-text truncate rounded px-1 text-caption-lg/[12px] font-medium text-fg-primary transition-[background-color,box-shadow] duration-200 shadow-[0_0_0_1px_transparent] hover:bg-foreground/5 hover:shadow-border"
                   >
                     {thread?.name ?? "Untitled"}
                   </p>
                 )}
-                <p className="mt-1.5 px-1 text-caption-base/[11px] text-fg-tertiary">
+                <p className="mt-1.5 px-1 text-caption-lg/[12px] text-fg-tertiary">
                   {formatRelativeTime(thread?._creationTime ?? 0)}
                 </p>
               </>
