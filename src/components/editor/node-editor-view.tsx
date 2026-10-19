@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
-import { ChevronRight, Plus, X } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
+import { CloseIcon } from "@/components/icons/close-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
 import type { Block } from "@blocknote/core";
@@ -103,7 +104,7 @@ export function NodeEditorView({
       title="Close (Esc)"
       className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <X className="size-4" />
+      <CloseIcon className="size-4" />
     </button>
   );
 

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { MotionConfig, motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
+import { CloseIcon } from "@/components/icons/close-icon";
 import { NewTabIcon } from "@/components/icons/new-tab-icon";
 import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { closeTab, useTabs } from "@/lib/tabs";
@@ -101,7 +102,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
                 "absolute right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-md text-fg-tertiary opacity-0 outline-none transition-opacity group-hover/tab:opacity-100 hover:bg-transparent-hover hover:text-fg-primary focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",
               )}
             >
-              <X className="size-3.5" />
+              <CloseIcon className="size-3.5" />
             </button>
           </div>
         );

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { Keyboard, X } from "lucide-react";
+import { Keyboard } from "lucide-react";
+import { CloseIcon } from "@/components/icons/close-icon";
 import type { Id } from "@convex/dataModel";
 import type { Doc } from "@convex/dataModel";
 import { useCanvasShortcuts } from "@/hooks/use-canvas-shortcuts";
@@ -122,7 +123,7 @@ export function CanvasShortcuts({
             aria-label="Hide shortcuts"
             className="flex size-7 cursor-pointer items-center justify-center rounded-full text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <X className="size-3.5" />
+            <CloseIcon className="size-3.5" />
           </button>
         </span>
       </div>
