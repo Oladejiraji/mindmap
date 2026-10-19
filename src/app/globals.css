@@ -239,16 +239,17 @@
   }
   html {
     @apply font-sans;
-    /* Inter loads with its opsz axis; keep text at the default (text) cut
-     * unless it opts into .font-display. */
+    /* Inter Display everywhere: Inter's optical-size axis pinned to its
+     * display end (opsz 32). */
     font-optical-sizing: none;
+    font-variation-settings: "opsz" 32;
     /* No vertical rubber-band on the document; panels scroll internally.
      * Horizontal is left alone so swipe-to-go-back still works. */
     overscroll-behavior-y: none;
   }
 }
 
-/* Inter Display: the optical size cut for headlines. */
+/* Inter Display (now the default on html; kept for explicit use). */
 .font-display {
   font-variation-settings: "opsz" 32;
 }
