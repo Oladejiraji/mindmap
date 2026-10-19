@@ -3,7 +3,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, ChevronLeft, Flame } from "lucide-react";
+import { ArrowUpRight, Building2, ChevronLeft, Flame, Palette, Sparkles } from "lucide-react";
+import { ModelsIcon } from "@/components/icons/models-icon";
+import { BillingIcon } from "@/components/icons/billing-icon";
+import { HotkeysIcon } from "@/components/icons/hotkeys-icon";
 import { PreferencesIcon } from "@/components/icons/preferences-icon";
 import { InviteIcon } from "@/components/icons/invite-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -14,8 +17,9 @@ import { cn } from "@/lib/utils";
  * Settings shell, modelled on define.app's: the app sidebar gives way to
  * a settings nav (Back to app, grouped pages, What's new at the foot);
  * the page sits in the same inset panel as the rest of the app, named by
- * a tab drawn in the tab strip's hover style (a rounded pill, no join). Only
- * pages that exist; Members is shown disabled until sharing does.
+ * a tab drawn in the tab strip's hover style (a rounded pill, no join).
+ * Grouped like Pond's (Personal / Workspace / Intelligence); pages that
+ * need backend work are shown disabled with "Soon".
  */
 
 const CHANGELOG_URL = "https://github.com/Oladejiraji/mindmap/commits/main";
@@ -48,6 +52,8 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
 const PAGES: Record<string, { title: string; icon: ReactNode }> = {
   [routes.settingsAccount]: { title: "Account", icon: <UserAvatar size={16} /> },
   [routes.settingsPreferences]: { title: "Preferences", icon: <PreferencesIcon className="size-4 text-fg-secondary" /> },
+  [routes.settingsHotkeys]: { title: "Hotkeys", icon: <HotkeysIcon className="size-4 text-fg-secondary" /> },
+  [routes.settingsGeneral]: { title: "General", icon: <Building2 className="size-4 text-fg-secondary" /> },
 };
 
 /* The current page as a tab in its hover style: a rounded pill on the
@@ -63,6 +69,17 @@ function PageTab() {
         </div>
       )}
     </div>
+  );
+}
+
+/* A page that isn't available yet: muted, not a link, with a Soon tag. */
+function Soon({ icon, children }: { icon: ReactNode; children: ReactNode }) {
+  return (
+    <span aria-disabled className={cn(row, "cursor-default text-fg-disabled hover:bg-transparent hover:text-fg-disabled [&>svg:first-child]:text-fg-disabled")}>
+      {icon}
+      {children}
+      <span className="ml-auto rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">Soon</span>
+    </span>
   );
 }
 
@@ -85,15 +102,27 @@ export function SettingsShell({ children }: { children: ReactNode }) {
               <PreferencesIcon />
               Preferences
             </NavLink>
+            <NavLink href={routes.settingsHotkeys}>
+              <HotkeysIcon />
+              Hotkeys
+            </NavLink>
+            <Soon icon={<Palette />}>Appearance</Soon>
           </NavGroup>
 
           <NavGroup label="Workspace">
-            {/* Needs project sharing in the backend. */}
-            <span aria-disabled className={cn(row, "cursor-default text-fg-disabled hover:bg-transparent hover:text-fg-disabled [&>svg:first-child]:text-fg-disabled")}>
-              <InviteIcon />
-              Members
-              <span className="ml-auto rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">Soon</span>
-            </span>
+            <NavLink href={routes.settingsGeneral}>
+              <Building2 />
+              General
+            </NavLink>
+            {/* Members and Billing need organizations on the server. */}
+            <Soon icon={<InviteIcon />}>Members</Soon>
+            <Soon icon={<BillingIcon />}>Billing</Soon>
+          </NavGroup>
+
+          <NavGroup label="Intelligence">
+            {/* Model choice and custom instructions need backend support. */}
+            <Soon icon={<ModelsIcon />}>Models</Soon>
+            <Soon icon={<Sparkles />}>Personalization</Soon>
           </NavGroup>
         </div>
 
