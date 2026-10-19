@@ -16,6 +16,7 @@ import { InviteIcon } from "@/components/icons/invite-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { navRow, navRowActive } from "@/components/shared/sidebar/nav-row";
 
 /*
  * Settings shell, modelled on define.app's: the app sidebar gives way to
@@ -28,8 +29,7 @@ import { cn } from "@/lib/utils";
 
 const CHANGELOG_URL = "https://github.com/Oladejiraji/mindmap/commits/main";
 
-const row =
-  "corner-squircle flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-body-sm font-semimedium text-fg-secondary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 [&>svg:first-child]:size-4 [&>svg:first-child]:shrink-0 [&>svg:first-child]:text-fg-tertiary";
+const row = navRow;
 
 function NavGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -46,7 +46,7 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={cn(row, active && "bg-surface-container text-fg-primary shadow-border hover:bg-surface-container [&>svg:first-child]:text-fg-primary")}
+      className={cn(row, active && navRowActive)}
     >
       {children}
     </Link>

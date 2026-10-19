@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { navRowActiveOnCard } from "./nav-row";
 import { RootNodeIcon, BranchNodeIcon, LeafNodeIcon } from "@/components/icons/node-icons";
 import { RenderIf } from "@/components/shared/render-if";
 import { useNodesByThread } from "@/services/nodes/queries";
@@ -95,10 +96,12 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
     <Link
       href={nodeRoute}
       className={cn(
-        "flex h-7 items-center rounded-lg text-caption-lg transition-colors",
+        // Shared nav row; the tree sits on a white card, so its active pill
+        // uses the card variant. Inactive titles stay light (28%).
+        "corner-squircle flex h-8 items-center rounded-2xl text-body-sm font-semimedium transition-colors",
         isActive
-          ? "bg-foreground/8 font-medium text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/[0.28] hover:bg-foreground/5 hover:text-sidebar-accent-foreground",
+          ? navRowActiveOnCard
+          : "text-sidebar-foreground/[0.28] hover:bg-transparent-hover hover:text-sidebar-accent-foreground",
       )}
       style={{ paddingLeft }}
     >
