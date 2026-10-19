@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons/chevron-down";
 import { useMutation } from "convex/react";
-import { ArrowDown, ChevronLeft, ChevronRight, GitBranch } from "lucide-react";
+import { ArrowDown, GitBranch } from "lucide-react";
 import { CanvasViewIcon } from "@/components/icons/canvas-view-icon";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
@@ -203,7 +204,7 @@ function ForkHeader({
               aria-label="Previous branch"
               className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-transparent-hover hover:text-fg-primary disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
             >
-              <ChevronLeft className="size-3.5" />
+              <ChevronLeftIcon className="size-3.5" />
             </button>
             {index + 1} / {count}
             <button
@@ -212,7 +213,7 @@ function ForkHeader({
               aria-label="Next branch"
               className="flex size-5 cursor-pointer items-center justify-center rounded-md hover:bg-transparent-hover hover:text-fg-primary disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
             >
-              <ChevronRight className="size-3.5" />
+              <ChevronRightIcon className="size-3.5" />
             </button>
           </span>
         )}

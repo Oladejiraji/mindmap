@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useConvex, useMutation } from "convex/react";
@@ -15,7 +15,9 @@ import { useRenameThread } from "@/services/threads/mutations";
 import { closeTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
+import { formatRelativeTime } from "@/lib/format-time";
 import { cn } from "@/lib/utils";
+import { popupDivider, popupRow, popupSurface, SIDEBAR_INSET } from "./popover-styles";
 
 /*
  * A project in the sidebar. On hover (or while its menu is open) two
@@ -26,17 +28,17 @@ import { cn } from "@/lib/utils";
 
 const action =
   "flex size-6 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover data-popup-open:text-fg-primary [&_svg]:size-4";
-const menuItem =
-  "flex h-8 cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-body-sm text-fg-primary outline-none select-none data-highlighted:bg-transparent-hover [&_svg]:size-4 [&_svg]:text-fg-tertiary";
+const menuItem = popupRow;
 
 export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; rowClassName: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const convex = useConvex();
-  const { mutate: renameThread } = useRenameThread();
+  const renameThread = useRenameThread();
   const removeThread = useMutation(api.threads.remove);
   const createBranch = useMutation(api.nodes.createEmptyBranch);
   const [menuOpen, setMenuOpen] = useState(false);
+  const rowRef = useRef<HTMLLIElement>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -77,7 +79,7 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
   if (editing) {
     return (
       <SidebarMenuItem>
-        <div className={cn("flex h-8 items-center gap-2.5 rounded-md bg-transparent-hover px-2", rowClassName)}>
+        <div className={cn("flex h-8 items-center gap-2.5 rounded-2xl bg-transparent-hover px-2", rowClassName)}>
           <NodeTabIcon className="size-4 shrink-0 text-fg-tertiary" />
           <input
             autoFocus
@@ -97,14 +99,23 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
   }
 
   return (
-    <SidebarMenuItem className="group/project">
+    <SidebarMenuItem ref={rowRef} className="group/project">
       <SidebarMenuButton
         isActive={pathname.startsWith(href)}
         className={cn(rowClassName, "group-hover/project:pr-15", menuOpen && "pr-15")}
         render={<Link href={href} />}
       >
         <NodeTabIcon className="size-4" />
-        <span>{name}</span>
+        <span className="min-w-0 flex-1 truncate">{name}</span>
+        {/* Last activity; the hover actions take its place. */}
+        <span
+          className={cn(
+            "shrink-0 text-caption-lg font-normal text-fg-tertiary tabular-nums group-focus-within/project:hidden group-hover/project:hidden",
+            menuOpen && "hidden",
+          )}
+        >
+          {formatRelativeTime(thread.updatedAt ?? thread._creationTime).replace(/ ago$/, "")}
+        </span>
       </SidebarMenuButton>
 
       <div
@@ -118,8 +129,9 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
             <MoreHorizontal />
           </Menu.Trigger>
           <Menu.Portal>
-            <Menu.Positioner side="bottom" align="start" sideOffset={4} className="z-50">
-              <Menu.Popup className="min-w-44 rounded-xl bg-surface-modal p-1.5 shadow-large outline-none">
+            {/* Under the row, on the sidebar's 16px content edge (rows sit at 12px). */}
+            <Menu.Positioner anchor={rowRef} side="bottom" align="start" alignOffset={SIDEBAR_INSET - 12} sideOffset={4} className="z-50">
+              <Menu.Popup className={cn(popupSurface, "p-1.5")}>
                 <Menu.Item
                   className={menuItem}
                   onClick={() => {
@@ -130,8 +142,8 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
                   <Pencil />
                   Rename
                 </Menu.Item>
-                <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default" />
-                <Menu.Item className={cn(menuItem, "text-danger-fg [&_svg]:text-danger-fg")} onClick={() => setConfirmDelete(true)}>
+                <Menu.Separator className={cn(popupDivider, "-mx-1.5 my-1.5")} />
+                <Menu.Item className={cn(menuItem, "text-danger-fg [&>svg:first-child]:text-danger-fg")} onClick={() => setConfirmDelete(true)}>
                   <Trash2 />
                   Delete
                 </Menu.Item>

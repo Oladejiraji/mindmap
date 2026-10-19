@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { CanvasIcon } from "@/components/icons/canvas-icon";
+import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { useConvexMutation } from "@/lib/use-convex-mutation";
+import { useMutation } from "convex/react";
 import { handleError } from "@/lib/handle-error";
 import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
@@ -30,8 +30,8 @@ export function ProjectRow({
   updatedAt?: number;
 }) {
   const router = useRouter();
-  const { mutate: removeThread } = useConvexMutation(api.threads.remove);
-  const { mutate: renameThread } = useRenameThread();
+  const removeThread = useMutation(api.threads.remove);
+  const renameThread = useRenameThread();
   const [showDelete, setShowDelete] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);
@@ -81,8 +81,12 @@ export function ProjectRow({
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background-5">
-                <CanvasIcon className="size-4 text-fg-disabled" />
+              {/* 20px Mindmap logo tile: white m on the blue gradient (as the avatar). */}
+              <div
+                className="corner-squircle flex size-5 shrink-0 items-center justify-center rounded-lg text-white"
+                style={{ background: "linear-gradient(135deg, oklch(0.78 0.12 245), var(--brand-solid) 70%)" }}
+              >
+                <LogoIcon className="h-auto w-[11px]" />
               </div>
               {isRenaming ? (
                 <input
@@ -102,13 +106,13 @@ export function ProjectRow({
                   className="block min-w-0 max-w-full truncate rounded-sm bg-transparent text-body-base leading-none text-fg-primary outline-none ring-1 ring-primary py-px px-0.5 -mx-0.5"
                 />
               ) : (
-                <p className="truncate text-body-base text-fg-primary">{name}</p>
+                <p className="truncate text-body-sm font-medium text-[#111111]">{name}</p>
               )}
             </div>
-            <span className="text-caption-lg text-fg-tertiary">
+            <span className="text-right text-body-sm font-medium text-[#111111]/60">
               {formatRelativeTime(createdAt)}
             </span>
-            <span className="text-caption-lg text-fg-tertiary">
+            <span className="text-right text-body-sm font-medium text-[#111111]/60">
               {formatRelativeTime(updatedAt ?? createdAt)}
             </span>
           </Link>

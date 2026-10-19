@@ -9,7 +9,7 @@ import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { useConvexMutation } from "@/lib/use-convex-mutation";
+import { useMutation } from "convex/react";
 import { handleError } from "@/lib/handle-error";
 import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
@@ -28,8 +28,8 @@ export function ProjectCard({
   createdAt: number;
 }) {
   const router = useRouter();
-  const { mutate: removeThread } = useConvexMutation(api.threads.remove);
-  const { mutate: renameThread } = useRenameThread();
+  const removeThread = useMutation(api.threads.remove);
+  const renameThread = useRenameThread();
   const [showDelete, setShowDelete] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);
@@ -70,7 +70,8 @@ export function ProjectCard({
   return (
     <>
       <ContextMenu.Root>
-        <ContextMenu.Trigger className="rounded-xl">
+        {/* -m-2 cancels the hover padding so the thumbnail lines up with the page text. */}
+        <ContextMenu.Trigger className="-m-2 rounded-xl">
           <Link
             href={href}
             className="group relative block rounded-xl p-2"

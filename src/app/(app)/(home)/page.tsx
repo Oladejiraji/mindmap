@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, LayoutGrid, List } from "lucide-react";
+import { Plus } from "lucide-react";
+import { ListIcon } from "@/components/icons/list-icon";
+import { GridIcon } from "@/components/icons/grid-icon";
 import { motion } from "motion/react";
 import { api } from "@convex/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useThreads } from "@/services/threads/queries";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
-import { getStorageItem, setStorageItem } from "@/lib/storage";
+import { useHomeLayout } from "@/lib/preferences";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
@@ -16,7 +17,6 @@ import { ProjectCard } from "@/components/shared/project-card";
 import { ProjectRow } from "@/components/shared/project-row";
 import { useRouter } from "next/navigation";
 
-type Layout = "grid" | "list";
 
 export default function Home() {
   const router = useRouter();
@@ -24,15 +24,8 @@ export default function Home() {
   const { mutate: createThread, isPending: isCreating } = useConvexMutation(
     api.threads.create,
   );
-  const [layout, setLayout] = useState<Layout>(() => {
-    const stored = getStorageItem<Layout>("home-layout");
-    return stored === "grid" || stored === "list" ? stored : "grid";
-  });
-
-  const updateLayout = (value: Layout) => {
-    setLayout(value);
-    setStorageItem("home-layout", value);
-  };
+  // Shared with the account menu's Preferences and the Settings page.
+  const [layout, updateLayout] = useHomeLayout();
 
   const handleCreate = async () => {
     try {
@@ -47,7 +40,7 @@ export default function Home() {
     <div className="flex min-h-full flex-col">
       <main className="mx-auto w-full max-w-[808px] flex-1 px-6 pt-14 pb-16">
         <div className="flex items-center justify-between">
-          <h1 className="text-heading-6 font-semibold text-fg-primary">Recents</h1>
+          <h1 className="text-heading-6 font-medium text-fg-primary">Recents</h1>
           <div className="flex items-center gap-2">
             <Button
               onClick={() => void handleCreate()}
@@ -67,7 +60,7 @@ export default function Home() {
                     : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
-                <LayoutGrid className="size-3.5" />
+                <GridIcon className="size-3.5" />
                 {layout === "grid" && (
                   <motion.div
                     layoutId="layout-toggle"
@@ -85,7 +78,7 @@ export default function Home() {
                     : "text-fg-disabled hover:text-fg-tertiary",
                 )}
               >
-                <List className="size-3.5" />
+                <ListIcon className="size-3.5" />
                 {layout === "list" && (
                   <motion.div
                     layoutId="layout-toggle"
@@ -121,11 +114,13 @@ export default function Home() {
                 ))}
           </div>
         ) : (
-          <div className="mt-11 flex flex-col">
+          // -mx-2 cancels the rows' hover padding so names start on the title
+          // edge and the date columns end on the divider's right edge.
+          <div className="mt-11 -mx-2 flex flex-col">
             <div className="grid grid-cols-[1fr_8rem_8rem] gap-3 px-2 pb-2 text-caption-lg text-fg-tertiary">
               <span>Name</span>
-              <span>Created</span>
-              <span>Edited</span>
+              <span className="text-right">Created</span>
+              <span className="text-right">Edited</span>
             </div>
             {isPending
               ? Array.from({ length: 6 }).map((_, i) => (
@@ -137,8 +132,8 @@ export default function Home() {
                       <div className="size-8 animate-pulse rounded-lg bg-background-5" />
                       <div className="h-4 w-1/3 animate-pulse rounded bg-background-5" />
                     </div>
-                    <div className="h-3 w-16 animate-pulse rounded bg-background-5" />
-                    <div className="h-3 w-16 animate-pulse rounded bg-background-5" />
+                    <div className="ml-auto h-3 w-16 animate-pulse rounded bg-background-5" />
+                    <div className="ml-auto h-3 w-16 animate-pulse rounded bg-background-5" />
                   </div>
                 ))
               : threads?.map((thread) => (

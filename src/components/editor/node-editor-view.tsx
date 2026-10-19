@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronRightIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
-import { ChevronRight, Plus, X } from "lucide-react";
-import { GradientAvatar } from "@outpacelabs/avatars";
+import { Plus } from "lucide-react";
+import { CloseIcon } from "@/components/icons/close-icon";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
 import type { Block } from "@blocknote/core";
 import type { Id } from "@convex/dataModel";
@@ -103,7 +105,7 @@ export function NodeEditorView({
       title="Close (Esc)"
       className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
     >
-      <X className="size-4" />
+      <CloseIcon className="size-4" />
     </button>
   );
 
@@ -254,7 +256,7 @@ function Collaborators() {
           title={`${p.name} (owner)`}
           className="relative flex size-6 shrink-0 overflow-hidden rounded-full ring-2 ring-surface-container"
         >
-          <GradientAvatar seed={p.email || p.name} size={24} />
+          <UserAvatar size={24} />
         </span>
       ))}
       <button
@@ -284,7 +286,7 @@ function Crumb({ href, children }: { href: string; children: React.ReactNode }) 
 function Separator() {
   return (
     <li role="presentation" aria-hidden className="flex w-3 shrink-0 items-center justify-center text-fg-disabled">
-      <ChevronRight className="size-4" />
+      <ChevronRightIcon className="size-4" />
     </li>
   );
 }

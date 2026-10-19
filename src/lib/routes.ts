@@ -5,6 +5,13 @@ import type { Id } from "@convex/dataModel";
 // group checks read from this registry.
 export const routes = {
   home: "/",
+  getStarted: "/get-started",
+  settings: "/settings",
+  settingsAccount: "/settings/account",
+  settingsPreferences: "/settings/preferences",
+  settingsGeneral: "/settings/general",
+  settingsHotkeys: "/settings/hotkeys",
+  onboarding: "/onboarding",
   newProject: "/new",
   signIn: "/sign-in",
   signUp: "/sign-up",

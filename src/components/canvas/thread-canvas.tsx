@@ -25,7 +25,7 @@ import type { Id } from "@convex/dataModel";
 
 import { api } from "@convex/api";
 import { useNodesByThread } from "@/services/nodes/queries";
-import { useConvexMutation } from "@/lib/use-convex-mutation";
+import { useMutation } from "convex/react";
 import { layoutNodes } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
@@ -55,16 +55,10 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { data: nodes, isLoading } = useNodesByThread(threadId);
-  const { mutate: updatePosition } = useConvexMutation(
-    api.nodes.updatePosition,
-  );
-  const { mutate: createEmptyBranch } = useConvexMutation(
-    api.nodes.createEmptyBranch,
-  );
-  const { mutate: deleteLeafNode } = useConvexMutation(
-    api.nodes.deleteLeafNode,
-  );
-  const { mutate: renameNode } = useConvexMutation(api.nodes.rename);
+  const updatePosition = useMutation(api.nodes.updatePosition);
+  const createEmptyBranch = useMutation(api.nodes.createEmptyBranch);
+  const deleteLeafNode = useMutation(api.nodes.deleteLeafNode);
+  const renameNode = useMutation(api.nodes.rename);
   const { screenToFlowPosition } = useReactFlow();
   const router = useRouter();
 

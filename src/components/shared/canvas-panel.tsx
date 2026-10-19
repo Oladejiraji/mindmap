@@ -37,7 +37,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
   const inputRef = useRef<HTMLInputElement>(null);
   const threadId = useThreadIdFromRoute();
   const { data: thread, isPending } = useThread(threadId);
-  const { mutate: renameThread } = useRenameThread();
+  const renameThread = useRenameThread();
 
   const startEditing = () => {
     setDraft(thread?.name || "");
