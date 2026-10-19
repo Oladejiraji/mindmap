@@ -7,6 +7,7 @@ import { CustomHandle } from "@/components/auth-canvas/custom-handle";
 import { type MindMapNodeData, CANVAS_NODE_WIDTH } from "./types";
 import { NodeTitle } from "./node-title";
 import { NodeMenu } from "./node-menu";
+import { BorderBeam } from "border-beam";
 import { NodeContent } from "./node-content";
 
 export function LeafNode({ id, data, selected }: NodeProps) {
@@ -37,17 +38,14 @@ export function LeafNode({ id, data, selected }: NodeProps) {
           <NodeMenu id={id} onDelete={onDelete} />
         </div>
 
-        <div
-          className="mt-3 rounded-lg p-[0.5px] shadow-default"
-          style={{
-            backgroundImage:
-              "linear-gradient(var(--gradient-angle), #DFFBFF 5.2%, #C2DAF9 21.33%, #AEB3E4 37.46%, #E2909C 54.48%, #FFA189 69.71%, #FFD060 94.8%)",
-            animation: "none",
-          }}
-        >
-          <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-[7.5px] bg-background-2 text-fg-primary">
-            <NodeContent nodeId={id} content={content} />
-          </div>
+        {/* Antalik's border beam at 20% strength around the writing area
+            (was a static gradient border). */}
+        <div className="mt-3">
+          <BorderBeam theme="light" strength={0.2}>
+            <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-background-2 text-fg-primary shadow-default [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <NodeContent nodeId={id} content={content} />
+            </div>
+          </BorderBeam>
         </div>
 
         <CustomHandle type="source" position={Position.Bottom} />
