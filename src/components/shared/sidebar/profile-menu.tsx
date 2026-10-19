@@ -11,6 +11,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@/components/icons/chevron-do
 import { LogoutIcon } from "@/components/icons/logout-icon";
 import { Menu } from "@base-ui/react/menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
 import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
@@ -33,6 +34,10 @@ function Section({ children }: { children: ReactNode }) {
 
 export function ProfileMenu() {
   const router = useRouter();
+  // Collapsed to the icon rail, the trigger is only 32px wide: open beside
+  // the rail at the usual 192px instead of squeezing above it.
+  const { state: sidebarState } = useSidebar();
+  const collapsed = sidebarState === "collapsed";
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
   const [hints, setHints] = useCanvasHints();
@@ -61,8 +66,8 @@ export function ProfileMenu() {
         <ChevronDownIcon className="size-4 text-fg-tertiary group-data-[collapsible=icon]:hidden" />
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Positioner sideOffset={6} align="start" side="top" className="z-50">
-          <Menu.Popup className={cn(popupSurface, "w-(--anchor-width)")}>
+        <Menu.Positioner sideOffset={collapsed ? 10 : 6} align={collapsed ? "end" : "start"} side={collapsed ? "right" : "top"} className="z-50">
+          <Menu.Popup className={cn(popupSurface, "w-(--anchor-width) min-w-48")}>
             <Menu.Group className={popupSection}>
               <Menu.GroupLabel className="px-2.5 pt-1.5 pb-1 text-caption-lg text-fg-tertiary">Account</Menu.GroupLabel>
               {/* One session at a time today; switching needs Better Auth's
