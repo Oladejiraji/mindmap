@@ -44,7 +44,7 @@ export function NodePanel() {
   return (
     <aside
       aria-label="Node"
-      className="w-[clamp(340px,28%,440px)] shrink-0 overflow-hidden rounded-3xl bg-background shadow-default motion-translate-x-in-[12px] motion-opacity-in-0 motion-duration-200 motion-ease-out"
+      className="mt-2 w-[clamp(340px,28%,440px)] shrink-0 overflow-hidden rounded-3xl bg-background shadow-default motion-translate-x-in-[12px] motion-opacity-in-0 motion-duration-200 motion-ease-out"
     >
       <NodeEditorView threadId={threadId} nodeId={nodeId} onClose={close} />
     </aside>
