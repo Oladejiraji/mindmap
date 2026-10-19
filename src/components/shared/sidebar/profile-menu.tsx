@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { Check, ChevronRight, Settings, SlidersHorizontal } from "lucide-react";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { LogoutIcon } from "@/components/icons/logout-icon";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
@@ -11,18 +12,21 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { useSidebar } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { routes } from "@/lib/routes";
+import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
 import { showError } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 
 /*
  * Account menu, laid out like Pond's: sections split by full-width
  * hairlines, 32px rows with a muted 16px icon, and a right-aligned hint
- * (shortcut or ↗) where one applies. Only actions that work today.
+ * (shortcut, ↗ or ›) where one applies. As wide as its trigger. Only
+ * actions that work today; preferences live in this browser.
  */
 
 const REPO_URL = "https://github.com/Oladejiraji/mindmap";
 
 const itemClass =
-  "flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-body-sm text-fg-primary outline-none transition-colors select-none data-highlighted:bg-transparent-hover [&>svg:first-child]:size-4 [&>svg:first-child]:shrink-0 [&>svg:first-child]:text-fg-tertiary";
+  "flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-body-sm whitespace-nowrap text-fg-primary outline-none transition-colors select-none data-highlighted:bg-transparent-hover [&>svg:first-child]:size-4 [&>svg:first-child]:shrink-0 [&>svg:first-child]:text-fg-tertiary";
 
 function Hint({ children }: { children: ReactNode }) {
   return <span className="ml-auto pl-4 text-caption-lg text-fg-tertiary">{children}</span>;
@@ -45,6 +49,8 @@ export function ProfileMenu() {
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
   const { open: sidebarOpen, toggleSidebar } = useSidebar();
+  const [hints, setHints] = useCanvasHints();
+  const [layout, setLayout] = useHomeLayout();
 
   const handleSignOut = async () => {
     const { error } = await authClient.signOut();
@@ -70,7 +76,7 @@ export function ProfileMenu() {
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={6} align="start" side="top" className="z-50">
-          <Menu.Popup className="w-64 origin-(--transform-origin) rounded-xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
+          <Menu.Popup className="w-(--anchor-width) origin-(--transform-origin) rounded-xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
             <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-3">
               <UserAvatar size={32} />
               <span className="min-w-0">
@@ -80,9 +86,58 @@ export function ProfileMenu() {
             </div>
             <Menu.Separator className="h-px bg-border-default" />
             <Section>
+              <Menu.Item className={itemClass} onClick={() => router.push(routes.settings)}>
+                <Settings />
+                Settings
+              </Menu.Item>
+              <Menu.SubmenuRoot>
+                <Menu.SubmenuTrigger className={cn(itemClass, "data-popup-open:bg-transparent-hover")}>
+                  <SlidersHorizontal />
+                  Preferences
+                  <ChevronRight className="ml-auto size-3.5 text-fg-tertiary" />
+                </Menu.SubmenuTrigger>
+                <Menu.Portal>
+                  <Menu.Positioner side="right" align="start" sideOffset={8} alignOffset={-6} className="z-50">
+                    <Menu.Popup className="w-56 rounded-xl bg-surface-modal p-1.5 shadow-large outline-none">
+                      <Menu.CheckboxItem className={itemClass} checked={hints} onCheckedChange={setHints}>
+                        <span className="flex size-4 items-center justify-center">
+                          <Menu.CheckboxItemIndicator>
+                            <Check className="size-3.5 text-fg-primary" />
+                          </Menu.CheckboxItemIndicator>
+                        </span>
+                        Canvas shortcut hints
+                      </Menu.CheckboxItem>
+                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default" />
+                      <Menu.Group>
+                      <Menu.GroupLabel className="px-2.5 pt-1 pb-1.5 text-caption-lg text-fg-tertiary">Home layout</Menu.GroupLabel>
+                      <Menu.RadioGroup value={layout} onValueChange={(v) => setLayout(v as "grid" | "list")}>
+                        {(["grid", "list"] as const).map((v) => (
+                          <Menu.RadioItem key={v} value={v} className={itemClass}>
+                            <span className="flex size-4 items-center justify-center">
+                              <Menu.RadioItemIndicator>
+                                <Check className="size-3.5 text-fg-primary" />
+                              </Menu.RadioItemIndicator>
+                            </span>
+                            <span className="capitalize">{v}</span>
+                          </Menu.RadioItem>
+                        ))}
+                      </Menu.RadioGroup>
+                      </Menu.Group>
+                      <Menu.Separator className="-mx-1.5 my-1.5 h-px bg-border-default" />
+                      <Menu.Item className={cn(itemClass, "text-fg-secondary")} onClick={() => router.push(`${routes.settings}#preferences`)}>
+                        <span className="size-4" />
+                        All preferences…
+                      </Menu.Item>
+                    </Menu.Popup>
+                  </Menu.Positioner>
+                </Menu.Portal>
+              </Menu.SubmenuRoot>
+            </Section>
+            <Menu.Separator className="h-px bg-border-default" />
+            <Section>
               <Menu.Item className={itemClass} onClick={toggleSidebar}>
                 <SidebarToggleIcon open={sidebarOpen} />
-                {sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+                {sidebarOpen ? "Hide sidebar" : "Show sidebar"}
                 <Hint>⌘B</Hint>
               </Menu.Item>
             </Section>
