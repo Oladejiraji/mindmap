@@ -3,9 +3,11 @@ import { cookies } from "next/headers";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { HomeSidebar } from "@/components/shared/sidebar/home-sidebar";
 import { TabStrip } from "@/components/shared/tab-strip";
+import { requireOnboarded } from "@/lib/require-onboarded";
 
 export default async function HomeLayout({ children }: { children: ReactNode }) {
-  // Same cookie the sidebar writes, so it stays open/closed across pages.
+  await requireOnboarded();
+
   const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false";
   return (
     <SidebarProvider defaultOpen={defaultOpen} className="h-svh overflow-hidden bg-sidebar">

@@ -2,9 +2,13 @@
 
 import { useState, type ReactNode } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { useMutation } from "convex/react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/api";
 import { authClient } from "@/lib/auth-client";
 import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
-import { ROLES, TEAM_SIZES, USE_CASES, useOnboarding } from "@/lib/onboarding";
+import { ROLES, TEAM_SIZES, USE_CASES, type TeamSize, type UseCase } from "@/lib/onboarding";
+import { handleError } from "@/lib/handle-error";
 import { useTeams, type Team } from "@/lib/teams";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Switch } from "@/components/ui/switch";
@@ -167,7 +171,17 @@ const field =
 /* Personal › Account */
 export function AccountSettings() {
   const { data: session } = authClient.useSession();
-  const [onboarding, update] = useOnboarding();
+  const orgData = useQuery(api.organizations.current);
+  const updateJobRole = useMutation(api.organizations.updateJobRole);
+  const currentRole = orgData?.user?.jobRole ?? null;
+
+  const handleRoleChange = (role: typeof currentRole) => {
+    if (!role) return;
+    updateJobRole({ jobRole: role }).catch((err) =>
+      handleError(err, "Failed to update role"),
+    );
+  };
+
   return (
     <SettingsPage title="Account" description="Your profile and your role in your organization.">
       <Section title="Profile">
@@ -183,7 +197,7 @@ export function AccountSettings() {
       </Section>
       <Section title="Role">
         <Row label="What you do" hint="Tailors examples and defaults to how you work." />
-        <Chips label="Role" role="radio" options={ROLES} isOn={(v) => onboarding.role === v} onToggle={(role) => update({ role })} />
+        <Chips label="Role" role="radio" options={ROLES} isOn={(v) => currentRole === v} onToggle={handleRoleChange} />
       </Section>
     </SettingsPage>
   );
@@ -219,32 +233,46 @@ export function PreferencesSettings() {
 
 /* Workspace › General: the organization from onboarding. */
 export function GeneralSettings() {
-  const [data, update] = useOnboarding();
+  const orgData = useQuery(api.organizations.current);
+  const updateOrg = useMutation(api.organizations.update);
+
+  const org = orgData?.org;
+  const orgName = org?.name ?? "";
+  const teamSize = org?.teamSize ?? null;
+  const useCases = (org?.useCases ?? []) as UseCase[];
+
+  const saveOrg = (patch: { name?: string; teamSize?: TeamSize; useCases?: UseCase[] }) => {
+    if (!org) return;
+    updateOrg({ orgId: org._id, ...patch }).catch((err) =>
+      handleError(err, "Failed to update organization"),
+    );
+  };
+
   return (
-    <SettingsPage title="General" description="Your organization's workspace. Saved in this browser until workspaces are on the server.">
+    <SettingsPage title="General" description="Your organization's workspace.">
       <Section title="Organization">
         <Row label="Name" hint="Shown across your workspace.">
           <input
-            value={data.orgName}
-            onChange={(e) => update({ orgName: e.target.value })}
+            value={orgName}
+            onChange={(e) => saveOrg({ name: e.target.value })}
             placeholder="Acme Inc."
             aria-label="Organization name"
             className={field}
           />
         </Row>
         <Row label="Team size" hint="How many people work there.">
-          <Segmented label="Team size" options={TEAM_SIZES} value={data.teamSize} onChange={(teamSize) => update({ teamSize })} />
+          <Segmented label="Team size" options={TEAM_SIZES} value={teamSize} onChange={(teamSize) => saveOrg({ teamSize })} />
         </Row>
       </Section>
-      <TeamsSection orgName={data.orgName} />
+      <TeamsSection orgName={orgName} />
       <Section title="Use cases">
         <Row label="What your team uses Mindmap for" hint="Pick any that apply." />
         <Chips
           label="Use cases"
           role="checkbox"
           options={USE_CASES}
-          isOn={(v) => data.useCases.includes(v)}
-          onToggle={(v) => update({ useCases: data.useCases.includes(v) ? data.useCases.filter((x) => x !== v) : [...data.useCases, v] })}
+          isOn={(v) => useCases.includes(v)}
+          onToggle={(v) => saveOrg({ useCases: useCases.includes(v) ? useCases.filter((x) => x !== v) : [...useCases, v] })}
         />
       </Section>
     </SettingsPage>
