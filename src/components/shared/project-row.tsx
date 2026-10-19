@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { CanvasIcon } from "@/components/icons/canvas-icon";
+import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
@@ -81,8 +81,9 @@ export function ProjectRow({
             }}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background-5">
-                <CanvasIcon className="size-4 text-fg-disabled" />
+              {/* Same blue node tile as the node panel. */}
+              <div className="corner-squircle flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg">
+                <NodeTabIcon className="size-4" />
               </div>
               {isRenaming ? (
                 <input
