@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronRight, SlidersHorizontal, UserPlus } from "lucide-react";
+import { Check, ChevronRight, UserPlus } from "lucide-react";
+import { PreferencesIcon } from "@/components/icons/preferences-icon";
 import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { LogoutIcon } from "@/components/icons/logout-icon";
@@ -100,7 +101,7 @@ export function ProfileMenu() {
               </Menu.Item>
               <Menu.SubmenuRoot>
                 <Menu.SubmenuTrigger className={cn(itemClass, "data-popup-open:bg-transparent-hover")}>
-                  <SlidersHorizontal />
+                  <PreferencesIcon />
                   Preferences
                   <ChevronRight className="ml-auto size-3.5 text-fg-tertiary" />
                 </Menu.SubmenuTrigger>
