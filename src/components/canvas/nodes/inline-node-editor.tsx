@@ -15,10 +15,12 @@ export function InlineNodeEditor({
   nodeId,
   initialContent,
   onBlur,
+  theme = "light",
 }: {
   nodeId: string;
   initialContent?: Block[];
   onBlur: () => void;
+  theme?: "light" | "dark";
 }) {
   const updateContent = useMutation(api.nodes.updateContent);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
@@ -41,6 +43,10 @@ export function InlineNodeEditor({
   }, [save]);
 
   useEffect(() => {
+    const lastBlock = editor.document[editor.document.length - 1];
+    if (lastBlock) {
+      editor.setTextCursorPosition(lastBlock, "end");
+    }
     editor.focus();
   }, [editor]);
 
@@ -88,7 +94,7 @@ export function InlineNodeEditor({
   return (
     <div
       ref={wrapperRef}
-      className="inline-node-editor nodrag nopan cursor-text"
+      className={`inline-node-editor nodrag nopan cursor-text${theme === "dark" ? " inline-node-editor-dark" : ""}`}
       onKeyDown={handleKeyDown}
       onKeyUp={stopPropagation}
       onMouseDown={stopPropagation}
@@ -96,7 +102,7 @@ export function InlineNodeEditor({
       <BlockNoteView
         editor={editor}
         onChange={handleChange}
-        theme="light"
+        theme={theme}
         sideMenu={false}
         formattingToolbar={false}
         slashMenu={false}

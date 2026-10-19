@@ -10,9 +10,11 @@ import { InlineNodeEditor } from "./inline-node-editor";
 export function NodeContent({
   nodeId,
   content,
+  editorTheme = "light",
 }: {
   nodeId?: string;
   content?: unknown;
+  editorTheme?: "light" | "dark";
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -32,6 +34,7 @@ export function NodeContent({
             Array.isArray(content) ? (content as Block[]) : undefined
           }
           onBlur={() => setIsEditing(false)}
+          theme={editorTheme}
         />
       </div>
     );
@@ -43,7 +46,10 @@ export function NodeContent({
         className={nodeId ? "cursor-text p-2" : "p-2"}
         onClick={nodeId ? () => setIsEditing(true) : undefined}
       >
-        <p className="text-caption-lg opacity-50" style={{ lineHeight: 1.5 }}>
+        <p
+          className="text-caption-lg opacity-50"
+          style={{ lineHeight: 1.5, color: editorTheme === "dark" ? "white" : undefined }}
+        >
           {nodeId ? "Click to start writing…" : "No content yet"}
         </p>
       </div>
