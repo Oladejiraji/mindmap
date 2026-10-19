@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { MotionConfig, motion } from "motion/react";
+import { PreviewCard } from "@base-ui/react/preview-card";
+import { TabPreview } from "./tab-preview";
 import { usePathname, useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
@@ -78,21 +80,38 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
                 className="absolute top-1/2 left-0 h-4 w-px -translate-y-1/2 bg-border-default transition-opacity group-hover/tab:opacity-0 [.group\/tab:hover+.group\/tab>&]:opacity-0"
               />
             )}
-            <Link
-              href={tab.href}
-              role="tab"
-              aria-selected={active}
-              title={tab.title}
-              className={cn(
-                "relative flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pr-7 pl-3 text-body-sm outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
-                active ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
+            {/* Inactive tabs preview their project on hover (define.app). */}
+            <PreviewCard.Root>
+              <PreviewCard.Trigger
+                delay={500}
+                closeDelay={100}
+                render={
+                  <Link
+                    href={tab.href}
+                    role="tab"
+                    aria-selected={active}
+                    className={cn(
+                      "relative flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pr-7 pl-3 text-body-sm outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
+                      active ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
+                    )}
+                  >
+                    <Icon className={cn("size-4 shrink-0 transition-colors duration-200", active ? "text-fg-secondary" : "text-fg-tertiary")} />
+                    <span className="min-w-0 flex-1 overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,black_30%,transparent_78%)]">
+                      {tab.title}
+                    </span>
+                  </Link>
+                }
+              />
+              {!active && (
+                <PreviewCard.Portal>
+                  <PreviewCard.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
+                    <PreviewCard.Popup className="origin-(--transform-origin) rounded-2xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0">
+                      <TabPreview tab={tab} />
+                    </PreviewCard.Popup>
+                  </PreviewCard.Positioner>
+                </PreviewCard.Portal>
               )}
-            >
-              <Icon className={cn("size-4 shrink-0 transition-colors duration-200", active ? "text-fg-secondary" : "text-fg-tertiary")} />
-              <span className="min-w-0 flex-1 overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,black_30%,transparent_78%)]">
-                {tab.title}
-              </span>
-            </Link>
+            </PreviewCard.Root>
             <button
               aria-label={`Close ${tab.title}`}
               onClick={() => {
