@@ -79,7 +79,7 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
   if (editing) {
     return (
       <SidebarMenuItem>
-        <div className={cn("flex h-8 items-center gap-2.5 rounded-md bg-transparent-hover px-2", rowClassName)}>
+        <div className={cn("flex h-8 items-center gap-2.5 rounded-2xl bg-transparent-hover px-2", rowClassName)}>
           <NodeTabIcon className="size-4 shrink-0 text-fg-tertiary" />
           <input
             autoFocus

@@ -32,10 +32,10 @@ import { routes } from "@/lib/routes";
  * Collapses to a 48px icon rail; there the logo tile swaps to the toggle
  * on hover, and sections hide.
  */
-// Rows: 32px, 13px labels; the active row is a pill a shade lighter than the
+// Rows: 32px, 12px corners, 13px labels; the active row is a pill a shade lighter than the
 // sidebar grey (white at 50% over it).
 const row =
-  "h-8 gap-2.5 text-body-sm font-semimedium data-active:bg-white/50 data-active:shadow-border data-active:hover:bg-white/50";
+  "h-8 gap-2.5 rounded-2xl text-body-sm font-semimedium data-active:bg-white/50 data-active:shadow-border data-active:hover:bg-white/50";
 const iconButton =
   "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50";
 
