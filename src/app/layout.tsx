@@ -8,6 +8,8 @@ import { Agentation } from "agentation";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  // Optical size axis: lets `font-display` render Inter Display (opsz 32).
+  axes: ["opsz"],
 });
 
 const geistMono = Geist_Mono({
