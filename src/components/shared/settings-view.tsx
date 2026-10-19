@@ -39,14 +39,58 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Row({ label, hint, children }: { label: string; hint?: string; children?: ReactNode }) {
+function Row({ label, hint, children, below }: { label: string; hint?: string; children?: ReactNode; below?: ReactNode }) {
   return (
-    <div className="flex min-h-16 items-center justify-between gap-6 px-4 py-3.5">
-      <div className="min-w-0">
-        <p className="text-body-sm font-medium text-fg-primary">{label}</p>
-        {hint && <p className="mt-0.5 text-body-sm text-fg-tertiary">{hint}</p>}
+    <div className="px-4 py-3.5">
+      <div className="flex min-h-9 items-center justify-between gap-6">
+        <div className="min-w-0">
+          <p className="text-body-sm font-medium text-fg-primary">{label}</p>
+          {hint && <p className="mt-0.5 text-body-sm text-fg-tertiary">{hint}</p>}
+        </div>
+        {children && <div className="shrink-0">{children}</div>}
       </div>
-      {children && <div className="shrink-0">{children}</div>}
+      {below && <div className="mt-3.5">{below}</div>}
+    </div>
+  );
+}
+
+/* Skeleton of Home in the chosen layout, so the setting shows what it does. */
+function LayoutPreview({ layout }: { layout: "grid" | "list" }) {
+  const block = "rounded-sm bg-component-active";
+  return (
+    <div
+      aria-hidden
+      className="corner-squircle overflow-hidden rounded-2xl bg-background px-5 pt-4 pb-5 shadow-border"
+    >
+      <div className="flex items-center justify-between">
+        <div className={cn(block, "h-2.5 w-16")} />
+        <div className={cn(block, "h-4 w-10 rounded-md")} />
+      </div>
+      <div className="mt-3 h-px bg-border-default/60" />
+      <div key={layout} className="motion-opacity-in-0 motion-translate-y-in-[3px] motion-duration-200 motion-ease-out">
+        {layout === "grid" ? (
+          <div className="mt-4 grid grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i}>
+                <div className="corner-squircle aspect-4/3 rounded-lg bg-component" />
+                <div className={cn(block, "mt-2 h-2 w-3/4")} />
+                <div className={cn(block, "mt-1.5 h-1.5 w-1/2 opacity-60")} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-3 flex flex-col">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-2.5 py-2">
+                <div className="size-4 shrink-0 rounded bg-[#F4E2AD]" />
+                <div className={cn(block, "h-2", ["w-2/5", "w-1/4", "w-1/3"][i])} />
+                <div className={cn(block, "ml-auto h-1.5 w-8 opacity-60")} />
+                <div className={cn(block, "h-1.5 w-8 opacity-60")} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -157,7 +201,7 @@ export function PreferencesSettings() {
         </Row>
       </Section>
       <Section title="Home">
-        <Row label="Layout" hint="How projects are listed on Home.">
+        <Row label="Layout" hint="How projects are listed on Home." below={<LayoutPreview layout={layout} />}>
           <Segmented
             label="Home layout"
             options={[
