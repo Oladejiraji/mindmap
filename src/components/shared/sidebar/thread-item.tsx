@@ -98,7 +98,7 @@ function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemPr
         "flex h-7 items-center rounded-lg text-caption-lg transition-colors",
         isActive
           ? "bg-foreground/8 font-medium text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/70 hover:bg-foreground/5 hover:text-sidebar-accent-foreground",
+          : "text-sidebar-foreground/[0.28] hover:bg-foreground/5 hover:text-sidebar-accent-foreground",
       )}
       style={{ paddingLeft }}
     >
