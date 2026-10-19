@@ -24,9 +24,10 @@ import { cn } from "@/lib/utils";
 /*
  * Node view, shown as a side panel over its project (?panel=<nodeId>)
  * rather than its own tab. Laid out like the interfere.com dashboard:
+ * The panel is narrow, so everything stacks in one column:
  *   top bar     breadcrumb (project › ancestors › node), close
- *   left        detail column: type tile, title, summary, property rows
- *   right       pill tabs (Content, Chat) over the active panel
+ *   details     type tile, title, summary, property rows
+ *   tabs        pill tabs (Content, Chat) over the active view, filling the rest
  */
 
 type Tab = "content" | "chat";
@@ -151,10 +152,10 @@ export function NodeEditorView({
         {closeButton}
       </header>
 
-      <div className="flex min-h-0 flex-1">
-        {/* Detail column */}
-        <aside className="w-72 shrink-0 overflow-y-auto overscroll-contain border-r border-border-default">
-          <div className="px-5 pt-6 pb-8">
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* Details */}
+        <aside className="max-h-[45%] shrink-0 overflow-y-auto overscroll-contain border-b border-border-default">
+          <div className="px-5 pt-5 pb-5">
             <div className="flex size-10 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
               <NodeTabIcon className="size-5" />
             </div>
@@ -162,7 +163,7 @@ export function NodeEditorView({
             <h1 className="mt-1 text-heading-5/6 font-semibold text-pretty text-fg-primary">{node.title}</h1>
             {node.summary && <p className="mt-3 text-body-sm text-fg-secondary">{node.summary}</p>}
 
-            <dl className="mt-6 grid grid-cols-[104px_minmax(0,1fr)] gap-y-1 text-body-sm">
+            <dl className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] text-body-sm">
               <Property label="Project">
                 <span className="truncate">{thread?.name ?? "—"}</span>
               </Property>
@@ -189,8 +190,8 @@ export function NodeEditorView({
           </div>
         </aside>
 
-        {/* Main column */}
-        <section className="flex min-w-0 flex-1 flex-col">
+        {/* Content / Chat */}
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div role="tablist" aria-label="Node views" className="flex h-12 shrink-0 items-center gap-1.5 border-b border-border-default px-3">
             {(["content", "chat"] as const).map((t) => (
               <button
@@ -213,7 +214,7 @@ export function NodeEditorView({
           <div className="min-h-0 flex-1">
             {tab === "content" ? (
               <div className="h-full overflow-y-auto overscroll-contain">
-                <div className="mx-auto max-w-3xl px-6 py-6">
+                <div className="px-5 py-5">
                   <BlockEditor
                     key={nodeId}
                     initialContent={Array.isArray(node.content) ? (node.content as Block[]) : undefined}
