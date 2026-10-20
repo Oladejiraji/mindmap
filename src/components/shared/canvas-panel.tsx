@@ -80,7 +80,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
             onClick={() => setOpen(true)}
             aria-label="Show project nodes"
             aria-expanded={false}
-            className="flex size-9 cursor-pointer items-center justify-center rounded-xl bg-component text-fg-secondary outline-none transition-colors hover:bg-component-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="flex size-9 cursor-pointer items-center justify-center rounded-xl bg-transparent-hover text-fg-secondary outline-none transition-colors hover:bg-component hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <NodesIcon className="size-4" />
           </button>
