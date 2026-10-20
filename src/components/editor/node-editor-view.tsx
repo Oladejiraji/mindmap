@@ -202,17 +202,15 @@ export function NodeEditorView({
         {/* Details */}
         <aside className="shrink-0 border-b border-border-default">
           <div className="px-5 py-4">
-            {/* Collapsed to the node icon and title; the stack on the right
-                (collaborators, then a dashed expand circle) opens the details */}
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
-                <NodeTabIcon className="size-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-caption-lg text-fg-tertiary">{kindLabel}</p>
-                <h1 className="truncate text-body-base font-semibold text-fg-primary">{node.title}</h1>
-              </div>
-              <div className="flex shrink-0 items-center -space-x-2">
+            {/* One stack: the node (a square, same size as the avatars), its
+                collaborators, then a dashed circle that opens the details */}
+            <div className="flex items-center">
+              <div className="flex items-center -space-x-1.5">
+                <Tip label={`${kindLabel} · ${node.title}`}>
+                  <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg ring-2 ring-background">
+                    <NodeTabIcon className="size-4" />
+                  </span>
+                </Tip>
                 <CollaboratorAvatars size={28} />
                 <Tip label={detailsOpen ? "Hide details" : "Show details"}>
                   <button
