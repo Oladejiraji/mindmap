@@ -3,7 +3,7 @@
 import { Plus } from "lucide-react";
 import { ListIcon } from "@/components/icons/list-icon";
 import { GridIcon } from "@/components/icons/grid-icon";
-import { motion } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 import { api } from "@convex/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -50,6 +50,7 @@ export default function Home() {
               <Plus className="size-3.5" />
               New
             </Button>
+            <MotionConfig reducedMotion="user">
             <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
               <button
                 onClick={() => updateLayout("grid")}
@@ -88,6 +89,7 @@ export default function Home() {
                 )}
               </button>
             </div>
+            </MotionConfig>
           </div>
         </div>
         <div className="mt-8 h-px bg-border-default" />

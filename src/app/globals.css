@@ -719,6 +719,13 @@
   animation: gradient-text-shimmer 1.8s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .gradient-text-shimmer {
+    animation: none;
+    background-position: 50% 0;
+  }
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
