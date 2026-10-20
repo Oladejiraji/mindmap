@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRightIcon } from "@/components/icons/chevron-down";
+import { ChevronDownIcon, ChevronRightIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
-import { Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { FloatIcon } from "@/components/icons/float-icon";
 import { ContentIcon } from "@/components/icons/content-icon";
@@ -203,24 +202,35 @@ export function NodeEditorView({
         {/* Details */}
         <aside className="shrink-0 border-b border-border-default">
           <div className="px-5 py-4">
-            {/* Collapsed to the node icon and title; the icon opens the
-                details (summary and properties) below */}
+            {/* Collapsed to the node icon and title; the stack on the right
+                (collaborators, then a dashed expand circle) opens the details */}
             <div className="flex items-center gap-3">
-              <Tip label={detailsOpen ? "Hide details" : "Show details"}>
-                <button
-                  type="button"
-                  onClick={() => setDetailsOpen((o) => !o)}
-                  aria-expanded={detailsOpen}
-                  aria-controls="node-details"
-                  aria-label="Node details"
-                  className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-brand-subtle text-brand-fg outline-none transition-[scale] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
-                >
-                  <NodeTabIcon className="size-5" />
-                </button>
-              </Tip>
-              <div className="min-w-0">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
+                <NodeTabIcon className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
                 <p className="text-caption-lg text-fg-tertiary">{kindLabel}</p>
                 <h1 className="truncate text-body-base font-semibold text-fg-primary">{node.title}</h1>
+              </div>
+              <div className="flex shrink-0 items-center -space-x-2">
+                <CollaboratorAvatars size={28} />
+                <Tip label={detailsOpen ? "Hide details" : "Show details"}>
+                  <button
+                    type="button"
+                    onClick={() => setDetailsOpen((o) => !o)}
+                    aria-expanded={detailsOpen}
+                    aria-controls="node-details"
+                    aria-label="Node details"
+                    className="relative flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-dashed border-border-strong bg-background text-fg-tertiary ring-2 ring-background outline-none transition-colors hover:text-fg-primary focus-visible:ring-ring/50"
+                  >
+                    <ChevronDownIcon
+                      className={cn(
+                        "size-3.5 transition-[rotate] duration-200 ease-out motion-reduce:transition-none",
+                        detailsOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                </Tip>
               </div>
             </div>
 
@@ -253,9 +263,6 @@ export function NodeEditorView({
                   <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
                   <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
                   <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
-                  <Property label="Collaborators">
-                    <Collaborators />
-                  </Property>
                 </dl>
               </div>
             </div>
@@ -285,37 +292,29 @@ export function NodeEditorView({
   );
 }
 
-/* Avatar stack with a dashed "+" at the end. Projects are single-owner
- * today, so the stack is just you; inviting needs a sharing model in the
- * backend, so the + is disabled until then. */
-function Collaborators() {
+/* The people on a node as overlapping avatars. Projects are single-owner
+ * today, so it's just you. */
+function CollaboratorAvatars({ size = 24 }: { size?: number }) {
   const { data: session } = authClient.useSession();
   const name = session?.user?.name ?? "You";
   const email = session?.user?.email ?? "";
   const people = [{ id: email || name, name, email }];
   return (
-    <span className="flex items-center -space-x-1.5">
+    <>
       {people.map((p) => (
         <span
           key={p.id}
           title={`${p.name} (owner)`}
-          className="relative flex size-6 shrink-0 overflow-hidden rounded-full ring-2 ring-surface-container"
+          style={{ width: size, height: size }}
+          className="relative flex shrink-0 overflow-hidden rounded-full ring-2 ring-background"
         >
-          <UserAvatar size={24} />
+          <UserAvatar size={size} />
         </span>
       ))}
-      <button
-        type="button"
-        disabled
-        aria-label="Invite collaborators"
-        title="Inviting collaborators isn't available yet"
-        className="relative flex size-6 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border-strong bg-surface-container text-fg-tertiary ring-2 ring-surface-container"
-      >
-        <Plus className="size-3.5" />
-      </button>
-    </span>
+    </>
   );
 }
+
 
 function Crumb({ href, children }: { href: string; children: React.ReactNode }) {
   return (
