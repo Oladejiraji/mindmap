@@ -2,7 +2,7 @@
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Lightbulb } from "lucide-react";
+import { ThinkingIcon } from "@/components/icons/thinking-icon";
 import { cn } from "@/lib/utils";
 import type { Message } from "@/services/messages/queries";
 
@@ -24,7 +24,7 @@ export function MessageBubble({ message }: { message: Message }) {
           // Waiting for the first words: a "Thinking…" line, not the model's
           // reasoning (that needs the backend to stream it)
           <div className="flex items-center gap-2.5 text-body-sm" role="status">
-            <Lightbulb className="size-4 text-fg-tertiary" aria-hidden />
+            <ThinkingIcon className="size-4 text-fg-tertiary" aria-hidden />
             <span className="gradient-text-shimmer">Thinking…</span>
           </div>
         ) : (
