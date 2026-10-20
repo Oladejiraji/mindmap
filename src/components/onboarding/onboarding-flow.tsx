@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Code, Ellipsis, Flag, FlaskConical, Package, PenTool } from "lucide-react";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { AuthCanvas } from "@/components/auth-canvas/auth-canvas";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
@@ -30,6 +31,15 @@ import { InviteCard } from "./invite-card";
  *   - with an org name (and no invite joined) → createWithOnboarding
  *   - otherwise (joined an invite, or "Skip for now") → completeOnboarding
  */
+
+const ROLE_ICONS: Record<Role, ReactNode> = {
+  product: <Package />,
+  design: <PenTool />,
+  engineering: <Code />,
+  research: <FlaskConical />,
+  leadership: <Flag />,
+  other: <Ellipsis />,
+};
 
 const field =
   "corner-squircle h-10 w-full rounded-3xl bg-surface-container px-3.5 text-body-sm text-fg-primary shadow-border outline-none transition-shadow placeholder:text-fg-tertiary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-fg-tertiary";
@@ -164,7 +174,7 @@ export function OnboardingFlow() {
               </>
             )}
             <Field label="Your role">
-              <Select className="rounded-3xl" aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES} />
+              <Select className="rounded-3xl" aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES.map((r) => ({ ...r, icon: ROLE_ICONS[r.value] }))} />
             </Field>
             <Field label="Work email">
               <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
