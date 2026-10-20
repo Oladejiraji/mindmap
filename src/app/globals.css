@@ -615,41 +615,41 @@
   opacity: 0;
   background: conic-gradient(
     from var(--halo-angle),
-    oklch(0.72 0.16 265),
-    oklch(0.72 0.17 305) 50deg,
-    oklch(0.76 0.16 355) 110deg,
-    oklch(0.8 0.15 55) 170deg,
-    oklch(0.9 0.15 95) 235deg,
-    oklch(0.84 0.11 195) 300deg,
-    oklch(0.72 0.16 265)
+    oklch(0.8 0.11 265),
+    oklch(0.8 0.11 305) 50deg,
+    oklch(0.83 0.1 355) 110deg,
+    oklch(0.86 0.09 55) 170deg,
+    oklch(0.93 0.09 95) 235deg,
+    oklch(0.89 0.07 195) 300deg,
+    oklch(0.8 0.11 265)
   );
 }
 
 .vapour-halo-glow {
-  inset: -18px;
-  filter: blur(18px);
+  inset: -10px;
+  filter: blur(14px);
   animation:
-    vapour-glow 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    vapour-glow 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards,
     vapour-spin 2.2s linear forwards;
 }
 
 .vapour-halo-aura {
-  inset: -44px;
-  filter: blur(32px);
+  inset: -28px;
+  filter: blur(28px);
   animation:
-    vapour-bloom 2s cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards,
+    vapour-bloom 1.6s cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards,
     vapour-spin 2.2s linear forwards;
 }
 
 @keyframes vapour-glow {
   0% { opacity: 0; transform: scale(0.94); }
-  15%, 40% { opacity: 1; }
+  15%, 30% { opacity: 0.75; }
   100% { opacity: 0; transform: scale(1.06); }
 }
 
 @keyframes vapour-bloom {
   0% { opacity: 0; transform: scale(0.9); }
-  25%, 45% { opacity: 1; }
+  25% { opacity: 0.6; }
   100% { opacity: 0; transform: scale(1.16); }
 }
 
