@@ -70,6 +70,7 @@ export function NodeEditorView({
   // floating chat back opens the same node on its chat).
   const requestedTab = useSearchParams().get("tab");
   const [tab, setTab] = useState<Tab>("content");
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
   const pickKey = `${nodeId}:${requestedTab ?? ""}`;
   if (initializedFor !== pickKey && node) {
@@ -201,38 +202,63 @@ export function NodeEditorView({
       <div className="flex min-h-0 flex-1 flex-col">
         {/* Details */}
         <aside className="shrink-0 border-b border-border-default">
-          <div className="px-5 pt-5 pb-5">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
-              <NodeTabIcon className="size-5" />
+          <div className="px-5 py-4">
+            {/* Collapsed to the node icon and title; the icon opens the
+                details (summary and properties) below */}
+            <div className="flex items-center gap-3">
+              <Tip label={detailsOpen ? "Hide details" : "Show details"}>
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen((o) => !o)}
+                  aria-expanded={detailsOpen}
+                  aria-controls="node-details"
+                  aria-label="Node details"
+                  className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-brand-subtle text-brand-fg outline-none transition-[scale] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                >
+                  <NodeTabIcon className="size-5" />
+                </button>
+              </Tip>
+              <div className="min-w-0">
+                <p className="text-caption-lg text-fg-tertiary">{kindLabel}</p>
+                <h1 className="truncate text-body-base font-semibold text-fg-primary">{node.title}</h1>
+              </div>
             </div>
-            <p className="mt-5 text-body-sm text-fg-tertiary">{kindLabel}</p>
-            <h1 className="mt-1 text-heading-5/6 font-semibold text-pretty text-fg-primary">{node.title}</h1>
-            {node.summary && <p className="mt-3 text-body-sm text-fg-secondary">{node.summary}</p>}
 
-            <dl className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] text-body-sm">
-              <Property label="Project">
-                <span className="truncate">{thread?.name ?? "—"}</span>
-              </Property>
-              <Property label="Parent">
-                {parent ? (
-                  parent.parentId ? (
-                    <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
-                      {parent.title}
-                    </Link>
-                  ) : (
-                    <span className="truncate">{parent.title}</span>
-                  )
-                ) : (
-                  <span className="text-fg-tertiary">None</span>
-                )}
-              </Property>
-              <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
-              <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
-              <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
-              <Property label="Collaborators">
-                <Collaborators />
-              </Property>
-            </dl>
+            <div
+              id="node-details"
+              inert={!detailsOpen}
+              style={{ gridTemplateRows: detailsOpen ? "1fr" : "0fr" }}
+              className="grid transition-[grid-template-rows] duration-250 ease-out motion-reduce:transition-none"
+            >
+              <div className="min-h-0 overflow-hidden">
+                {node.summary && <p className="mt-4 text-body-sm text-fg-secondary">{node.summary}</p>}
+
+                <dl className="mt-4 grid grid-cols-[104px_minmax(0,1fr)] text-body-sm">
+                  <Property label="Project">
+                    <span className="truncate">{thread?.name ?? "—"}</span>
+                  </Property>
+                  <Property label="Parent">
+                    {parent ? (
+                      parent.parentId ? (
+                        <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
+                          {parent.title}
+                        </Link>
+                      ) : (
+                        <span className="truncate">{parent.title}</span>
+                      )
+                    ) : (
+                      <span className="text-fg-tertiary">None</span>
+                    )}
+                  </Property>
+                  <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
+                  <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
+                  <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
+                  <Property label="Collaborators">
+                    <Collaborators />
+                  </Property>
+                </dl>
+              </div>
+            </div>
           </div>
         </aside>
 
