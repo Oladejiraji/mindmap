@@ -1,13 +1,13 @@
-import { AnthropicIcon, BranchIcon, GptIcon } from "@/lib/svg";
+import { BranchIcon } from "@/lib/svg";
 import { Position, type NodeProps } from "@xyflow/react";
 import Image, { StaticImageData } from "next/image";
 import { useAnimate } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BranchDropdown } from "./branch-dropdown";
 import { CustomHandle, type HandleVariant } from "./custom-handle";
 import { EditableTitle } from "./editable-title";
 import { usePulseConfig } from "./pulse-config";
-import { PlusIcon } from "lucide-react";
+import { MODELS, ModelsMenu, type ModelId } from "./models-menu";
 
 type HandleSide = "top" | "bottom" | "left" | "right";
 
@@ -40,6 +40,7 @@ export function BrandCardNode({ data }: NodeProps) {
   } = data as BrandCardData;
   const { duration } = usePulseConfig();
   const [scope, animate] = useAnimate();
+  const [models, setModels] = useState<ModelId[]>(["gpt-5.5", "claude-opus-5.5"]);
 
   useEffect(() => {
     if (!pulseTrigger || !scope.current) return;
@@ -130,29 +131,22 @@ export function BrandCardNode({ data }: NodeProps) {
       </div>
 
       {showModel ? (
-        <div className="pt-2 flex items-center gap-1.5">
-          <button
-            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
-          >
-            <div className="flex items-center justify-center size-4.5">
-              <GptIcon />
-            </div>
-            <p>Chatgpt 5.5</p>
-          </button>
-          <button
-            className="px-1 py-px rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
-          >
-            <div className="flex items-center justify-center size-4.5">
-              <AnthropicIcon />
-            </div>
-            <p>Anthropic</p>
-          </button>
-          <button
-            className="size-5 justify-center rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
-          >
-            <PlusIcon className="size-3" />
-          </button>
-          <p className="font-medium text-caption-base text-fg-tertiary">
+        <div className="pt-2 flex flex-wrap items-center gap-1.5">
+          {MODELS.filter((m) => models.includes(m.id)).map((m) => (
+            <span
+              key={m.id}
+              className="px-1 py-px rounded-md border border-black/2 flex items-center whitespace-nowrap text-caption-base text-fg-primary bg-background-5 shadow-default"
+            >
+              <span className="flex items-center justify-center size-4.5">{m.icon}</span>
+              <span>{m.short}</span>
+            </span>
+          ))}
+          <ModelsMenu
+            selected={models}
+            onToggle={(id) => setModels((ms) => (ms.includes(id) ? ms.filter((x) => x !== id) : [...ms, id]))}
+            triggerClassName="size-5 justify-center rounded-md border border-black/2 flex items-center text-caption-base text-fg-primary bg-background-5 shadow-default"
+          />
+          <p className="font-medium whitespace-nowrap text-caption-base text-fg-tertiary">
             Models in use
           </p>
         </div>
