@@ -2,7 +2,7 @@
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ThinkingIcon } from "@/components/icons/thinking-icon";
+import { ThinkingOrb } from "thinking-orbs";
 import { cn } from "@/lib/utils";
 import type { Message } from "@/services/messages/queries";
 
@@ -25,8 +25,9 @@ export function MessageBubble({ message }: { message: Message }) {
         {isEmpty && isStreaming ? (
           // Waiting for the first words: a "Thinking…" line, not the model's
           // reasoning (that needs the backend to stream it)
-          <div className="flex items-center gap-2.5 text-body-sm" role="status">
-            <ThinkingIcon className="size-4 text-fg-tertiary" aria-hidden />
+          <div className="flex items-center gap-2 text-body-sm" role="status">
+            {/* Dotted thought orb (thinking-orbs); a still frame under reduced motion */}
+            <ThinkingOrb state="working" size={20} theme="light" aria-hidden />
             <span className="gradient-text-shimmer">Thinking…</span>
           </div>
         ) : (
