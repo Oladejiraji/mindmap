@@ -18,7 +18,7 @@ import { InviteCard } from "./invite-card";
 /*
  * B2B onboarding, shown once after sign-up, laid out like interfere.com/join:
  * a single-page form on the left (paired fields, one full-width Continue)
- * and a dotted panel on the right with the product line.
+ * and a light-grey panel on the right with the product line.
  *
  *   invitations   only if the user has pending invites (join one, or not)
  *   form          organization name + team size, role + work email,
@@ -210,12 +210,12 @@ export function OnboardingFlow() {
         </form>
       </div>
 
-      {/* Product panel: an inset card (10px from the edges, 16px squircle
-          corners) with a dotted texture and the line, no invented testimonial */}
+      {/* Product panel: an inset light-grey card (10px from the edges, 16px
+          squircle corners) with the line; no invented testimonial */}
       <div
         aria-hidden
-        className="relative my-2.5 mr-2.5 hidden items-center justify-center overflow-hidden rounded-3xl bg-sidebar lg:flex"
-        style={{ backgroundImage: "radial-gradient(oklch(0 0 0 / 0.12) 1px, transparent 1px)", backgroundSize: "10px 10px" }}
+        className="relative my-2.5 mr-2.5 hidden items-center justify-center overflow-hidden rounded-3xl lg:flex"
+        style={{ background: "var(--surface-panel-edge)" }}
       >
         <div className="max-w-[520px] px-12 text-center">
           <p className="font-serif text-[2rem] leading-[1.3] text-fg-primary">
