@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { ChevronLeftIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, ArrowUpRight, Building2, ChartColumn, Code, Palette, ShieldCheck, SquareUser } from "lucide-react";
+import { ArrowUpRight, Building2, ChartColumn, Palette, SquareUser } from "lucide-react";
+import { ImportIcon } from "@/components/icons/import-icon";
+import { SecurityIcon } from "@/components/icons/security-icon";
+import { ApiIcon } from "@/components/icons/api-icon";
 import { FlameIcon } from "@/components/icons/flame-icon";
 import { PersonalizationIcon } from "@/components/icons/personalization-icon";
 import { ModelsIcon } from "@/components/icons/models-icon";
@@ -123,11 +126,11 @@ export function SettingsShell({ children }: { children: ReactNode }) {
               Teams
             </NavLink>
             <Soon icon={<InviteIcon />}>Members</Soon>
-            <Soon icon={<ShieldCheck />}>Security</Soon>
-            <Soon icon={<Code />}>API</Soon>
+            <Soon icon={<SecurityIcon />}>Security</Soon>
+            <Soon icon={<ApiIcon />}>API</Soon>
             <Soon icon={<BillingIcon />}>Billing</Soon>
             <Soon icon={<ChartColumn />}>Usage &amp; limits</Soon>
-            <Soon icon={<ArrowLeftRight />}>Import &amp; export</Soon>
+            <Soon icon={<ImportIcon />}>Import &amp; export</Soon>
           </NavGroup>
 
           <NavGroup label="Intelligence">
