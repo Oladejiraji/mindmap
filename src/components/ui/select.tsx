@@ -1,6 +1,7 @@
 "use client";
 
 import { Select as BaseSelect } from "@base-ui/react/select";
+import { CheckIcon } from "@/components/icons/check-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { popupRow, popupSection, popupSurface } from "@/components/shared/sidebar/popover-styles";
 import { cn } from "@/lib/utils";
@@ -56,9 +57,7 @@ export function Select<T extends string>({
                 <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2 font-medium")}>
                   <span className="flex size-4 shrink-0 items-center justify-center">
                     <BaseSelect.ItemIndicator>
-                      <svg viewBox="0 0 16 16" fill="none" className="size-3.5 text-fg-secondary" aria-hidden>
-                        <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <CheckIcon className="size-4 text-fg-secondary" aria-hidden />
                     </BaseSelect.ItemIndicator>
                   </span>
                   <BaseSelect.ItemText>{o.itemLabel ?? o.label}</BaseSelect.ItemText>
