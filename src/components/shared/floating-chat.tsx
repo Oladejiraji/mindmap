@@ -88,7 +88,7 @@ function FloatingCard({
       role="dialog"
       aria-label={`Chat: ${node?.title ?? "Node"}`}
       style={{ translate: `${offset.x}px ${offset.y}px` }}
-      className="corner-squircle absolute right-4 bottom-4 z-20 flex h-[min(520px,calc(100%-32px))] w-[min(380px,calc(100%-32px))] flex-col overflow-hidden rounded-3xl bg-surface-container shadow-large motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95"
+      className="corner-squircle absolute right-4 bottom-4 z-20 flex h-[min(520px,calc(100%-32px))] w-[min(380px,calc(100%-32px))] flex-col overflow-hidden rounded-3xl bg-surface-container shadow-large origin-bottom-right motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95"
     >
       <header
         onPointerDown={onPointerDown}
