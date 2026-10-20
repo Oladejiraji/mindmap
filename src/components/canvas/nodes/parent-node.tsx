@@ -35,7 +35,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
               id={id}
               title={title}
               onRename={onRename}
-              className="text-background/87 focus:ring-1 focus:ring-white/30"
+              className="text-background/87 focus-visible:ring-1 focus-visible:ring-white/30"
             />
           </div>
           {isLeaf && <NodeMenu id={id} onDelete={onDelete} />}

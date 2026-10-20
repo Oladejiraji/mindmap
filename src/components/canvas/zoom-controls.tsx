@@ -1,8 +1,9 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { ZoomInIcon, ZoomOutIcon } from "@/components/icons/zoom-icons";
 import { Panel, useReactFlow, useStore } from "@xyflow/react";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 
 /*
  * Canvas zoom control: a grey well holding a raised white card with + over −
@@ -21,28 +22,30 @@ export function ZoomControls({ className }: { className?: string }) {
   return (
     <Panel position="bottom-left" className={cn("m-3!", className)}>
       <div className="rounded-2xl bg-component p-1">
-        <div role="group" aria-label="Zoom" className="flex flex-col overflow-hidden rounded-xl bg-surface-container shadow-default">
-          <button
-            type="button"
-            aria-label="Zoom in"
-            title="Zoom in"
-            disabled={zoom >= maxZoom}
-            onClick={() => zoomIn({ duration: 200 })}
-            className={button}
-          >
-            <Plus className="size-4" strokeWidth={2} />
-          </button>
+        <div role="group" aria-label="Zoom" className="flex flex-col overflow-hidden rounded-lg bg-surface-container shadow-default">
+          <Tip label="Zoom in" side="right">
+            <button
+              type="button"
+              aria-label="Zoom in"
+              disabled={zoom >= maxZoom}
+              onClick={() => zoomIn({ duration: 200 })}
+              className={button}
+            >
+              <ZoomInIcon className="size-4" />
+            </button>
+          </Tip>
           <div aria-hidden className="mx-1.5 h-px bg-border-default" />
-          <button
-            type="button"
-            aria-label="Zoom out"
-            title="Zoom out"
-            disabled={zoom <= minZoom}
-            onClick={() => zoomOut({ duration: 200 })}
-            className={button}
-          >
-            <Minus className="size-4" strokeWidth={2} />
-          </button>
+          <Tip label="Zoom out" side="right">
+            <button
+              type="button"
+              aria-label="Zoom out"
+              disabled={zoom <= minZoom}
+              onClick={() => zoomOut({ duration: 200 })}
+              className={button}
+            >
+              <ZoomOutIcon className="size-4" />
+            </button>
+          </Tip>
         </div>
       </div>
     </Panel>

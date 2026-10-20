@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons/chevron-down";
 import { useMutation } from "convex/react";
-import { ArrowDown, GitBranch } from "lucide-react";
+import { ArrowDown, Check, Copy, GitBranch } from "lucide-react";
 import { CanvasViewIcon } from "@/components/icons/canvas-view-icon";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
@@ -13,10 +13,14 @@ import { useSendMessage } from "@/services/chat/actions";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 import { MessageBubble } from "./message-bubble";
 import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
-import { CanvasPanel } from "@/components/shared/canvas-panel";
+import { CanvasPanel } from "@/components/thread/canvas-panel";
+import { Kbd } from "@/components/canvas/canvas-shortcuts";
+import { CheckIcon } from "@/components/icons/check-icon";
+import { blocksToPlainText } from "@/lib/blocks-to-markdown";
 
 /*
  * ChatGPT-style view of a project's tree.
@@ -110,12 +114,36 @@ export function BranchChat({
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [activeNodeId, messageCount, lastLength]);
 
+  // "/" jumps to the message box (unless you're already typing somewhere)
+  const composerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, select, [contenteditable='true']")) return;
+      const box = composerRef.current?.querySelector<HTMLElement>("textarea, [contenteditable='true']");
+      if (!box) return;
+      e.preventDefault();
+      box.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   if (!active) return null;
 
   return (
     <div className="flex h-full flex-col">
       <div ref={scrollRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {/* Sections with messages (or still loading) carry data-filled; when
+            none do, the whole branch is empty and shows one empty state */}
         <div className="mx-auto flex w-full max-w-[720px] flex-col px-6 pt-20 pb-10">
+          <div className="flex flex-col items-center gap-3 pt-16 text-center [:has([data-filled])>&]:hidden">
+            <p className="text-body-sm text-fg-tertiary">No messages in this branch</p>
+            <p className="flex items-center gap-1.5 text-caption-lg text-fg-tertiary">
+              Press <Kbd>/</Kbd> to start
+            </p>
+          </div>
           {path.map((node, i) => {
             const parent = i > 0 ? path[i - 1] : undefined;
             const siblings = parent ? (childrenOf.get(parent._id) ?? []) : [];
@@ -125,6 +153,7 @@ export function BranchChat({
                 key={node._id}
                 nodeId={node._id}
                 title={node.title}
+                parentNotes={path.slice(0, i).filter((n) => hasNotes(n.content)).map((n) => n.title)}
                 showDivider={i > 0}
                 onBranch={() => void branchFrom(node._id)}
                 header={
@@ -157,7 +186,7 @@ export function BranchChat({
         >
           <ArrowDown className="size-4.5" />
         </button>
-        <div className="relative mx-auto w-full max-w-[720px]">
+        <div ref={composerRef} className="relative mx-auto w-full max-w-[720px]">
           <CanvasPanel variant="docked" />
           <ChatInput
             onSend={send}
@@ -222,58 +251,126 @@ function ForkHeader({
   );
 }
 
-/* One node's part of the conversation. The divider above it is as wide as
- * the section's text: the full column when there are messages, just the
- * empty-state line when there aren't. */
+/* One node's part of the conversation; a node with no messages renders
+ * nothing. */
 function NodeSection({
   nodeId,
   title,
   showDivider,
   header,
   onBranch,
+  parentNotes,
 }: {
   nodeId: Id<"nodes">;
   title: string;
   showDivider: boolean;
   header: React.ReactNode;
   onBranch: () => void;
+  parentNotes: string[];
 }) {
   const { data: messages, isLoading } = useMessagesByNode(nodeId);
-  const empty = !isLoading && !messages?.length;
+  // An empty node adds nothing to the conversation: no header, no line.
+  if (!isLoading && !messages?.length) return null;
   return (
-    <section aria-label={title} className={cn(empty && "mx-auto w-fit max-w-full")}>
+    <section aria-label={title} data-filled>
       {showDivider && <Divider color="strong" className="my-10" />}
       {header}
-      {isLoading ? (
-        <div className="h-10" />
-      ) : empty ? (
-        <p className="text-center text-body-sm text-fg-tertiary">No messages in this branch yet.</p>
-      ) : (
-        <NodeMessages messages={messages ?? []} onBranch={onBranch} />
-      )}
+      {isLoading ? <div className="h-10" /> : <NodeMessages messages={messages ?? []} onBranch={onBranch} parentNotes={parentNotes} />}
     </section>
   );
 }
 
-function NodeMessages({ messages, onBranch }: { messages: Message[]; onBranch: () => void }) {
+function NodeMessages({
+  messages,
+  onBranch,
+  parentNotes,
+}: {
+  messages: Message[];
+  onBranch: () => void;
+  parentNotes: string[];
+}) {
   return (
     <div className="flex flex-col gap-6">
-      {messages.map((m: Message) => (
+      {messages.map((m: Message, i) => (
         <div key={m._id} className="group/msg">
+          {m.role !== "user" && <ReplySteps parentNotes={parentNotes} priorMessages={i} />}
           <MessageBubble message={m} />
-          {m.role !== "user" && !m.isStreaming && (
-            <div className="mt-1.5 flex opacity-0 transition-opacity group-hover/msg:opacity-100 focus-within:opacity-100">
-              <button
-                onClick={onBranch}
-                className="flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-body-sm text-fg-tertiary outline-none hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <GitBranch className="size-3.5" />
-                Branch from here
-              </button>
-            </div>
-          )}
+          {m.role !== "user" && !m.isStreaming && <ReplyActions content={m.content} onBranch={onBranch} />}
         </div>
       ))}
+    </div>
+  );
+}
+
+/* What the model read before replying, the same context the backend
+ * builds (convex/lib/context.ts): notes from the parent nodes, then this
+ * branch's earlier messages. One row per step: check, step, muted detail. */
+function ReplySteps({ parentNotes, priorMessages }: { parentNotes: string[]; priorMessages: number }) {
+  const steps: { label: string; detail: string }[] = [];
+  if (parentNotes.length > 0) {
+    const names = parentNotes.slice(-2).join(" · ");
+    const more = parentNotes.length - 2;
+    steps.push({ label: "Read parent notes", detail: more > 0 ? `${names} +${more}` : names });
+  }
+  if (priorMessages > 0) {
+    steps.push({ label: "Read the conversation", detail: `${priorMessages} ${priorMessages === 1 ? "message" : "messages"}` });
+  }
+  if (steps.length === 0) return null;
+  return (
+    <ul className="mb-3 flex flex-col gap-1.5" aria-label="Context">
+      {steps.map((s) => (
+        <li key={s.label} className="flex min-w-0 items-center gap-2.5 text-body-sm">
+          <CheckIcon className="size-4 shrink-0 text-fg-tertiary" aria-hidden />
+          <span className="shrink-0 text-fg-secondary">{s.label}</span>
+          <span className="truncate text-fg-tertiary">{s.detail}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const hasNotes = (content: unknown) =>
+  Array.isArray(content) &&
+  blocksToPlainText(content as Parameters<typeof blocksToPlainText>[0]).trim().length > 0;
+
+// Icon swap (interfaces.dev): the incoming icon grows from 0.25 and
+// unblurs as the outgoing one does the reverse
+const iconSwap =
+  "absolute transition-[opacity,scale,filter] duration-200 ease-out motion-reduce:transition-opacity";
+const iconIn = "scale-100 opacity-100 blur-0";
+const iconOut = "scale-[0.25] opacity-0 blur-[4px]";
+
+const replyAction =
+  "flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-body-sm text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-4";
+
+/* Under each finished reply: Branch from here, then icon actions. Copy
+ * confirms with a check for a moment. */
+function ReplyActions({ content, onBranch }: { content: string; onBranch: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard
+      .writeText(content)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch((err) => handleError(err, "Couldn't copy"));
+  };
+  return (
+    <div className="mt-2 -ml-2 flex items-center gap-1">
+      <button type="button" onClick={onBranch} className={replyAction}>
+        <GitBranch />
+        Branch from here
+      </button>
+      <span aria-hidden className="mx-1 h-4 w-px bg-border-default" />
+      <Tip label={copied ? "Copied" : "Copy"}>
+        <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy"} className={cn(replyAction, "w-7 justify-center px-0")}>
+          <span className="relative flex size-4 items-center justify-center">
+            <Check className={cn(iconSwap, copied ? iconIn : iconOut)} />
+            <Copy className={cn(iconSwap, copied ? iconOut : iconIn)} />
+          </span>
+        </button>
+      </Tip>
     </div>
   );
 }

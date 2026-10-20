@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -18,12 +18,11 @@ import {
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { motion } from "motion/react";
 
 import { BrandCardNode } from "./brand-card-node";
 import { ResearchCardNode } from "./research-card-node";
 import { GradientEdge } from "./gradient-edge";
-import { usePulseConfig } from "./pulse-config";
+import { VapourHalo } from "./vapour-halo";
 import AuthAssets from "@/lib/asset-export/auth";
 
 const FIT_VIEW_OPTIONS = { padding: 0.18 };
@@ -132,24 +131,6 @@ const NEW_EDGE_DEFAULTS = {
   style: { strokeWidth: 1.5 },
 } as const;
 
-const PERFECT_CIRCLE_RADIUS = "50% 50% 50% 50%";
-
-const DISTORT_SHAPES: number[][] = [
-  [25, 75, 35, 65],
-  [70, 30, 75, 25],
-  [40, 65, 75, 30],
-];
-
-const DISTORT_ROTATIONS = [28, -24, 18];
-
-const RING_COLORS = ["#ff5fa2", "#ffb155", "#5fb8ff"];
-
-function buildDistortRadius(nums: number[], intensity: number): string {
-  const lerp = (a: number) => 50 + (a - 50) * intensity;
-  const [a, b, c, d] = nums;
-  return `${lerp(a)}% ${lerp(b)}% ${lerp(c)}% ${lerp(d)}%`;
-}
-
 export function AuthCanvas() {
   return (
     <ReactFlowProvider>
@@ -161,15 +142,13 @@ export function AuthCanvas() {
 type Pulse = {
   id: string;
   nodeId: string;
-  cx: number;
-  cy: number;
-  nodeWidth: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
-const NODE_INSET_PX = 8;
-
 function AuthCanvasInner() {
-  const PULSE_CONFIG = usePulseConfig();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { fitView, getViewport, getNode } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -190,11 +169,64 @@ function AuthCanvasInner() {
     [edges],
   );
 
+  // The vapour wave on a node: fired when it's dropped, and when a
+  // connection lands on it.
+  const fireHalo = useCallback(
+    (node: Node | undefined) => {
+      if (!node) return;
+      const w = node.measured?.width ?? 0;
+      const h = node.measured?.height ?? 0;
+      if (!w || !h) return;
+      const trigger = Date.now();
+      // Hug the card itself, not the author tag above or the chips below
+      const el = wrapperRef.current?.querySelector<HTMLElement>(`.react-flow__node[data-id="${node.id}"]`);
+      const card = el?.querySelector<HTMLElement>(".rounded-3xl");
+      const { zoom } = getViewport();
+      let rect = { x: node.position.x, y: node.position.y, width: w, height: h };
+      if (el && card) {
+        const nr = el.getBoundingClientRect();
+        const cr = card.getBoundingClientRect();
+        rect = {
+          x: node.position.x + (cr.left - nr.left) / zoom,
+          y: node.position.y + (cr.top - nr.top) / zoom,
+          width: cr.width / zoom,
+          height: cr.height / zoom,
+        };
+      }
+      setPulses((prev) => [
+        ...prev.filter((p) => p.nodeId !== node.id),
+        { id: `${node.id}-${trigger}`, nodeId: node.id, ...rect },
+      ]);
+      setNodes((ns) =>
+        ns.map((n) =>
+          n.id === node.id
+            ? { ...n, data: { ...n.data, pulseTrigger: trigger } }
+            : n,
+        ),
+      );
+    },
+    [getViewport, setNodes],
+  );
+
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => fireHalo(node),
+    [fireHalo],
+  );
+
+  // The node a connection is dragged from, so the wave fires on the
+  // other end (where it landed) whichever handle the drag started on.
+  const connectFrom = useRef<string | null>(null);
+  const onConnectStart = useCallback((_: unknown, { nodeId }: { nodeId: string | null }) => {
+    connectFrom.current = nodeId;
+  }, []);
+  const landedOn = (conn: Connection) => (conn.source === connectFrom.current ? conn.target : conn.source);
+
   const onConnect = useCallback(
     (conn: Connection) => {
       setEdges((eds) => addEdge({ ...conn, ...NEW_EDGE_DEFAULTS }, eds));
+      fireHalo(getNode(landedOn(conn)));
     },
-    [setEdges],
+    [setEdges, fireHalo, getNode],
   );
 
   const onReconnectStart = useCallback(() => {
@@ -205,8 +237,11 @@ function AuthCanvasInner() {
     (oldEdge: Edge, newConnection: Connection) => {
       reconnectSuccessful.current = true;
       setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds));
+      // The end that moved is the one that differs from the old edge
+      const moved = newConnection.target !== oldEdge.target ? newConnection.target : newConnection.source;
+      fireHalo(getNode(moved));
     },
-    [setEdges],
+    [setEdges, fireHalo, getNode],
   );
 
   const onReconnectEnd = useCallback(
@@ -229,38 +264,6 @@ function AuthCanvasInner() {
     return () => observer.disconnect();
   }, [fitView]);
 
-  const onNodeDragStop = useCallback(
-    (_: React.MouseEvent, node: Node) => {
-      const w = node.measured?.width ?? 0;
-      const h = node.measured?.height ?? 0;
-      if (!w || !h) return;
-      const trigger = Date.now();
-      const offsetY =
-        node.id === "top-brand"
-          ? PULSE_CONFIG.originOffsetY - 0.03
-          : node.type === "brandCard"
-            ? PULSE_CONFIG.originOffsetY - 0.15
-            : PULSE_CONFIG.originOffsetY;
-      setPulses((prev) => [
-        ...prev.filter((p) => p.nodeId !== node.id),
-        {
-          id: `${node.id}-${trigger}`,
-          nodeId: node.id,
-          cx: node.position.x + w / 2,
-          cy: node.position.y + h * offsetY,
-          nodeWidth: w,
-        },
-      ]);
-      setNodes((ns) =>
-        ns.map((n) =>
-          n.id === node.id
-            ? { ...n, data: { ...n.data, pulseTrigger: trigger } }
-            : n,
-        ),
-      );
-    },
-    [PULSE_CONFIG.originOffsetY, setNodes],
-  );
 
   const removePulse = useCallback((id: string) => {
     setPulses((prev) => prev.filter((p) => p.id !== id));
@@ -309,6 +312,7 @@ function AuthCanvasInner() {
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
         onReconnect={onReconnect}
         onReconnectStart={onReconnectStart}
         onReconnectEnd={onReconnectEnd}
@@ -325,197 +329,16 @@ function AuthCanvasInner() {
         proOptions={{ hideAttribution: true }}
       >
         <ViewportPortal>
-          {pulses.map((p) => {
-            const endWidth = Math.max(
-              PULSE_CONFIG.startDiameter,
-              p.nodeWidth - NODE_INSET_PX * 2,
-            );
-            return (
-              <div
-                key={p.id}
-                className="auth-pulse"
-                style={{ left: p.cx, top: p.cy }}
-              >
-                {PULSE_CONFIG.ringDelays.map((delay, i) => {
-                  const isLast = i === PULSE_CONFIG.ringDelays.length - 1;
-                  const shape = DISTORT_SHAPES[i % DISTORT_SHAPES.length];
-                  const rot =
-                    DISTORT_ROTATIONS[i % DISTORT_ROTATIONS.length] *
-                    PULSE_CONFIG.distortion;
-                  const distortedRadius = buildDistortRadius(
-                    shape,
-                    PULSE_CONFIG.distortion,
-                  );
-                  const distortTimes = [
-                    0,
-                    PULSE_CONFIG.distortionStart,
-                    1,
-                  ] as const;
-                  const filterId = `vstreak-${p.id}-${i}`;
-                  return (
-                    <Fragment key={i}>
-                      <svg
-                        style={{
-                          position: "absolute",
-                          width: 0,
-                          height: 0,
-                          pointerEvents: "none",
-                        }}
-                        aria-hidden
-                      >
-                        <defs>
-                          <filter
-                            id={filterId}
-                            x="-50%"
-                            y="-200%"
-                            width="200%"
-                            height="500%"
-                            colorInterpolationFilters="sRGB"
-                          >
-                            <motion.feGaussianBlur
-                              initial={{ stdDeviation: "0 0" }}
-                              animate={{
-                                stdDeviation: `${PULSE_CONFIG.blurX} ${PULSE_CONFIG.blur}`,
-                              }}
-                              transition={{
-                                duration: PULSE_CONFIG.duration,
-                                delay,
-                                ease: "easeIn",
-                              }}
-                            />
-                          </filter>
-                        </defs>
-                      </svg>
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          translateX: "-50%",
-                          translateY: "-50%",
-                          border: `${PULSE_CONFIG.strokeWidth}px solid ${RING_COLORS[i % RING_COLORS.length]}`,
-                          pointerEvents: "none",
-                          filter: `url(#${filterId})`,
-                          maskImage:
-                            "linear-gradient(to bottom, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 1) 50%, rgb(0 0 0 / 0.05) 50%, rgb(0 0 0 / 0.05) 100%)",
-                          WebkitMaskImage:
-                            "linear-gradient(to bottom, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 1) 50%, rgb(0 0 0 / 0.05) 50%, rgb(0 0 0 / 0.05) 100%)",
-                        }}
-                        initial={{
-                          width: PULSE_CONFIG.startDiameter,
-                          height: PULSE_CONFIG.startDiameter,
-                          opacity: 0,
-                          borderRadius: PERFECT_CIRCLE_RADIUS,
-                          rotate: 0,
-                        }}
-                        animate={{
-                          width: endWidth,
-                          height: PULSE_CONFIG.endDiameter,
-                          opacity: [...PULSE_CONFIG.opacityKeyframes],
-                          borderRadius: [
-                            PERFECT_CIRCLE_RADIUS,
-                            PERFECT_CIRCLE_RADIUS,
-                            distortedRadius,
-                          ],
-                          rotate: [0, 0, rot],
-                        }}
-                        transition={{
-                          duration: PULSE_CONFIG.duration,
-                          delay,
-                          ease: [...PULSE_CONFIG.ease],
-                          opacity: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: PULSE_CONFIG.opacityEase,
-                            times: [...PULSE_CONFIG.opacityTimes],
-                          },
-                          borderRadius: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: "easeIn",
-                            times: [...distortTimes],
-                          },
-                          rotate: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: "easeIn",
-                            times: [...distortTimes],
-                          },
-                        }}
-                        onAnimationComplete={
-                          isLast ? () => removePulse(p.id) : undefined
-                        }
-                      />
-                      <motion.div
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          translateX: "-50%",
-                          translateY: "-50%",
-                          borderStyle: "solid",
-                          borderColor: RING_COLORS[i % RING_COLORS.length],
-                          pointerEvents: "none",
-                          filter: `url(#${filterId})`,
-                          maskImage:
-                            "linear-gradient(to bottom, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 1) 50%, rgb(0 0 0 / 0.05) 50%, rgb(0 0 0 / 0.05) 100%)",
-                          WebkitMaskImage:
-                            "linear-gradient(to bottom, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 1) 50%, rgb(0 0 0 / 0.05) 50%, rgb(0 0 0 / 0.05) 100%)",
-                        }}
-                        initial={{
-                          width: PULSE_CONFIG.startDiameter,
-                          height: PULSE_CONFIG.startDiameter,
-                          borderWidth: 2,
-                          opacity: 1,
-                          borderRadius: PERFECT_CIRCLE_RADIUS,
-                          rotate: 0,
-                        }}
-                        animate={{
-                          width: endWidth,
-                          height: PULSE_CONFIG.endDiameter,
-                          borderWidth: PULSE_CONFIG.strokeWidth,
-                          opacity: 0,
-                          borderRadius: [
-                            PERFECT_CIRCLE_RADIUS,
-                            PERFECT_CIRCLE_RADIUS,
-                            distortedRadius,
-                          ],
-                          rotate: [0, 0, rot],
-                        }}
-                        transition={{
-                          duration: PULSE_CONFIG.duration,
-                          delay,
-                          ease: [...PULSE_CONFIG.ease],
-                          borderWidth: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: "easeIn",
-                          },
-                          opacity: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: "easeIn",
-                          },
-                          borderRadius: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: "easeIn",
-                            times: [...distortTimes],
-                          },
-                          rotate: {
-                            duration: PULSE_CONFIG.duration,
-                            delay,
-                            ease: "easeIn",
-                            times: [...distortTimes],
-                          },
-                        }}
-                      />
-                    </Fragment>
-                  );
-                })}
-              </div>
-            );
-          })}
+          {pulses.map((p) => (
+            <VapourHalo
+              key={p.id}
+              x={p.x}
+              y={p.y}
+              width={p.width}
+              height={p.height}
+              onDone={() => removePulse(p.id)}
+            />
+          ))}
         </ViewportPortal>
       </ReactFlow>
     </div>

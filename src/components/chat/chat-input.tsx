@@ -164,7 +164,7 @@ export function ChatInput({
                 key={c.label}
                 className="inline-flex h-8 max-w-60 items-center gap-1.5 rounded-full pr-3 pl-1 text-body-sm text-fg-primary inset-ring-[0.5px] inset-ring-border-strong"
               >
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg [&_svg]:size-3.5">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-solid text-on-brand-solid [&_svg]:size-3.5">
                   {c.icon}
                 </span>
                 <span className="truncate">{c.label}</span>

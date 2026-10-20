@@ -56,7 +56,7 @@ export function NodeChat({
           <MessageList items={items} isLoading={isLoading} isStreaming={isStreaming} />
         )}
         <div className="sticky bottom-0 bg-background">
-          <ChatInput onSend={handleSend} disabled={isBusy || !!error} className="px-4 py-3" />
+          <ChatInput onSend={handleSend} disabled={isBusy || !!error} className="px-2 pt-3 pb-2" />
         </div>
       </div>
     </div>

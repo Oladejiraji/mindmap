@@ -55,7 +55,7 @@ export function ResearchCardNode({ data }: NodeProps) {
               <Image
                 src={author.image}
                 alt="Auth avatar"
-                className="rounded-full"
+                className="rounded-full outline-1 -outline-offset-1 outline-black/8"
                 width={16}
                 height={16}
               />

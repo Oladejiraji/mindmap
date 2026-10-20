@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { ViewToggle } from "@/components/shared/view-toggle";
+import { ViewToggle } from "@/components/canvas/view-toggle";
 import {
   ReactFlow,
   ReactFlowProvider,

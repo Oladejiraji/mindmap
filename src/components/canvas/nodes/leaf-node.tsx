@@ -32,7 +32,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
               id={id}
               title={title}
               onRename={onRename}
-              className="text-fg-primary focus:ring-1 focus:ring-ring"
+              className="text-fg-primary focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
           <NodeMenu id={id} onDelete={onDelete} />

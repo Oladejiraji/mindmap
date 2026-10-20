@@ -7,7 +7,9 @@ import type { Id } from "@convex/dataModel";
 import type { Doc } from "@convex/dataModel";
 import { useCanvasShortcuts } from "@/hooks/use-canvas-shortcuts";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
+import { getShortcutGroup } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 
 /*
  * Canvas shortcut hints. A bottom-centre pill that teaches how to add
@@ -16,7 +18,7 @@ import { cn } from "@/lib/utils";
  * keyboard button stays to bring it back.
  */
 
-function Kbd({ children }: { children: React.ReactNode }) {
+export function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-surface-container px-1 font-sans text-caption-lg font-medium text-fg-secondary inset-ring-[0.5px] inset-ring-border-strong">
       {children}
@@ -24,14 +26,22 @@ function Kbd({ children }: { children: React.ReactNode }) {
   );
 }
 
+const CANVAS_SHORTCUTS = getShortcutGroup("Canvas");
+
 const ALL: { keys: React.ReactNode; label: string }[] = [
-  { keys: <Kbd>Tab</Kbd>, label: "Add a branch to the selected node" },
-  { keys: <Kbd>↵</Kbd>, label: "Add a sibling beside it" },
+  ...CANVAS_SHORTCUTS.map((s) => ({
+    keys: (
+      <span className="flex gap-1">
+        {s.combo.map((c) => (
+          <Kbd key={c}>{c}</Kbd>
+        ))}
+      </span>
+    ),
+    label: s.hint,
+  })),
   { keys: <span className="text-caption-lg text-fg-secondary">Drag a handle</span>, label: "Drop a branch where you want it" },
   { keys: <span className="text-caption-lg text-fg-secondary">Double-click</span>, label: "Rename a node" },
   { keys: <span className="text-caption-lg text-fg-secondary">Click</span>, label: "Select a node, or clear on empty canvas" },
-  { keys: <span className="flex gap-1"><Kbd>+</Kbd><Kbd>−</Kbd></span>, label: "Zoom, or pinch and ⌘-scroll" },
-  { keys: <Kbd>?</Kbd>, label: "Show or hide these shortcuts" },
 ];
 
 export function CanvasShortcuts({
@@ -59,15 +69,16 @@ export function CanvasShortcuts({
 
   if (!visible) {
     return (
-      <button
-        type="button"
-        onClick={() => setVisible(true)}
-        aria-label="Show canvas shortcuts"
-        title="Shortcuts (?)"
-        className="absolute bottom-4 left-1/2 z-10 flex size-8 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full bg-surface-container text-fg-tertiary shadow-default outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Keyboard className="size-4" />
-      </button>
+      <Tip label={<>Shortcuts <span className="text-white/50">?</span></>} side="top">
+        <button
+          type="button"
+          onClick={() => setVisible(true)}
+          aria-label="Show canvas shortcuts"
+          className="absolute bottom-4 left-1/2 z-10 flex size-8 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full bg-surface-container text-fg-tertiary shadow-default outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Keyboard className="size-4" />
+        </button>
+      </Tip>
     );
   }
 
@@ -101,19 +112,20 @@ export function CanvasShortcuts({
           </>
         )}
         <span className="flex items-center gap-0.5">
-          <button
-            type="button"
-            onClick={() => onExpandedChange(!expanded)}
-            aria-expanded={expanded}
-            aria-label="All shortcuts"
-            title="All shortcuts (?)"
-            className={cn(
-              "flex size-7 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50",
-              expanded && "bg-transparent-hover text-fg-primary",
-            )}
-          >
-            <Keyboard className="size-4" />
-          </button>
+          <Tip label={<>All shortcuts <span className="text-white/50">?</span></>} side="top">
+            <button
+              type="button"
+              onClick={() => onExpandedChange(!expanded)}
+              aria-expanded={expanded}
+              aria-label="All shortcuts"
+              className={cn(
+                "flex size-7 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50",
+                expanded && "bg-transparent-hover text-fg-primary",
+              )}
+            >
+              <Keyboard className="size-4" />
+            </button>
+          </Tip>
           <button
             type="button"
             onClick={() => {

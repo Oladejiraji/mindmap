@@ -9,7 +9,9 @@ export const routes = {
   settings: "/settings",
   settingsAccount: "/settings/account",
   settingsPreferences: "/settings/preferences",
-  settingsGeneral: "/settings/general",
+  settingsGeneral: "/settings/general", // old address, redirects to Workspace
+  settingsWorkspace: "/settings/workspace",
+  settingsTeams: "/settings/teams",
   settingsHotkeys: "/settings/hotkeys",
   onboarding: "/onboarding",
   newProject: "/new",

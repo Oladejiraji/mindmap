@@ -595,13 +595,6 @@
   transition: opacity 150ms;
 }
 
-.auth-pulse {
-  position: absolute;
-  pointer-events: none;
-  z-index: -1;
-  overflow: visible;
-}
-
 @property --gradient-angle {
   syntax: "<angle>";
   initial-value: 191.3deg;
@@ -724,6 +717,13 @@
   -webkit-text-fill-color: transparent;
   color: transparent;
   animation: gradient-text-shimmer 1.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient-text-shimmer {
+    animation: none;
+    background-position: 50% 0;
+  }
 }
 
 input:-webkit-autofill,

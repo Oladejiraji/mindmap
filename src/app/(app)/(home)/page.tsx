@@ -3,7 +3,7 @@
 import { Plus } from "lucide-react";
 import { ListIcon } from "@/components/icons/list-icon";
 import { GridIcon } from "@/components/icons/grid-icon";
-import { motion } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 import { api } from "@convex/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,8 @@ import { useHomeLayout } from "@/lib/preferences";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
-import { ProjectCard } from "@/components/shared/project-card";
-import { ProjectRow } from "@/components/shared/project-row";
+import { ProjectCard } from "@/components/project/project-card";
+import { ProjectRow } from "@/components/project/project-row";
 import { useRouter } from "next/navigation";
 
 
@@ -50,6 +50,7 @@ export default function Home() {
               <Plus className="size-3.5" />
               New
             </Button>
+            <MotionConfig reducedMotion="user">
             <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
               <button
                 onClick={() => updateLayout("grid")}
@@ -64,7 +65,7 @@ export default function Home() {
                 {layout === "grid" && (
                   <motion.div
                     layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-md bg-foreground/6"
+                    className="absolute inset-0.5 rounded-lg bg-foreground/6"
                     transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
                   />
                 )}
@@ -88,6 +89,7 @@ export default function Home() {
                 )}
               </button>
             </div>
+            </MotionConfig>
           </div>
         </div>
         <div className="mt-8 h-px bg-border-default" />

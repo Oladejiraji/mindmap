@@ -22,11 +22,11 @@ export function MessageList({
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-6 px-4 py-6">
+      <div className="flex flex-1 flex-col gap-6 px-2 py-6">
         <div className="flex justify-end">
           <Skeleton className="h-10 w-48 rounded-xl" />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-3">
           <Skeleton className="h-4 w-3/4 rounded" />
           <Skeleton className="h-4 w-1/2 rounded" />
           <Skeleton className="h-4 w-2/3 rounded" />
@@ -34,7 +34,7 @@ export function MessageList({
         <div className="flex justify-end">
           <Skeleton className="h-10 w-36 rounded-xl" />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 px-3">
           <Skeleton className="h-4 w-2/3 rounded" />
           <Skeleton className="h-4 w-1/2 rounded" />
         </div>
@@ -53,12 +53,16 @@ export function MessageList({
   }
 
   return (
-    <div className={`flex flex-1 flex-col gap-6 px-4 py-6 ${isStreaming ? "pb-[60vh]" : ""}`}>
+    // Aligned with the composer: bubbles to its edge (8px in), plain text
+    // (replies, branch markers) to its text (20px in, like the panel's
+    // details and content)
+    <div className={`flex flex-1 flex-col gap-6 px-2 py-6 ${isStreaming ? "pb-[60vh]" : ""}`}>
       {items.map((item, i) => {
         const isLast = i === items.length - 1;
         const key = item.kind === "message" ? item.message._id : item.id;
+        const plainText = item.kind !== "message" || item.message.role !== "user";
         return (
-          <div key={key} ref={isLast ? lastItemRef : undefined}>
+          <div key={key} ref={isLast ? lastItemRef : undefined} className={plainText ? "px-3" : undefined}>
             {item.kind === "message" ? (
               <MessageBubble message={item.message} />
             ) : (

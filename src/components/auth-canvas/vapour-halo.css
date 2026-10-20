@@ -1,0 +1,145 @@
+/* Drop effect on the auth canvas (vapour-halo.tsx): chromatic fringes on
+   the card, pastel clouds washing outward and losing steam, and a faint
+   coloured residue left on the card's edges. */
+.vapour-halo {
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* A wash grows from the card's footprint; turbulence (an SVG filter on
+   the wrapper) warps its edges so it reads as a cloud, not a shape. */
+.vapour-wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  opacity: 0;
+  animation: vapour-wave 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Uneven colour, like the reference: lavender and sky up top, rose and
+   peach to one side, butter low down; never an even ring. Oversized so
+   the warp and rotation never show its edge. */
+.vapour-wash {
+  position: absolute;
+  inset: -12%;
+  border-radius: inherit;
+  background:
+    radial-gradient(60% 55% at 72% 8%, oklch(0.8 0.1 285) 0%, transparent 70%),
+    radial-gradient(45% 50% at 30% 0%, oklch(0.84 0.08 240) 0%, transparent 70%),
+    radial-gradient(55% 60% at 0% 45%, oklch(0.86 0.08 15) 0%, transparent 70%),
+    radial-gradient(50% 55% at 10% 95%, oklch(0.94 0.09 95) 0%, transparent 70%),
+    radial-gradient(55% 50% at 85% 100%, oklch(0.87 0.08 40) 0%, transparent 70%),
+    radial-gradient(40% 50% at 100% 50%, oklch(0.84 0.09 330) 0%, transparent 70%);
+}
+
+/* Opacity keyframes use plain numbers: a var() there breaks the
+   composited animation and the wave never paints. */
+@keyframes vapour-wave {
+  0% { inset: 0; opacity: 0; }
+  12% { opacity: 1; }
+  45% { opacity: 0.65; }
+  100% { inset: calc(var(--wave-reach) * -1); opacity: 0; }
+}
+
+/* Dot grid revealed by the wave: a band of visibility (--dots-r) sweeps
+   out from the card and the dots fade behind it. The band is a radial
+   mask, so on a wide card it spreads as an ellipse like the washes. */
+@property --dots-r {
+  syntax: "<percentage>";
+  initial-value: 0%;
+  inherits: false;
+}
+
+.vapour-dots {
+  position: absolute;
+  opacity: 0;
+  background-image: radial-gradient(circle, oklch(0.55 0.06 285 / 0.55) 1px, transparent 1.5px);
+  mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(var(--dots-r) - 45%),
+    #000 calc(var(--dots-r) - 12%),
+    #000 var(--dots-r),
+    transparent calc(var(--dots-r) + 12%)
+  );
+  animation:
+    vapour-dots-sweep 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards,
+    vapour-dots-fade 2s ease-out 0.08s forwards;
+}
+
+@keyframes vapour-dots-sweep {
+  from { --dots-r: 20%; }
+  to { --dots-r: 120%; }
+}
+
+@keyframes vapour-dots-fade {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  55% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* Chromatic fringe: each edge of the card picks up a different colour,
+   split wide at first and settling tight, then lingering faintly as
+   residue after the washes have gone. Kept to 30% strength so it tints
+   the node rather than outlining it. */
+.vapour-fringe {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  animation: vapour-fringe 3.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes vapour-fringe {
+  0% {
+    opacity: 0;
+    box-shadow:
+      -10px -3px 14px 2px oklch(0.74 0.16 255),
+      10px 2px 14px 2px oklch(0.76 0.16 345),
+      -4px 10px 14px 2px oklch(0.9 0.15 95),
+      6px 9px 14px 2px oklch(0.8 0.14 45);
+  }
+  8% { opacity: 0.3; }
+  35% {
+    opacity: 0.3;
+    box-shadow:
+      -4px -1px 6px 1px oklch(0.74 0.16 255),
+      4px 1px 6px 1px oklch(0.76 0.16 345),
+      -1px 4px 6px 1px oklch(0.9 0.15 95),
+      2px 4px 6px 1px oklch(0.8 0.14 45);
+  }
+  /* residue: a thin coloured rim that lingers after the washes */
+  70% {
+    opacity: 0.21;
+    box-shadow:
+      -3px -1px 4px 0 oklch(0.74 0.16 255),
+      3px 1px 4px 0 oklch(0.76 0.16 345),
+      -1px 3px 4px 0 oklch(0.9 0.15 95),
+      2px 3px 4px 0 oklch(0.8 0.14 45);
+  }
+  100% {
+    opacity: 0;
+    box-shadow:
+      -3px -1px 4px 0 oklch(0.74 0.16 255),
+      3px 1px 4px 0 oklch(0.76 0.16 345),
+      -1px 3px 4px 0 oklch(0.9 0.15 95),
+      2px 3px 4px 0 oklch(0.8 0.14 45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vapour-halo > .vapour-wave {
+    animation-name: vapour-fade;
+  }
+
+  .vapour-halo > .vapour-dots {
+    --dots-r: 80%;
+    animation: vapour-fade 1.6s ease-out forwards;
+  }
+}
+
+@keyframes vapour-fade {
+  0%, 100% { opacity: 0; }
+  30% { opacity: 0.5; }
+}
