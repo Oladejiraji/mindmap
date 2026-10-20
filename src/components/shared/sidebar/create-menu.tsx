@@ -15,6 +15,7 @@ import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { popupMotion } from "./popover-styles";
 
 /*
  * Search popover, laid out like define.app's: a grey search pill on top,
@@ -157,7 +158,7 @@ export function CreateMenu({
         <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
           <Popover.Popup
             initialFocus={false}
-            className="w-80 origin-(--transform-origin) overflow-hidden rounded-2xl bg-surface-modal text-fg-primary shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-ending-style:scale-[0.98] data-ending-style:opacity-0 data-starting-style:scale-[0.98] data-starting-style:opacity-0"
+            className={cn("w-80 overflow-hidden rounded-2xl bg-surface-modal text-fg-primary shadow-large outline-none", popupMotion)}
           >
             <div className="border-b border-border-subtle p-1.5">
               <label className="flex h-9.5 items-center gap-2 rounded-xl bg-component px-3">

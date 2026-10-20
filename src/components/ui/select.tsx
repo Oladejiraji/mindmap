@@ -16,12 +16,6 @@ import { cn } from "@/lib/utils";
  * interaction here.
  */
 
-// Motion (interfaces.dev): grows from the trigger (Base UI sets the
-// origin); the exit is subtler than the entrance (shorter, barely shrinks,
-// blurs 4px as it fades). Reduced motion keeps only the fade.
-const popupMotion =
-  "transition-[opacity,scale,filter] duration-150 ease-out data-starting-style:scale-[0.96] data-starting-style:opacity-0 data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:blur-[4px] data-ending-style:duration-100 motion-reduce:transition-opacity";
-
 export type SelectOption<T extends string> = { value: T; label: string; itemLabel?: string };
 
 export function Select<T extends string>({
@@ -58,10 +52,10 @@ export function Select<T extends string>({
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={6} alignItemWithTrigger={false} className="z-50">
-          <BaseSelect.Popup className={cn(popupSurface, popupMotion, "w-(--anchor-width) min-w-40")}>
+          <BaseSelect.Popup className={cn(popupSurface, "w-(--anchor-width) min-w-40")}>
             <BaseSelect.List className={cn(popupSection, "max-h-(--available-height) overflow-y-auto")}>
               {options.map((o) => (
-                <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2 font-medium transition-none")}>
+                <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2 font-medium")}>
                   <span className="flex size-4 shrink-0 items-center justify-center">
                     <BaseSelect.ItemIndicator>
                       <CheckIcon className="size-4 text-fg-secondary" aria-hidden />
