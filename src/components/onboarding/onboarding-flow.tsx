@@ -99,19 +99,26 @@ export function OnboardingFlow() {
           with a hairline border; the form is a 560px column centred in it */}
       <main className="flex flex-col border-border-default bg-surface-container px-6 py-16 lg:my-1.5 lg:ms-1 lg:rounded-3xl lg:border-[0.5px]">
         <form
-          className="mx-auto flex w-full max-w-[560px] flex-1 flex-col"
+          className="mx-auto flex w-full max-w-120 flex-1 flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             if (canContinue) void finish();
           }}
         >
-          <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
-            <LogoIcon className="h-auto w-4" />
-          </span>
-          <h1 className="mt-12 font-display text-heading-4 text-fg-primary">Get started</h1>
-          <p className="mt-3 text-body-base text-fg-secondary">
-            Set up your workspace. Mindmap is a shared space for your team&apos;s thinking: ask, branch and trace ideas together.
-          </p>
+          {/* Spacing follows interfere.com/join: 32px from the logo to the
+              title, 10px title to subtitle, 56px to the fields; fields on a
+              16px grid, centred in the space left; actions pinned below */}
+          <header className="space-y-8">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
+              <LogoIcon className="h-auto w-4" />
+            </span>
+            <div className="space-y-2.5">
+              <h1 className="font-display text-heading-4 text-fg-primary">Get started</h1>
+              <p className="text-body-base text-fg-secondary">
+                Set up your workspace. Mindmap is a shared space for your team&apos;s thinking: ask, branch and trace ideas together.
+              </p>
+            </div>
+          </header>
 
           {pendingInvites.length > 0 && (
             <div className="mt-8">
@@ -132,7 +139,8 @@ export function OnboardingFlow() {
             </div>
           )}
 
-          <div className="mt-10 grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2">
+          <div className="mt-14 flex flex-1 flex-col">
+          <div className="my-auto grid grid-cols-1 gap-4 sm:grid-cols-2">
             {!joinedOrgId && (
               <>
                 <Field label="Organization name">
@@ -161,9 +169,8 @@ export function OnboardingFlow() {
             <Field label="Work email">
               <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
             </Field>
-          </div>
 
-          <fieldset className="mt-5">
+          <fieldset className="sm:col-span-2">
             <legend className="text-body-sm font-medium text-fg-primary">What will you use Mindmap for?</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {USE_CASES.map((u) => {
@@ -189,11 +196,13 @@ export function OnboardingFlow() {
               })}
             </div>
           </fieldset>
+          </div>
 
+          <div className="mt-auto flex flex-col gap-4 pt-8">
           <button
             type="submit"
             disabled={!canContinue}
-            className="corner-squircle mt-10 h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+            className="corner-squircle h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
           >
             {submitting ? "Setting up…" : "Continue"}
           </button>
@@ -202,15 +211,16 @@ export function OnboardingFlow() {
               type="button"
               onClick={() => void finish(true)}
               disabled={submitting}
-              className="mx-auto mt-3 h-8 cursor-pointer rounded-lg px-3 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="-my-2 h-8 cursor-pointer self-center rounded-lg px-3 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               Skip for now
             </button>
           )}
 
-          <p className="mt-auto border-t border-border-default/60 pt-5 text-caption-lg text-fg-tertiary">
-            Signed in as {session?.user?.email ?? "…"}
-          </p>
+          <div role="separator" className="h-[0.5px] bg-border-default" />
+          <p className="text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
+          </div>
+          </div>
         </form>
       </main>
 
