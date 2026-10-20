@@ -7,7 +7,7 @@ import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { api } from "@convex/api";
 import { authClient } from "@/lib/auth-client";
 import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
-import { ROLES, USE_CASES, type UseCase } from "@/lib/onboarding";
+import { ROLES } from "@/lib/onboarding";
 import { handleError } from "@/lib/handle-error";
 import { useTeams, type Team } from "@/lib/teams";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -236,9 +236,9 @@ export function PreferencesSettings() {
 
 /* Workspace › General: the organization from onboarding. */
 /*
- * Administration › Workspace: the organization's name and what it uses
- * Mindmap for. Team size is asked once at onboarding (to segment the
- * account) and isn't a setting: the members list is the real number.
+ * Administration › Workspace: the organization's name. Team size and use
+ * cases are asked once at onboarding (to segment and tailor the account)
+ * and aren't settings: the members list is the real team size.
  */
 export function WorkspaceSettings() {
   const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
@@ -246,9 +246,8 @@ export function WorkspaceSettings() {
 
   const org = orgData?.org;
   const orgName = org?.name ?? "";
-  const useCases = (org?.useCases ?? []) as UseCase[];
 
-  const saveOrg = (patch: { name?: string; useCases?: UseCase[] }) => {
+  const saveOrg = (patch: { name?: string }) => {
     if (!org) return;
     updateOrg({ orgId: org._id, ...patch }).catch((err) =>
       handleError(err, "Failed to update organization"),
@@ -267,16 +266,6 @@ export function WorkspaceSettings() {
             className={field}
           />
         </Row>
-      </Section>
-      <Section title="Use cases">
-        <Row label="What your team uses Mindmap for" hint="Pick any that apply." />
-        <Chips
-          label="Use cases"
-          role="checkbox"
-          options={USE_CASES}
-          isOn={(v) => useCases.includes(v)}
-          onToggle={(v) => saveOrg({ useCases: useCases.includes(v) ? useCases.filter((x) => x !== v) : [...useCases, v] })}
-        />
       </Section>
     </SettingsPage>
   );
