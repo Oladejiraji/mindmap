@@ -23,6 +23,7 @@ import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { BlockEditor } from "./block-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 
 /*
  * Node view, shown as a side panel over its project (?panel=<nodeId>)
@@ -104,15 +105,16 @@ export function NodeEditorView({
   );
 
   const closeButton = (
-    <button
-      type="button"
-      onClick={onClose}
-      aria-label="Close panel"
-      title="Close (Esc)"
-      className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-    >
-      <CloseIcon className="size-4" />
-    </button>
+    <Tip label={<>Close <span className="text-white/50">Esc</span></>}>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close panel"
+        className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <CloseIcon className="size-4" />
+      </button>
+    </Tip>
   );
 
   if (isPending || !node) {
@@ -165,15 +167,16 @@ export function NodeEditorView({
         </nav>
         <div className="flex shrink-0 items-center">
           {onPopOut && (
-            <button
-              type="button"
-              onClick={onPopOut}
-              aria-label="Float chat over the canvas"
-              title="Float chat"
-              className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <FloatIcon className="size-4" />
-            </button>
+            <Tip label="Float chat">
+              <button
+                type="button"
+                onClick={onPopOut}
+                aria-label="Float chat over the canvas"
+                className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <FloatIcon className="size-4" />
+              </button>
+            </Tip>
           )}
           {closeButton}
         </div>

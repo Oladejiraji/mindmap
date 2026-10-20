@@ -8,6 +8,7 @@ import type { Doc } from "@convex/dataModel";
 import { useCanvasShortcuts } from "@/hooks/use-canvas-shortcuts";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 
 /*
  * Canvas shortcut hints. A bottom-centre pill that teaches how to add
@@ -59,15 +60,16 @@ export function CanvasShortcuts({
 
   if (!visible) {
     return (
-      <button
-        type="button"
-        onClick={() => setVisible(true)}
-        aria-label="Show canvas shortcuts"
-        title="Shortcuts (?)"
-        className="absolute bottom-4 left-1/2 z-10 flex size-8 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full bg-surface-container text-fg-tertiary shadow-default outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Keyboard className="size-4" />
-      </button>
+      <Tip label={<>Shortcuts <span className="text-white/50">?</span></>} side="top">
+        <button
+          type="button"
+          onClick={() => setVisible(true)}
+          aria-label="Show canvas shortcuts"
+          className="absolute bottom-4 left-1/2 z-10 flex size-8 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full bg-surface-container text-fg-tertiary shadow-default outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Keyboard className="size-4" />
+        </button>
+      </Tip>
     );
   }
 
@@ -101,19 +103,20 @@ export function CanvasShortcuts({
           </>
         )}
         <span className="flex items-center gap-0.5">
-          <button
-            type="button"
-            onClick={() => onExpandedChange(!expanded)}
-            aria-expanded={expanded}
-            aria-label="All shortcuts"
-            title="All shortcuts (?)"
-            className={cn(
-              "flex size-7 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50",
-              expanded && "bg-transparent-hover text-fg-primary",
-            )}
-          >
-            <Keyboard className="size-4" />
-          </button>
+          <Tip label={<>All shortcuts <span className="text-white/50">?</span></>} side="top">
+            <button
+              type="button"
+              onClick={() => onExpandedChange(!expanded)}
+              aria-expanded={expanded}
+              aria-label="All shortcuts"
+              className={cn(
+                "flex size-7 cursor-pointer items-center justify-center rounded-full outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50",
+                expanded && "bg-transparent-hover text-fg-primary",
+              )}
+            >
+              <Keyboard className="size-4" />
+            </button>
+          </Tip>
           <button
             type="button"
             onClick={() => {

@@ -17,6 +17,7 @@ import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { formatRelativeTime } from "@/lib/format-time";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 import { popupDivider, popupRow, popupSurface, SIDEBAR_INSET } from "./popover-styles";
 
 /*
@@ -151,9 +152,11 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
             </Menu.Positioner>
           </Menu.Portal>
         </Menu.Root>
-        <button type="button" aria-label={`New chat in ${name}`} title="New chat" onClick={() => void newChat()} className={action}>
-          <SquarePen />
-        </button>
+        <Tip label="New chat">
+          <button type="button" aria-label={`New chat in ${name}`} onClick={() => void newChat()} className={action}>
+            <SquarePen />
+          </button>
+        </Tip>
       </div>
 
       <ConfirmDialog

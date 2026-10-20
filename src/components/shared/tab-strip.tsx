@@ -12,6 +12,7 @@ import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { closeTab, useTabs } from "@/lib/tabs";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 
 /*
  * Browser-style tab strip (modelled on define.app). The active tab takes
@@ -132,14 +133,15 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
         );
       })}
       </MotionConfig>
-      <Link
-        href={routes.newProject}
-        aria-label="New project"
-        title="New project"
-        className="mb-0.5 ml-1 flex size-7 shrink-0 items-center justify-center self-end rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Plus className="size-4" />
-      </Link>
+      <Tip label="New project">
+        <Link
+          href={routes.newProject}
+          aria-label="New project"
+          className="mb-0.5 ml-1 flex size-7 shrink-0 items-center justify-center self-end rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Plus className="size-4" />
+        </Link>
+      </Tip>
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 import { popupMotion } from "./popover-styles";
 
 /*
@@ -144,16 +145,17 @@ export function CreateMenu({
         }
       }}
     >
-      <Popover.Trigger
-        aria-label={label}
-        title={label}
-        className={cn(
-          "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover data-popup-open:text-fg-primary",
-          className,
-        )}
-      >
-        {icon}
-      </Popover.Trigger>
+      <Tip label={label}>
+        <Popover.Trigger
+          aria-label={label}
+          className={cn(
+            "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-transparent-hover data-popup-open:text-fg-primary",
+            className,
+          )}
+        >
+          {icon}
+        </Popover.Trigger>
+      </Tip>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
           <Popover.Popup

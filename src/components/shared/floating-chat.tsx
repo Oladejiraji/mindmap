@@ -7,6 +7,7 @@ import { NodeChat } from "@/components/chat/node-chat";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { FloatIcon } from "@/components/icons/float-icon";
 import { useNode } from "@/services/nodes/queries";
+import { Tip } from "@/components/ui/tooltip";
 
 /*
  * A node's chat popped out of the side panel (?float=<nodeId>): a card
@@ -97,12 +98,16 @@ function FloatingCard({
         className="flex h-11 shrink-0 cursor-grab touch-none items-center gap-2 border-b border-border-default pr-2 pl-4 select-none active:cursor-grabbing"
       >
         <p className="min-w-0 flex-1 truncate text-body-sm font-medium text-fg-primary">{node?.title ?? "Chat"}</p>
-        <button type="button" onClick={onDock} aria-label="Dock in side panel" title="Dock in side panel" className={iconButton}>
-          <FloatIcon className="size-4" />
-        </button>
-        <button type="button" onClick={onClose} aria-label="Close chat" title="Close" className={iconButton}>
-          <CloseIcon className="size-4" />
-        </button>
+        <Tip label="Dock in side panel">
+          <button type="button" onClick={onDock} aria-label="Dock in side panel" className={iconButton}>
+            <FloatIcon className="size-4" />
+          </button>
+        </Tip>
+        <Tip label="Close">
+          <button type="button" onClick={onClose} aria-label="Close chat" className={iconButton}>
+            <CloseIcon className="size-4" />
+          </button>
+        </Tip>
       </header>
       <div className="min-h-0 flex-1">
         <NodeChat threadId={threadId} nodeId={nodeId} />

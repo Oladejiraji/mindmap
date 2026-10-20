@@ -13,6 +13,7 @@ import { useSendMessage } from "@/services/chat/actions";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
+import { Tip } from "@/components/ui/tooltip";
 import { MessageBubble } from "./message-bubble";
 import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
@@ -310,9 +311,11 @@ function ReplyActions({ content, onBranch }: { content: string; onBranch: () => 
         Branch from here
       </button>
       <span aria-hidden className="mx-1 h-4 w-px bg-border-default" />
-      <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy"} title="Copy" className={cn(replyAction, "w-7 justify-center px-0")}>
-        {copied ? <Check /> : <Copy />}
-      </button>
+      <Tip label={copied ? "Copied" : "Copy"}>
+        <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy"} className={cn(replyAction, "w-7 justify-center px-0")}>
+          {copied ? <Check /> : <Copy />}
+        </button>
+      </Tip>
     </div>
   );
 }
