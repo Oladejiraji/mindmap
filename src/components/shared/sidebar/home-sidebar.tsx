@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PartyPopper, Plus, Search, SquarePen, Star } from "lucide-react";
+import { PartyPopper, Plus, Search, Star } from "lucide-react";
 import { HomeIcon, LogoIcon } from "@/components/icons/sidebar-toggle";
 import {
   Sidebar,
@@ -58,9 +58,6 @@ export function HomeSidebar() {
         </Link>
         <SidebarToggleButton className="group-data-[collapsible=icon]:hidden group-data-[collapsible=icon]:group-hover/header:flex group-data-[collapsible=icon]:group-focus-within/header:flex" />
         <CreateMenu label="Search" icon={<Search className="size-4" />} className="group-data-[collapsible=icon]:hidden" />
-        <Link href={routes.newProject} aria-label="New chat" title="New chat" className={`${iconButton} group-data-[collapsible=icon]:hidden`}>
-          <SquarePen className="size-4" />
-        </Link>
       </SidebarHeader>
 
       <SidebarContent className="gap-6 pt-5">
