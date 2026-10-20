@@ -1,4 +1,4 @@
-import { PreferencesSettings } from "@/components/shared/settings-view";
+import { PreferencesSettings } from "@/components/layout/settings/preferences";
 
 export default function PreferencesSettingsPage() {
   return <PreferencesSettings />;

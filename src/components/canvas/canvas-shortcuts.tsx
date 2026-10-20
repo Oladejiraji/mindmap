@@ -7,6 +7,7 @@ import type { Id } from "@convex/dataModel";
 import type { Doc } from "@convex/dataModel";
 import { useCanvasShortcuts } from "@/hooks/use-canvas-shortcuts";
 import { useStoredBoolean } from "@/lib/use-stored-boolean";
+import { getShortcutGroup } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
 
@@ -25,14 +26,22 @@ export function Kbd({ children }: { children: React.ReactNode }) {
   );
 }
 
+const CANVAS_SHORTCUTS = getShortcutGroup("Canvas");
+
 const ALL: { keys: React.ReactNode; label: string }[] = [
-  { keys: <Kbd>Tab</Kbd>, label: "Add a branch to the selected node" },
-  { keys: <Kbd>↵</Kbd>, label: "Add a sibling beside it" },
+  ...CANVAS_SHORTCUTS.map((s) => ({
+    keys: (
+      <span className="flex gap-1">
+        {s.combo.map((c) => (
+          <Kbd key={c}>{c}</Kbd>
+        ))}
+      </span>
+    ),
+    label: s.hint,
+  })),
   { keys: <span className="text-caption-lg text-fg-secondary">Drag a handle</span>, label: "Drop a branch where you want it" },
   { keys: <span className="text-caption-lg text-fg-secondary">Double-click</span>, label: "Rename a node" },
   { keys: <span className="text-caption-lg text-fg-secondary">Click</span>, label: "Select a node, or clear on empty canvas" },
-  { keys: <span className="flex gap-1"><Kbd>+</Kbd><Kbd>−</Kbd></span>, label: "Zoom, or pinch and ⌘-scroll" },
-  { keys: <Kbd>?</Kbd>, label: "Show or hide these shortcuts" },
 ];
 
 export function CanvasShortcuts({

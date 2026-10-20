@@ -15,10 +15,10 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { ProfileMenu } from "@/components/shared/sidebar/profile-menu";
-import { SidebarToggleButton } from "@/components/shared/sidebar/sidebar-toggle-button";
-import { CreateMenu } from "@/components/shared/sidebar/create-menu";
-import { ProjectRow } from "@/components/shared/sidebar/project-row";
+import { ProfileMenu } from "@/components/layout/sidebar/profile-menu";
+import { SidebarToggleButton } from "@/components/layout/sidebar/sidebar-toggle-button";
+import { CreateMenu } from "@/components/layout/sidebar/create-menu";
+import { ProjectRow } from "@/components/layout/sidebar/project-row";
 import { useThreads } from "@/services/threads/queries";
 import { routes } from "@/lib/routes";
 

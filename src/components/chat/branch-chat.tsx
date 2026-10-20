@@ -17,7 +17,7 @@ import { Tip } from "@/components/ui/tooltip";
 import { MessageBubble } from "./message-bubble";
 import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
-import { CanvasPanel } from "@/components/shared/canvas-panel";
+import { CanvasPanel } from "@/components/thread/canvas-panel";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
 import { CheckIcon } from "@/components/icons/check-icon";
 import { blocksToPlainText } from "@/lib/blocks-to-markdown";

@@ -1,4 +1,4 @@
-import { TeamsSettings } from "@/components/shared/settings-view";
+import { TeamsSettings } from "@/components/layout/settings/teams";
 
 export default function TeamsSettingsPage() {
   return <TeamsSettings />;

@@ -16,7 +16,7 @@ import { InviteIcon } from "@/components/icons/invite-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-import { navRow, navRowActive } from "@/components/shared/sidebar/nav-row";
+import { navRow, navRowActive } from "@/components/layout/sidebar/nav-row";
 
 /*
  * Settings shell, modelled on define.app's: the app sidebar gives way to

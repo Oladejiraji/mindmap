@@ -11,7 +11,7 @@ import { Plus as PlusIcon } from "lucide-react";
 import { InfoIcon } from "@/components/icons/info-icon";
 import { META_BLUE, MetaIcon } from "@/components/icons/meta-icon";
 import { Popover } from "@base-ui/react/popover";
-import { popupSurface } from "@/components/shared/sidebar/popover-styles";
+import { popupSurface } from "@/components/layout/sidebar/popover-styles";
 import { ContentIcon } from "@/components/icons/content-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
