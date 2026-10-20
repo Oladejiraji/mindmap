@@ -115,7 +115,7 @@ export function OnboardingFlow() {
             <div className="space-y-2.5">
               <h1 className="font-display text-heading-4 text-fg-primary">Get started</h1>
               <p className="text-body-base text-fg-secondary">
-                Set up your workspace. Mindmap is a shared space for your team&apos;s thinking: ask, branch and trace ideas together.
+                Set up your workspace. Mindmap is a shared space for your team&apos;s thinking.
               </p>
             </div>
           </header>
