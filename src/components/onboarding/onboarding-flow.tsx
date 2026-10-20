@@ -210,10 +210,11 @@ export function OnboardingFlow() {
         </form>
       </div>
 
-      {/* Product panel: dotted texture + the line, no invented testimonial */}
+      {/* Product panel: an inset card (10px from the edges, 16px squircle
+          corners) with a dotted texture and the line, no invented testimonial */}
       <div
         aria-hidden
-        className="relative hidden items-center justify-center overflow-hidden bg-sidebar lg:flex"
+        className="relative my-2.5 mr-2.5 hidden items-center justify-center overflow-hidden rounded-3xl bg-sidebar lg:flex"
         style={{ backgroundImage: "radial-gradient(oklch(0 0 0 / 0.12) 1px, transparent 1px)", backgroundSize: "10px 10px" }}
       >
         <div className="max-w-[520px] px-12 text-center">
