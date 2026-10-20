@@ -59,7 +59,9 @@ function Row({ label, hint, children, below }: { label: string; hint?: string; c
 }
 
 /* Skeleton of Home in the chosen layout, so the setting shows what it does. */
-function LayoutPreview({ layout }: { layout: "grid" | "list" }) {
+// animate: true once you've switched layouts here, so the preview doesn't
+// animate in when the page loads
+function LayoutPreview({ layout, animate }: { layout: "grid" | "list"; animate: boolean }) {
   const block = "rounded-sm bg-component-active";
   return (
     <div
@@ -71,7 +73,10 @@ function LayoutPreview({ layout }: { layout: "grid" | "list" }) {
         <div className={cn(block, "h-4 w-10 rounded-md")} />
       </div>
       <div className="mt-3 h-px bg-border-default/60" />
-      <div key={layout} className="motion-opacity-in-0 motion-translate-y-in-[3px] motion-duration-200 motion-ease-out">
+      <div
+        key={layout}
+        className={cn(animate && "motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[3px] motion-safe:motion-duration-200 motion-safe:motion-ease-out")}
+      >
         {layout === "grid" ? (
           <div className="mt-4 grid grid-cols-4 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -210,6 +215,7 @@ export function AccountSettings() {
 export function PreferencesSettings() {
   const [hints, setHints] = useCanvasHints();
   const [layout, setLayout] = useHomeLayout();
+  const [switchedLayout, setSwitchedLayout] = useState(false);
   return (
     <SettingsPage title="Preferences" description="How the canvas and Home behave. Saved in this browser.">
       <Section title="Canvas">
@@ -218,7 +224,7 @@ export function PreferencesSettings() {
         </Row>
       </Section>
       <Section title="Home">
-        <Row label="Layout" hint="How projects are listed on Home." below={<LayoutPreview layout={layout} />}>
+        <Row label="Layout" hint="How projects are listed on Home." below={<LayoutPreview layout={layout} animate={switchedLayout} />}>
           <Segmented
             label="Home layout"
             options={[
@@ -226,7 +232,10 @@ export function PreferencesSettings() {
               { value: "list", label: "List" },
             ]}
             value={layout}
-            onChange={setLayout}
+            onChange={(next) => {
+              setSwitchedLayout(true);
+              setLayout(next);
+            }}
           />
         </Row>
       </Section>
