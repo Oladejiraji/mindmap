@@ -1,5 +1,7 @@
-import { GeneralSettings } from "@/components/shared/settings-view";
+import { redirect } from "next/navigation";
+import { routes } from "@/lib/routes";
 
+// General became Administration › Workspace.
 export default function GeneralSettingsPage() {
-  return <GeneralSettings />;
+  redirect(routes.settingsWorkspace);
 }

@@ -7,7 +7,7 @@ import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { api } from "@convex/api";
 import { authClient } from "@/lib/auth-client";
 import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
-import { ROLES, TEAM_SIZES, USE_CASES, type TeamSize, type UseCase } from "@/lib/onboarding";
+import { ROLES, USE_CASES, type UseCase } from "@/lib/onboarding";
 import { handleError } from "@/lib/handle-error";
 import { useTeams, type Team } from "@/lib/teams";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -34,10 +34,10 @@ function SettingsPage({ title, description, children }: { title: string; descrip
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <section aria-label={title}>
-      <h2 className="pb-2.5 text-body-sm text-fg-tertiary">{title}</h2>
+      {title && <h2 className="pb-2.5 text-body-sm text-fg-tertiary">{title}</h2>}
       <div className="corner-squircle divide-y divide-border-default/[0.28] overflow-hidden rounded-3xl bg-surface-container shadow-border">{children}</div>
     </section>
   );
@@ -232,16 +232,20 @@ export function PreferencesSettings() {
 }
 
 /* Workspace › General: the organization from onboarding. */
-export function GeneralSettings() {
+/*
+ * Administration › Workspace: the organization's name and what it uses
+ * Mindmap for. Team size is asked once at onboarding (to segment the
+ * account) and isn't a setting: the members list is the real number.
+ */
+export function WorkspaceSettings() {
   const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
   const updateOrg = useMutation(api.organizations.update);
 
   const org = orgData?.org;
   const orgName = org?.name ?? "";
-  const teamSize = org?.teamSize ?? null;
   const useCases = (org?.useCases ?? []) as UseCase[];
 
-  const saveOrg = (patch: { name?: string; teamSize?: TeamSize; useCases?: UseCase[] }) => {
+  const saveOrg = (patch: { name?: string; useCases?: UseCase[] }) => {
     if (!org) return;
     updateOrg({ orgId: org._id, ...patch }).catch((err) =>
       handleError(err, "Failed to update organization"),
@@ -249,7 +253,7 @@ export function GeneralSettings() {
   };
 
   return (
-    <SettingsPage title="General" description="Your organization's workspace.">
+    <SettingsPage title="Workspace" description="Your organization's workspace.">
       <Section title="Organization">
         <Row label="Name" hint="Shown across your workspace.">
           <input
@@ -260,11 +264,7 @@ export function GeneralSettings() {
             className={field}
           />
         </Row>
-        <Row label="Team size" hint="How many people work there.">
-          <Segmented label="Team size" options={TEAM_SIZES} value={teamSize} onChange={(teamSize) => saveOrg({ teamSize })} />
-        </Row>
       </Section>
-      <TeamsSection orgName={orgName} />
       <Section title="Use cases">
         <Row label="What your team uses Mindmap for" hint="Pick any that apply." />
         <Chips
@@ -279,8 +279,22 @@ export function GeneralSettings() {
   );
 }
 
-/* Workspace › General › Teams: groups inside the organization. */
-function TeamsSection({ orgName }: { orgName: string }) {
+/* Administration › Teams: groups inside the organization. */
+export function TeamsSettings() {
+  const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
+  const orgName = orgData?.org?.name?.trim();
+  return (
+    <SettingsPage
+      title="Teams"
+      description={`Group people in ${orgName || "your workspace"} by how they work, like Product or Research.`}
+    >
+      <TeamsSection />
+    </SettingsPage>
+  );
+}
+
+/* The teams list: one row per team, plus a row to add one. */
+function TeamsSection() {
   const { teams, create, rename, remove } = useTeams();
   const [draft, setDraft] = useState("");
   const add = () => {
@@ -289,11 +303,7 @@ function TeamsSection({ orgName }: { orgName: string }) {
     setDraft("");
   };
   return (
-    <Section title="Teams">
-      <Row
-        label="Teams"
-        hint={`Group people in ${orgName.trim() || "your workspace"} by how they work, like Product or Research.`}
-      />
+    <Section>
       {teams.map((team) => (
         <TeamRow key={team.id} team={team} onRename={(name) => rename(team.id, name)} onRemove={() => remove(team.id)} />
       ))}
