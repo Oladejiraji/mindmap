@@ -595,11 +595,78 @@
   transition: opacity 150ms;
 }
 
-.auth-pulse {
+/* Drop effect on the auth canvas (vapour-halo.tsx): a pastel halo that
+   blooms out from behind the card, its colours slowly turning. */
+@property --halo-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.vapour-halo {
   position: absolute;
   pointer-events: none;
   z-index: -1;
-  overflow: visible;
+}
+
+.vapour-halo-layer {
+  position: absolute;
+  border-radius: 32px;
+  opacity: 0;
+  background: conic-gradient(
+    from var(--halo-angle),
+    oklch(0.72 0.16 265),
+    oklch(0.72 0.17 305) 50deg,
+    oklch(0.76 0.16 355) 110deg,
+    oklch(0.8 0.15 55) 170deg,
+    oklch(0.9 0.15 95) 235deg,
+    oklch(0.84 0.11 195) 300deg,
+    oklch(0.72 0.16 265)
+  );
+}
+
+.vapour-halo-glow {
+  inset: -18px;
+  filter: blur(18px);
+  animation:
+    vapour-glow 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    vapour-spin 2.2s linear forwards;
+}
+
+.vapour-halo-aura {
+  inset: -44px;
+  filter: blur(32px);
+  animation:
+    vapour-bloom 2s cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards,
+    vapour-spin 2.2s linear forwards;
+}
+
+@keyframes vapour-glow {
+  0% { opacity: 0; transform: scale(0.94); }
+  15%, 40% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.06); }
+}
+
+@keyframes vapour-bloom {
+  0% { opacity: 0; transform: scale(0.9); }
+  25%, 45% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.16); }
+}
+
+@keyframes vapour-spin {
+  to { --halo-angle: 180deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vapour-halo-glow,
+  .vapour-halo-aura {
+    animation-name: vapour-fade;
+  }
+}
+
+@keyframes vapour-fade {
+  0%, 100% { opacity: 0; }
+  30% { opacity: 0.8; }
 }
 
 @property --gradient-angle {
