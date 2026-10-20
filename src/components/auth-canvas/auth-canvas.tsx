@@ -169,47 +169,11 @@ function AuthCanvasInner() {
     [edges],
   );
 
-  const onConnect = useCallback(
-    (conn: Connection) => {
-      setEdges((eds) => addEdge({ ...conn, ...NEW_EDGE_DEFAULTS }, eds));
-    },
-    [setEdges],
-  );
-
-  const onReconnectStart = useCallback(() => {
-    reconnectSuccessful.current = false;
-  }, []);
-
-  const onReconnect = useCallback(
-    (oldEdge: Edge, newConnection: Connection) => {
-      reconnectSuccessful.current = true;
-      setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds));
-    },
-    [setEdges],
-  );
-
-  const onReconnectEnd = useCallback(
-    (_: unknown, edge: Edge) => {
-      if (!reconnectSuccessful.current) {
-        setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-      }
-      reconnectSuccessful.current = true;
-    },
-    [setEdges],
-  );
-
-  useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(() => {
-      fitView(FIT_VIEW_OPTIONS);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [fitView]);
-
-  const onNodeDragStop = useCallback(
-    (_: React.MouseEvent, node: Node) => {
+  // The vapour wave on a node: fired when it's dropped, and when a
+  // connection lands on it.
+  const fireHalo = useCallback(
+    (node: Node | undefined) => {
+      if (!node) return;
       const w = node.measured?.width ?? 0;
       const h = node.measured?.height ?? 0;
       if (!w || !h) return;
@@ -243,6 +207,63 @@ function AuthCanvasInner() {
     },
     [getViewport, setNodes],
   );
+
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => fireHalo(node),
+    [fireHalo],
+  );
+
+  // The node a connection is dragged from, so the wave fires on the
+  // other end (where it landed) whichever handle the drag started on.
+  const connectFrom = useRef<string | null>(null);
+  const onConnectStart = useCallback((_: unknown, { nodeId }: { nodeId: string | null }) => {
+    connectFrom.current = nodeId;
+  }, []);
+  const landedOn = (conn: Connection) => (conn.source === connectFrom.current ? conn.target : conn.source);
+
+  const onConnect = useCallback(
+    (conn: Connection) => {
+      setEdges((eds) => addEdge({ ...conn, ...NEW_EDGE_DEFAULTS }, eds));
+      fireHalo(getNode(landedOn(conn)));
+    },
+    [setEdges, fireHalo, getNode],
+  );
+
+  const onReconnectStart = useCallback(() => {
+    reconnectSuccessful.current = false;
+  }, []);
+
+  const onReconnect = useCallback(
+    (oldEdge: Edge, newConnection: Connection) => {
+      reconnectSuccessful.current = true;
+      setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds));
+      // The end that moved is the one that differs from the old edge
+      const moved = newConnection.target !== oldEdge.target ? newConnection.target : newConnection.source;
+      fireHalo(getNode(moved));
+    },
+    [setEdges, fireHalo, getNode],
+  );
+
+  const onReconnectEnd = useCallback(
+    (_: unknown, edge: Edge) => {
+      if (!reconnectSuccessful.current) {
+        setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+      }
+      reconnectSuccessful.current = true;
+    },
+    [setEdges],
+  );
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => {
+      fitView(FIT_VIEW_OPTIONS);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [fitView]);
+
 
   const removePulse = useCallback((id: string) => {
     setPulses((prev) => prev.filter((p) => p.id !== id));
@@ -291,6 +312,7 @@ function AuthCanvasInner() {
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
         onReconnect={onReconnect}
         onReconnectStart={onReconnectStart}
         onReconnectEnd={onReconnectEnd}
