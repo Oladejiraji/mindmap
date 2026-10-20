@@ -16,8 +16,10 @@ export function MessageBubble({ message }: { message: Message }) {
       <div
         className={cn(
           "text-body-base text-fg-primary",
-          // ChatGPT-style: your turns in a soft grey bubble, replies as plain text
-          isUser ? "max-w-[75%] rounded-3xl bg-component px-4 py-2.5" : "w-full"
+          // ChatGPT-style: your turns in a soft grey bubble, replies as plain text.
+          // Radius is half a one-line bubble (20px line + 2×10px padding), so
+          // one-liners are pills and longer messages keep soft corners.
+          isUser ? "max-w-[75%] rounded-[20px] bg-component px-4 py-2.5 [corner-shape:round]" : "w-full"
         )}
       >
         {isEmpty && isStreaming ? (
