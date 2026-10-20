@@ -9,6 +9,7 @@ import { CloseIcon } from "@/components/icons/close-icon";
 import { FloatIcon } from "@/components/icons/float-icon";
 import { Plus as PlusIcon } from "lucide-react";
 import { InfoIcon } from "@/components/icons/info-icon";
+import { META_BLUE, MetaIcon } from "@/components/icons/meta-icon";
 import { Popover } from "@base-ui/react/popover";
 import { popupSurface } from "@/components/shared/sidebar/popover-styles";
 import { ContentIcon } from "@/components/icons/content-icon";
@@ -23,7 +24,6 @@ import { handleError } from "@/lib/handle-error";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { BlockEditor } from "./block-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
@@ -210,8 +210,11 @@ export function NodeEditorView({
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Tip label={`${kindLabel} · ${node.title}`}>
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg">
-                    <NodeTabIcon className="size-4" />
+                  <span
+                    style={{ backgroundColor: META_BLUE }}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-lg text-white"
+                  >
+                    <MetaIcon className="size-4" />
                   </span>
                 </Tip>
                 <div className="flex items-center -space-x-1">
