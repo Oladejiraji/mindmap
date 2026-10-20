@@ -53,7 +53,7 @@ export function Select<T extends string>({
           <BaseSelect.Popup className={cn(popupSurface, "w-(--anchor-width) min-w-40")}>
             <BaseSelect.List className={cn(popupSection, "max-h-(--available-height) overflow-y-auto")}>
               {options.map((o) => (
-                <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2")}>
+                <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2 font-medium")}>
                   <span className="flex size-4 shrink-0 items-center justify-center">
                     <BaseSelect.ItemIndicator>
                       <svg viewBox="0 0 16 16" fill="none" className="size-3.5 text-fg-secondary" aria-hidden>
