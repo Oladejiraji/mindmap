@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { FloatIcon } from "@/components/icons/float-icon";
+import { Plus as PlusIcon } from "lucide-react";
 import { ContentIcon } from "@/components/icons/content-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
@@ -202,34 +203,44 @@ export function NodeEditorView({
         {/* Details */}
         <aside className="shrink-0 border-b border-border-default">
           <div className="px-5 py-4">
-            {/* One stack: the node (a square, same size as the avatars), its
-                collaborators, then a dashed circle that opens the details */}
-            <div className="flex items-center">
-              <div className="flex items-center -space-x-1.5">
+            {/* The node (a square, same size as the avatars), its
+                collaborators and a dashed + to invite; expand on the right */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center -space-x-1">
                 <Tip label={`${kindLabel} · ${node.title}`}>
                   <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg ring-2 ring-background">
                     <NodeTabIcon className="size-4" />
                   </span>
                 </Tip>
                 <CollaboratorAvatars size={28} />
-                <Tip label={detailsOpen ? "Hide details" : "Show details"}>
+                <Tip label="Inviting collaborators isn't available yet">
                   <button
                     type="button"
-                    onClick={() => setDetailsOpen((o) => !o)}
-                    aria-expanded={detailsOpen}
-                    aria-controls="node-details"
-                    aria-label="Node details"
-                    className="relative flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-dashed border-border-strong bg-background text-fg-tertiary ring-2 ring-background outline-none transition-colors hover:text-fg-primary focus-visible:ring-ring/50"
+                    aria-disabled
+                    aria-label="Invite collaborators"
+                    className="relative flex size-7 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border-strong bg-background text-fg-tertiary ring-2 ring-background outline-none focus-visible:ring-ring/50"
                   >
-                    <ChevronDownIcon
-                      className={cn(
-                        "size-3.5 transition-[rotate] duration-200 ease-out motion-reduce:transition-none",
-                        detailsOpen && "rotate-180",
-                      )}
-                    />
+                    <PlusIcon className="size-3.5" />
                   </button>
                 </Tip>
               </div>
+              <Tip label={detailsOpen ? "Hide details" : "Show details"}>
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen((o) => !o)}
+                  aria-expanded={detailsOpen}
+                  aria-controls="node-details"
+                  aria-label="Node details"
+                  className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  <ChevronDownIcon
+                    className={cn(
+                      "size-4 transition-[rotate] duration-200 ease-out motion-reduce:transition-none",
+                      detailsOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+              </Tip>
             </div>
 
             <div
