@@ -71,6 +71,7 @@ export function Switch({
   const shown = useRef(checked); // which side the thumb is drawn on
   const busy = useRef(false);
   const nudged = useRef<string | null>(null);
+  const activeAnimation = useRef<ReturnType<typeof animate> | null>(null);
 
   // Animate the SVG when `checked` changes (from a click or from outside,
   // e.g. the Preferences menu); syncing a DOM animation is an external effect.
@@ -79,16 +80,30 @@ export function Switch({
     if (!path || shown.current === checked) return;
     shown.current = checked;
     nudged.current = null;
+    activeAnimation.current?.stop();
     if (reducedMotion()) {
       path.setAttribute("d", checked ? RIGHT : LEFT);
       return;
     }
     busy.current = true;
-    (async () => {
-      await animate(path, { d: checked ? STRETCH_RIGHT : STRETCH_LEFT }, { duration: 0.2, ease: "easeIn" }).finished;
-      await animate(path, { d: checked ? RIGHT : LEFT }, { duration: 0.3, ease: SETTLE }).finished;
+    let cancelled = false;
+    const run = async () => {
+      const stretch = animate(path, { d: checked ? STRETCH_RIGHT : STRETCH_LEFT }, { duration: 0.2, ease: "easeIn" });
+      activeAnimation.current = stretch;
+      await stretch.finished;
+      if (cancelled) return;
+      const settle = animate(path, { d: checked ? RIGHT : LEFT }, { duration: 0.3, ease: SETTLE });
+      activeAnimation.current = settle;
+      await settle.finished;
+      if (cancelled) return;
       busy.current = false;
-    })();
+    };
+    void run();
+    return () => {
+      cancelled = true;
+      activeAnimation.current?.stop();
+      activeAnimation.current = null;
+    };
   }, [checked]);
 
   const onMove = (e: MouseEvent<HTMLButtonElement>) => {

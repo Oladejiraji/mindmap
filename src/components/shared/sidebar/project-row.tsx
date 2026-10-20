@@ -34,7 +34,7 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
   const pathname = usePathname();
   const router = useRouter();
   const convex = useConvex();
-  const { mutate: renameThread } = useRenameThread();
+  const renameThread = useRenameThread();
   const removeThread = useMutation(api.threads.remove);
   const createBranch = useMutation(api.nodes.createEmptyBranch);
   const [menuOpen, setMenuOpen] = useState(false);

@@ -9,7 +9,7 @@ import { routes } from "@/lib/routes";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { useConvexMutation } from "@/lib/use-convex-mutation";
+import { useMutation } from "convex/react";
 import { handleError } from "@/lib/handle-error";
 import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
@@ -30,8 +30,8 @@ export function ProjectRow({
   updatedAt?: number;
 }) {
   const router = useRouter();
-  const { mutate: removeThread } = useConvexMutation(api.threads.remove);
-  const { mutate: renameThread } = useRenameThread();
+  const removeThread = useMutation(api.threads.remove);
+  const renameThread = useRenameThread();
   const [showDelete, setShowDelete] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);
