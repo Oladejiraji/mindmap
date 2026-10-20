@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { ArrowLeft } from "lucide-react";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { api } from "@convex/api";
@@ -48,7 +48,8 @@ export function OnboardingFlow() {
     useConvexMutation(api.invitations.accept);
   const { mutate: declineInviteMut } =
     useConvexMutation(api.invitations.decline);
-  const pendingInvites = useQuery(api.invitations.pending);
+  // Gated on auth: a signed-in-only query must not fire before the token.
+  const { data: pendingInvites } = useAuthedConvexQuery(api.invitations.pending, {});
 
   const [step, setStep] = useState<StepId | null>(null);
   const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);

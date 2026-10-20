@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useMutation } from "convex/react";
-import { useQuery } from "convex/react";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { api } from "@convex/api";
 import { authClient } from "@/lib/auth-client";
 import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
@@ -171,7 +171,7 @@ const field =
 /* Personal › Account */
 export function AccountSettings() {
   const { data: session } = authClient.useSession();
-  const orgData = useQuery(api.organizations.current);
+  const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
   const updateJobRole = useMutation(api.organizations.updateJobRole);
   const currentRole = orgData?.user?.jobRole ?? null;
 
@@ -233,7 +233,7 @@ export function PreferencesSettings() {
 
 /* Workspace › General: the organization from onboarding. */
 export function GeneralSettings() {
-  const orgData = useQuery(api.organizations.current);
+  const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
   const updateOrg = useMutation(api.organizations.update);
 
   const org = orgData?.org;
