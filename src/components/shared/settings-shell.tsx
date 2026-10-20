@@ -7,11 +7,9 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, Building2, ChartColumn, Palette, SquareUser } from "lucide-react";
 import { ImportIcon } from "@/components/icons/import-icon";
 import { SecurityIcon } from "@/components/icons/security-icon";
-import { ApiIcon } from "@/components/icons/api-icon";
 import { FlameIcon } from "@/components/icons/flame-icon";
 import { PersonalizationIcon } from "@/components/icons/personalization-icon";
 import { ModelsIcon } from "@/components/icons/models-icon";
-import { BillingIcon } from "@/components/icons/billing-icon";
 import { HotkeysIcon } from "@/components/icons/hotkeys-icon";
 import { PreferencesIcon } from "@/components/icons/preferences-icon";
 import { InviteIcon } from "@/components/icons/invite-icon";
@@ -127,8 +125,6 @@ export function SettingsShell({ children }: { children: ReactNode }) {
             </NavLink>
             <Soon icon={<InviteIcon />}>Members</Soon>
             <Soon icon={<SecurityIcon />}>Security</Soon>
-            <Soon icon={<ApiIcon />}>API</Soon>
-            <Soon icon={<BillingIcon />}>Billing</Soon>
             <Soon icon={<ChartColumn />}>Usage &amp; limits</Soon>
             <Soon icon={<ImportIcon />}>Import &amp; export</Soon>
           </NavGroup>
