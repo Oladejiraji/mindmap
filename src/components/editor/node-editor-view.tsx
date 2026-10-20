@@ -206,23 +206,25 @@ export function NodeEditorView({
             {/* The node (a square, same size as the avatars), its
                 collaborators and a dashed + to invite; expand on the right */}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center -space-x-1">
+              <div className="flex items-center gap-2">
                 <Tip label={`${kindLabel} · ${node.title}`}>
-                  <span className="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg ring-2 ring-background">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-subtle text-brand-fg">
                     <NodeTabIcon className="size-4" />
                   </span>
                 </Tip>
-                <CollaboratorAvatars size={28} />
-                <Tip label="Inviting collaborators isn't available yet">
-                  <button
-                    type="button"
-                    aria-disabled
-                    aria-label="Invite collaborators"
-                    className="relative flex size-7 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border-strong bg-background text-fg-tertiary ring-2 ring-background outline-none focus-visible:ring-ring/50"
-                  >
-                    <PlusIcon className="size-3.5" />
-                  </button>
-                </Tip>
+                <div className="flex items-center -space-x-1">
+                  <CollaboratorAvatars size={28} />
+                  <Tip label="Inviting collaborators isn't available yet">
+                    <button
+                      type="button"
+                      aria-disabled
+                      aria-label="Invite collaborators"
+                      className="relative flex size-7 shrink-0 cursor-not-allowed items-center justify-center rounded-full border border-dashed border-border-strong bg-background text-fg-tertiary ring-2 ring-background outline-none focus-visible:ring-ring/50"
+                    >
+                      <PlusIcon className="size-3.5" />
+                    </button>
+                  </Tip>
+                </div>
               </div>
               <Tip label={detailsOpen ? "Hide details" : "Show details"}>
                 <button
