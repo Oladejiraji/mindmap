@@ -176,9 +176,9 @@ export function OnboardingFlow() {
                     title={u.hint}
                     onClick={() => toggleUseCase(u.value)}
                     className={cn(
-                      "corner-squircle h-8 cursor-pointer rounded-full px-3.5 text-body-sm outline-none transition-[background-color,box-shadow,color] focus-visible:ring-3 focus-visible:ring-ring/50",
+                      "corner-squircle h-8 cursor-pointer rounded-full px-3.5 text-body-sm outline-none transition-[background-color,color] focus-visible:ring-3 focus-visible:ring-ring/50",
                       on
-                        ? "bg-brand-subtle text-brand-fg shadow-[0_0_0_1px_var(--brand-solid)]"
+                        ? "bg-brand-subtle text-brand-fg"
                         : "bg-component text-fg-secondary hover:text-fg-primary",
                     )}
                   >
