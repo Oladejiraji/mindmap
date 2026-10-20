@@ -86,7 +86,10 @@ function LayoutPreview({ layout }: { layout: "grid" | "list" }) {
           <div className="mt-3 flex flex-col">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-2.5 py-2">
-                <div className="size-4 shrink-0 rounded bg-[#F4E2AD]" />
+                <div
+                  className="size-4 shrink-0 rounded"
+                  style={{ background: "linear-gradient(135deg, oklch(0.78 0.12 245), var(--brand-solid) 70%)" }}
+                />
                 <div className={cn(block, "h-2", ["w-2/5", "w-1/4", "w-1/3"][i])} />
                 <div className={cn(block, "ml-auto h-1.5 w-8 opacity-60")} />
                 <div className={cn(block, "h-1.5 w-8 opacity-60")} />
