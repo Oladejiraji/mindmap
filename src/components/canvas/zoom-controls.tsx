@@ -22,7 +22,7 @@ export function ZoomControls({ className }: { className?: string }) {
   return (
     <Panel position="bottom-left" className={cn("m-3!", className)}>
       <div className="rounded-2xl bg-component p-1">
-        <div role="group" aria-label="Zoom" className="flex flex-col overflow-hidden rounded-xl bg-surface-container shadow-default">
+        <div role="group" aria-label="Zoom" className="flex flex-col overflow-hidden rounded-lg bg-surface-container shadow-default">
           <Tip label="Zoom in" side="right">
             <button
               type="button"

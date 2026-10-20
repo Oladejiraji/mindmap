@@ -65,7 +65,7 @@ export default function Home() {
                 {layout === "grid" && (
                   <motion.div
                     layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-md bg-foreground/6"
+                    className="absolute inset-0.5 rounded-lg bg-foreground/6"
                     transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
                   />
                 )}

@@ -195,7 +195,7 @@ export function CreateMenu({
                         onMouseMove={() => setActive(i)}
                         onClick={entry.run}
                         className={cn(
-                          "flex w-full cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2 text-left outline-none",
+                          "flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-left outline-none",
                           i === current && "bg-transparent-hover",
                         )}
                       >

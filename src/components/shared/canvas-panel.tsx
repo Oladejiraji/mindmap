@@ -86,7 +86,7 @@ export function CanvasPanel({ variant = "floating" }: { variant?: "floating" | "
   );
 
   const card = (
-    <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-xl border border-border/40 bg-white shadow-default"}>
+    <div className={embedded ? "flex h-full flex-col" : "overflow-hidden rounded-4xl bg-white shadow-default"}>
       <div className="flex w-full items-center gap-2 p-3">
         {/* Project icon: the nodes mark on its own; floating, it folds the
             panel back down to just the icon */}
