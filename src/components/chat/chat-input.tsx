@@ -66,6 +66,7 @@ export function ChatInput({
   onNewBranch,
   defaultValue = "",
   className,
+  height,
 }: {
   onSend: (content: string) => void;
   disabled: boolean;
@@ -77,6 +78,9 @@ export function ChatInput({
   /** Starting text (e.g. handed over from the + menu). */
   defaultValue?: string;
   className?: string;
+  /** Fixed box height in px (the typing area fills it); grows with the
+   * text when omitted. */
+  height?: number;
 }) {
   const [value, setValue] = useState(defaultValue);
   const [listening, setListening] = useState(false);
@@ -153,7 +157,10 @@ export function ChatInput({
 
   return (
     <div className={className}>
-      <div className="flex flex-col gap-2 rounded-[20px] bg-surface-container p-3 inset-ring-[0.5px] inset-ring-border-strong transition-shadow focus-within:shadow-default">
+      <div
+        style={height ? { height } : undefined}
+        className="flex flex-col gap-2 rounded-[20px] bg-surface-container p-3 inset-ring-[0.5px] inset-ring-border-strong transition-shadow focus-within:shadow-default"
+      >
         {context && context.length > 0 && (
           <div
             className="flex flex-wrap items-center gap-1.5"
@@ -182,7 +189,10 @@ export function ChatInput({
           aria-label="Message"
           disabled={disabled}
           rows={2}
-          className="field-sizing-content max-h-60 min-h-14 w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-sm text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50"
+          className={cn(
+            "w-full resize-none overflow-y-auto bg-transparent px-1 py-1 text-body-sm text-fg-primary outline-none placeholder:text-fg-tertiary disabled:opacity-50",
+            height ? "min-h-0 flex-1" : "field-sizing-content max-h-60 min-h-14",
+          )}
         />
 
         <div className="flex items-center gap-1.5">
