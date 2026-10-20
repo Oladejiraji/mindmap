@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
-import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
 import { authClient } from "@/lib/auth-client";
@@ -13,6 +12,7 @@ import { routes } from "@/lib/routes";
 import { ROLES, TEAM_SIZES, USE_CASES, useOnboarding, type Role, type TeamSize, type UseCase } from "@/lib/onboarding";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { cn } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
 import { InviteCard } from "./invite-card";
 
 /*
@@ -144,15 +144,16 @@ export function OnboardingFlow() {
                 </Field>
                 <Field label="Team size">
                   <Select
-                    value={data.teamSize ?? ""}
-                    onChange={(v) => update({ teamSize: (v || null) as TeamSize | null })}
-                    options={TEAM_SIZES}
+                    aria-label="Team size"
+                    value={data.teamSize}
+                    onChange={(v) => update({ teamSize: v as TeamSize | null })}
+                    options={TEAM_SIZES.map((t) => ({ ...t, itemLabel: `${t.label} employees` }))}
                   />
                 </Field>
               </>
             )}
             <Field label="Your role">
-              <Select value={data.role ?? ""} onChange={(v) => update({ role: (v || null) as Role | null })} options={ROLES} />
+              <Select aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES} />
             </Field>
             <Field label="Work email">
               <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
@@ -239,33 +240,5 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="text-body-sm font-medium text-fg-primary">{label}</span>
       <div className="mt-2">{children}</div>
     </label>
-  );
-}
-
-function Select<T extends string>({
-  value,
-  onChange,
-  options,
-}: {
-  value: T | "";
-  onChange: (value: T | "") => void;
-  options: { value: T; label: string }[];
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as T | "")}
-        className={cn(field, "cursor-pointer appearance-none pr-9", !value && "text-fg-tertiary")}
-      >
-        <option value="">Select</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-fg-tertiary" />
-    </div>
   );
 }
