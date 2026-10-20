@@ -181,7 +181,7 @@ export function NodeEditorView({
 
       <div className="flex min-h-0 flex-1 flex-col">
         {/* Details */}
-        <aside className="max-h-[45%] shrink-0 overflow-y-auto overscroll-contain border-b border-border-default">
+        <aside className="shrink-0 border-b border-border-default">
           <div className="px-5 pt-5 pb-5">
             <div className="flex size-10 items-center justify-center rounded-xl bg-brand-subtle text-brand-fg">
               <NodeTabIcon className="size-5" />
