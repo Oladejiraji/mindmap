@@ -18,8 +18,9 @@ import { InviteCard } from "./invite-card";
 
 /*
  * B2B onboarding, shown once after sign-up, laid out like interfere.com/join:
- * a single-page form on the left (paired fields, one full-width Continue)
- * and the sign-up page's node canvas on the right.
+ * the form in an inset white card on the left (a centred 560px column,
+ * paired fields, one full-width Continue) and the sign-up page's node
+ * canvas on the page background to the right.
  *
  *   invitations   only if the user has pending invites (join one, or not)
  *   form          organization name + team size, role + work email,
@@ -93,21 +94,21 @@ export function OnboardingFlow() {
   if (pendingInvites === undefined) return null;
 
   return (
-    <div className="grid min-h-svh bg-surface-container lg:grid-cols-2">
-      {/* Form */}
-      <div className="flex flex-col px-6 py-10 sm:px-12 lg:px-20">
-        <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
-          <LogoIcon className="h-auto w-4" />
-        </span>
-
+    <div className="grid min-h-svh bg-background lg:grid-cols-2">
+      {/* Form card (interfere.com/join): white, inset from the page edges
+          with a hairline border; the form is a 560px column centred in it */}
+      <main className="flex flex-col border-border-default bg-surface-container px-6 py-16 lg:my-1.5 lg:ms-1 lg:rounded-3xl lg:border-[0.5px]">
         <form
-          className="mx-auto mt-16 flex w-full max-w-[440px] flex-1 flex-col lg:mx-0"
+          className="mx-auto flex w-full max-w-[560px] flex-1 flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             if (canContinue) void finish();
           }}
         >
-          <h1 className="font-display text-heading-4 text-fg-primary">Get started</h1>
+          <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
+            <LogoIcon className="h-auto w-4" />
+          </span>
+          <h1 className="mt-12 font-display text-heading-4 text-fg-primary">Get started</h1>
           <p className="mt-3 text-body-base text-fg-secondary">
             Set up your workspace. Mindmap is a shared space for your team&apos;s thinking: ask, branch and trace ideas together.
           </p>
@@ -211,11 +212,10 @@ export function OnboardingFlow() {
             Signed in as {session?.user?.email ?? "…"}
           </p>
         </form>
-      </div>
+      </main>
 
-      {/* The sign-up page's node canvas, in an inset card (10px from the
-          edges, 16px squircle corners) so the two screens read as one flow */}
-      <div className="relative my-2.5 mr-2.5 hidden overflow-hidden rounded-3xl lg:block">
+      {/* The sign-up page's node canvas, straight on the page background */}
+      <div className="relative hidden lg:block">
         <AuthCanvas />
       </div>
     </div>
