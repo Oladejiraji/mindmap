@@ -5,6 +5,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { HomeSidebar } from "@/components/shared/sidebar/home-sidebar";
 import { CanvasPanel } from "@/components/shared/canvas-panel";
 import { NodePanel } from "@/components/shared/node-panel";
+import { FloatingChat } from "@/components/shared/floating-chat";
 import { TabStrip } from "@/components/shared/tab-strip";
 
 /*
@@ -27,6 +28,7 @@ export function ThreadShell({ defaultOpen, children }: { defaultOpen: boolean; c
             {/* CanvasPanel and NodePanel read the query, so they need Suspense */}
             <Suspense>
               <CanvasPanel />
+              <FloatingChat />
             </Suspense>
           </div>
         </div>

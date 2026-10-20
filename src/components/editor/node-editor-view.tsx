@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
+import { FloatIcon } from "@/components/icons/float-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
 import type { Block } from "@blocknote/core";
@@ -38,10 +39,13 @@ export function NodeEditorView({
   threadId,
   nodeId,
   onClose,
+  onPopOut,
 }: {
   threadId: Id<"threads">;
   nodeId: Id<"nodes">;
   onClose: () => void;
+  /** Pop this node's chat out to float over the canvas. */
+  onPopOut?: () => void;
 }) {
   const { data: node, isPending } = useNode(nodeId);
   const { data: thread } = useThread(threadId);
@@ -60,13 +64,15 @@ export function NodeEditorView({
     );
 
   // ?tab=chat wins; otherwise an empty node opens on the chat. Re-picked
-  // whenever the panel switches to another node.
+  // whenever the panel switches node or ?tab changes (e.g. docking a
+  // floating chat back opens the same node on its chat).
   const requestedTab = useSearchParams().get("tab");
   const [tab, setTab] = useState<Tab>("content");
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
-  if (initializedFor !== nodeId && node) {
+  const pickKey = `${nodeId}:${requestedTab ?? ""}`;
+  if (initializedFor !== pickKey && node) {
     setTab(requestedTab === "chat" || requestedTab === "content" ? requestedTab : hasContent ? "content" : "chat");
-    setInitializedFor(nodeId);
+    setInitializedFor(pickKey);
   }
 
   const { ancestors, children, depth } = useMemo(() => {
@@ -157,7 +163,20 @@ export function NodeEditorView({
             </li>
           </ol>
         </nav>
-        {closeButton}
+        <div className="flex shrink-0 items-center">
+          {onPopOut && (
+            <button
+              type="button"
+              onClick={onPopOut}
+              aria-label="Float chat over the canvas"
+              title="Float chat"
+              className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <FloatIcon className="size-4" />
+            </button>
+          )}
+          {closeButton}
+        </div>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col">
