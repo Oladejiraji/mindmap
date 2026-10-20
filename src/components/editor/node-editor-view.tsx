@@ -8,6 +8,7 @@ import { useMutation } from "convex/react";
 import { Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { FloatIcon } from "@/components/icons/float-icon";
+import { ContentIcon } from "@/components/icons/content-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
 import type { Block } from "@blocknote/core";
@@ -166,6 +167,21 @@ export function NodeEditorView({
           </ol>
         </nav>
         <div className="flex shrink-0 items-center">
+          {/* Content toggle: shows the node's notes in place of its chat */}
+          <Tip label={tab === "content" ? "Hide content" : "Show content"}>
+            <button
+              type="button"
+              onClick={() => setTab(tab === "content" ? "chat" : "content")}
+              aria-pressed={tab === "content"}
+              aria-label="Content"
+              className={cn(
+                "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50",
+                tab === "content" ? "bg-transparent-hover text-fg-primary" : "text-fg-tertiary",
+              )}
+            >
+              <ContentIcon className="size-4" />
+            </button>
+          </Tip>
           {onPopOut && (
             <Tip label="Float chat">
               <button
@@ -222,25 +238,6 @@ export function NodeEditorView({
 
         {/* Content / Chat */}
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div role="tablist" aria-label="Node views" className="flex h-12 shrink-0 items-center gap-1.5 px-3">
-            {(["content", "chat"] as const).map((t) => (
-              <button
-                key={t}
-                role="tab"
-                aria-selected={tab === t}
-                onClick={() => setTab(t)}
-                className={cn(
-                  "h-7 cursor-pointer rounded-lg px-2.5 text-body-sm font-medium capitalize outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
-                  tab === t
-                    ? "bg-transparent-hover text-fg-primary shadow-border"
-                    : "text-fg-secondary shadow-border hover:bg-transparent-hover hover:text-fg-primary",
-                )}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-
           <div className="min-h-0 flex-1">
             {tab === "content" ? (
               <div className="h-full overflow-y-auto overscroll-contain">
