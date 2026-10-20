@@ -19,6 +19,8 @@ import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
 import { CanvasPanel } from "@/components/shared/canvas-panel";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
+import { CheckIcon } from "@/components/icons/check-icon";
+import { blocksToPlainText } from "@/lib/blocks-to-markdown";
 
 /*
  * ChatGPT-style view of a project's tree.
@@ -151,6 +153,7 @@ export function BranchChat({
                 key={node._id}
                 nodeId={node._id}
                 title={node.title}
+                parentNotes={path.slice(0, i).filter((n) => hasNotes(n.content)).map((n) => n.title)}
                 showDivider={i > 0}
                 onBranch={() => void branchFrom(node._id)}
                 header={
@@ -256,12 +259,14 @@ function NodeSection({
   showDivider,
   header,
   onBranch,
+  parentNotes,
 }: {
   nodeId: Id<"nodes">;
   title: string;
   showDivider: boolean;
   header: React.ReactNode;
   onBranch: () => void;
+  parentNotes: string[];
 }) {
   const { data: messages, isLoading } = useMessagesByNode(nodeId);
   // An empty node adds nothing to the conversation: no header, no line.
@@ -270,16 +275,25 @@ function NodeSection({
     <section aria-label={title} data-filled>
       {showDivider && <Divider color="strong" className="my-10" />}
       {header}
-      {isLoading ? <div className="h-10" /> : <NodeMessages messages={messages ?? []} onBranch={onBranch} />}
+      {isLoading ? <div className="h-10" /> : <NodeMessages messages={messages ?? []} onBranch={onBranch} parentNotes={parentNotes} />}
     </section>
   );
 }
 
-function NodeMessages({ messages, onBranch }: { messages: Message[]; onBranch: () => void }) {
+function NodeMessages({
+  messages,
+  onBranch,
+  parentNotes,
+}: {
+  messages: Message[];
+  onBranch: () => void;
+  parentNotes: string[];
+}) {
   return (
     <div className="flex flex-col gap-6">
-      {messages.map((m: Message) => (
+      {messages.map((m: Message, i) => (
         <div key={m._id} className="group/msg">
+          {m.role !== "user" && <ReplySteps parentNotes={parentNotes} priorMessages={i} />}
           <MessageBubble message={m} />
           {m.role !== "user" && !m.isStreaming && <ReplyActions content={m.content} onBranch={onBranch} />}
         </div>
@@ -287,6 +301,37 @@ function NodeMessages({ messages, onBranch }: { messages: Message[]; onBranch: (
     </div>
   );
 }
+
+/* What the model read before replying, the same context the backend
+ * builds (convex/lib/context.ts): notes from the parent nodes, then this
+ * branch's earlier messages. One row per step: check, step, muted detail. */
+function ReplySteps({ parentNotes, priorMessages }: { parentNotes: string[]; priorMessages: number }) {
+  const steps: { label: string; detail: string }[] = [];
+  if (parentNotes.length > 0) {
+    const names = parentNotes.slice(-2).join(" · ");
+    const more = parentNotes.length - 2;
+    steps.push({ label: "Read parent notes", detail: more > 0 ? `${names} +${more}` : names });
+  }
+  if (priorMessages > 0) {
+    steps.push({ label: "Read the conversation", detail: `${priorMessages} ${priorMessages === 1 ? "message" : "messages"}` });
+  }
+  if (steps.length === 0) return null;
+  return (
+    <ul className="mb-3 flex flex-col gap-1.5" aria-label="Context">
+      {steps.map((s) => (
+        <li key={s.label} className="flex min-w-0 items-center gap-2.5 text-body-sm">
+          <CheckIcon className="size-4 shrink-0 text-fg-tertiary" aria-hidden />
+          <span className="shrink-0 text-fg-secondary">{s.label}</span>
+          <span className="truncate text-fg-tertiary">{s.detail}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const hasNotes = (content: unknown) =>
+  Array.isArray(content) &&
+  blocksToPlainText(content as Parameters<typeof blocksToPlainText>[0]).trim().length > 0;
 
 // Icon swap (interfaces.dev): the incoming icon grows from 0.25 and
 // unblurs as the outgoing one does the reverse
