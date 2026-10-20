@@ -7,7 +7,8 @@ import { Check, CirclePlus as AddAccountIcon } from "lucide-react";
 import { InviteIcon } from "@/components/icons/invite-icon";
 import { PreferencesIcon } from "@/components/icons/preferences-icon";
 import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
-import { ChevronDownIcon, ChevronRightIcon } from "@/components/icons/chevron-down";
+import { ChevronRightIcon } from "@/components/icons/chevron-down";
+import { SelectorIcon } from "@/components/icons/selector-icon";
 import { LogoutIcon } from "@/components/icons/logout-icon";
 import { Menu } from "@base-ui/react/menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -63,7 +64,7 @@ export function ProfileMenu() {
         <span className="flex-1 truncate text-left text-body-sm font-medium text-fg-primary group-data-[collapsible=icon]:hidden">
           {name}
         </span>
-        <ChevronDownIcon className="size-4 text-fg-tertiary group-data-[collapsible=icon]:hidden" />
+        <SelectorIcon className="size-4 text-fg-tertiary group-data-[collapsible=icon]:hidden" />
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={collapsed ? 10 : 6} align={collapsed ? "end" : "start"} side={collapsed ? "right" : "top"} className="z-50">

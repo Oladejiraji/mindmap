@@ -2,7 +2,7 @@
 
 import { Select as BaseSelect } from "@base-ui/react/select";
 import { CheckIcon } from "@/components/icons/check-icon";
-import { ChevronDownIcon } from "@/components/icons/chevron-down";
+import { SelectorIcon } from "@/components/icons/selector-icon";
 import { popupRow, popupSection, popupSurface } from "@/components/shared/sidebar/popover-styles";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * Dropdown select: a field-styled trigger showing the short label, and a
  * popup the trigger's width underneath it, in the same family as the
  * sidebar menus (modal surface, 14px rows). The chosen row has a check in
- * a left gutter; the chevron flips while open. Options can carry a longer
+ * a left gutter. Options can carry a longer
  * `itemLabel` for the list (e.g. "1–10" in the field, "1–10 employees" in
  * the list). Highlighting a row is instant: it's the most frequent
  * interaction here.
@@ -48,7 +48,7 @@ export function Select<T extends string>({
         >
           {(v: T | null) => options.find((o) => o.value === v)?.label ?? placeholder}
         </BaseSelect.Value>
-        <ChevronDownIcon className="size-4 shrink-0 text-fg-tertiary transition-[rotate] duration-150 ease-out group-data-popup-open:rotate-180 motion-reduce:transition-none" />
+        <SelectorIcon className="size-4 shrink-0 text-fg-tertiary" />
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={6} alignItemWithTrigger={false} className="z-50">
