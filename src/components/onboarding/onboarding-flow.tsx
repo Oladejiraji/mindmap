@@ -202,7 +202,7 @@ export function OnboardingFlow() {
           <button
             type="submit"
             disabled={!canContinue}
-            className="corner-squircle h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+            className="corner-squircle h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
           >
             {submitting ? "Setting up…" : "Continue"}
           </button>

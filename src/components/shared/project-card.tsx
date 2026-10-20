@@ -79,7 +79,7 @@ export function ProjectCard({
               if (isRenaming) e.preventDefault();
             }}
           >
-            <div className="absolute inset-0 rounded-xl bg-foreground/8 scale-[0.97] opacity-0 transition-all duration-200 ease-out group-hover:scale-100 group-hover:opacity-100" />
+            <div className="absolute inset-0 rounded-xl bg-foreground/8 scale-[0.97] opacity-0 transition-[opacity,scale] duration-200 ease-out group-hover:scale-100 group-hover:opacity-100" />
             <div className="relative flex aspect-4/3 items-center justify-center rounded-lg bg-background-5">
               <CanvasIcon className="size-8 text-fg-disabled" />
             </div>
