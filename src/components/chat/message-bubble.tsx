@@ -3,8 +3,12 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ThinkingOrb } from "thinking-orbs";
+import "./message-bubble.css";
 import { cn } from "@/lib/utils";
+import { rehypeStreamWords } from "@/lib/rehype-stream-words";
 import type { Message } from "@/services/messages/queries";
+
+const STREAMING_PLUGINS = [rehypeStreamWords];
 
 export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
@@ -32,11 +36,11 @@ export function MessageBubble({ message }: { message: Message }) {
           </div>
         ) : (
           <div className="markdown-body">
-            {/* Default escapes raw HTML — never add rehype-raw without rehype-sanitize. */}
-            <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
-            {isStreaming && (
-              <span className="ml-0.5 inline-block h-4 w-px animate-pulse bg-current align-middle" />
-            )}
+            {/* Default escapes raw HTML — never add rehype-raw without rehype-sanitize.
+                While streaming, each new word fades in as it arrives. */}
+            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={isStreaming ? STREAMING_PLUGINS : undefined}>
+              {message.content}
+            </Markdown>
           </div>
         )}
       </div>
