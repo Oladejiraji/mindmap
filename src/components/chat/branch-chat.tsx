@@ -17,6 +17,7 @@ import { MessageBubble } from "./message-bubble";
 import { Divider } from "@/components/ui/divider";
 import { ChatInput } from "./chat-input";
 import { CanvasPanel } from "@/components/shared/canvas-panel";
+import { Kbd } from "@/components/canvas/canvas-shortcuts";
 
 /*
  * ChatGPT-style view of a project's tree.
@@ -110,12 +111,36 @@ export function BranchChat({
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [activeNodeId, messageCount, lastLength]);
 
+  // "/" jumps to the message box (unless you're already typing somewhere)
+  const composerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest("input, textarea, select, [contenteditable='true']")) return;
+      const box = composerRef.current?.querySelector<HTMLElement>("textarea, [contenteditable='true']");
+      if (!box) return;
+      e.preventDefault();
+      box.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   if (!active) return null;
 
   return (
     <div className="flex h-full flex-col">
       <div ref={scrollRef} onScroll={onScroll} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {/* Sections with messages (or still loading) carry data-filled; when
+            none do, the whole branch is empty and shows one empty state */}
         <div className="mx-auto flex w-full max-w-[720px] flex-col px-6 pt-20 pb-10">
+          <div className="flex flex-col items-center gap-3 pt-16 text-center [:has([data-filled])>&]:hidden">
+            <p className="text-body-sm text-fg-tertiary">No messages in this branch</p>
+            <p className="flex items-center gap-1.5 text-caption-lg text-fg-tertiary">
+              Press <Kbd>/</Kbd> to start
+            </p>
+          </div>
           {path.map((node, i) => {
             const parent = i > 0 ? path[i - 1] : undefined;
             const siblings = parent ? (childrenOf.get(parent._id) ?? []) : [];
@@ -157,7 +182,7 @@ export function BranchChat({
         >
           <ArrowDown className="size-4.5" />
         </button>
-        <div className="relative mx-auto w-full max-w-[720px]">
+        <div ref={composerRef} className="relative mx-auto w-full max-w-[720px]">
           <CanvasPanel variant="docked" />
           <ChatInput
             onSend={send}
@@ -222,9 +247,8 @@ function ForkHeader({
   );
 }
 
-/* One node's part of the conversation. The divider above it is as wide as
- * the section's text: the full column when there are messages, just the
- * empty-state line when there aren't. */
+/* One node's part of the conversation; a node with no messages renders
+ * nothing. */
 function NodeSection({
   nodeId,
   title,
@@ -239,18 +263,13 @@ function NodeSection({
   onBranch: () => void;
 }) {
   const { data: messages, isLoading } = useMessagesByNode(nodeId);
-  const empty = !isLoading && !messages?.length;
+  // An empty node adds nothing to the conversation: no header, no line.
+  if (!isLoading && !messages?.length) return null;
   return (
-    <section aria-label={title} className={cn(empty && "mx-auto w-fit max-w-full")}>
+    <section aria-label={title} data-filled>
       {showDivider && <Divider color="strong" className="my-10" />}
       {header}
-      {isLoading ? (
-        <div className="h-10" />
-      ) : empty ? (
-        <p className="text-center text-body-sm text-fg-tertiary">No messages in this branch yet.</p>
-      ) : (
-        <NodeMessages messages={messages ?? []} onBranch={onBranch} />
-      )}
+      {isLoading ? <div className="h-10" /> : <NodeMessages messages={messages ?? []} onBranch={onBranch} />}
     </section>
   );
 }

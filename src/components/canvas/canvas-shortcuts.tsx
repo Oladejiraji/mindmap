@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
  * keyboard button stays to bring it back.
  */
 
-function Kbd({ children }: { children: React.ReactNode }) {
+export function Kbd({ children }: { children: React.ReactNode }) {
   return (
     <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-surface-container px-1 font-sans text-caption-lg font-medium text-fg-secondary inset-ring-[0.5px] inset-ring-border-strong">
       {children}
