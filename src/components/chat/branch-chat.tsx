@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons/chevron-down";
 import { useMutation } from "convex/react";
-import { ArrowDown, GitBranch } from "lucide-react";
+import { ArrowDown, Check, Copy, GitBranch } from "lucide-react";
 import { CanvasViewIcon } from "@/components/icons/canvas-view-icon";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
@@ -280,19 +280,39 @@ function NodeMessages({ messages, onBranch }: { messages: Message[]; onBranch: (
       {messages.map((m: Message) => (
         <div key={m._id} className="group/msg">
           <MessageBubble message={m} />
-          {m.role !== "user" && !m.isStreaming && (
-            <div className="mt-1.5 flex opacity-0 transition-opacity group-hover/msg:opacity-100 focus-within:opacity-100">
-              <button
-                onClick={onBranch}
-                className="flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-body-sm text-fg-tertiary outline-none hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <GitBranch className="size-3.5" />
-                Branch from here
-              </button>
-            </div>
-          )}
+          {m.role !== "user" && !m.isStreaming && <ReplyActions content={m.content} onBranch={onBranch} />}
         </div>
       ))}
+    </div>
+  );
+}
+
+const replyAction =
+  "flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2 text-body-sm text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-4";
+
+/* Under each finished reply: Branch from here, then icon actions. Copy
+ * confirms with a check for a moment. */
+function ReplyActions({ content, onBranch }: { content: string; onBranch: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard
+      .writeText(content)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch((err) => handleError(err, "Couldn't copy"));
+  };
+  return (
+    <div className="mt-2 -ml-2 flex items-center gap-1">
+      <button type="button" onClick={onBranch} className={replyAction}>
+        <GitBranch />
+        Branch from here
+      </button>
+      <span aria-hidden className="mx-1 h-4 w-px bg-border-default" />
+      <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy"} title="Copy" className={cn(replyAction, "w-7 justify-center px-0")}>
+        {copied ? <Check /> : <Copy />}
+      </button>
     </div>
   );
 }
