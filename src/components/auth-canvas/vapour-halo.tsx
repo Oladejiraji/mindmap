@@ -1,23 +1,26 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
+import "./vapour-halo.css";
 
 /*
- * Drop effect: a soft pastel glow on the dropped card (Apple's chip
- * renders: lavender and sky on top, peach and butter below, the colours
- * slowly turning), then waves of the same colours ripple outward. Each
- * wave travels further than the last but starts weaker, and fades,
- * blurs and thins as it goes, so the ripple loses steam. Sits in flow
- * coordinates behind the nodes; the animation lives in globals.css.
+ * Drop effect, after Apple's chip renders: the card splits into
+ * chromatic fringes (sky on one edge, rose and butter on the others), and
+ * clouds of pastel colour wash outward from it. The clouds are filled,
+ * uneven and warped by turbulence, not outlines. Each wash spreads
+ * further than the last but starts weaker and blurrier, so the wave loses
+ * steam. The fringe settles into a faint coloured residue on the card's
+ * edges that fades last. Sits in flow coordinates behind the nodes; the
+ * animation lives in vapour-halo.css.
  */
 
-// reach: how far past the card the wave travels (px); peak: its opacity
-// as it leaves the card; band: its thickness; blur: softer the further
-// out it goes.
+// reach: how far past the card the wash spreads (px); peak: its opacity
+// as it leaves the card; blur: softer the further out it goes; turn:
+// rotates the colour map so each wash is tinted differently.
 const WAVES = [
-  { reach: 64, peak: 0.95, band: 18, blur: 10, delay: 0.05 },
-  { reach: 112, peak: 0.6, band: 14, blur: 16, delay: 0.3 },
-  { reach: 160, peak: 0.32, band: 10, blur: 22, delay: 0.55 },
+  { reach: 35, peak: 0.42, blur: 14, turn: 0, delay: 0.04 },
+  { reach: 65, peak: 0.25, blur: 20, turn: 40, delay: 0.26 },
+  { reach: 95, peak: 0.14, blur: 26, turn: -35, delay: 0.5 },
 ];
 
 export function VapourHalo({
@@ -33,9 +36,18 @@ export function VapourHalo({
   height: number;
   onDone: () => void;
 }) {
+  const filterId = `vapour-warp-${useId().replace(/:/g, "")}`;
   return (
     <div className="vapour-halo" style={{ left: x, top: y, width, height }} aria-hidden>
-      <div className="vapour-halo-glow vapour-halo-colour" />
+      {/* Turbulence that warps the washes' edges; it drifts while they spread */}
+      <svg width="0" height="0" className="absolute">
+        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="7">
+            <animate attributeName="baseFrequency" dur="2.4s" values="0.006 0.009;0.009 0.006" fill="freeze" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale="70" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
       {WAVES.map((w, i) => (
         <div
           key={i}
@@ -43,15 +55,15 @@ export function VapourHalo({
           style={
             {
               "--wave-reach": `${w.reach}px`,
-              filter: `blur(${w.blur}px)`,
+              filter: `url(#${filterId}) blur(${w.blur}px)`,
               animationDelay: `${w.delay}s`,
             } as CSSProperties
           }
-          onAnimationEnd={i === WAVES.length - 1 ? () => onDone() : undefined}
         >
-          <div className="vapour-wave-band vapour-halo-colour" style={{ padding: w.band, opacity: w.peak }} />
+          <div className="vapour-wash" style={{ opacity: w.peak, rotate: `${w.turn}deg` }} />
         </div>
       ))}
+      <div className="vapour-fringe" onAnimationEnd={onDone} />
     </div>
   );
 }
