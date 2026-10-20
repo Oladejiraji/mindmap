@@ -179,7 +179,7 @@ export function OnboardingFlow() {
                       "corner-squircle h-8 cursor-pointer rounded-full px-3.5 text-body-sm outline-none transition-[background-color,box-shadow,color] focus-visible:ring-3 focus-visible:ring-ring/50",
                       on
                         ? "bg-brand-subtle text-brand-fg shadow-[0_0_0_1px_var(--brand-solid)]"
-                        : "bg-surface-container text-fg-secondary shadow-border hover:text-fg-primary",
+                        : "bg-component text-fg-secondary hover:text-fg-primary",
                     )}
                   >
                     {u.label}
