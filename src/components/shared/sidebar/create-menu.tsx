@@ -160,7 +160,7 @@ export function CreateMenu({
         <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
           <Popover.Popup
             initialFocus={false}
-            className={cn("w-80 overflow-hidden rounded-2xl bg-surface-modal text-fg-primary shadow-large outline-none", popupMotion)}
+            className={cn("w-80 overflow-hidden rounded-2xl bg-surface-modal text-fg-primary shadow-large outline-none", popupMotion, "data-starting-style:scale-100 data-starting-style:opacity-100")}
           >
             <div className="border-b border-border-subtle p-1.5">
               <label className="flex h-9.5 items-center gap-2 rounded-xl bg-component px-3">
