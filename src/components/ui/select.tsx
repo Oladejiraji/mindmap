@@ -12,8 +12,15 @@ import { cn } from "@/lib/utils";
  * sidebar menus (modal surface, 14px rows). The chosen row has a check in
  * a left gutter; the chevron flips while open. Options can carry a longer
  * `itemLabel` for the list (e.g. "1–10" in the field, "1–10 employees" in
- * the list).
+ * the list). Highlighting a row is instant: it's the most frequent
+ * interaction here.
  */
+
+// Motion (interfaces.dev): grows from the trigger (Base UI sets the
+// origin); the exit is subtler than the entrance (shorter, barely shrinks,
+// blurs 4px as it fades). Reduced motion keeps only the fade.
+const popupMotion =
+  "transition-[opacity,scale,filter] duration-150 ease-out data-starting-style:scale-[0.96] data-starting-style:opacity-0 data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:blur-[4px] data-ending-style:duration-100 motion-reduce:transition-opacity";
 
 export type SelectOption<T extends string> = { value: T; label: string; itemLabel?: string };
 
@@ -47,14 +54,14 @@ export function Select<T extends string>({
         >
           {(v: T | null) => options.find((o) => o.value === v)?.label ?? placeholder}
         </BaseSelect.Value>
-        <ChevronDownIcon className="size-4 shrink-0 text-fg-tertiary transition-transform duration-150 group-data-popup-open:rotate-180" />
+        <ChevronDownIcon className="size-4 shrink-0 text-fg-tertiary transition-[rotate] duration-150 ease-out group-data-popup-open:rotate-180 motion-reduce:transition-none" />
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={6} alignItemWithTrigger={false} className="z-50">
-          <BaseSelect.Popup className={cn(popupSurface, "w-(--anchor-width) min-w-40")}>
+          <BaseSelect.Popup className={cn(popupSurface, popupMotion, "w-(--anchor-width) min-w-40")}>
             <BaseSelect.List className={cn(popupSection, "max-h-(--available-height) overflow-y-auto")}>
               {options.map((o) => (
-                <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2 font-medium")}>
+                <BaseSelect.Item key={o.value} value={o.value} className={cn(popupRow, "h-9 gap-2 pl-2 font-medium transition-none")}>
                   <span className="flex size-4 shrink-0 items-center justify-center">
                     <BaseSelect.ItemIndicator>
                       <CheckIcon className="size-4 text-fg-secondary" aria-hidden />
