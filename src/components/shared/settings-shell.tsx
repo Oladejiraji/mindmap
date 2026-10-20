@@ -4,10 +4,9 @@ import type { ReactNode } from "react";
 import { ChevronLeftIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Palette } from "lucide-react";
+import { ArrowLeftRight, ArrowUpRight, Building2, ChartColumn, Code, Palette, ShieldCheck, SquareUser } from "lucide-react";
 import { FlameIcon } from "@/components/icons/flame-icon";
 import { PersonalizationIcon } from "@/components/icons/personalization-icon";
-import { SettingsGearIcon } from "@/components/icons/settings-gear-icon";
 import { ModelsIcon } from "@/components/icons/models-icon";
 import { BillingIcon } from "@/components/icons/billing-icon";
 import { HotkeysIcon } from "@/components/icons/hotkeys-icon";
@@ -57,7 +56,8 @@ const PAGES: Record<string, { title: string; icon: ReactNode }> = {
   [routes.settingsAccount]: { title: "Account", icon: <UserAvatar size={16} /> },
   [routes.settingsPreferences]: { title: "Preferences", icon: <PreferencesIcon className="size-4 text-fg-secondary" /> },
   [routes.settingsHotkeys]: { title: "Hotkeys", icon: <HotkeysIcon className="size-4 text-fg-secondary" /> },
-  [routes.settingsGeneral]: { title: "General", icon: <SettingsGearIcon className="size-4 text-fg-secondary" /> },
+  [routes.settingsWorkspace]: { title: "Workspace", icon: <Building2 className="size-4 text-fg-secondary" /> },
+  [routes.settingsTeams]: { title: "Teams", icon: <SquareUser className="size-4 text-fg-secondary" /> },
 };
 
 /* The current page as a tab in its hover style: a rounded pill on the
@@ -113,14 +113,21 @@ export function SettingsShell({ children }: { children: ReactNode }) {
             <Soon icon={<Palette />}>Appearance</Soon>
           </NavGroup>
 
-          <NavGroup label="Workspace">
-            <NavLink href={routes.settingsGeneral}>
-              <SettingsGearIcon />
-              General
+          <NavGroup label="Administration">
+            <NavLink href={routes.settingsWorkspace}>
+              <Building2 />
+              Workspace
             </NavLink>
-            {/* Members and Billing need organizations on the server. */}
+            <NavLink href={routes.settingsTeams}>
+              <SquareUser />
+              Teams
+            </NavLink>
             <Soon icon={<InviteIcon />}>Members</Soon>
+            <Soon icon={<ShieldCheck />}>Security</Soon>
+            <Soon icon={<Code />}>API</Soon>
             <Soon icon={<BillingIcon />}>Billing</Soon>
+            <Soon icon={<ChartColumn />}>Usage &amp; limits</Soon>
+            <Soon icon={<ArrowLeftRight />}>Import &amp; export</Soon>
           </NavGroup>
 
           <NavGroup label="Intelligence">
