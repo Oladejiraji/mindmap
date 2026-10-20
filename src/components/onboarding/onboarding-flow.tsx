@@ -31,7 +31,7 @@ import { InviteCard } from "./invite-card";
  */
 
 const field =
-  "corner-squircle h-10 w-full rounded-xl bg-surface-container px-3.5 text-body-sm text-fg-primary shadow-border outline-none transition-shadow placeholder:text-fg-tertiary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-fg-tertiary";
+  "corner-squircle h-10 w-full rounded-3xl bg-surface-container px-3.5 text-body-sm text-fg-primary shadow-border outline-none transition-shadow placeholder:text-fg-tertiary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-fg-tertiary";
 
 export function OnboardingFlow() {
   const router = useRouter();
@@ -145,6 +145,7 @@ export function OnboardingFlow() {
                 </Field>
                 <Field label="Team size">
                   <Select
+                    className="rounded-3xl"
                     aria-label="Team size"
                     value={data.teamSize}
                     onChange={(v) => update({ teamSize: v as TeamSize | null })}
@@ -154,7 +155,7 @@ export function OnboardingFlow() {
               </>
             )}
             <Field label="Your role">
-              <Select aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES} />
+              <Select className="rounded-3xl" aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES} />
             </Field>
             <Field label="Work email">
               <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
@@ -191,7 +192,7 @@ export function OnboardingFlow() {
           <button
             type="submit"
             disabled={!canContinue}
-            className="corner-squircle mt-10 h-11 w-full cursor-pointer rounded-xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+            className="corner-squircle mt-10 h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
           >
             {submitting ? "Setting up…" : "Continue"}
           </button>
