@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+import { AuthCanvas } from "@/components/auth-canvas/auth-canvas";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { api } from "@convex/api";
 import type { Id } from "@convex/dataModel";
@@ -18,7 +19,7 @@ import { InviteCard } from "./invite-card";
 /*
  * B2B onboarding, shown once after sign-up, laid out like interfere.com/join:
  * a single-page form on the left (paired fields, one full-width Continue)
- * and a light-grey panel on the right with the product line.
+ * and the sign-up page's node canvas on the right.
  *
  *   invitations   only if the user has pending invites (join one, or not)
  *   form          organization name + team size, role + work email,
@@ -211,24 +212,10 @@ export function OnboardingFlow() {
         </form>
       </div>
 
-      {/* Product panel: an inset light-grey card (10px from the edges, 16px
-          squircle corners) with the line; no invented testimonial */}
-      <div
-        aria-hidden
-        className="relative my-2.5 mr-2.5 hidden items-center justify-center overflow-hidden rounded-3xl lg:flex"
-        style={{ background: "var(--surface-panel-edge)" }}
-      >
-        <div className="max-w-[520px] px-12 text-center">
-          <p className="font-serif text-[2rem] leading-[1.3] text-fg-primary">
-            &ldquo;Ask one question, follow every branch, and keep the whole thread of your team&apos;s thinking.&rdquo;
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-2.5">
-            <span className="flex size-6 items-center justify-center rounded-md bg-brand-solid text-on-brand-solid">
-              <LogoIcon className="h-auto w-3.5" />
-            </span>
-            <span className="text-body-sm font-medium text-fg-primary">Mindmap</span>
-          </div>
-        </div>
+      {/* The sign-up page's node canvas, in an inset card (10px from the
+          edges, 16px squircle corners) so the two screens read as one flow */}
+      <div className="relative my-2.5 mr-2.5 hidden overflow-hidden rounded-3xl lg:block">
+        <AuthCanvas />
       </div>
     </div>
   );
