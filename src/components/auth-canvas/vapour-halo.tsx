@@ -9,7 +9,8 @@ import "./vapour-halo.css";
  * clouds of pastel colour wash outward from it. The clouds are filled,
  * uneven and warped by turbulence, not outlines. Each wash spreads
  * further than the last but starts weaker and blurrier, so the wave loses
- * steam. The fringe settles into a faint coloured residue on the card's
+ * steam. As the wave front passes it reveals a dot grid, which fades
+ * behind it. The fringe settles into a faint coloured residue on the card's
  * edges that fades last. Sits in flow coordinates behind the nodes; the
  * animation lives in vapour-halo.css.
  */
@@ -22,6 +23,12 @@ const WAVES = [
   { reach: 65, peak: 0.25, blur: 20, turn: 40, delay: 0.26 },
   { reach: 95, peak: 0.14, blur: 26, turn: -35, delay: 0.5 },
 ];
+
+// The dot grid the wave reveals: spacing (px) and how far past the card it
+// reaches (a little beyond the furthest wash).
+const DOT_GAP = 14;
+const DOT_REACH = 110;
+const mod = (n: number, m: number) => ((n % m) + m) % m;
 
 export function VapourHalo({
   x,
@@ -63,6 +70,16 @@ export function VapourHalo({
           <div className="vapour-wash" style={{ opacity: w.peak, rotate: `${w.turn}deg` }} />
         </div>
       ))}
+      {/* Dots sit on one canvas-wide grid, so every drop reveals the same
+          points: offset the pattern by where this layer starts. */}
+      <div
+        className="vapour-dots"
+        style={{
+          inset: -DOT_REACH,
+          backgroundSize: `${DOT_GAP}px ${DOT_GAP}px`,
+          backgroundPosition: `${-mod(x - DOT_REACH, DOT_GAP)}px ${-mod(y - DOT_REACH, DOT_GAP)}px`,
+        }}
+      />
       <div className="vapour-fringe" onAnimationEnd={onDone} />
     </div>
   );

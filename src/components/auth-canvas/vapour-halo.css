@@ -42,6 +42,43 @@
   100% { inset: calc(var(--wave-reach) * -1); opacity: 0; }
 }
 
+/* Dot grid revealed by the wave: a band of visibility (--dots-r) sweeps
+   out from the card and the dots fade behind it. The band is a radial
+   mask, so on a wide card it spreads as an ellipse like the washes. */
+@property --dots-r {
+  syntax: "<percentage>";
+  initial-value: 0%;
+  inherits: false;
+}
+
+.vapour-dots {
+  position: absolute;
+  opacity: 0;
+  background-image: radial-gradient(circle, oklch(0.55 0.06 285 / 0.55) 1px, transparent 1.5px);
+  mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(var(--dots-r) - 45%),
+    #000 calc(var(--dots-r) - 12%),
+    #000 var(--dots-r),
+    transparent calc(var(--dots-r) + 12%)
+  );
+  animation:
+    vapour-dots-sweep 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards,
+    vapour-dots-fade 2s ease-out 0.08s forwards;
+}
+
+@keyframes vapour-dots-sweep {
+  from { --dots-r: 20%; }
+  to { --dots-r: 120%; }
+}
+
+@keyframes vapour-dots-fade {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  55% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
 /* Chromatic fringe: each edge of the card picks up a different colour,
    split wide at first and settling tight, then lingering faintly as
    residue after the washes have gone. Kept to 30% strength so it tints
@@ -94,6 +131,11 @@
 @media (prefers-reduced-motion: reduce) {
   .vapour-halo > .vapour-wave {
     animation-name: vapour-fade;
+  }
+
+  .vapour-halo > .vapour-dots {
+    --dots-r: 80%;
+    animation: vapour-fade 1.6s ease-out forwards;
   }
 }
 
