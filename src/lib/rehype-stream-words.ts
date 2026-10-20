@@ -1,8 +1,14 @@
 /*
- * Rehype plugin for a reply that's still streaming: wraps each word of
- * the text in <span class="stream-word"> so new words fade in as they
- * arrive. React keeps the spans already on screen (same position in the
- * tree), so only newly added words animate. Code is left alone.
+ * Rehype plugin for a reply that's still streaming: new words fade in as
+ * they arrive, and words already shown never fade again.
+ *
+ * Each word is identified by its position in the reply (nth word), and
+ * the time it first appeared is kept in `arrivals`. A word still within
+ * its fade is wrapped in <span class="stream-word"> with a negative
+ * animation-delay of its age, so if half-finished markdown makes React
+ * rebuild it (an unclosed **bold** closing, say), it resumes mid-fade
+ * instead of starting over. Older words are left as plain text. Code is
+ * left alone.
  */
 type HastNode = {
   type: string;
@@ -12,34 +18,45 @@ type HastNode = {
   children?: HastNode[];
 };
 
+export const STREAM_FADE_MS = 450;
 const SKIP = new Set(["code", "pre"]);
 
-function wrapWords(node: HastNode) {
-  if (!node.children) return;
-  const next: HastNode[] = [];
-  for (const child of node.children) {
-    if (child.type === "text" && child.value) {
-      // Keep the whitespace with the word before it so spacing is unchanged
-      for (const part of child.value.match(/\S+\s*|\s+/g) ?? []) {
-        next.push(
-          /^\s+$/.test(part)
-            ? { type: "text", value: part }
-            : {
-                type: "element",
-                tagName: "span",
-                properties: { className: ["stream-word"] },
-                children: [{ type: "text", value: part }],
-              },
-        );
+export function rehypeStreamWords({ arrivals }: { arrivals: Map<number, number> }) {
+  return (tree: HastNode) => {
+    const now = Date.now();
+    let index = 0;
+    const walk = (node: HastNode) => {
+      if (!node.children) return;
+      const next: HastNode[] = [];
+      for (const child of node.children) {
+        if (child.type === "text" && child.value) {
+          // Keep the whitespace with the word before it so spacing is unchanged
+          for (const part of child.value.match(/\S+\s*|\s+/g) ?? []) {
+            if (/^\s+$/.test(part)) {
+              next.push({ type: "text", value: part });
+              continue;
+            }
+            const i = index++;
+            if (!arrivals.has(i)) arrivals.set(i, now);
+            const age = now - (arrivals.get(i) ?? now);
+            next.push(
+              age >= STREAM_FADE_MS
+                ? { type: "text", value: part }
+                : {
+                    type: "element",
+                    tagName: "span",
+                    properties: { className: ["stream-word"], style: `animation-delay:-${age}ms` },
+                    children: [{ type: "text", value: part }],
+                  },
+            );
+          }
+        } else {
+          if (child.type === "element" && !SKIP.has(child.tagName ?? "")) walk(child);
+          next.push(child);
+        }
       }
-    } else {
-      if (child.type === "element" && !SKIP.has(child.tagName ?? "")) wrapWords(child);
-      next.push(child);
-    }
-  }
-  node.children = next;
-}
-
-export function rehypeStreamWords() {
-  return (tree: HastNode) => wrapWords(tree);
+      node.children = next;
+    };
+    walk(tree);
+  };
 }

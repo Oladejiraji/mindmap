@@ -1,19 +1,35 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ThinkingOrb } from "thinking-orbs";
 import "./message-bubble.css";
 import { cn } from "@/lib/utils";
-import { rehypeStreamWords } from "@/lib/rehype-stream-words";
+import { STREAM_FADE_MS, rehypeStreamWords } from "@/lib/rehype-stream-words";
 import type { Message } from "@/services/messages/queries";
-
-const STREAMING_PLUGINS = [rehypeStreamWords];
 
 export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
   const isStreaming = message.isStreaming === true;
   const isEmpty = message.content.length === 0;
+
+  // Word fade while streaming: when each word first appeared (kept across
+  // renders so shown words never re-fade), and a short tail after the
+  // stream ends so the last words finish their fade instead of snapping.
+  const [arrivals] = useState(() => new Map<number, number>());
+  const [settling, setSettling] = useState(false);
+  const [wasStreaming, setWasStreaming] = useState(isStreaming);
+  if (wasStreaming !== isStreaming) {
+    setWasStreaming(isStreaming);
+    if (!isStreaming) setSettling(true);
+  }
+  useEffect(() => {
+    if (!settling) return;
+    const t = setTimeout(() => setSettling(false), STREAM_FADE_MS);
+    return () => clearTimeout(t);
+  }, [settling]);
+  const fading = isStreaming || settling;
 
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
@@ -38,7 +54,7 @@ export function MessageBubble({ message }: { message: Message }) {
           <div className="markdown-body">
             {/* Default escapes raw HTML — never add rehype-raw without rehype-sanitize.
                 While streaming, each new word fades in as it arrives. */}
-            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={isStreaming ? STREAMING_PLUGINS : undefined}>
+            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={fading ? [[rehypeStreamWords, { arrivals }]] : undefined}>
               {message.content}
             </Markdown>
           </div>
