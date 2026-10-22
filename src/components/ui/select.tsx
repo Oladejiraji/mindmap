@@ -23,7 +23,7 @@ export type SelectOption<T extends string> = { value: T; label: string; itemLabe
 /* An option's icon on a small tile, in the list and in the field. */
 function IconTile({ children }: { children: ReactNode }) {
   return (
-    <span className="flex size-4 shrink-0 items-center justify-center rounded-sm bg-surface-container text-fg-secondary shadow-border [&_svg]:size-2.5">
+    <span className="flex size-4 shrink-0 items-center justify-center rounded-sm bg-surface-container text-fg-secondary [&_svg]:size-2.5">
       {children}
     </span>
   );
