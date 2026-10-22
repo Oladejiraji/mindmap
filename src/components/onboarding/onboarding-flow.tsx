@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { InviteCard } from "./invite-card";
 import { MakeItYours } from "./make-it-yours";
+import { TOUR, TourStep } from "./tour";
 
 /*
  * B2B onboarding, shown once after sign-up, laid out like interfere.com/join:
@@ -60,8 +61,9 @@ export function OnboardingFlow() {
   const { data: pendingInvites } = useAuthedConvexQuery(api.invitations.pending, {});
 
   const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);
-  // 1: workspace details; 2: "Make it yours", a walkthrough of settings
-  const [step, setStep] = useState<1 | 2>(1);
+  // 1: workspace details; then the tour (how it works, nodes, collaborate,
+  // teams, models); last: "Make it yours", the settings walkthrough
+  const [step, setStep] = useState(1);
   const submitting = isCreating || isCompleting;
   const hasOrgName = data.orgName.trim().length > 0;
   const canContinue = (hasOrgName || !!joinedOrgId) && !submitting;
@@ -108,22 +110,33 @@ export function OnboardingFlow() {
 
   if (pendingInvites === undefined) return null;
 
-  if (step === 2) {
+  if (step > 1) {
+    const slide = TOUR[step - 2];
+    const last = step === TOTAL_STEPS;
     return (
       <div className="min-h-svh bg-background lg:p-1.5">
         <main className="mx-auto flex min-h-svh max-w-5xl flex-col border-border-default bg-surface-container px-6 py-10 lg:min-h-[calc(100svh-12px)] lg:rounded-3xl lg:border-[0.5px] lg:px-10">
           <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
             <LogoIcon className="h-auto w-4" />
           </span>
-          <div className="my-auto py-10">
-            <MakeItYours />
+          <div key={step} className="my-auto py-10 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
+            {slide ? <TourStep slide={slide} /> : <MakeItYours />}
           </div>
           <div className="flex items-center justify-between gap-4">
-            <StepDots step={2} />
+            <StepDots step={step} />
             <div className="flex items-center gap-2">
+              {slide && (
+                <button
+                  type="button"
+                  onClick={() => setStep(TOTAL_STEPS)}
+                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  Skip tour
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setStep(1)}
+                onClick={() => setStep(step - 1)}
                 disabled={submitting}
                 className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-secondary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
               >
@@ -131,11 +144,11 @@ export function OnboardingFlow() {
               </button>
               <button
                 type="button"
-                onClick={() => void finish()}
+                onClick={() => (last ? void finish() : setStep(step + 1))}
                 disabled={submitting}
                 className="corner-squircle h-9 cursor-pointer rounded-xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:opacity-60"
               >
-                {submitting ? "Setting up…" : "Continue"}
+                {submitting ? "Setting up…" : last ? "Finish" : "Continue"}
               </button>
             </div>
           </div>
@@ -295,11 +308,13 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+const TOTAL_STEPS = TOUR.length + 2;
+
 /* Where you are in onboarding: one dot per step, the current one wider. */
-function StepDots({ step }: { step: 1 | 2 }) {
+function StepDots({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-1.5" aria-label={`Step ${step} of 2`}>
-      {[1, 2].map((n) => (
+    <div className="flex items-center gap-1.5" aria-label={`Step ${step} of ${TOTAL_STEPS}`}>
+      {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((n) => (
         <span
           key={n}
           className={cn(
