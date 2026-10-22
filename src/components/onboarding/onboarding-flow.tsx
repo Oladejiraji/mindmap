@@ -42,8 +42,10 @@ const ROLE_ICONS: Record<Role, ReactNode> = {
   other: <Ellipsis />,
 };
 
+// Focus: a soft 3px ring at 30% that fades in (150ms ease-out), so the
+// field lights up gently; instant under reduced motion
 const field =
-  "corner-squircle h-10 w-full rounded-3xl bg-surface-container px-3.5 text-body-sm text-fg-primary shadow-border outline-none transition-shadow placeholder:text-fg-tertiary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-fg-tertiary";
+  "corner-squircle h-10 w-full rounded-3xl bg-surface-container px-3.5 text-body-sm text-fg-primary shadow-border outline-none transition-[box-shadow] duration-150 ease-out placeholder:text-fg-tertiary focus-visible:ring-3 focus-visible:ring-ring/30 motion-reduce:transition-none disabled:text-fg-tertiary";
 
 export function OnboardingFlow() {
   const router = useRouter();
