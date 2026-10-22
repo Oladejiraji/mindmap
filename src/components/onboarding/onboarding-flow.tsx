@@ -132,7 +132,7 @@ export function OnboardingFlow() {
                 <button
                   type="button"
                   onClick={() => setStep(TOTAL_STEPS)}
-                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   Skip tour
                 </button>
@@ -141,7 +141,7 @@ export function OnboardingFlow() {
                 type="button"
                 onClick={() => setStep(step - 1)}
                 disabled={submitting}
-                className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-secondary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 Back
               </button>
@@ -266,16 +266,15 @@ export function OnboardingFlow() {
           </div>
 
           <div className="mt-auto flex flex-col gap-4 pt-8">
-          {/* Same footer as the tour: dots left, Skip and Continue right */}
-          <div className="flex items-center justify-between gap-4">
-            <StepDots step={1} />
+          {/* Skip and Continue side by side on the right */}
+          <div className="flex items-center justify-end gap-4">
             <div className="flex items-center gap-2">
               {!joinedOrgId && (
                 <button
                   type="button"
                   onClick={() => void finish(true)}
                   disabled={submitting}
-                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   Skip for now
                 </button>
