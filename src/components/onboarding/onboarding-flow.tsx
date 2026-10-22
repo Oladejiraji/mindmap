@@ -168,45 +168,42 @@ export function OnboardingFlow() {
             if (canContinue) setStep(2);
           }}
         >
-          {/* Spacing follows interfere.com/join: 32px from the logo to the
-              title, 10px title to subtitle, 56px to the fields; fields on a
-              16px grid, centred in the space left; actions pinned below */}
-          <header className="space-y-8">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
-              <LogoIcon className="h-auto w-4" />
-            </span>
+          {/* Logo at the top; the title, fields and actions centred together
+              as one group (10px title to subtitle, 40px to the fields, 32px
+              to the actions); the signed-in line at the foot */}
+          <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
+            <LogoIcon className="h-auto w-4" />
+          </span>
+
+          <div className="flex flex-1 flex-col">
+          <div className="my-auto py-10">
             <div className="space-y-2.5">
               <h1 className="font-display text-heading-4 text-fg-primary">Get started</h1>
               <p className="text-body-base text-fg-secondary">
                 Set up your workspace. Mindmap is a shared space for your team&apos;s thinking.
               </p>
             </div>
-          </header>
 
-          {pendingInvites.length > 0 && (
-            <div className="mt-8">
-              <p className="text-body-sm font-medium text-fg-primary">You&apos;ve been invited</p>
-              <div className="mt-2 flex flex-col gap-2">
-                {pendingInvites.map((inv) => (
-                  <InviteCard
-                    key={inv._id}
-                    orgName={inv.orgName}
-                    role={inv.role}
-                    accepted={joinedOrgId === inv.orgId}
-                    loading={isAccepting}
-                    onAccept={() => void acceptInvite(inv._id)}
-                    onDecline={() => void declineInvite(inv._id)}
-                  />
-                ))}
+            {pendingInvites.length > 0 && (
+              <div className="mt-10">
+                <p className="text-body-sm font-medium text-fg-primary">You&apos;ve been invited</p>
+                <div className="mt-2 flex flex-col gap-2">
+                  {pendingInvites.map((inv) => (
+                    <InviteCard
+                      key={inv._id}
+                      orgName={inv.orgName}
+                      role={inv.role}
+                      accepted={joinedOrgId === inv.orgId}
+                      loading={isAccepting}
+                      onAccept={() => void acceptInvite(inv._id)}
+                      onDecline={() => void declineInvite(inv._id)}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="mt-14 flex flex-1 flex-col">
-          {/* Fields with the actions 32px below, centred together; the
-              signed-in line stays at the foot */}
-          <div className="my-auto">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {!joinedOrgId && (
                 <>
                   <Field label="Organization name">
