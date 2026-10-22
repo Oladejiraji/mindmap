@@ -1,0 +1,102 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Dialog } from "@base-ui/react/dialog";
+import { cn } from "@/lib/utils";
+import { MakeItYours } from "./make-it-yours";
+import { TOUR, TourStep } from "./tour";
+
+/*
+ * The walkthrough after onboarding (after Pond): a dialog over the Get
+ * started page, opened with ?tour=1 when onboarding finishes. The tour
+ * slides (how it works, nodes, collaborate, teams, models), then "Make it
+ * yours". Finish, Skip tour, Esc or clicking outside close it and drop the
+ * param, leaving you on Get started.
+ */
+const TOTAL = TOUR.length + 1;
+
+export function Walkthrough() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const open = searchParams.get("tour") === "1";
+  const [step, setStep] = useState(0);
+  // Focus starts on Continue, the expected next action, not on Skip tour
+  const continueRef = useRef<HTMLButtonElement>(null);
+
+  const close = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("tour");
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    setStep(0);
+  };
+
+  const slide = TOUR[step];
+  const last = step === TOTAL - 1;
+
+  return (
+    <Dialog.Root open={open} onOpenChange={(o) => !o && close()}>
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:opacity-0" />
+        <Dialog.Popup
+          initialFocus={continueRef}
+          aria-label="Welcome to Mindmap"
+          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100svh-32px)] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-4xl bg-surface-container p-6 shadow-extra-large outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity md:p-8"
+        >
+          <div
+            key={step}
+            className="flex min-h-[460px] flex-col justify-center py-4 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out"
+          >
+            {slide ? <TourStep slide={slide} /> : <MakeItYours />}
+          </div>
+
+          <div className="mt-6 flex items-center justify-between gap-4">
+            <Dots step={step} />
+            <div className="flex items-center gap-2">
+              {slide && (
+                <button type="button" onClick={close} className={textButton}>
+                  Skip tour
+                </button>
+              )}
+              {step > 0 && (
+                <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
+                  Back
+                </button>
+              )}
+              <button
+                ref={continueRef}
+                type="button"
+                onClick={() => (last ? close() : setStep(step + 1))}
+                className="corner-squircle h-9 cursor-pointer rounded-3xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+              >
+                {last ? "Finish" : "Continue"}
+              </button>
+            </div>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+const textButton =
+  "corner-squircle h-9 cursor-pointer rounded-3xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50";
+
+/* One dot per step, the current one wider. */
+function Dots({ step }: { step: number }) {
+  return (
+    <div className="flex items-center gap-1.5" aria-label={`Step ${step + 1} of ${TOTAL}`}>
+      {Array.from({ length: TOTAL }, (_, i) => (
+        <span
+          key={i}
+          className={cn(
+            "h-1.5 rounded-full transition-[width,background-color] duration-200 ease-out",
+            i === step ? "w-4 bg-fg-primary" : "w-1.5 bg-fg-disabled",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
