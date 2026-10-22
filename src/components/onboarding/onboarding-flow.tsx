@@ -2,7 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Ellipsis, Flag, FlaskConical, Package } from "lucide-react";
+import { Ellipsis, FlaskConical, Package } from "lucide-react";
+import { FlagIcon } from "@/components/icons/flag-icon";
 import { ContentIcon } from "@/components/icons/content-icon";
 import { DesignIcon } from "@/components/icons/design-icon";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
@@ -41,7 +42,7 @@ const ROLE_ICONS: Record<Role, ReactNode> = {
   design: <DesignIcon />,
   engineering: <ContentIcon />,
   research: <FlaskConical />,
-  leadership: <Flag />,
+  leadership: <FlagIcon />,
   other: <Ellipsis />,
 };
 
