@@ -14,7 +14,7 @@ import type { Id } from "@convex/dataModel";
 import { authClient } from "@/lib/auth-client";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
-import { ROLES, TEAM_SIZES, USE_CASES, useOnboarding, type Role, type TeamSize, type UseCase } from "@/lib/onboarding";
+import { ROLES, TEAM_SIZES, useOnboarding, type Role, type TeamSize } from "@/lib/onboarding";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
@@ -29,8 +29,7 @@ import { TOUR, TourStep } from "./tour";
  * canvas on the page background to the right.
  *
  *   invitations   only if the user has pending invites (join one, or not)
- *   form          organization name + team size, role + work email,
- *                 use cases (chips)
+ *   form          organization name + team size, role + work email
  *
  * Finishing:
  *   - with an org name (and no invite joined) → createWithOnboarding
@@ -107,9 +106,6 @@ export function OnboardingFlow() {
       handleError(err, "Failed to decline invitation");
     }
   };
-
-  const toggleUseCase = (value: UseCase) =>
-    update({ useCases: data.useCases.includes(value) ? data.useCases.filter((u) => u !== value) : [...data.useCases, value] });
 
   if (pendingInvites === undefined) return null;
 
@@ -237,32 +233,6 @@ export function OnboardingFlow() {
               <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
             </Field>
 
-          <fieldset className="sm:col-span-2">
-            <legend className="text-body-sm font-medium text-fg-primary">What will you use Mindmap for?</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {USE_CASES.map((u) => {
-                const on = data.useCases.includes(u.value);
-                return (
-                  <button
-                    key={u.value}
-                    type="button"
-                    role="checkbox"
-                    aria-checked={on}
-                    title={u.hint}
-                    onClick={() => toggleUseCase(u.value)}
-                    className={cn(
-                      "corner-squircle h-8 cursor-pointer rounded-full px-3.5 text-body-sm outline-none transition-[background-color,color] focus-visible:ring-3 focus-visible:ring-ring/50",
-                      on
-                        ? "bg-brand-subtle text-brand-fg"
-                        : "bg-component text-fg-secondary hover:text-fg-primary",
-                    )}
-                  >
-                    {u.label}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
           </div>
 
           <div className="mt-auto flex flex-col gap-4 pt-8">
