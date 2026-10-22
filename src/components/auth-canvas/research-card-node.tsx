@@ -86,9 +86,10 @@ export function ResearchCardNode({ data }: NodeProps) {
           </div>
           <div
             className="mt-3 rounded-lg p-[0.5px] shadow-default"
+            // Gradient edge at half strength (each stop at 50% alpha)
             style={{
               backgroundImage:
-                "linear-gradient(var(--gradient-angle), #DFFBFF 5.2%, #C2DAF9 21.33%, #AEB3E4 37.46%, #E2909C 54.48%, #FFA189 69.71%, #FFD060 94.8%)",
+                "linear-gradient(var(--gradient-angle), #DFFBFF80 5.2%, #C2DAF980 21.33%, #AEB3E480 37.46%, #E2909C80 54.48%, #FFA18980 69.71%, #FFD06080 94.8%)",
               animation: "rotate-gradient-angle 6s linear infinite",
             }}
           >
