@@ -179,7 +179,7 @@ export function OnboardingFlow() {
           <div className="my-auto py-10">
             <div className="space-y-2.5">
               <h1 className="font-display text-heading-4 text-fg-primary">Get started</h1>
-              <p className="text-body-base text-fg-secondary">
+              <p className="text-body-base font-medium text-fg-secondary">
                 Set up your workspace. Mindmap is a shared space for your team&apos;s thinking.
               </p>
             </div>
