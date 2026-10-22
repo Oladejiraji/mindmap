@@ -6,7 +6,7 @@ import { useMutation } from "convex/react";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { api } from "@convex/api";
 import { authClient } from "@/lib/auth-client";
-import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
+import { useAnimatedReplies, useCanvasHints, useHomeLayout } from "@/lib/preferences";
 import { ROLES } from "@/lib/onboarding";
 import { handleError } from "@/lib/handle-error";
 import { useTeams, type Team } from "@/lib/teams";
@@ -214,13 +214,19 @@ export function AccountSettings() {
 /* Personal › Preferences */
 export function PreferencesSettings() {
   const [hints, setHints] = useCanvasHints();
+  const [animatedReplies, setAnimatedReplies] = useAnimatedReplies();
   const [layout, setLayout] = useHomeLayout();
   const [switchedLayout, setSwitchedLayout] = useState(false);
   return (
-    <SettingsPage title="Preferences" description="How the canvas and Home behave. Saved in this browser.">
+    <SettingsPage title="Preferences" description="How the canvas, chat and Home behave. Saved in this browser.">
       <Section title="Canvas">
         <Row label="Shortcut hints" hint="Show the pill at the bottom of the canvas that teaches how to add nodes.">
           <Switch checked={hints} onCheckedChange={setHints} aria-label="Shortcut hints" />
+        </Row>
+      </Section>
+      <Section title="Chat">
+        <Row label="Animated replies" hint="Fade replies in word by word as they arrive.">
+          <Switch checked={animatedReplies} onCheckedChange={setAnimatedReplies} aria-label="Animated replies" />
         </Row>
       </Section>
       <Section title="Home">

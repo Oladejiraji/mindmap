@@ -12,6 +12,11 @@ export function useCanvasHints() {
   return useStoredBoolean("mindmap:canvas-hints", true);
 }
 
+/** Fade streamed replies in word by word (off: words just appear). */
+export function useAnimatedReplies() {
+  return useStoredBoolean("mindmap:animated-replies", true);
+}
+
 export type HomeLayout = "grid" | "list";
 const HOME_LAYOUT_KEY = "mindmap:home-layout";
 const EVENT = "mindmap:home-layout";
