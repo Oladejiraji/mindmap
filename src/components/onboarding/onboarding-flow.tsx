@@ -263,29 +263,32 @@ export function OnboardingFlow() {
           </div>
 
           <div className="mt-auto flex flex-col gap-4 pt-8">
-          <button
-            type="submit"
-            disabled={!canContinue}
-            className="corner-squircle h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
-          >
-            Continue
-          </button>
-          {!joinedOrgId && (
-            <button
-              type="button"
-              onClick={() => void finish(true)}
-              disabled={submitting}
-              className="-my-2 h-8 cursor-pointer self-center rounded-lg px-3 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              Skip for now
-            </button>
-          )}
+          {/* Same footer as the tour: dots left, Skip and Continue right */}
+          <div className="flex items-center justify-between gap-4">
+            <StepDots step={1} />
+            <div className="flex items-center gap-2">
+              {!joinedOrgId && (
+                <button
+                  type="button"
+                  onClick={() => void finish(true)}
+                  disabled={submitting}
+                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  Skip for now
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={!canContinue}
+                className="corner-squircle h-9 cursor-pointer rounded-xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
 
           <div role="separator" className="h-[0.5px] bg-border-default" />
-          <div className="flex items-center justify-between gap-4">
-            <p className="truncate text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
-            <StepDots step={1} />
-          </div>
+          <p className="truncate text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
           </div>
           </div>
         </form>
