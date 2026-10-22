@@ -128,7 +128,7 @@ export function OnboardingFlow() {
                 <button
                   type="button"
                   onClick={() => setStep(TOTAL_STEPS)}
-                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="corner-squircle h-9 cursor-pointer rounded-3xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   Skip tour
                 </button>
@@ -137,7 +137,7 @@ export function OnboardingFlow() {
                 type="button"
                 onClick={() => setStep(step - 1)}
                 disabled={submitting}
-                className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="corner-squircle h-9 cursor-pointer rounded-3xl px-3.5 text-body-sm font-medium text-fg-secondary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 Back
               </button>
@@ -145,7 +145,7 @@ export function OnboardingFlow() {
                 type="button"
                 onClick={() => (last ? void finish() : setStep(step + 1))}
                 disabled={submitting}
-                className="corner-squircle h-9 cursor-pointer rounded-xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:opacity-60"
+                className="corner-squircle h-9 cursor-pointer rounded-3xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:opacity-60"
               >
                 {submitting ? "Setting up…" : last ? "Finish" : "Continue"}
               </button>
@@ -203,64 +203,68 @@ export function OnboardingFlow() {
           )}
 
           <div className="mt-14 flex flex-1 flex-col">
-          <div className="my-auto grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {!joinedOrgId && (
-              <>
-                <Field label="Organization name">
-                  <input
-                    autoFocus
-                    value={data.orgName}
-                    onChange={(e) => update({ orgName: e.target.value })}
-                    placeholder="Acme Inc."
-                    className={field}
-                  />
-                </Field>
-                <Field label="Team size">
-                  <Select
-                    className="rounded-3xl"
-                    aria-label="Team size"
-                    value={data.teamSize}
-                    onChange={(v) => update({ teamSize: v as TeamSize | null })}
-                    options={TEAM_SIZES.map((t) => ({ ...t, itemLabel: `${t.label} employees` }))}
-                  />
-                </Field>
-              </>
-            )}
-            <Field label="Your role">
-              <Select className="rounded-3xl" aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES.map((r) => ({ ...r, icon: ROLE_ICONS[r.value] }))} />
-            </Field>
-            <Field label="Work email">
-              <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
-            </Field>
-
-          </div>
-
-          <div className="mt-auto flex flex-col gap-4 pt-8">
-          {/* Skip and Continue side by side on the right */}
-          <div className="flex items-center justify-end gap-4">
-            <div className="flex items-center gap-2">
+          {/* Fields with the actions 32px below, centred together; the
+              signed-in line stays at the foot */}
+          <div className="my-auto">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {!joinedOrgId && (
-                <button
-                  type="button"
-                  onClick={() => void finish(true)}
-                  disabled={submitting}
-                  className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  Skip for now
-                </button>
+                <>
+                  <Field label="Organization name">
+                    <input
+                      autoFocus
+                      value={data.orgName}
+                      onChange={(e) => update({ orgName: e.target.value })}
+                      placeholder="Acme Inc."
+                      className={field}
+                    />
+                  </Field>
+                  <Field label="Team size">
+                    <Select
+                      className="rounded-3xl"
+                      aria-label="Team size"
+                      value={data.teamSize}
+                      onChange={(v) => update({ teamSize: v as TeamSize | null })}
+                      options={TEAM_SIZES.map((t) => ({ ...t, itemLabel: `${t.label} employees` }))}
+                    />
+                  </Field>
+                </>
               )}
-              <button
-                type="submit"
-                disabled={!canContinue}
-                className="corner-squircle h-9 cursor-pointer rounded-xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
-              >
-                Continue
-              </button>
+              <Field label="Your role">
+                <Select className="rounded-3xl" aria-label="Your role" value={data.role} onChange={(v) => update({ role: v as Role | null })} options={ROLES.map((r) => ({ ...r, icon: ROLE_ICONS[r.value] }))} />
+              </Field>
+              <Field label="Work email">
+                <input value={session?.user?.email ?? ""} disabled readOnly aria-readonly className={field} />
+              </Field>
+
+            </div>
+
+            {/* Skip and Continue side by side on the right */}
+            <div className="mt-8 flex items-center justify-end gap-4">
+              <div className="flex items-center gap-2">
+                {!joinedOrgId && (
+                  <button
+                    type="button"
+                    onClick={() => void finish(true)}
+                    disabled={submitting}
+                    className="corner-squircle h-9 cursor-pointer rounded-3xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    Skip for now
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={!canContinue}
+                  className="corner-squircle h-9 cursor-pointer rounded-3xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
+                >
+                  Continue
+                </button>
+              </div>
             </div>
           </div>
 
-          <div role="separator" className="h-[0.5px] bg-border-default" />
-          <p className="truncate text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
+          <div className="flex flex-col gap-4 pt-8">
+            <div role="separator" className="h-[0.5px] bg-border-default" />
+            <p className="truncate text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
           </div>
           </div>
         </form>
