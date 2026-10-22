@@ -2,7 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Code, Ellipsis, Flag, FlaskConical, Package } from "lucide-react";
+import { Ellipsis, Flag, FlaskConical, Package } from "lucide-react";
+import { ContentIcon } from "@/components/icons/content-icon";
 import { DesignIcon } from "@/components/icons/design-icon";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { AuthCanvas } from "@/components/auth-canvas/auth-canvas";
@@ -38,7 +39,7 @@ import { TOUR, TourStep } from "./tour";
 const ROLE_ICONS: Record<Role, ReactNode> = {
   product: <Package />,
   design: <DesignIcon />,
-  engineering: <Code />,
+  engineering: <ContentIcon />,
   research: <FlaskConical />,
   leadership: <Flag />,
   other: <Ellipsis />,
