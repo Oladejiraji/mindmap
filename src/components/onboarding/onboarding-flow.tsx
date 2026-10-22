@@ -16,6 +16,7 @@ import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { cn } from "@/lib/utils";
 import { Select } from "@/components/ui/select";
 import { InviteCard } from "./invite-card";
+import { MakeItYours } from "./make-it-yours";
 
 /*
  * B2B onboarding, shown once after sign-up, laid out like interfere.com/join:
@@ -57,6 +58,8 @@ export function OnboardingFlow() {
   const { data: pendingInvites } = useAuthedConvexQuery(api.invitations.pending, {});
 
   const [joinedOrgId, setJoinedOrgId] = useState<string | null>(null);
+  // 1: workspace details; 2: "Make it yours", a walkthrough of settings
+  const [step, setStep] = useState<1 | 2>(1);
   const submitting = isCreating || isCompleting;
   const hasOrgName = data.orgName.trim().length > 0;
   const canContinue = (hasOrgName || !!joinedOrgId) && !submitting;
@@ -103,6 +106,42 @@ export function OnboardingFlow() {
 
   if (pendingInvites === undefined) return null;
 
+  if (step === 2) {
+    return (
+      <div className="min-h-svh bg-background lg:p-1.5">
+        <main className="mx-auto flex min-h-svh max-w-5xl flex-col border-border-default bg-surface-container px-6 py-10 lg:min-h-[calc(100svh-12px)] lg:rounded-3xl lg:border-[0.5px] lg:px-10">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-brand-solid text-on-brand-solid">
+            <LogoIcon className="h-auto w-4" />
+          </span>
+          <div className="my-auto py-10">
+            <MakeItYours />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <StepDots step={2} />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                disabled={submitting}
+                className="h-9 cursor-pointer rounded-xl px-3.5 text-body-sm text-fg-secondary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={() => void finish()}
+                disabled={submitting}
+                className="corner-squircle h-9 cursor-pointer rounded-xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:opacity-60"
+              >
+                {submitting ? "Setting up…" : "Continue"}
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="grid min-h-svh bg-background lg:grid-cols-2">
       {/* Form card (interfere.com/join): white, inset from the page edges
@@ -112,7 +151,7 @@ export function OnboardingFlow() {
           className="mx-auto flex w-full max-w-120 flex-1 flex-col"
           onSubmit={(e) => {
             e.preventDefault();
-            if (canContinue) void finish();
+            if (canContinue) setStep(2);
           }}
         >
           {/* Spacing follows interfere.com/join: 32px from the logo to the
@@ -214,7 +253,7 @@ export function OnboardingFlow() {
             disabled={!canContinue}
             className="corner-squircle h-11 w-full cursor-pointer rounded-3xl bg-brand-solid text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 enabled:active:scale-[0.97] motion-reduce:enabled:active:scale-100 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary"
           >
-            {submitting ? "Setting up…" : "Continue"}
+            Continue
           </button>
           {!joinedOrgId && (
             <button
@@ -228,7 +267,10 @@ export function OnboardingFlow() {
           )}
 
           <div role="separator" className="h-[0.5px] bg-border-default" />
-          <p className="text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
+          <div className="flex items-center justify-between gap-4">
+            <p className="truncate text-caption-lg text-fg-tertiary">Signed in as {session?.user?.email ?? "…"}</p>
+            <StepDots step={1} />
+          </div>
           </div>
           </div>
         </form>
@@ -248,5 +290,22 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="text-body-sm font-medium text-fg-primary">{label}</span>
       <div className="mt-2">{children}</div>
     </label>
+  );
+}
+
+/* Where you are in onboarding: one dot per step, the current one wider. */
+function StepDots({ step }: { step: 1 | 2 }) {
+  return (
+    <div className="flex items-center gap-1.5" aria-label={`Step ${step} of 2`}>
+      {[1, 2].map((n) => (
+        <span
+          key={n}
+          className={cn(
+            "h-1.5 rounded-full transition-[width,background-color] duration-200 ease-out",
+            n === step ? "w-4 bg-fg-primary" : "w-1.5 bg-fg-disabled",
+          )}
+        />
+      ))}
+    </div>
   );
 }

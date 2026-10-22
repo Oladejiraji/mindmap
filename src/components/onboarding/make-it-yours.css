@@ -1,0 +1,18 @@
+/* The sample reply in "Make it yours": words fade in one after another
+   (staggered animation-delay), matching streamed replies in the chat. */
+.stream-word-preview {
+  animation: stream-word-preview-in 450ms ease-out both;
+}
+
+@keyframes stream-word-preview-in {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stream-word-preview {
+    animation: none;
+  }
+}
