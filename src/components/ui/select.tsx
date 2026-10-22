@@ -49,7 +49,7 @@ export function Select<T extends string>({
       <BaseSelect.Trigger
         aria-label={ariaLabel}
         className={cn(
-          "group corner-squircle flex h-10 w-full cursor-pointer items-center gap-2 rounded-xl bg-surface-container px-3.5 text-left text-body-sm text-fg-primary shadow-border outline-none transition-[box-shadow] duration-150 ease-out focus-visible:ring-3 focus-visible:ring-ring/30 data-popup-open:ring-3 data-popup-open:ring-ring/30 motion-reduce:transition-none",
+          "group corner-squircle flex h-10 w-full cursor-pointer items-center gap-2 rounded-xl bg-surface-container px-3.5 text-left text-body-sm text-fg-primary shadow-border outline-none transition-[box-shadow,background-color] duration-150 ease-out hover:bg-[#f5f5f5] data-popup-open:bg-[#f5f5f5] focus-visible:ring-3 focus-visible:ring-ring/30 data-popup-open:ring-3 data-popup-open:ring-ring/30 motion-reduce:transition-none",
           className,
         )}
       >
