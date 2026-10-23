@@ -90,12 +90,13 @@ const bar = "rounded-sm bg-component-active";
 
 /* "Ask then Branch" (Figma): three message bars stacked bottom-right of
  * the panel, right-aligned, 10px apart. Each bar hugs to 36px high, 13px
- * radius, 12px 10px padding, #027fff, with a lighter line for its text. */
+ * radius (plain round, as in Figma), 12px 10px padding, #027fff, with a
+ * lighter line for its text. */
 function MessageBars() {
   return (
     <div className="absolute right-4 bottom-12 flex flex-col items-end gap-2.5">
-      {[308, 277, 404].map((w) => (
-        <div key={w} style={{ width: w }} className="flex items-center rounded-[13px] bg-[#027fff] px-2.5 py-3">
+      {[311, 277, 404].map((w) => (
+        <div key={w} style={{ width: w }} className="flex items-center rounded-[13px] bg-[#027fff] px-2.5 py-3 [corner-shape:round]">
           <span className="h-3 flex-1 rounded-full bg-white/15" />
         </div>
       ))}
