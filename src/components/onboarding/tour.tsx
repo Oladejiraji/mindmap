@@ -51,27 +51,34 @@ export const TOUR: TourSlide[] = [
   },
 ];
 
-/* A slide: the 770 × 318 illustration panel (brand blue) right-aligned
- * under the logo, then the title and a line on how it works, left-aligned. */
-export function TourStep({ slide }: { slide: TourSlide }) {
+/* A slide's illustration: the 770 × 318 brand-blue panel, right-aligned
+ * under the logo. */
+export function TourPanel({ slide }: { slide: TourSlide }) {
   return (
-    <div className="flex flex-col">
-      <div
-        aria-hidden
-        style={{ background: "linear-gradient(180deg, oklch(0.6 0.2 262) 0%, oklch(0.53 0.2 264) 100%)" }}
-        className="corner-squircle ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-2xl"
-      >
-        {slide.preview}
-      </div>
-      <div className="mt-10 flex items-center gap-2">
-        <h2 className="text-heading-6 font-semibold text-fg-primary">{slide.title}</h2>
+    <div
+      aria-hidden
+      style={{ background: "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)" }}
+      className="corner-squircle ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
+    >
+      {slide.preview}
+    </div>
+  );
+}
+
+/* A slide's title and a line on how it works, left-aligned.
+ * Title 600 24px/133% −0.01em #111; body 500 14px/143% #111 at 60%. */
+export function TourText({ slide }: { slide: TourSlide }) {
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <h2 className="text-[24px] leading-[1.33] font-semibold tracking-[-0.01em] text-[#111]">{slide.title}</h2>
         {slide.soon && (
           <span className="rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">
             {slide.soon}
           </span>
         )}
       </div>
-      <p className="mt-2 max-w-[460px] text-body-sm text-pretty text-fg-secondary">{slide.body}</p>
+      <p className="mt-2 max-w-[460px] text-[14px] leading-[1.43] font-medium tracking-normal text-pretty text-[rgba(17,17,17,0.6)]">{slide.body}</p>
     </div>
   );
 }

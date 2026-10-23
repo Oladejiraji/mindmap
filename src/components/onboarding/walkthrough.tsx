@@ -6,7 +6,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { MakeItYours } from "./make-it-yours";
-import { TOUR, TourStep } from "./tour";
+import { TOUR, TourPanel, TourText } from "./tour";
 
 /*
  * The walkthrough after onboarding (after Pond): a dialog over the Get
@@ -51,34 +51,40 @@ export function Walkthrough() {
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-solid text-on-brand-solid">
             <LogoIcon className="h-auto w-5" />
           </span>
-          <div
-            key={step}
-            className="flex min-h-0 flex-1 flex-col pt-1 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out"
-          >
-            {slide ? <TourStep slide={slide} /> : <MakeItYours className="min-h-0 flex-1 pt-4" />}
+          <div key={step} className="flex min-h-0 flex-1 flex-col pt-1 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
+            {slide ? <TourPanel slide={slide} /> : <MakeItYours className="min-h-0 flex-1 pt-4" />}
           </div>
 
-          <div className="mt-auto flex items-center justify-between gap-4 pt-6">
-            <Dots step={step} />
-            <div className="flex items-center gap-2">
-              {slide && (
-                <button type="button" onClick={close} className={textButton}>
-                  Skip
+          {/* Text, dots and buttons: 959 × 152, text at the top, actions at the
+              foot (just the actions on Make it yours) */}
+          <div className={cn("mt-auto flex w-full max-w-[959px] flex-col justify-between pt-6", slide && "h-[152px] pt-0")}>
+            {slide && (
+              <div key={step} className="motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
+                <TourText slide={slide} />
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-4">
+              <Dots step={step} />
+              <div className="flex items-center gap-2">
+                {slide && (
+                  <button type="button" onClick={close} className={textButton}>
+                    Skip
+                  </button>
+                )}
+                {step > 0 && (
+                  <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
+                    Back
+                  </button>
+                )}
+                <button
+                  ref={continueRef}
+                  type="button"
+                  onClick={() => (last ? close() : setStep(step + 1))}
+                  className="corner-squircle h-9 cursor-pointer rounded-xl bg-inverted-solid px-4 text-body-sm font-medium text-on-inverted-fg outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                >
+                  {last ? "Finish" : "Continue"}
                 </button>
-              )}
-              {step > 0 && (
-                <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
-                  Back
-                </button>
-              )}
-              <button
-                ref={continueRef}
-                type="button"
-                onClick={() => (last ? close() : setStep(step + 1))}
-                className="corner-squircle h-9 cursor-pointer rounded-xl bg-inverted-solid px-4 text-body-sm font-medium text-on-inverted-fg outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
-              >
-                {last ? "Finish" : "Continue"}
-              </button>
+              </div>
             </div>
           </div>
         </Dialog.Popup>
