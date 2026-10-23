@@ -20,13 +20,13 @@ import "./make-it-yours.css";
  *   │ Home layout  │              │              │
  *   └──────────────┴──────────────┴──────────────┘
  */
-export function MakeItYours() {
+export function MakeItYours({ className }: { className?: string }) {
   const [hints, setHints] = useCanvasHints();
   const [animated, setAnimated] = useAnimatedReplies();
   const [layout, setLayout] = useHomeLayout();
 
   return (
-    <div className="grid gap-3 md:grid-cols-3 md:grid-rows-2">
+    <div className={cn("grid gap-3 md:grid-cols-3 md:grid-rows-2", className)}>
       <Card
         title="Shortcut hints"
         hint="Press Tab on a node to branch it, ↵ to add a sibling."
@@ -78,9 +78,9 @@ function Card({
   return (
     <section
       aria-label={title}
-      className={cn("corner-squircle flex flex-col rounded-3xl bg-background p-4 shadow-border", className)}
+      className={cn("corner-squircle flex min-h-0 flex-col rounded-3xl bg-background p-4 shadow-border", className)}
     >
-      <div aria-hidden className="flex min-h-32 flex-1 items-center justify-center">
+      <div aria-hidden className="flex min-h-0 flex-1 items-center justify-center">
         {children}
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
+import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { MakeItYours } from "./make-it-yours";
 import { TOUR, TourStep } from "./tour";
 
@@ -45,21 +46,24 @@ export function Walkthrough() {
         <Dialog.Popup
           initialFocus={continueRef}
           aria-label="Welcome to Mindmap"
-          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity md:p-8"
+          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-solid text-on-brand-solid">
+            <LogoIcon className="h-auto w-5" />
+          </span>
           <div
             key={step}
-            className="flex min-h-0 flex-1 flex-col justify-center py-4 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out"
+            className="flex min-h-0 flex-1 flex-col pt-1 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out"
           >
-            {slide ? <TourStep slide={slide} /> : <MakeItYours />}
+            {slide ? <TourStep slide={slide} /> : <MakeItYours className="min-h-0 flex-1 pt-4" />}
           </div>
 
-          <div className="mt-6 flex items-center justify-between gap-4">
+          <div className="mt-auto flex items-center justify-between gap-4 pt-6">
             <Dots step={step} />
             <div className="flex items-center gap-2">
               {slide && (
                 <button type="button" onClick={close} className={textButton}>
-                  Skip tour
+                  Skip
                 </button>
               )}
               {step > 0 && (
@@ -71,7 +75,7 @@ export function Walkthrough() {
                 ref={continueRef}
                 type="button"
                 onClick={() => (last ? close() : setStep(step + 1))}
-                className="corner-squircle h-9 cursor-pointer rounded-3xl bg-brand-solid px-4 text-body-sm font-medium text-on-brand-solid outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                className="corner-squircle h-9 cursor-pointer rounded-xl bg-inverted-solid px-4 text-body-sm font-medium text-on-inverted-fg outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 {last ? "Finish" : "Continue"}
               </button>
@@ -89,13 +93,13 @@ const textButton =
 /* One dot per step, the current one wider. */
 function Dots({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-1.5" aria-label={`Step ${step + 1} of ${TOTAL}`}>
+    <div className="flex items-center gap-1" aria-label={`Step ${step + 1} of ${TOTAL}`}>
       {Array.from({ length: TOTAL }, (_, i) => (
         <span
           key={i}
           className={cn(
-            "h-1.5 rounded-full transition-[width,background-color] duration-200 ease-out",
-            i === step ? "w-4 bg-fg-primary" : "w-1.5 bg-fg-disabled",
+            "size-1 rounded-full transition-colors duration-200 ease-out",
+            i === step ? "bg-fg-primary" : "bg-component-active",
           )}
         />
       ))}

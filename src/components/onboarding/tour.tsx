@@ -51,24 +51,27 @@ export const TOUR: TourSlide[] = [
   },
 ];
 
+/* A slide: the 770 × 318 illustration panel (brand blue) right-aligned
+ * under the logo, then the title and a line on how it works, left-aligned. */
 export function TourStep({ slide }: { slide: TourSlide }) {
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
+    <div className="flex flex-col">
       <div
         aria-hidden
-        className="corner-squircle flex h-64 w-full items-center justify-center overflow-hidden rounded-3xl bg-background shadow-border"
+        style={{ background: "linear-gradient(180deg, oklch(0.6 0.2 262) 0%, oklch(0.53 0.2 264) 100%)" }}
+        className="corner-squircle ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-2xl"
       >
         {slide.preview}
       </div>
-      <div className="mt-8 flex items-center gap-2">
-        <h2 className="font-display text-heading-4 text-fg-primary">{slide.title}</h2>
+      <div className="mt-10 flex items-center gap-2">
+        <h2 className="text-heading-6 font-semibold text-fg-primary">{slide.title}</h2>
         {slide.soon && (
           <span className="rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">
             {slide.soon}
           </span>
         )}
       </div>
-      <p className="mt-3 max-w-md text-body-base text-pretty text-fg-secondary">{slide.body}</p>
+      <p className="mt-2 max-w-[460px] text-body-sm text-pretty text-fg-secondary">{slide.body}</p>
     </div>
   );
 }
