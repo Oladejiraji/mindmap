@@ -78,7 +78,7 @@ export function Walkthrough() {
                     <button
                       type="button"
                       onClick={close}
-                      className="corner-squircle h-9 w-[61px] shrink-0 cursor-pointer rounded-[8px] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50"
+                      className="corner-squircle h-9 w-[61px] shrink-0 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
                       Skip
                     </button>
@@ -87,7 +87,7 @@ export function Walkthrough() {
                     ref={continueRef}
                     type="button"
                     onClick={() => (last ? close() : setStep(step + 1))}
-                    className="corner-squircle h-9 w-[93px] shrink-0 cursor-pointer rounded-[8px] bg-[#1e1e1e] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                    className="corner-squircle h-9 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
                   >
                     {last ? "Finish" : "Continue"}
                   </button>
@@ -101,9 +101,10 @@ export function Walkthrough() {
   );
 }
 
-// Back: same text as Skip (500 14px/143%, #111 at 60%)
+// Back: same text as Skip (500 14px/143%, #111 at 60%); buttons use our
+// 16px squircle button radius
 const textButton =
-  "corner-squircle h-9 cursor-pointer rounded-[8px] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
+  "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /* One dot per step, the current one wider. */
 function Dots({ step }: { step: number }) {
