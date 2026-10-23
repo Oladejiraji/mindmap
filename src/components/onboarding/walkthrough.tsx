@@ -40,14 +40,16 @@ export function Walkthrough() {
     <Dialog.Root open={open} onOpenChange={(o) => !o && close()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:opacity-0" />
+        {/* 1040 × 628, 20px corners, white, hairline + soft drop shadow;
+            shrinks to fit smaller screens */}
         <Dialog.Popup
           initialFocus={continueRef}
           aria-label="Welcome to Mindmap"
-          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100svh-32px)] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-4xl bg-surface-container p-6 shadow-extra-large outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity md:p-8"
+          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity md:p-8"
         >
           <div
             key={step}
-            className="flex min-h-[460px] flex-col justify-center py-4 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out"
+            className="flex min-h-0 flex-1 flex-col justify-center py-4 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out"
           >
             {slide ? <TourStep slide={slide} /> : <MakeItYours />}
           </div>
