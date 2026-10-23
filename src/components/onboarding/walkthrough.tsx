@@ -66,24 +66,32 @@ export function Walkthrough() {
             <div className="flex items-center justify-between gap-4">
               <Dots step={step} />
               <div className="flex items-center gap-2">
-                {slide && (
-                  <button type="button" onClick={close} className={textButton}>
-                    Skip
-                  </button>
-                )}
                 {step > 0 && (
                   <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
                     Back
                   </button>
                 )}
-                <button
-                  ref={continueRef}
-                  type="button"
-                  onClick={() => (last ? close() : setStep(step + 1))}
-                  className="corner-squircle h-9 cursor-pointer rounded-xl bg-inverted-solid px-4 text-body-sm font-medium text-on-inverted-fg outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-inverted-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
-                >
-                  {last ? "Finish" : "Continue"}
-                </button>
+                {/* Skip + Continue: a 166 × 36 group; Skip 61 × 36, Continue
+                    93 × 36, 12px apart; text 500 14px/143% */}
+                <div className="flex h-9 w-[166px] items-center justify-end gap-3">
+                  {slide && (
+                    <button
+                      type="button"
+                      onClick={close}
+                      className="corner-squircle h-9 w-[61px] shrink-0 cursor-pointer rounded-[8px] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      Skip
+                    </button>
+                  )}
+                  <button
+                    ref={continueRef}
+                    type="button"
+                    onClick={() => (last ? close() : setStep(step + 1))}
+                    className="corner-squircle h-9 w-[93px] shrink-0 cursor-pointer rounded-[8px] bg-[#1e1e1e] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                  >
+                    {last ? "Finish" : "Continue"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -93,8 +101,9 @@ export function Walkthrough() {
   );
 }
 
+// Back: same text as Skip (500 14px/143%, #111 at 60%)
 const textButton =
-  "corner-squircle h-9 cursor-pointer rounded-3xl px-3.5 text-body-sm font-medium text-fg-tertiary outline-none transition-colors hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50";
+  "corner-squircle h-9 cursor-pointer rounded-[8px] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /* One dot per step, the current one wider. */
 function Dots({ step }: { step: number }) {
