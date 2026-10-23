@@ -26,7 +26,7 @@ export function TabPreview({ tab }: { tab: OpenTab }) {
   let snippet = "Start a project from a question.";
   if (threadId) {
     const root = nodes?.find((n) => n.parentId === null);
-    const notes = Array.isArray(root?.content) ? blocksToPlainText(root.content as any).trim() : "";
+    const notes = Array.isArray(root?.content) ? blocksToPlainText(root.content as Parameters<typeof blocksToPlainText>[0]).trim() : "";
     snippet = notes || (nodes ? `${nodes.length} ${nodes.length === 1 ? "node" : "nodes"}, no notes yet.` : "Loading…");
   }
 
