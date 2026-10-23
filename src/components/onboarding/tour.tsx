@@ -19,9 +19,9 @@ export type TourSlide = { id: string; title: string; body: string; soon?: string
 export const TOUR: TourSlide[] = [
   {
     id: "how",
-    title: "Ask, then branch",
+    title: "Ask then Branch",
     body: "Start a project with a question. Each answer can branch into its own node, so you can follow every direction without losing the thread.",
-    preview: <HowItWorks />,
+    preview: <MessageBars />,
   },
   {
     id: "nodes",
@@ -58,7 +58,7 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
     <div
       aria-hidden
       style={{ background: "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)" }}
-      className="corner-squircle ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
+      className="corner-squircle relative ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
     >
       {slide.preview}
     </div>
@@ -88,32 +88,18 @@ export function TourText({ slide }: { slide: TourSlide }) {
 const card = "corner-squircle rounded-2xl bg-surface-container shadow-default";
 const bar = "rounded-sm bg-component-active";
 
-/* A question, its answer, and two branches growing from it. */
-function HowItWorks() {
+/* "Ask then Branch" (Figma): three message bars stacked bottom-right of
+ * the panel, right-aligned, 10px apart. Each bar hugs to 36px high, 13px
+ * radius, 12px 10px padding, #027fff, with a lighter line for its text. */
+function MessageBars() {
   return (
-    <div className="flex w-72 flex-col items-center">
-      <p className="self-end rounded-[20px] bg-component px-3.5 py-2 text-body-sm text-fg-primary [corner-shape:round]">
-        How should we price the team plan?
-      </p>
-      <div className={cn(card, "mt-3 w-full p-3")}>
-        <div className={cn(bar, "h-1.5 w-11/12")} />
-        <div className={cn(bar, "mt-1.5 h-1.5 w-3/4")} />
-      </div>
-      <div className="flex h-5 w-40 justify-between">
-        <span className="ml-6 w-px bg-border-strong" />
-        <span className="mr-6 w-px bg-border-strong" />
-      </div>
-      <div className="flex w-full gap-3">
-        <BranchChip>Per-seat</BranchChip>
-        <BranchChip>Usage-based</BranchChip>
-      </div>
+    <div className="absolute right-4 bottom-12 flex flex-col items-end gap-2.5">
+      {[308, 277, 404].map((w) => (
+        <div key={w} style={{ width: w }} className="flex items-center rounded-[13px] bg-[#027fff] px-2.5 py-3">
+          <span className="h-3 flex-1 rounded-full bg-white/15" />
+        </div>
+      ))}
     </div>
-  );
-}
-
-function BranchChip({ children }: { children: ReactNode }) {
-  return (
-    <div className={cn(card, "flex-1 px-3 py-2 text-left text-caption-lg font-medium text-fg-primary")}>{children}</div>
   );
 }
 
