@@ -63,7 +63,8 @@ export function Walkthrough() {
               foot (just the actions on Make it yours) */}
           <div className={cn("mt-auto flex w-full max-w-[959px] flex-col justify-between pt-6", slide && "h-[152px] pt-0")}>
             {slide && (
-              <div key={step} className="motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
+              // Centred in the frame, text still left-aligned
+              <div key={step} className="w-full max-w-[460px] self-center motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
                 <TourText slide={slide} />
               </div>
             )}

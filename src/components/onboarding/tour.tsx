@@ -52,14 +52,14 @@ export const TOUR: TourSlide[] = [
   },
 ];
 
-/* A slide's illustration: the 770px brand-blue panel, right-aligned
+/* A slide's illustration: the 578px brand-blue panel, right-aligned
  * under the logo, filling the height left above the text. */
 export function TourPanel({ slide }: { slide: TourSlide }) {
   return (
     <div
       aria-hidden
       style={{ background: "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)" }}
-      className="corner-squircle relative ml-auto flex min-h-0 w-[770px] flex-1 max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
+      className="corner-squircle relative ml-auto flex min-h-0 w-[578px] flex-1 max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
     >
       {slide.preview}
     </div>
