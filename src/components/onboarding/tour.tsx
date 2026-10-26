@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ThinkingOrb } from "thinking-orbs";
 import { Plus } from "lucide-react";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
+import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { CheckIcon } from "@/components/icons/check-icon";
 import { MODELS } from "@/components/auth-canvas/models-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -62,11 +63,21 @@ export function TourPanel() {
   );
 }
 
-/* A slide's title and a line on how it works, left-aligned, beside the panel.
+/* The Mindmap logo tile, 32px, sitting 16px above a step's title. */
+export function TourLogo({ className }: { className?: string }) {
+  return (
+    <span className={cn("mb-4 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
+      <LogoIcon className="h-auto w-4" />
+    </span>
+  );
+}
+
+/* A slide's logo, title and a line on how it works, left-aligned, beside the panel.
  * Title 500 18px/133% −0.01em #111; body 500 14px/143% #111 at 60%. */
 export function TourText({ slide }: { slide: TourSlide }) {
   return (
     <div>
+      <TourLogo />
       <div className="flex items-center gap-2">
         <h2 className="text-[18px] leading-[1.33] font-medium tracking-[-0.01em] text-[#111]">{slide.title}</h2>
         {slide.soon && (

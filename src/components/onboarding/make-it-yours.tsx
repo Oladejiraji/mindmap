@@ -5,6 +5,7 @@ import { Kbd } from "@/components/canvas/canvas-shortcuts";
 import { Switch } from "@/components/ui/switch";
 import { useAnimatedReplies, useCanvasHints, useHomeLayout, type HomeLayout } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
+import { TourLogo } from "./tour";
 import "./make-it-yours.css";
 
 /*
@@ -36,6 +37,7 @@ export function MakeItYours({ className }: { className?: string }) {
       </Card>
 
       <div className="flex flex-col items-center justify-center px-6 py-10 text-center md:row-span-2">
+        <TourLogo />
         <h2 className="font-display text-heading-4 text-fg-primary">Make it yours</h2>
         <p className="mt-3 max-w-72 text-body-base text-fg-secondary">
           A quick tour of how Mindmap works for you. Change any of it later in Settings.

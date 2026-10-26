@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
-import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { MakeItYours } from "./make-it-yours";
 import { TOUR, TourPanel, TourText } from "./tour";
 
@@ -48,20 +47,17 @@ export function Walkthrough() {
           aria-label="Welcome to Mindmap"
           className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-brand-solid text-on-brand-solid">
-            <LogoIcon className="h-auto w-2.5" />
-          </span>
-          <div key={step} className="flex min-h-0 flex-1 flex-col pt-1 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
+          <div key={step} className="flex min-h-0 flex-1 flex-col motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
             {slide ? (
               // Text and panel on one line, centred on each other
-              <div className="flex min-h-0 flex-1 items-center gap-10 pt-4">
+              <div className="flex min-h-0 flex-1 items-center gap-10">
                 <div className="min-w-0 flex-1">
                   <TourText slide={slide} />
                 </div>
                 <TourPanel />
               </div>
             ) : (
-              <MakeItYours className="min-h-0 flex-1 pt-4" />
+              <MakeItYours className="min-h-0 flex-1" />
             )}
           </div>
 
