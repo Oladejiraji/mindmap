@@ -11,7 +11,7 @@ import { TOUR, TourPanel, TourText } from "./tour";
  * The walkthrough after onboarding (after Pond): a dialog over the Get
  * started page, opened with ?tour=1 when onboarding finishes. The tour
  * slides (how it works, nodes, collaborate, teams, models), then "Make it
- * yours". Finish, Skip tour, Esc or clicking outside close it and drop the
+ * yours". Finish, Esc or clicking outside close it and drop the
  * param, leaving you on Get started.
  */
 const TOTAL = TOUR.length + 1;
@@ -22,7 +22,7 @@ export function Walkthrough() {
   const searchParams = useSearchParams();
   const open = searchParams.get("tour") === "1";
   const [step, setStep] = useState(0);
-  // Focus starts on Continue, the expected next action, not on Skip tour
+  // Focus starts on Continue, the expected next action
   const continueRef = useRef<HTMLButtonElement>(null);
 
   const close = () => {
@@ -71,27 +71,15 @@ export function Walkthrough() {
                     Back
                   </button>
                 )}
-                {/* Skip + Continue: a 166 × 36 group; Skip 61 × 36 (500 14px/143%),
-                    Continue 93 × 32 (500 13px), 12px apart */}
-                <div className="flex h-9 w-[166px] items-center justify-end gap-3">
-                  {slide && (
-                    <button
-                      type="button"
-                      onClick={close}
-                      className="corner-squircle h-9 w-[61px] shrink-0 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50"
-                    >
-                      Skip
-                    </button>
-                  )}
-                  <button
-                    ref={continueRef}
-                    type="button"
-                    onClick={() => (last ? close() : setStep(step + 1))}
-                    className="corner-squircle h-8 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-1.5 text-[13px] leading-[1.38] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
-                  >
-                    {last ? "Finish" : "Continue"}
-                  </button>
-                </div>
+                {/* Continue 93 × 32 (500 13px); close with Esc or outside */}
+                <button
+                  ref={continueRef}
+                  type="button"
+                  onClick={() => (last ? close() : setStep(step + 1))}
+                  className="corner-squircle h-8 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-1.5 text-[13px] leading-[1.38] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                >
+                  {last ? "Finish" : "Continue"}
+                </button>
               </div>
             </div>
           </div>
@@ -101,7 +89,7 @@ export function Walkthrough() {
   );
 }
 
-// Back: same text as Skip (500 14px/143%, #111 at 60%); buttons use our
+// Back: 500 14px/143%, #111 at 60%; buttons use our
 // 16px squircle button radius
 const textButton =
   "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
