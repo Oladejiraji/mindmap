@@ -73,7 +73,7 @@ export function TourLogo({ className }: { className?: string }) {
 }
 
 /* A slide's logo, title and a line on how it works, left-aligned, beside the panel.
- * Title 500 24px/133% −0.01em #111; body 500 14px/143% #111 at 60%. */
+ * Title 500 24px/133% −0.01em #111; body 400 14px/143% #111 at 60%. */
 export function TourText({ slide }: { slide: TourSlide }) {
   return (
     <div>
@@ -86,7 +86,7 @@ export function TourText({ slide }: { slide: TourSlide }) {
           </span>
         )}
       </div>
-      <p className="mt-2 max-w-[460px] text-[14px] leading-[1.43] font-medium tracking-normal text-pretty text-[rgba(17,17,17,0.6)]">{slide.body}</p>
+      <p className="mt-2 max-w-[460px] text-[14px] leading-[1.43] font-normal tracking-normal text-pretty text-[rgba(17,17,17,0.6)]">{slide.body}</p>
     </div>
   );
 }
