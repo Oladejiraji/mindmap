@@ -21,6 +21,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 16 | 2026-10-26 | Step dots 40% larger: 5.6px, 5.6px apart | `697156e` |
 | 15 | 2026-10-26 | Back to the original 1040 × 628; section thumbnails back to the step dots | `2c666f9` |
 | 14 | 2026-10-26 | Text and panel on one line: title and body on the left, the 578 × 318 panel on the right, vertically centred on each other, 40px apart. Footer is just the section thumbnails and actions (the 152px text block is gone) | `e7ee4a3` |
 | 13 | 2026-10-26 | Slide text centred in the frame (460px block, still left-aligned); blue panel 25% narrower, 578px, still right-aligned | `4e64778` |
