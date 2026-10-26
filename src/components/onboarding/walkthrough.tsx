@@ -71,8 +71,8 @@ export function Walkthrough() {
                     Back
                   </button>
                 )}
-                {/* Skip + Continue: a 166 × 36 group; Skip 61 × 36, Continue
-                    93 × 36, 12px apart; text 500 14px/143% */}
+                {/* Skip + Continue: a 166 × 36 group; Skip 61 × 36 (500 14px/143%),
+                    Continue 93 × 32 (500 13px), 12px apart */}
                 <div className="flex h-9 w-[166px] items-center justify-end gap-3">
                   {slide && (
                     <button
@@ -87,7 +87,7 @@ export function Walkthrough() {
                     ref={continueRef}
                     type="button"
                     onClick={() => (last ? close() : setStep(step + 1))}
-                    className="corner-squircle h-9 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                    className="corner-squircle h-8 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-1.5 text-[13px] leading-[1.38] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
                   >
                     {last ? "Finish" : "Continue"}
                   </button>
