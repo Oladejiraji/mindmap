@@ -21,6 +21,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 21 | 2026-10-26 | Skip removed (Esc or clicking outside still close it); the 166px button group goes with it, so Back sits 8px from Continue | `c3b05e0` |
 | 20 | 2026-10-26 | Slide body text 13px/18px, regular | `46eed1b` |
 | 19 | 2026-10-26 | Slide body text regular (400), 14px/143% | `79ebd35` |
 | 18 | 2026-10-26 | Continue button 93 × 32 with 13px text; slide title back to its original 24px (weight stays 500) | `d0b2f2f` |
