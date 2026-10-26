@@ -1,14 +1,10 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
-import { NodesIcon } from "@/components/icons/nodes-icon";
-import { PreferencesIcon } from "@/components/icons/preferences-icon";
-import { Tip } from "@/components/ui/tooltip";
-import { Network, Sparkles, SquareUser, Users } from "lucide-react";
 import { MakeItYours } from "./make-it-yours";
 import { TOUR, TourPanel, TourText } from "./tour";
 
@@ -45,12 +41,12 @@ export function Walkthrough() {
     <Dialog.Root open={open} onOpenChange={(o) => !o && close()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:opacity-0" />
-        {/* 1040 × 502, 20px corners, white, hairline + soft drop shadow;
+        {/* 1040 × 628, 20px corners, white, hairline + soft drop shadow;
             shrinks to fit smaller screens */}
         <Dialog.Popup
           initialFocus={continueRef}
           aria-label="Welcome to Mindmap"
-          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(502px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
+          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
           <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-brand-solid text-on-brand-solid">
             <LogoIcon className="h-auto w-2.5" />
@@ -62,17 +58,17 @@ export function Walkthrough() {
                 <div className="min-w-0 flex-1">
                   <TourText slide={slide} />
                 </div>
-                <TourPanel slide={slide} />
+                <TourPanel />
               </div>
             ) : (
               <MakeItYours className="min-h-0 flex-1 pt-4" />
             )}
           </div>
 
-          {/* Footer: section thumbnails, then the actions */}
+          {/* Footer: step dots, then the actions */}
           <div className="mt-auto flex w-full flex-col pt-6">
             <div className="flex items-center justify-between gap-4">
-              <Sections step={step} onSelect={setStep} />
+              <Dots step={step} />
               <div className="flex items-center gap-2">
                 {step > 0 && (
                   <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
@@ -114,44 +110,19 @@ export function Walkthrough() {
 const textButton =
   "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
-/* A visual preview of the sections: a small thumbnail of each one's panel
- * (brand blue for the tour slides, light for Make it yours) with an icon for its topic. The current one is outlined, ones
- * still to come are faded; click to jump. Names are the tooltip and label. */
-const BLUE = "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)";
-const THUMBS: Record<string, ReactNode> = {
-  how: <Network />,
-  nodes: <NodesIcon />,
-  collaborate: <Users />,
-  teams: <SquareUser />,
-  models: <Sparkles />,
-};
-const SECTIONS = [
-  ...TOUR.map((t) => ({ name: t.title, icon: THUMBS[t.id], light: false })),
-  { name: "Make it yours", icon: <PreferencesIcon />, light: true },
-];
-
-function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => void }) {
+/* One dot per step, the current one wider. */
+function Dots({ step }: { step: number }) {
   return (
-    <nav aria-label="Walkthrough sections" className="flex items-center gap-1.5">
-      {SECTIONS.map((sec, i) => (
-        <Tip key={sec.name} label={sec.name} side="top">
-          <button
-            type="button"
-            onClick={() => onSelect(i)}
-            aria-label={sec.name}
-            aria-current={i === step ? "step" : undefined}
-            style={sec.light ? undefined : { background: BLUE }}
-            className={cn(
-              "corner-squircle flex h-7 w-[18px] cursor-pointer items-center justify-center rounded-[4px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-2.5",
-              sec.light ? "bg-[#f2f2f2] text-[rgba(17,17,17,0.6)]" : "text-white",
-              i === step ? "outline-2 outline-[#111]" : "outline-2 outline-transparent",
-              i > step && "opacity-45 hover:opacity-80",
-            )}
-          >
-            {sec.icon}
-          </button>
-        </Tip>
+    <div className="flex items-center gap-1" aria-label={`Step ${step + 1} of ${TOTAL}`}>
+      {Array.from({ length: TOTAL }, (_, i) => (
+        <span
+          key={i}
+          className={cn(
+            "size-1 rounded-full transition-colors duration-200 ease-out",
+            i === step ? "bg-fg-primary" : "bg-component-active",
+          )}
+        />
       ))}
-    </nav>
+    </div>
   );
 }

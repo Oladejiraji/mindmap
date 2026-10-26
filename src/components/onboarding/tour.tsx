@@ -52,17 +52,13 @@ export const TOUR: TourSlide[] = [
   },
 ];
 
-/* A slide's illustration: the 578px brand-blue panel on the right,
- * beside the slide's text, as tall as the space allows (318px at most). */
-export function TourPanel({ slide }: { slide: TourSlide }) {
+/* A slide's illustration: for now an empty 578 × 318 #f5f5f5 container
+ * beside the slide's text. The previews (the blue panel with the Ask then
+ * Branch chat, and the others below) are kept but not shown; restore the
+ * blue panel from e7ee4a3. */
+export function TourPanel() {
   return (
-    <div
-      aria-hidden
-      style={{ background: "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)" }}
-      className="corner-squircle relative flex h-full max-h-[318px] w-[578px] shrink-0 max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
-    >
-      {slide.preview}
-    </div>
+    <div aria-hidden className="corner-squircle h-full max-h-[318px] w-[578px] max-w-full shrink-0 rounded-[16px] bg-[#f5f5f5]" />
   );
 }
 
