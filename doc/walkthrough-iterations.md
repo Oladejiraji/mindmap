@@ -19,6 +19,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 10 | 2026-10-26 | Section thumbnails 70% narrower: 13 × 28 strips, 4px corners, 10px icons | `b5b60ab` |
 | 9 | 2026-10-26 | Section preview becomes thumbnails, not words: a mini panel per section (dark tree, blue tour slides, light Make it yours) with a topic icon; current outlined, upcoming faded, click to jump | `3d3f943` |
 | 8 | 2026-10-26 | Footer previews the sections (names, current dark, seen mid-grey, upcoming light, click to jump) instead of dots | `ab77fb0` |
 | 7 | 2026-10-23 | Buttons use our 16px squircle button radius | `84d4c1b` |
