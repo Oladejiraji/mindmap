@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { RootsIllustration } from "./roots-illustration";
+import { Roots3D } from "./roots-3d";
 import { Plus } from "lucide-react";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
 import { CheckIcon } from "@/components/icons/check-icon";
@@ -15,7 +15,8 @@ import { cn } from "@/lib/utils";
  * Features that aren't in the app yet say so ("Coming soon") instead of
  * promising them.
  */
-// dark: a greyscale panel instead of brand blue (the Ask then Branch roots)
+// dark: a greyscale, narrower panel instead of brand blue (the Ask then
+// Branch roots in 3D)
 export type TourSlide = { id: string; title: string; body: string; soon?: string; dark?: boolean; preview: ReactNode };
 
 export const TOUR: TourSlide[] = [
@@ -24,7 +25,7 @@ export const TOUR: TourSlide[] = [
     title: "Ask then Branch",
     body: "Start a project with a question. Each answer can branch into its own node, so you can follow every direction without losing the thread.",
     dark: true,
-    preview: <RootsIllustration />,
+    preview: <Roots3D />,
   },
   {
     id: "nodes",
@@ -64,7 +65,9 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
         background: slide.dark ? "#050505" : "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)",
       }}
       className={cn(
-        "corner-squircle relative ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-[16px]",
+        "corner-squircle relative ml-auto flex h-[318px] max-w-full items-center justify-center overflow-hidden rounded-[16px]",
+        // The tree panel is 25% narrower (578px) than the blue ones (770px)
+        slide.dark ? "w-[578px]" : "w-[770px]",
         slide.dark ? "shadow-[0_0_0_1px_rgba(0,0,0,0.6)]" : "shadow-[0_0_0_1px_rgba(5,85,204,0.4)]",
       )}
     >
