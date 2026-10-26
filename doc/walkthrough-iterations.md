@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 8 | 2026-10-26 | **Empty placeholder.** The panel is a plain 578 × 318 `#f5f5f5` container for now. The blue panel with the chat is saved: the previews stay in `tour.tsx`, and the blue panel can be restored from `e7ee4a3` | `2c666f9` |
 | 7 | 2026-10-26 | **Tree removed; back to the simulated chat** (iteration 3) on the blue 770px panel. `three` dependency dropped. The tree versions (4–6) stay restorable from their commits | `290a75b` |
 | 6 | 2026-10-26 | **3D roots, centred.** The 578px tree panel sits in the middle of the modal instead of right-aligned | `19403cd` |
 | 5 | 2026-10-26 | **3D roots (three.js).** Lit greyscale root system that turns slowly; points of light stream through every root; panel 578px (25% narrower) | `01f553d` |
@@ -20,6 +21,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 15 | 2026-10-26 | Back to the original 1040 × 628; section thumbnails back to the step dots | `2c666f9` |
 | 14 | 2026-10-26 | Text and panel on one line: title and body on the left, the 578 × 318 panel on the right, vertically centred on each other, 40px apart. Footer is just the section thumbnails and actions (the 152px text block is gone) | `e7ee4a3` |
 | 13 | 2026-10-26 | Slide text centred in the frame (460px block, still left-aligned); blue panel 25% narrower, 578px, still right-aligned | `4e64778` |
 | 12 | 2026-10-26 | Modal 20% shorter: 1040 × 502. The blue panel now fills the height above the text (770 × 246 at full size); text block stays 152 | `4d9dc36` |
