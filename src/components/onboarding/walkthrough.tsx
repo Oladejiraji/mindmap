@@ -110,15 +110,15 @@ export function Walkthrough() {
 const textButton =
   "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
-/* One dot per step, the current one wider. */
+/* One dot per step (5.6px, 5.6px apart), the current one dark. */
 function Dots({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-1" aria-label={`Step ${step + 1} of ${TOTAL}`}>
+    <div className="flex items-center gap-[5.6px]" aria-label={`Step ${step + 1} of ${TOTAL}`}>
       {Array.from({ length: TOTAL }, (_, i) => (
         <span
           key={i}
           className={cn(
-            "size-1 rounded-full transition-colors duration-200 ease-out",
+            "size-[5.6px] rounded-full transition-colors duration-200 ease-out",
             i === step ? "bg-fg-primary" : "bg-component-active",
           )}
         />
