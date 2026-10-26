@@ -2,12 +2,13 @@
 
 A running log of how the onboarding walkthrough has evolved, newest first. Each entry names the commit, so any earlier version can be looked at or restored with `git show <hash>` or `git checkout <hash> -- <file>`.
 
-Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tour.tsx` the slides, `make-it-yours.tsx` the settings step, `roots-3d.tsx` the Ask then Branch illustration). It opens over Get started with `/get-started?tour=1`, which onboarding links to when it finishes.
+Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tour.tsx` the slides, `make-it-yours.tsx` the settings step, `tour.tsx` also holds the Ask then Branch simulated chat). It opens over Get started with `/get-started?tour=1`, which onboarding links to when it finishes.
 
 ## Ask then Branch illustration
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 7 | 2026-10-26 | **Tree removed; back to the simulated chat** (iteration 3) on the blue 770px panel. `three` dependency dropped. The tree versions (4–6) stay restorable from their commits | `290a75b` |
 | 6 | 2026-10-26 | **3D roots, centred.** The 578px tree panel sits in the middle of the modal instead of right-aligned | `19403cd` |
 | 5 | 2026-10-26 | **3D roots (three.js).** Lit greyscale root system that turns slowly; points of light stream through every root; panel 578px (25% narrower) | `01f553d` |
 | 4 | 2026-10-26 | **Flat greyscale roots (SVG)**, after a photo of exposed roots; bright dashes run through the roots | `a808fdb` |
