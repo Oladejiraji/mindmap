@@ -52,8 +52,8 @@ export function Walkthrough() {
           aria-label="Welcome to Mindmap"
           className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_16px_0_rgba(0,0,0,0.04)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-solid text-on-brand-solid">
-            <LogoIcon className="h-auto w-5" />
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-brand-solid text-on-brand-solid">
+            <LogoIcon className="h-auto w-2.5" />
           </span>
           <div key={step} className="flex min-h-0 flex-1 flex-col pt-1 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
             {slide ? <TourPanel slide={slide} /> : <MakeItYours className="min-h-0 flex-1 pt-4" />}
@@ -138,7 +138,7 @@ function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => v
             aria-current={i === step ? "step" : undefined}
             style={sec.light ? undefined : { background: BLUE }}
             className={cn(
-              "corner-squircle flex h-7 w-[13px] cursor-pointer items-center justify-center rounded-[4px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-2.5",
+              "corner-squircle flex h-7 w-[18px] cursor-pointer items-center justify-center rounded-[4px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-2.5",
               sec.light ? "bg-[#f2f2f2] text-[rgba(17,17,17,0.6)]" : "text-white",
               i === step ? "outline-2 outline-[#111]" : "outline-2 outline-transparent",
               i > step && "opacity-45 hover:opacity-80",

@@ -67,12 +67,12 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
 }
 
 /* A slide's title and a line on how it works, left-aligned.
- * Title 600 24px/133% −0.01em #111; body 500 14px/143% #111 at 60%. */
+ * Title 500 18px/133% −0.01em #111; body 500 14px/143% #111 at 60%. */
 export function TourText({ slide }: { slide: TourSlide }) {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <h2 className="text-[24px] leading-[1.33] font-semibold tracking-[-0.01em] text-[#111]">{slide.title}</h2>
+        <h2 className="text-[18px] leading-[1.33] font-medium tracking-[-0.01em] text-[#111]">{slide.title}</h2>
         {slide.soon && (
           <span className="rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">
             {slide.soon}
