@@ -21,6 +21,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 18 | 2026-10-26 | Continue button 93 × 32 with 13px text; slide title back to its original 24px (weight stays 500) | `d0b2f2f` |
 | 17 | 2026-10-26 | Logo moved from the top-left corner to above each step's title: 32px tile (10px corners), 16px to the title; centred over Make it yours | `f3e26a0` |
 | 16 | 2026-10-26 | Step dots 40% larger: 5.6px, 5.6px apart | `697156e` |
 | 15 | 2026-10-26 | Back to the original 1040 × 628; section thumbnails back to the step dots | `2c666f9` |
