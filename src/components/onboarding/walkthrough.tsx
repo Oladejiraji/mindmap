@@ -1,10 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
+import { NodesIcon } from "@/components/icons/nodes-icon";
+import { PreferencesIcon } from "@/components/icons/preferences-icon";
+import { Tip } from "@/components/ui/tooltip";
+import { Network, Sparkles, SquareUser, Users } from "lucide-react";
 import { MakeItYours } from "./make-it-yours";
 import { TOUR, TourPanel, TourText } from "./tour";
 
@@ -106,30 +110,44 @@ export function Walkthrough() {
 const textButton =
   "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
-/* A preview of the sections: each one's name, the current one dark, ones
- * you've seen mid-grey, ones still to come light; click to jump. */
-const SECTIONS = [...TOUR.map((t) => t.title), "Make it yours"];
+/* A visual preview of the sections: a small thumbnail of each one's panel
+ * (dark for the tree, brand blue for the tour slides, light for Make it
+ * yours) with an icon for its topic. The current one is outlined, ones
+ * still to come are faded; click to jump. Names are the tooltip and label. */
+const BLUE = "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)";
+const THUMBS: Record<string, ReactNode> = {
+  how: <Network />,
+  nodes: <NodesIcon />,
+  collaborate: <Users />,
+  teams: <SquareUser />,
+  models: <Sparkles />,
+};
+const SECTIONS = [
+  ...TOUR.map((t) => ({ name: t.title, icon: THUMBS[t.id], dark: !!t.dark, light: false })),
+  { name: "Make it yours", icon: <PreferencesIcon />, dark: false, light: true },
+];
 
 function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => void }) {
   return (
-    <nav aria-label="Walkthrough sections" className="flex min-w-0 items-center gap-4 overflow-hidden">
-      {SECTIONS.map((name, i) => (
-        <button
-          key={name}
-          type="button"
-          onClick={() => onSelect(i)}
-          aria-current={i === step ? "step" : undefined}
-          className={cn(
-            "shrink-0 cursor-pointer rounded-md text-caption-lg font-medium whitespace-nowrap outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
-            i === step
-              ? "text-[#111]"
-              : i < step
-                ? "text-[rgba(17,17,17,0.6)] hover:text-[#111]"
-                : "text-[rgba(17,17,17,0.35)] hover:text-[rgba(17,17,17,0.6)]",
-          )}
-        >
-          {name}
-        </button>
+    <nav aria-label="Walkthrough sections" className="flex items-center gap-1.5">
+      {SECTIONS.map((sec, i) => (
+        <Tip key={sec.name} label={sec.name} side="top">
+          <button
+            type="button"
+            onClick={() => onSelect(i)}
+            aria-label={sec.name}
+            aria-current={i === step ? "step" : undefined}
+            style={sec.light ? undefined : { background: sec.dark ? "#050505" : BLUE }}
+            className={cn(
+              "corner-squircle flex h-7 w-11 cursor-pointer items-center justify-center rounded-[7px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5",
+              sec.light ? "bg-[#f2f2f2] text-[rgba(17,17,17,0.6)]" : "text-white",
+              i === step ? "outline-2 outline-[#111]" : "outline-2 outline-transparent",
+              i > step && "opacity-45 hover:opacity-80",
+            )}
+          >
+            {sec.icon}
+          </button>
+        </Tip>
       ))}
     </nav>
   );
