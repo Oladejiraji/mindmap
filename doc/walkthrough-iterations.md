@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 6 | 2026-10-26 | **3D roots, centred.** The 578px tree panel sits in the middle of the modal instead of right-aligned | `19403cd` |
 | 5 | 2026-10-26 | **3D roots (three.js).** Lit greyscale root system that turns slowly; points of light stream through every root; panel 578px (25% narrower) | `01f553d` |
 | 4 | 2026-10-26 | **Flat greyscale roots (SVG)**, after a photo of exposed roots; bright dashes run through the roots | `a808fdb` |
 | 3 | 2026-10-23 | **Simulated chat.** Messages 40px from the top; a pill is sent, the thinking orb appears, the reply streams in; two exchanges, loops. Pills went to full 18px radius | `6b74f02` |
