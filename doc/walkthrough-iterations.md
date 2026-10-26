@@ -20,6 +20,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 13 | 2026-10-26 | Slide text centred in the frame (460px block, still left-aligned); blue panel 25% narrower, 578px, still right-aligned | `4e64778` |
 | 12 | 2026-10-26 | Modal 20% shorter: 1040 × 502. The blue panel now fills the height above the text (770 × 246 at full size); text block stays 152 | `4d9dc36` |
 | 11 | 2026-10-26 | Title 18px medium (was 24px semibold); logo tile halved to 20px; section thumbnails 40% wider (18 × 28) | `b6b7f71` |
 | 10 | 2026-10-26 | Section thumbnails 70% narrower: 13 × 28 strips, 4px corners, 10px icons | `b5b60ab` |
