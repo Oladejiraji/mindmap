@@ -64,7 +64,7 @@ export function Walkthrough() {
               </div>
             )}
             <div className="flex items-center justify-between gap-4">
-              <Dots step={step} />
+              <Sections step={step} onSelect={setStep} />
               <div className="flex items-center gap-2">
                 {step > 0 && (
                   <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
@@ -106,19 +106,31 @@ export function Walkthrough() {
 const textButton =
   "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
-/* One dot per step, the current one wider. */
-function Dots({ step }: { step: number }) {
+/* A preview of the sections: each one's name, the current one dark, ones
+ * you've seen mid-grey, ones still to come light; click to jump. */
+const SECTIONS = [...TOUR.map((t) => t.title), "Make it yours"];
+
+function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => void }) {
   return (
-    <div className="flex items-center gap-1" aria-label={`Step ${step + 1} of ${TOTAL}`}>
-      {Array.from({ length: TOTAL }, (_, i) => (
-        <span
-          key={i}
+    <nav aria-label="Walkthrough sections" className="flex min-w-0 items-center gap-4 overflow-hidden">
+      {SECTIONS.map((name, i) => (
+        <button
+          key={name}
+          type="button"
+          onClick={() => onSelect(i)}
+          aria-current={i === step ? "step" : undefined}
           className={cn(
-            "size-1 rounded-full transition-colors duration-200 ease-out",
-            i === step ? "bg-fg-primary" : "bg-component-active",
+            "shrink-0 cursor-pointer rounded-md text-caption-lg font-medium whitespace-nowrap outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
+            i === step
+              ? "text-[#111]"
+              : i < step
+                ? "text-[rgba(17,17,17,0.6)] hover:text-[#111]"
+                : "text-[rgba(17,17,17,0.35)] hover:text-[rgba(17,17,17,0.6)]",
           )}
-        />
+        >
+          {name}
+        </button>
       ))}
-    </div>
+    </nav>
   );
 }
