@@ -139,7 +139,7 @@ function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => v
             aria-current={i === step ? "step" : undefined}
             style={sec.light ? undefined : { background: sec.dark ? "#050505" : BLUE }}
             className={cn(
-              "corner-squircle flex h-7 w-11 cursor-pointer items-center justify-center rounded-[7px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-3.5",
+              "corner-squircle flex h-7 w-[13px] cursor-pointer items-center justify-center rounded-[4px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-2.5",
               sec.light ? "bg-[#f2f2f2] text-[rgba(17,17,17,0.6)]" : "text-white",
               i === step ? "outline-2 outline-[#111]" : "outline-2 outline-transparent",
               i > step && "opacity-45 hover:opacity-80",
