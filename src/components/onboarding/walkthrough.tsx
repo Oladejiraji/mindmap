@@ -111,8 +111,7 @@ const textButton =
   "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
 
 /* A visual preview of the sections: a small thumbnail of each one's panel
- * (dark for the tree, brand blue for the tour slides, light for Make it
- * yours) with an icon for its topic. The current one is outlined, ones
+ * (brand blue for the tour slides, light for Make it yours) with an icon for its topic. The current one is outlined, ones
  * still to come are faded; click to jump. Names are the tooltip and label. */
 const BLUE = "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)";
 const THUMBS: Record<string, ReactNode> = {
@@ -123,8 +122,8 @@ const THUMBS: Record<string, ReactNode> = {
   models: <Sparkles />,
 };
 const SECTIONS = [
-  ...TOUR.map((t) => ({ name: t.title, icon: THUMBS[t.id], dark: !!t.dark, light: false })),
-  { name: "Make it yours", icon: <PreferencesIcon />, dark: false, light: true },
+  ...TOUR.map((t) => ({ name: t.title, icon: THUMBS[t.id], light: false })),
+  { name: "Make it yours", icon: <PreferencesIcon />, light: true },
 ];
 
 function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => void }) {
@@ -137,7 +136,7 @@ function Sections({ step, onSelect }: { step: number; onSelect: (i: number) => v
             onClick={() => onSelect(i)}
             aria-label={sec.name}
             aria-current={i === step ? "step" : undefined}
-            style={sec.light ? undefined : { background: sec.dark ? "#050505" : BLUE }}
+            style={sec.light ? undefined : { background: BLUE }}
             className={cn(
               "corner-squircle flex h-7 w-[13px] cursor-pointer items-center justify-center rounded-[4px] outline-offset-2 transition-[opacity,outline-color] duration-200 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:size-2.5",
               sec.light ? "bg-[#f2f2f2] text-[rgba(17,17,17,0.6)]" : "text-white",

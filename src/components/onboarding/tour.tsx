@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { Roots3D } from "./roots-3d";
+import { useEffect, useState, type ReactNode } from "react";
+import { ThinkingOrb } from "thinking-orbs";
 import { Plus } from "lucide-react";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
 import { CheckIcon } from "@/components/icons/check-icon";
@@ -15,17 +15,14 @@ import { cn } from "@/lib/utils";
  * Features that aren't in the app yet say so ("Coming soon") instead of
  * promising them.
  */
-// dark: a greyscale, narrower panel instead of brand blue (the Ask then
-// Branch roots in 3D)
-export type TourSlide = { id: string; title: string; body: string; soon?: string; dark?: boolean; preview: ReactNode };
+export type TourSlide = { id: string; title: string; body: string; soon?: string; preview: ReactNode };
 
 export const TOUR: TourSlide[] = [
   {
     id: "how",
     title: "Ask then Branch",
     body: "Start a project with a question. Each answer can branch into its own node, so you can follow every direction without losing the thread.",
-    dark: true,
-    preview: <Roots3D />,
+    preview: <MessageBars />,
   },
   {
     id: "nodes",
@@ -61,16 +58,8 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
   return (
     <div
       aria-hidden
-      style={{
-        background: slide.dark ? "#050505" : "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)",
-      }}
-      className={cn(
-        "corner-squircle relative flex h-[318px] max-w-full items-center justify-center overflow-hidden rounded-[16px]",
-        // The tree panel is 25% narrower (578px) and centred; the blue ones
-        // are 770px and right-aligned under the logo
-        slide.dark ? "mx-auto w-[578px]" : "ml-auto w-[770px]",
-        slide.dark ? "shadow-[0_0_0_1px_rgba(0,0,0,0.6)]" : "shadow-[0_0_0_1px_rgba(5,85,204,0.4)]",
-      )}
+      style={{ background: "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)" }}
+      className="corner-squircle relative ml-auto flex h-[318px] w-[770px] max-w-full items-center justify-center overflow-hidden rounded-[16px] shadow-[0_0_0_1px_rgba(5,85,204,0.4)]"
     >
       {slide.preview}
     </div>
@@ -98,6 +87,102 @@ export function TourText({ slide }: { slide: TourSlide }) {
 /* ---------- Previews ---------- */
 
 const card = "corner-squircle rounded-2xl bg-surface-container shadow-default";
+
+/* "Ask then Branch" (Figma): a simulated chat, 40px from the top of the
+ * panel. Your message pills (#027fff, full 18px radius, 12px 10px padding)
+ * are sent on the right; the model thinks (the chat's orb), then its reply
+ * streams in line by line on the left. Two exchanges, a short hold, then
+ * it fades and loops. Reduced motion shows the finished chat. */
+const CHAT: { you: number; reply: string[] }[] = [
+  { you: 311, reply: ["92%", "84%", "56%"] },
+  { you: 277, reply: ["88%", "48%"] },
+];
+// Each exchange: send, think, then stream the reply lines
+const STEP_MS = { send: 500, think: 900, line: 260 };
+
+function MessageBars() {
+  const steps = CHAT.reduce((n, c) => n + 2 + c.reply.length, 0);
+  // Reduced motion: show the finished chat, no timeline
+  const [reduced] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [step, setPhase] = useState(0);
+  const [run, setRun] = useState(0);
+  const phase = reduced ? steps : step;
+
+  useEffect(() => {
+    if (reduced) return;
+    // Build the timeline: per exchange, sent → thinking → each reply line
+    const at: number[] = [];
+    let t = 300;
+    for (const c of CHAT) {
+      at.push(t);
+      t += STEP_MS.send;
+      at.push(t);
+      t += STEP_MS.think;
+      for (let i = 0; i < c.reply.length; i++) {
+        at.push(t);
+        t += STEP_MS.line;
+      }
+      t += 500;
+    }
+    const timers = at.map((ms, i) => setTimeout(() => setPhase(i + 1), ms));
+    timers.push(setTimeout(() => setPhase(-1), t + 1800)); // fade out
+    timers.push(setTimeout(() => { setPhase(0); setRun((r) => r + 1); }, t + 2300));
+    return () => timers.forEach(clearTimeout);
+  }, [run, reduced]);
+
+  // Where each exchange's steps start in the timeline
+  const starts = CHAT.map((_, i) => CHAT.slice(0, i).reduce((n, c) => n + 2 + c.reply.length, 0));
+  return (
+    <div
+      key={run}
+      className={cn(
+        "absolute inset-x-4 top-10 flex flex-col gap-3 transition-opacity duration-500 ease-out",
+        phase === -1 && "opacity-0",
+      )}
+    >
+      {CHAT.map((c, ci) => {
+        const sent = starts[ci] + 1;
+        const thinking = starts[ci] + 2;
+        const firstLine = starts[ci] + 3;
+        const shown = (n: number) => phase === -1 || phase >= n;
+        const replying = shown(firstLine);
+        return (
+          <div key={ci} className="flex flex-col gap-3">
+            <div
+              style={{ width: c.you }}
+              className={cn(
+                "flex origin-right items-center self-end rounded-[18px] bg-[#027fff] px-2.5 py-3 transition-[opacity,translate,scale] duration-300 ease-out [corner-shape:round]",
+                shown(sent) ? "opacity-100" : "translate-y-2 scale-[0.97] opacity-0",
+              )}
+            >
+              <span className="h-3 flex-1 rounded-full bg-white/15" />
+            </div>
+            <div className={cn("relative w-[60%] transition-opacity duration-200", shown(thinking) ? "opacity-100" : "opacity-0")}>
+              {/* Thinking, until the first line arrives */}
+              <div className={cn("absolute top-0 left-0 transition-opacity duration-200", replying ? "opacity-0" : "opacity-100")}>
+                <ThinkingOrb state="working" size={20} theme="dark" aria-hidden />
+              </div>
+              <div className="flex flex-col gap-2">
+                {c.reply.map((w, li) => (
+                  <span
+                    key={li}
+                    style={{ width: w }}
+                    className={cn(
+                      "h-2.5 origin-left rounded-full bg-white/35 transition-[opacity,scale] duration-300 ease-out",
+                      shown(firstLine + li) ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0",
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 /* A selected node, its new branch and sibling, with the keys that make them. */
 function CreateNodes() {
