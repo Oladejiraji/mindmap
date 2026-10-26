@@ -56,18 +56,21 @@ export function Walkthrough() {
             <LogoIcon className="h-auto w-2.5" />
           </span>
           <div key={step} className="flex min-h-0 flex-1 flex-col pt-1 motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
-            {slide ? <TourPanel slide={slide} /> : <MakeItYours className="min-h-0 flex-1 pt-4" />}
+            {slide ? (
+              // Text and panel on one line, centred on each other
+              <div className="flex min-h-0 flex-1 items-center gap-10 pt-4">
+                <div className="min-w-0 flex-1">
+                  <TourText slide={slide} />
+                </div>
+                <TourPanel slide={slide} />
+              </div>
+            ) : (
+              <MakeItYours className="min-h-0 flex-1 pt-4" />
+            )}
           </div>
 
-          {/* Text, dots and buttons: 959 × 152, text at the top, actions at the
-              foot (just the actions on Make it yours) */}
-          <div className={cn("mt-auto flex w-full max-w-[959px] flex-col justify-between pt-6", slide && "h-[152px] pt-0")}>
-            {slide && (
-              // Centred in the frame, text still left-aligned
-              <div key={step} className="w-full max-w-[460px] self-center motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
-                <TourText slide={slide} />
-              </div>
-            )}
+          {/* Footer: section thumbnails, then the actions */}
+          <div className="mt-auto flex w-full flex-col pt-6">
             <div className="flex items-center justify-between gap-4">
               <Sections step={step} onSelect={setStep} />
               <div className="flex items-center gap-2">
