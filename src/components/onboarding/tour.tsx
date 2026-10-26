@@ -65,9 +65,10 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
         background: slide.dark ? "#050505" : "linear-gradient(180deg, #0c6bf9 -8.02%, #0c67ef 58.41%, #073f93 257.7%)",
       }}
       className={cn(
-        "corner-squircle relative ml-auto flex h-[318px] max-w-full items-center justify-center overflow-hidden rounded-[16px]",
-        // The tree panel is 25% narrower (578px) than the blue ones (770px)
-        slide.dark ? "w-[578px]" : "w-[770px]",
+        "corner-squircle relative flex h-[318px] max-w-full items-center justify-center overflow-hidden rounded-[16px]",
+        // The tree panel is 25% narrower (578px) and centred; the blue ones
+        // are 770px and right-aligned under the logo
+        slide.dark ? "mx-auto w-[578px]" : "ml-auto w-[770px]",
         slide.dark ? "shadow-[0_0_0_1px_rgba(0,0,0,0.6)]" : "shadow-[0_0_0_1px_rgba(5,85,204,0.4)]",
       )}
     >
