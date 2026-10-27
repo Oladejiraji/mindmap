@@ -57,7 +57,7 @@ export const TOUR: TourSlide[] = [
   },
 ];
 
-/* A slide's illustration: a 578 × 318 #f5f5f5 panel beside the slide's
+/* A slide's illustration: a 578 × 318 #f3f3f3 panel beside the slide's
  * text, showing the slide's art (empty until a slide has some). The earlier
  * previews (the blue panel with the Ask then Branch chat, and the others
  * below) are kept but not shown; restore the blue panel from e7ee4a3. */
@@ -65,7 +65,7 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
   return (
     <div
       aria-hidden
-      className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[#f5f5f5]"
+      className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[#f3f3f3]"
     >
       {slide.art}
     </div>
