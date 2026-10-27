@@ -15,6 +15,13 @@
   }
 }
 
+/* The sphere's logos: placed, sized and layered by depth each frame
+   (think-together.tsx); far ones fade back */
+.think-together .tt-logo {
+  opacity: var(--tt-depth, 1);
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .think-together .tt-pop {
     animation: none;
