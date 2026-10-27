@@ -4,21 +4,17 @@
  * "The canvas awaits": the whole panel is the canvas. The first node
  * appears hovering above it, in focus, and "So how do you get started on
  * Mindmap?" types into it while Kurosawa "is typing…". Then it settles
- * onto the canvas, firing the auth page's pulse (VapourHalo) as it comes
- * to rest, and his tag becomes "created a nexus point". The chat composer
- * slides up at the foot; clicking it starts a new project. Kurosawa's tag sits above the card, as on the
- * earlier slides. Reduced motion shows it settled, without the pulse.
+ * onto the canvas and his tag becomes "created a nexus point"; from the
+ * moment it comes to rest the auth page's pulse (VapourHalo) beats round
+ * it rhythmically. Kurosawa's tag sits above the card, as on the earlier
+ * slides. Reduced motion shows it settled, without the pulse.
  * Laid out at the panel's 578 × 318 and scaled to fit.
  */
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Plus } from "lucide-react";
-import { SendIcon } from "@/components/icons/send-icon";
 import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
 import { cn } from "@/lib/utils";
-import { routes } from "@/lib/routes";
 import "./canvas-awaits.css";
 
 const W = 578;
@@ -34,6 +30,8 @@ const TYPE_FROM = 600;
 const TYPE_MS = 45;
 const SETTLE_AT = TYPE_FROM + QUESTION.length * TYPE_MS + 400;
 const SETTLE_MS = 380;
+// Once it's at rest, the pulse beats this often
+const BEAT_MS = 3000;
 
 export function CanvasAwaits() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -42,7 +40,8 @@ export function CanvasAwaits() {
   );
   const [typed, setTyped] = useState(reduced ? QUESTION.length : 0);
   const [settled, setSettled] = useState(reduced);
-  const [pulse, setPulse] = useState(false);
+  // Each beat is its own halo (they overlap a little as one fades)
+  const [beats, setBeats] = useState<number[]>([]);
 
   // Draw at the panel's scale, keeping the 578 × 318 layout
   useEffect(() => {
@@ -62,8 +61,19 @@ export function CanvasAwaits() {
     if (reduced) return;
     const timers = [...QUESTION].map((_, i) => window.setTimeout(() => setTyped(i + 1), TYPE_FROM + i * TYPE_MS));
     timers.push(window.setTimeout(() => setSettled(true), SETTLE_AT));
-    timers.push(window.setTimeout(() => setPulse(true), SETTLE_AT + SETTLE_MS - 60));
-    return () => timers.forEach(clearTimeout);
+    let beat = 0;
+    let interval = 0;
+    const pulse = () => setBeats((b) => [...b, ++beat]);
+    timers.push(
+      window.setTimeout(() => {
+        pulse();
+        interval = window.setInterval(pulse, BEAT_MS);
+      }, SETTLE_AT + SETTLE_MS - 60),
+    );
+    return () => {
+      timers.forEach(clearTimeout);
+      clearInterval(interval);
+    };
   }, [reduced]);
 
   return (
@@ -73,16 +83,17 @@ export function CanvasAwaits() {
       style={{ width: W, height: H }}
       aria-hidden
     >
-      {/* The pulse as the node comes to rest, behind it */}
-      {pulse && (
+      {/* The pulse, beating behind the node once it's at rest */}
+      {beats.map((b) => (
         <VapourHalo
+          key={b}
           x={NODE.x - NODE.w / 2}
           y={NODE.y - NODE.h / 2}
           width={NODE.w}
           height={NODE.h}
-          onDone={() => setPulse(false)}
+          onDone={() => setBeats((all) => all.filter((k) => k !== b))}
         />
-      )}
+      ))}
 
       <div
         className={cn("ca-node absolute", settled && "ca-settled")}
@@ -117,29 +128,6 @@ export function CanvasAwaits() {
         </div>
       </div>
 
-      {/* The chat composer, ready for the first question: our chat input
-          (20px corners, the surface colour with a hairline ring, a round +
-          and the black send button), at a smaller size */}
-      {/* Clicking it starts a new project. The panel is decorative and
-          hidden from assistive tech, so this is a pointer shortcut only
-          (out of the tab order); the walkthrough's own buttons stay the
-          keyboard path. */}
-      <Link
-        href={routes.newProject}
-        tabIndex={-1}
-        className="ca-rise absolute bottom-5 left-1/2 flex w-[340px] -translate-x-1/2 cursor-text flex-col gap-1.5 rounded-[20px] bg-surface-container p-2.5 inset-ring-[0.5px] inset-ring-border-strong transition-shadow duration-150 ease-out hover:shadow-default"
-        style={{ animationDelay: `${SETTLE_AT + SETTLE_MS + 200}ms` }}
-      >
-        <span className="px-1 pt-0.5 text-body-sm text-fg-tertiary">Ask anything…</span>
-        <div className="flex items-center gap-1.5">
-          <span className="flex size-7 items-center justify-center rounded-full text-fg-secondary inset-ring-[0.5px] inset-ring-border-strong [&_svg]:size-3.5">
-            <Plus />
-          </span>
-          <span className="ml-auto flex size-7 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg">
-            <SendIcon className="size-4" />
-          </span>
-        </div>
-      </Link>
     </div>
   );
 }
