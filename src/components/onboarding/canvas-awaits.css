@@ -71,7 +71,7 @@
 /* Wireframe connectors below the settled node: subtle grey lines drawing
    out of its foot and on past the panel's edge, 120ms apart */
 .canvas-awaits .ca-wire {
-  stroke: oklch(0.88 0 0);
+  stroke: oklch(0.955 0 0);
   stroke-width: 1;
   stroke-linecap: round;
   stroke-dasharray: 1;
