@@ -1,39 +1,25 @@
-/* The canvas awaits (canvas-awaits.tsx). Plays once on arrival (ms):
-   150–570    the square blurs in (fade, slight scale, 6px blur sharpening)
-   450        the project node pops in, selected
-   700–1300   the edges draw down to its forks, 100ms apart
-   1000, 1100 the forks pop in as their edges arrive
-   1350       the chat composer slides up into the foot */
-.canvas-awaits .ca-square {
-  /* The canvas's dot grid */
-  background-image: radial-gradient(circle, oklch(0.88 0 0) 1px, transparent 1.2px);
-  background-size: 14px 14px;
-  background-position: 7px 7px;
-}
+/* The canvas awaits (canvas-awaits.tsx). The whole panel is the canvas.
+   Plays once on arrival (ms):
+   300–620    the project drops in to rest (and pulses as it lands)
+   780–1380   edges draw down to its forks, 100ms apart
+   1000–1420  the forks drop in to rest, each pulsing as it lands
+   1650       the chat composer slides up at the foot */
 
-.canvas-awaits .ca-in {
+/* A node dropping onto the canvas: from a few px up, faded and soft, to
+   rest (duration and delay set inline) */
+.canvas-awaits .ca-drop {
   opacity: 0;
-  scale: 0.96;
-  filter: blur(6px);
-  animation: ca-in 420ms cubic-bezier(0.2, 0, 0, 1) 150ms forwards;
+  translate: 0 -10px;
+  filter: blur(3px);
+  animation-name: ca-drop;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  animation-fill-mode: forwards;
 }
-@keyframes ca-in {
+@keyframes ca-drop {
   to {
     opacity: 1;
-    scale: 1;
+    translate: 0 0;
     filter: blur(0);
-  }
-}
-
-.canvas-awaits .ca-pop {
-  opacity: 0;
-  scale: 0.9;
-  animation: ca-pop 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
-}
-@keyframes ca-pop {
-  to {
-    opacity: 1;
-    scale: 1;
   }
 }
 
@@ -51,28 +37,29 @@
   }
 }
 
+/* The composer keeps its -50% x translate (a Tailwind translate class), so
+   it rises with transform-independent opacity and margin */
 .canvas-awaits .ca-rise {
   opacity: 0;
-  translate: 0 8px;
+  margin-bottom: -8px;
   animation: ca-rise 380ms cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 @keyframes ca-rise {
   to {
     opacity: 1;
-    translate: 0 0;
+    margin-bottom: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .canvas-awaits .ca-in,
-  .canvas-awaits .ca-pop,
+  .canvas-awaits .ca-drop,
   .canvas-awaits .ca-edge,
   .canvas-awaits .ca-rise {
     animation: none;
     opacity: 1;
-    scale: none;
     translate: none;
     filter: none;
+    margin-bottom: 0;
   }
   .canvas-awaits .ca-edge {
     stroke-dashoffset: 0;
