@@ -22,7 +22,7 @@ export type TourSlide = { id: string; title: string; body: string; soon?: string
 export const TOUR: TourSlide[] = [
   {
     id: "how",
-    title: "Ask then Branch",
+    title: "Research with the team",
     body: "Start a project with a question. Each answer can branch into its own node, so you can follow every direction without losing the thread.",
     preview: <MessageBars />,
   },
