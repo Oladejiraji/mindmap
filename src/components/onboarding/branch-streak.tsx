@@ -83,8 +83,8 @@ const typingCss = [
 // wave reveals, a chromatic fringe) fires on the square once it's lit and
 // on the text box once the blue has filled it (seconds into the loop)
 const HALOS = [
-  { at: 1.64, x: BOX.x, y: TOP, width: BOX.size, height: BOX.size },
-  { at: 5.25, x: TEXT.x, y: TT, width: TEXT.w, height: TEXT.h },
+  { at: 1.64, x: BOX.x, y: TOP, width: BOX.size, height: BOX.size, lightResidue: false },
+  { at: 5.25, x: TEXT.x, y: TT, width: TEXT.w, height: TEXT.h, lightResidue: true },
 ];
 
 // From its dot on the left, straight on, then curving into the square's
@@ -147,11 +147,13 @@ export function BranchStreak() {
         aria-hidden
       >
         {halos.map((h) => (
-          <VapourHalo
-            key={h.id}
-            {...HALOS[h.i]}
-            onDone={() => setHalos((prev) => prev.filter((p) => p.id !== h.id))}
-          />
+          // The text box's halo leaves a lighter residue (branch-streak.css)
+          <div key={h.id} className={HALOS[h.i].lightResidue ? "bs-halo-light" : undefined}>
+            <VapourHalo
+              {...HALOS[h.i]}
+              onDone={() => setHalos((prev) => prev.filter((p) => p.id !== h.id))}
+            />
+          </div>
         ))}
       </div>
     <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
