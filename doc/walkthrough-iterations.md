@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 18 | 2026-10-27 | Panel background lighter: #f3f3f3 (~oklch 0.966) → `oklch(0.975 0 0)` | `5d8e0d5` |
 | 17 | 2026-10-27 | Grey tracks lighter again: `oklch(0.96 0 0)`, just under the panel's ~0.966 | `71c6310` |
 | 16 | 2026-10-27 | Grey tracks even lighter: `oklch(0.95 0 0)` | `18744dd` |
 | 15 | 2026-10-27 | Grey tracks (and the square's grey edge) lighter: `oklch(0.9 0 0)` → `oklch(0.93 0 0)` on the #f3f3f3 panel | `ae07e54` |
