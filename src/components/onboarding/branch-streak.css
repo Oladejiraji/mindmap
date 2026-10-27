@@ -1,9 +1,10 @@
 /* Research with the team (branch-streak.tsx). One 4.8s loop:
-   0–32%   the blue streak runs in (linear); its head reaches the square at
-           21.6% and it is gone into it by 32%. Until then the square and
-           the branch tracks sit at 30%
-   21.6%   impact: the square is knocked and squashed (springs back by 31%),
-           flashes light blue, takes a blue edge; a ring ripples off it
+   0–21.6% the blue streak runs in, speeding up, until its head meets the
+           square. Until then the square and the branch tracks sit at 30%
+   21.6%   impact, kept understated: the line nudges the square 2px and
+           eases it back (no squash or bounce), the square takes a blue edge
+           with a faint blue tint, a soft ring fades off it, and the
+           streak's tail collapses into the square by 30%
    24–50%  the five branches draw out, 90ms apart, then their end dots pop
    84–94%  everything fades; the loop restarts clean */
 .branch-streak {
@@ -18,35 +19,57 @@
   stroke-linecap: round;
 }
 
-.branch-streak .bs-streak {
-  animation: bs-streak var(--bs-dur) linear infinite;
+/* The streak runs in, speeding up, until its head meets the square's left
+   edge at 21.6%. It nudges the square 2px and rides it back, while its
+   tail collapses into it */
+.branch-streak .bs-streak-run {
+  animation: bs-streak-run var(--bs-dur) infinite;
 }
-@keyframes bs-streak {
+@keyframes bs-streak-run {
   0% {
     transform: translateX(0);
-    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
-  32% {
-    transform: translateX(296px);
-    opacity: 1;
+  21.6% {
+    transform: translateX(200px);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
-  32.1%,
+  23% {
+    transform: translateX(202px);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  30%,
   100% {
-    transform: translateX(296px);
+    transform: translateX(200px);
+  }
+}
+.branch-streak .bs-streak {
+  transform-box: fill-box;
+  transform-origin: right center;
+  animation: bs-streak var(--bs-dur) infinite;
+}
+@keyframes bs-streak {
+  0%,
+  22% {
+    transform: scaleX(1);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  30%,
+  100% {
+    transform: scaleX(0);
     opacity: 0;
   }
 }
 
 /* The square: barely there (30%) until the streak's head reaches it at
-   21.6%, then knocked right and squashed, springing back, with a light blue
-   flash and a blue edge that holds until the fade */
+   21.6%, then nudged 2px by the line and eased back, with a blue edge that
+   holds until the fade and a faint blue tint that clears */
 .branch-streak .bs-box {
   fill: #fff;
   stroke: var(--bs-track);
   stroke-width: 1;
   opacity: 0.3;
-  transform-box: fill-box;
-  transform-origin: center;
   animation: bs-box var(--bs-dur) infinite;
 }
 @keyframes bs-box {
@@ -60,16 +83,15 @@
   }
   23% {
     opacity: 1;
-    transform: translateX(5px) scale(0.84, 1.12);
-    fill: oklch(0.93 0.05 262);
+    transform: translateX(2px);
+    fill: oklch(0.97 0.02 262);
     stroke: var(--brand-solid);
-    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-  27% {
-    transform: translateX(-1.5px) scale(1.06, 0.95);
-  }
-  31% {
+  30% {
     transform: none;
+  }
+  36% {
     fill: #fff;
   }
   84% {
@@ -87,33 +109,34 @@
   }
 }
 
-/* The impact ring: a blue outline that grows off the square and fades */
+/* The impact ring: a faint blue outline that grows a little off the square
+   and fades */
 .branch-streak .bs-wave {
   fill: none;
   stroke: var(--brand-solid);
-  stroke-width: 1.5;
+  stroke-width: 1;
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
   animation: bs-wave var(--bs-dur) infinite;
 }
 @keyframes bs-wave {
-  /* Starts just after the knock, already a little out from the square,
-     so it never doubles the displaced square */
+  /* A soft, short ring: starts just outside the square so it never
+     doubles it, faint, gone by 30% */
   0%,
-  23.5% {
+  21.6% {
     opacity: 0;
-    transform: scale(1.15);
+    transform: scale(1.06);
   }
-  24.5% {
-    opacity: 0.7;
-    transform: scale(1.2);
+  22.4% {
+    opacity: 0.35;
+    transform: scale(1.08);
     animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
-  38%,
+  30%,
   100% {
     opacity: 0;
-    transform: scale(2.2);
+    transform: scale(1.45);
   }
 }
 
@@ -194,6 +217,7 @@
 
 /* Reduced motion: the finished picture, streak resting against the square */
 @media (prefers-reduced-motion: reduce) {
+  .branch-streak .bs-streak-run,
   .branch-streak .bs-streak,
   .branch-streak .bs-box,
   .branch-streak .bs-wave,
@@ -202,7 +226,7 @@
   .branch-streak .bs-dot {
     animation: none;
   }
-  .branch-streak .bs-streak {
+  .branch-streak .bs-streak-run {
     transform: translateX(200px);
   }
   .branch-streak .bs-box {

@@ -39,10 +39,6 @@ export function BranchStreak() {
           <stop offset="0" stopColor="var(--brand-solid)" stopOpacity="0" />
           <stop offset="1" stopColor="var(--brand-solid)" />
         </linearGradient>
-        {/* The streak disappears into the square */}
-        <clipPath id="bs-trunk">
-          <rect x="0" y={MID - 10} width={BOX.x} height="20" />
-        </clipPath>
       </defs>
 
       {/* Faint tracks: the trunk and the five branches */}
@@ -51,8 +47,9 @@ export function BranchStreak() {
         <path key={b.y} d={branchPath(b.y)} className="bs-track bs-track-branch" fill="none" />
       ))}
 
-      {/* The blue streak */}
-      <g clipPath="url(#bs-trunk)">
+      {/* The blue streak: runs in, its head drives the square, then its
+          tail collapses into it */}
+      <g className="bs-streak-run">
         <rect className="bs-streak" x={-96} y={MID - 1.5} width="96" height="3" rx="1.5" fill="url(#bs-streak)" />
       </g>
 
