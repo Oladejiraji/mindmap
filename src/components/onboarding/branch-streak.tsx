@@ -215,6 +215,17 @@ export function BranchStreak({ leaving = false }: { leaving?: boolean }) {
         {/* The 32px square. Faint and colourless until the lines strike
             its left edge; then a blue edge travels from that point round
             both sides to the right, and the square lights up behind it */}
+        {/* The edge's gradient, like the pulse: the colours that struck
+            on the left turning into our blue on the right, where the blue
+            line leaves */}
+        <defs>
+          <linearGradient id="bs-edge-grad" gradientUnits="userSpaceOnUse" x1={BOX.x} y1={MID} x2={BOX_RIGHT} y2={MID}>
+            <stop offset="0" stopColor="oklch(0.7 0.18 32)" />
+            <stop offset="0.3" stopColor="oklch(0.8 0.16 82)" />
+            <stop offset="0.55" stopColor="oklch(0.72 0.17 132)" />
+            <stop offset="1" stopColor="var(--brand-solid)" />
+          </linearGradient>
+        </defs>
         <rect className="bs-box" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
         <rect className="bs-box-lit" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
         <path className="bs-edge" d={EDGE_TOP} pathLength={1} fill="none" />

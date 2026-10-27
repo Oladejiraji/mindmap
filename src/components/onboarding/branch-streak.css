@@ -103,7 +103,8 @@
 /* The blue edge the strike sets off: from the contact point round both
    sides of the square to its right side, at a pace you can follow */
 .branch-streak .bs-edge {
-  stroke: var(--brand-solid);
+  /* A gradient like the pulse: the struck colours into our blue */
+  stroke: url(#bs-edge-grad);
   stroke-width: 1.25;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
