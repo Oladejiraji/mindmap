@@ -1,13 +1,15 @@
 /*
  * "Research with the team": five coloured lines, one per teammate, run in
  * from the left and converge on a 32px square, which (with everything to
- * its right) is barely there until they arrive. Their strike makes the
- * impact: a blue edge runs from the point of contact round the square to
- * its right side, and one blue line draws out of it into a text box (Apple's
- * iOS text field size), where "What does Mindmap do?" types in; two soft blue
- * pulses, then blue flows into it from the left with the text in white. The five colours sit around our blue's
- * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
- * fanned 25° apart. One 6s loop; reduced motion shows the finished
+ * its right) is faint and colourless until they arrive. Each step is a
+ * process: their strike starts a blue edge travelling from the point of
+ * contact round the square, lighting it as it goes; a blue line then draws
+ * out of it into a text box (Apple's iOS text field size), where "What does
+ * Mindmap do?" types in; a blue stroke runs once round the box from its
+ * left side, then blue flows into it from the left with the text in white.
+ * The five colours sit around our blue's complement in OKLCH (brand
+ * oklch(0.558 0.226 262) → complement hue 82), fanned 25° apart. One 7s
+ * loop; reduced motion shows the finished
  * picture. Drawn at the panel's 578 × 318 and scaled to fit.
  * (The earlier "follow the line" version, with nodes and faded branches,
  * is in 26737dc.)
@@ -40,6 +42,11 @@ const START_X = 48;
 // 36pt tall, 10pt corners, a grey fill and no border, with the blue caret.
 // Its right margin matches the dots' 48 on the left.
 const TEXT = { x: 350, w: 180, h: 36, r: 10, pad: 12 };
+const TT = MID - TEXT.h / 2;
+const TR = TEXT.r;
+// The box's outline as one stroke from its left middle (where the blue
+// line arrives), clockwise all the way round and back
+const TEXT_RING = `M${TEXT.x} ${MID} V${TT + TR} A${TR} ${TR} 0 0 1 ${TEXT.x + TR} ${TT} H${TEXT.x + TEXT.w - TR} A${TR} ${TR} 0 0 1 ${TEXT.x + TEXT.w} ${TT + TR} V${TT + TEXT.h - TR} A${TR} ${TR} 0 0 1 ${TEXT.x + TEXT.w - TR} ${TT + TEXT.h} H${TEXT.x + TR} A${TR} ${TR} 0 0 1 ${TEXT.x} ${TT + TEXT.h - TR} V${MID}`;
 
 // What gets typed, and where each character ends (Inter 13px, measured
 // with getSubStringLength) so the caret lands right after it. Characters
@@ -49,8 +56,8 @@ const ENDS = [
   12.8, 20.4, 27.6, 31.8, 35.4, 43.3, 51, 58.6, 65.4, 69, 80.7, 83.7, 91.4, 99.3, 110.6, 117.8, 125.7, 129.3, 137.2,
   145, 151.5,
 ];
-const TYPE_FROM = 33;
-const TYPE_TO = 55;
+const TYPE_FROM = 32.86;
+const TYPE_TO = 51.43;
 const typedAt = (i: number) => +(TYPE_FROM + ((TYPE_TO - TYPE_FROM) * i) / (PHRASE.length - 1)).toFixed(2);
 
 // One keyframe per character (it appears at its moment), and the caret's
@@ -73,7 +80,7 @@ const linePath = (y: number) =>
   `M${START_X} ${y} L${BOX.x - 150} ${y} C${BOX.x - 85} ${y} ${BOX.x - 65} ${MID} ${BOX.x} ${MID}`;
 
 export function BranchStreak() {
-  const textTop = MID - TEXT.h / 2;
+  const textTop = TT;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
       <g className="bs-world">
@@ -96,8 +103,9 @@ export function BranchStreak() {
         <line x1={BOX_RIGHT} y1={MID} x2={TEXT.x} y2={MID} pathLength={1} className="bs-out" />
 
         {/* The text box: "What does Mindmap do?" types in a character at a
-            time with the caret just after it; then two soft blue pulses and
-            blue flows in from the left, the text in white */}
+            time with the caret just after it; then a blue stroke runs once
+            round it from the left, and blue flows in from the left, the
+            text in white */}
         <style>{typingCss}</style>
         <rect className="bs-text" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
         <text className="bs-typed" x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
@@ -110,7 +118,7 @@ export function BranchStreak() {
         <g className="bs-caret-run">
           <rect className="bs-caret" x={TEXT.x + TEXT.pad} y={MID - 9} width="2" height="18" rx="1" />
         </g>
-        <rect className="bs-text-ring" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
+        <path className="bs-text-ring" d={TEXT_RING} pathLength={1} fill="none" />
         {/* Sent: the same box in blue with the question in white, revealed
             from the left over the grey one */}
         <g className="bs-sent">
@@ -120,10 +128,11 @@ export function BranchStreak() {
           </text>
         </g>
 
-        {/* The 32px square. Grey until the lines strike its left edge;
-            then a blue edge runs from that point round both sides to the
-            right, where the blue line leaves */}
+        {/* The 32px square. Faint and colourless until the lines strike
+            its left edge; then a blue edge travels from that point round
+            both sides to the right, and the square lights up behind it */}
         <rect className="bs-box" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
+        <rect className="bs-box-lit" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
         <path className="bs-edge" d={EDGE_TOP} pathLength={1} fill="none" />
         <path className="bs-edge" d={EDGE_BOTTOM} pathLength={1} fill="none" />
       </g>

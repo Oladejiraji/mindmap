@@ -1,22 +1,23 @@
-/* Research with the team (branch-streak.tsx). One 6s loop:
-   0–17.3%   five coloured lines run in together, speeding up, and their
-             heads meet the square's left edge at 17.3% (1.04s). Until then
-             the square, the way out and the text box sit at 30%, no blue
-   17.3–21.7% the strike: the square comes up to full and a blue edge runs
-             from the contact point round both sides to the right; the
-             lines' tails drain into the square by 24%
-   21.2–29.2% the blue line draws from the square into the text box
-   29.2–31.5% the text box (iOS text field, 36pt) comes up to full and the
-             blue caret appears
-   33–55%    "What does Mindmap do?" types in a character at a time, the
-             caret stepping after each
-   57–67%    two soft blue stroke pulses round the box
-   67–77%    blue flows into the box from the left, the question in white
-             (the caret fades out)
-   86–95%    everything fades; hidden until the loop restarts */
+/* Research with the team (branch-streak.tsx). One 7s loop, each step a
+   process that hands on to the next (times in seconds):
+   0–1.04    five coloured lines run in together, speeding up, until their
+             heads meet the square's left edge. Until then the square, the
+             way out and the text box are faint and colourless
+   1.04–1.64 a blue edge travels from the point of contact round both sides
+             of the square, and the square lights up behind it (left to
+             right); the lines' tails drain into it by 1.44
+   1.6–2.1   the blue line draws from the square into the text box
+   2.1–2.25  the text box (iOS text field, 36pt) comes up; the caret appears
+   2.3–3.6   "What does Mindmap do?" types in, the caret stepping after each
+             character
+   3.8–4.6   a blue stroke runs once round the box, from its left side
+   4.65–5.25 blue flows into the box from the left, the question in white;
+             the caret fades
+   6.0–6.6   everything fades; hidden until the loop restarts */
 .branch-streak {
-  --bs-dur: 6s;
+  --bs-dur: 7s;
   --bs-track: oklch(0.96 0 0);
+  --bs-sine: cubic-bezier(0.37, 0, 0.63, 1);
   overflow: visible;
 }
 
@@ -28,10 +29,10 @@
     opacity: 0;
   }
   2%,
-  86% {
+  85.71% {
     opacity: 1;
   }
-  95%,
+  94.29%,
   100% {
     opacity: 0;
   }
@@ -44,7 +45,7 @@
 }
 
 /* The five lines: a 22% length of colour travelling along each track. Its
-   head (at offset 0.22 − progress) reaches the square at 17.3%; the tail
+   head (at offset 0.22 − progress) reaches the square at 1.04s; the tail
    then drains in */
 .branch-streak .bs-run {
   stroke-width: 2;
@@ -58,37 +59,47 @@
     stroke-dashoffset: 0.22;
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
-  17.3% {
+  14.86% {
     stroke-dashoffset: -0.78;
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-  24%,
+  20.57%,
   100% {
     stroke-dashoffset: -1;
   }
 }
 
-/* The square: grey and barely there (30%) until the strike */
+/* The square: faint and colourless (30%) */
 .branch-streak .bs-box {
   fill: #fff;
   stroke: var(--bs-track);
   stroke-width: 1;
   opacity: 0.3;
-  animation: bs-box var(--bs-dur) infinite;
 }
-@keyframes bs-box {
+
+/* The square lit: revealed left to right in step with the blue edge, so
+   it only takes on its colour where the blue has reached */
+.branch-streak .bs-box-lit {
+  fill: #fff;
+  stroke: var(--bs-track);
+  stroke-width: 1;
+  clip-path: inset(0 100% 0 0);
+  animation: bs-box-lit var(--bs-dur) infinite;
+}
+@keyframes bs-box-lit {
   0%,
-  17.3% {
-    opacity: 0.3;
+  14.86% {
+    clip-path: inset(0 100% 0 0);
+    animation-timing-function: var(--bs-sine);
   }
-  18.5%,
+  23.43%,
   100% {
-    opacity: 1;
+    clip-path: inset(0 0 0 0);
   }
 }
 
 /* The blue edge the strike sets off: from the contact point round both
-   sides of the square to its right side */
+   sides of the square to its right side, at a pace you can follow */
 .branch-streak .bs-edge {
   stroke: var(--brand-solid);
   stroke-width: 1.25;
@@ -98,33 +109,34 @@
 }
 @keyframes bs-edge {
   0%,
-  17.3% {
+  14.86% {
     stroke-dashoffset: 1;
-    animation-timing-function: cubic-bezier(0.25, 0.6, 0.3, 1);
+    animation-timing-function: var(--bs-sine);
   }
-  21.7%,
+  23.43%,
   100% {
     stroke-dashoffset: 0;
   }
 }
 
-/* The way to the text box: barely there until the strike */
+/* The way to the text box: faint until the strike */
 .branch-streak .bs-track-out {
   opacity: 0.3;
   animation: bs-track-out var(--bs-dur) infinite;
 }
 @keyframes bs-track-out {
   0%,
-  17.3% {
+  14.86% {
     opacity: 0.3;
   }
-  20.8%,
+  17.86%,
   100% {
     opacity: 1;
   }
 }
 
-/* The blue line, drawing from the square into the text box */
+/* The blue line, drawing from the square into the text box once the edge
+   has reached the square's right side */
 .branch-streak .bs-out {
   stroke: var(--brand-solid);
   stroke-width: 2;
@@ -135,18 +147,18 @@
 }
 @keyframes bs-out {
   0%,
-  21.2% {
+  22.86% {
     stroke-dashoffset: 1;
     animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
   }
-  29.2%,
+  30%,
   100% {
     stroke-dashoffset: 0;
   }
 }
 
-/* The text box (iOS text field): a darker grey fill, no border, barely
-   there until the blue line reaches it */
+/* The text box (iOS text field): a darker grey fill, no border, faint
+   until the blue line reaches it */
 .branch-streak .bs-text {
   fill: oklch(0.955 0 0);
   opacity: 0.3;
@@ -154,46 +166,34 @@
 }
 @keyframes bs-text {
   0%,
-  29.2% {
+  30% {
     opacity: 0.3;
   }
-  31.5%,
+  32.14%,
   100% {
     opacity: 1;
   }
 }
 
-/* After the question is typed: two soft blue stroke pulses (each a 0.6s
-   sine ease in and out), then blue flows into the box from the left,
-   revealing the question in white (a wipe, so no in-between colours) */
+/* Once the question is typed: one blue stroke runs round the box from its
+   left side, the whole way, then blue flows into the box from the left,
+   revealing the question in white */
 .branch-streak .bs-text-ring {
-  fill: none;
   stroke: var(--brand-solid);
   stroke-width: 1.5;
-  opacity: 0;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
   animation: bs-text-ring var(--bs-dur) infinite;
 }
 @keyframes bs-text-ring {
   0%,
-  57% {
-    opacity: 0;
-    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  54.29% {
+    stroke-dashoffset: 1;
+    animation-timing-function: var(--bs-sine);
   }
-  59.5% {
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
-  }
-  62% {
-    opacity: 0;
-    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
-  }
-  64.5% {
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
-  }
-  67%,
+  65.71%,
   100% {
-    opacity: 0;
+    stroke-dashoffset: 0;
   }
 }
 .branch-streak .bs-sent {
@@ -206,14 +206,13 @@
 .branch-streak .bs-sent text {
   fill: #fff;
 }
-/* The blue flows in from the left, the way the blue line arrives */
 @keyframes bs-sent {
   0%,
-  67% {
+  66.43% {
     clip-path: inset(0 100% 0 0);
     animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
   }
-  77%,
+  75%,
   100% {
     clip-path: inset(0 0 0 0);
   }
@@ -229,8 +228,7 @@
 }
 
 /* The blue caret: appears with the box, steps along after each character
-   as it types (33–55%), holds through the pulses, fades as the blue comes
-   in */
+   as it types, holds through the stroke, fades as the blue comes in */
 .branch-streak .bs-caret {
   fill: var(--brand-solid);
   opacity: 0;
@@ -238,15 +236,15 @@
 }
 @keyframes bs-caret {
   0%,
-  30% {
+  30.71% {
     opacity: 0;
   }
-  31%,
-  67% {
+  31.5%,
+  66.43% {
     opacity: 1;
-    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+    animation-timing-function: var(--bs-sine);
   }
-  71%,
+  69.29%,
   100% {
     opacity: 0;
   }
@@ -256,7 +254,7 @@
 @media (prefers-reduced-motion: reduce) {
   .branch-streak .bs-world,
   .branch-streak .bs-run,
-  .branch-streak .bs-box,
+  .branch-streak .bs-box-lit,
   .branch-streak .bs-edge,
   .branch-streak .bs-track-out,
   .branch-streak .bs-out,
@@ -270,19 +268,20 @@
     stroke-dasharray: 1;
     stroke-dashoffset: 0;
   }
-  .branch-streak .bs-box,
   .branch-streak .bs-track-out,
   .branch-streak .bs-text {
     opacity: 1;
   }
+  .branch-streak .bs-box-lit,
+  .branch-streak .bs-sent {
+    clip-path: none;
+  }
   .branch-streak .bs-edge,
-  .branch-streak .bs-out {
+  .branch-streak .bs-out,
+  .branch-streak .bs-text-ring {
     stroke-dashoffset: 0;
   }
   .branch-streak .bs-typed tspan {
     opacity: 1;
-  }
-  .branch-streak .bs-sent {
-    clip-path: none;
   }
 }
