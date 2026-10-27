@@ -44,6 +44,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 2 | 2026-10-27 | Node square removed: the line splits straight into the three branches (they start as it arrives, 0.56s sooner). Cards 48px tall (was 44) with our 20px squircle corners (was 12) | `51ff93b` |
 | 1 | 2026-10-27 | **Branch out to people researching** (`branch-out.tsx`). Carries on from slide 1: the blue line comes in from the left edge into a 32px node, which lights up behind a travelling blue edge; three branches grow out to white cards (Pricing models, User interviews, Competitor teardown), each with an auth-canvas author chip (avatar + name: Lex Porto, Oladeji Raji, Felipe Rocha on blue) and the shimmering "is researching…". Plays once on arrival and holds | `ad7069f` |
 
 ## Dialog and layout
