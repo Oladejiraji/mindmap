@@ -43,10 +43,10 @@ const LINES = [
 ];
 const START_X = 48;
 
-// The text box the blue line runs into, at Apple's iOS text field size:
-// 36pt tall, 10pt corners, a grey fill and no border, with the blue caret.
+// The text box the blue line runs into, after Apple's iOS text field
+// (32px tall here, 10pt corners), a grey fill and no border, with the blue caret.
 // Its right margin matches the dots' 48 on the left.
-const TEXT = { x: 350, w: 180, h: 36, r: 10, pad: 12 };
+const TEXT = { x: 350, w: 180, h: 32, r: 10, pad: 12 };
 const TT = MID - TEXT.h / 2;
 const TR = TEXT.r;
 // The box's outline as one stroke from its left middle (where the blue
