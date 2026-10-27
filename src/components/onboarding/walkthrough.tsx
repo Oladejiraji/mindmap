@@ -42,11 +42,25 @@ export function Walkthrough() {
   const slide = TOUR[step];
   const last = step === TOTAL - 1;
 
+  // Every control takes effect straight away, even mid-animation (the
+  // animations are interruptible): going to a slide cancels any exit that's
+  // still playing
+  const goTo = (n: number) => {
+    window.clearTimeout(exitTimer.current);
+    setLeaving(false);
+    setStep(Math.min(Math.max(n, 0), TOTAL - 1));
+  };
+
+  // Back during an exit cancels it (the Continue it undoes hadn't landed
+  // yet), so Continue then Back always returns you where you were
+  const back = () => goTo(leaving ? step : step - 1);
+
   const next = () => {
     if (last) return close();
-    if (leaving) return;
+    // Continue again during an exit: skip the rest of it
+    if (leaving) return goTo(step + 1);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!slide?.art || reduced) return setStep(step + 1);
+    if (!slide?.art || reduced) return goTo(step + 1);
     // The slide's own exit (its line running out) plays first, then its
     // visuals scale and blur, then fade (ART_OUT_MS, tour.css)
     setLeaving(true);
@@ -88,7 +102,7 @@ export function Walkthrough() {
               <Dots step={step} />
               <div className="flex items-center gap-2">
                 {step > 0 && (
-                  <button type="button" onClick={() => setStep(step - 1)} className={textButton}>
+                  <button type="button" onClick={back} className={textButton}>
                     Back
                   </button>
                 )}
