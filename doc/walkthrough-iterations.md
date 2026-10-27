@@ -40,6 +40,12 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 | 2 | 2026-10-23 | **Figma message bars.** Three `#027fff` pills (311/277/404 × 36, 13px radius, 12px 10px padding) bottom-right of the blue panel | `7792772`, `668962c` |
 | 1 | 2026-10-22 | **Product previews.** A question, its answer and two branches as cards | `c5b0cc7` |
 
+## Create nodes illustration
+
+| # | Date | Version | Commit |
+|---|---|---|---|
+| 1 | 2026-10-27 | **Branch out to people researching** (`branch-out.tsx`). Carries on from slide 1: the blue line comes in from the left edge into a 32px node, which lights up behind a travelling blue edge; three branches grow out to white cards (Pricing models, User interviews, Competitor teardown), each with an auth-canvas author chip (avatar + name: Lex Porto, Oladeji Raji, Felipe Rocha on blue) and the shimmering "is researching…". Plays once on arrival and holds | `ad7069f` |
+
 ## Dialog and layout
 
 | # | Date | Change | Commit |
