@@ -98,7 +98,7 @@ const CHILDREN: Card[] = [
   {
     x: 300,
     w: 238,
-    mid: 236,
+    mid: 228,
     h: 32,
     at: 1740,
     // Forks the features of the group research tool
@@ -107,7 +107,7 @@ const CHILDREN: Card[] = [
     avatar: StephenAvatar,
     ring: "oklch(0.8 0.16 82)",
     // The features it forks from the group research tool
-    notes: [FORKED, { text: "Collaboration · Clarity · Tracking" }],
+    notes: [FORKED, { text: "Core features for MVP" }, { text: "Collaboration · Clarity · Tracking" }],
   },
 ];
 // The branches grow out of the project card's right side, 100ms apart,
