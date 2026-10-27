@@ -21,6 +21,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 24 | 2026-10-27 | First slide title "Ask then Branch" → "Research with the team" (body unchanged) | `af568e3` |
 | 23 | 2026-10-27 | Logo back to 32px (keeps the smaller 10px m and 10px corners). Coming soon badge is a 20px chip, centred on the title | `9fd9446` |
 | 22 | 2026-10-27 | Logo tile 64px, 10px corners, smaller m (20px, 31% of the tile). Coming soon badges get Antalik's shimmer from libraries.dev/orbs (dark band on a tertiary-grey label, 2s linear; off for reduced motion) | `8599984` |
 | 21 | 2026-10-26 | Skip removed (Esc or clicking outside still close it); the 166px button group goes with it, so Back sits 8px from Continue | `c3b05e0` |
