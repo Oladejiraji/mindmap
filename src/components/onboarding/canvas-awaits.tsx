@@ -132,15 +132,28 @@ export function CanvasAwaits() {
         <div className="mb-1.5 flex h-5 items-center gap-1.5">
           <Image src={KurosawaAvatar} alt="" width={16} height={16} className="rounded-full ring-[1.5px] ring-brand-solid" />
           <span className="text-caption-base font-medium text-fg-primary">Kurosawa</span>
-          {settled ? (
-            <span key="created" className="ca-swap text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]">
+          {/* "is typing…" crossfades to "created a nexus point" (both
+              stacked; one fades and blurs out as the other comes in) */}
+          <span className="grid">
+            <span
+              className={cn(
+                "col-start-1 row-start-1 transition-[opacity,filter] duration-300 ease-out motion-reduce:transition-none",
+                settled ? "opacity-0 blur-[4px]" : "opacity-100",
+              )}
+            >
+              <span className="t-shimmer text-[12px] leading-4 font-normal" data-text="is typing…">
+                is typing…
+              </span>
+            </span>
+            <span
+              className={cn(
+                "col-start-1 row-start-1 text-[12px] leading-4 font-normal whitespace-nowrap text-[oklch(0.68_0_0)] transition-[opacity,filter] duration-300 ease-out motion-reduce:transition-none",
+                settled ? "opacity-100" : "opacity-0 blur-[4px]",
+              )}
+            >
               created a nexus point
             </span>
-          ) : (
-            <p className="t-shimmer text-[12px] leading-4 font-normal" data-text="is typing…">
-              is typing…
-            </p>
-          )}
+          </span>
         </div>
         {/* The card: in focus while it's typed into, then settled */}
         <div

@@ -52,16 +52,6 @@
   }
 }
 
-/* "created a nexus point" fades in as it settles */
-.canvas-awaits .ca-swap {
-  animation: ca-swap 300ms ease-out;
-}
-@keyframes ca-swap {
-  from {
-    opacity: 0;
-  }
-}
-
 /* "is typing…": the notes' grey with a darker grey band */
 .canvas-awaits .t-shimmer {
   --shimmer-base: oklch(0.68 0 0);
@@ -91,8 +81,7 @@
     animation: none;
     stroke-dashoffset: 0;
   }
-  .canvas-awaits .ca-node,
-  .canvas-awaits .ca-swap {
+  .canvas-awaits .ca-node {
     animation: none;
     opacity: 1;
     filter: none;
