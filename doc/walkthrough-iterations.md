@@ -99,6 +99,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 11 | 2026-10-27 | **Wireframes.** Once the node settles, three 1px connectors in `oklch(0.88 0 0)` draw down from its foot (600ms, 120ms apart) to three empty 112 × 28 nodes, dashed 3/3 in the same grey, which fade in after them. Reduced motion shows them drawn | `dd8a132` |
 | 10 | 2026-10-27 | Composer removed (and its new-project click). The pulse beats rhythmically: from the moment the node settles, the auth pulse fires round it every 3s (measured 3000ms apart); off for reduced motion | `b66c674` |
 | 9 | 2026-10-27 | Clicking the composer opens a new project (/new) and the walkthrough closes. A pointer shortcut (text cursor, a shadow on hover), out of the tab order since the panel is decorative and hidden from assistive tech | `eff1dfd` |
 | 8 | 2026-10-27 | Composer matches our chat input (chat-input.tsx), smaller: 20px corners, surface colour with a hairline strong-border ring, placeholder in fg-tertiary, a round outlined + on the left and the black send button on the right (28px), 340 wide | `fcddcad` |
