@@ -1,16 +1,56 @@
-/* Research with the team (branch-streak.tsx). One 4.8s loop:
-   0–21.6%  five coloured lines run in together, speeding up, and their
-            heads meet the square's left edge at 21.6%. Until then the
-            square and the line out of it sit at 30%, with no blue
-   21.6–27% the strike: the square comes up to full and a blue edge runs
-            from the contact point round both sides to the right; the
-            lines' tails drain into the square by 30%
-   26.5–46% one blue line draws out of the square's right side
-   84–94%   everything fades; the loop restarts clean */
+/* Research with the team (branch-streak.tsx). One 10s loop:
+   0–10.4%   five coloured lines run in together, speeding up, and their
+             heads meet the square's left edge at 10.4% (1.04s). Until then
+             the square and the line out of it sit at 30%, with no blue
+   10.4–13%  the strike: the square comes up to full and a blue edge runs
+             from the contact point round both sides to the right; the
+             lines' tails drain into the square by 14.4%
+   12.7–70%  the blue line draws out (x 378 → 1340, linear). From 15.2%,
+             when its head is 420px into the view, the camera pans with it
+             at the same speed, so the head holds still and the world moves
+   23.5%, 35.4%, 47.4%, 59.3%
+             a node pops as the head passes it (x 560, 760, 960, 1160), and
+             its faded branches grow out over the next 0.7s
+   86–95%    everything fades; hidden until the loop restarts, when the
+             camera is back at the start */
 .branch-streak {
-  --bs-dur: 4800ms;
+  --bs-dur: 10s;
   --bs-track: oklch(0.9 0 0);
   overflow: visible;
+}
+
+.branch-streak .bs-world {
+  animation: bs-world var(--bs-dur) infinite;
+}
+@keyframes bs-world {
+  0% {
+    opacity: 0;
+  }
+  2%,
+  86% {
+    opacity: 1;
+  }
+  95%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The camera: still for the converge, then pans with the blue line's head
+   (same distance per second as the line draws, so the head holds at 420) */
+.branch-streak .bs-camera {
+  animation: bs-camera var(--bs-dur) infinite;
+}
+@keyframes bs-camera {
+  0%,
+  15.2% {
+    transform: translateX(0);
+    animation-timing-function: linear;
+  }
+  70%,
+  100% {
+    transform: translateX(-920px);
+  }
 }
 
 .branch-streak .bs-track {
@@ -20,7 +60,7 @@
 }
 
 /* The five lines: a 22% length of colour travelling along each track. Its
-   head (at offset 0.22 − progress) reaches the square at 21.6%; the tail
+   head (at offset 0.22 − progress) reaches the square at 10.4%; the tail
    then drains in */
 .branch-streak .bs-run {
   stroke-width: 2;
@@ -34,11 +74,11 @@
     stroke-dashoffset: 0.22;
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
-  21.6% {
+  10.4% {
     stroke-dashoffset: -0.78;
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
-  30%,
+  14.4%,
   100% {
     stroke-dashoffset: -1;
   }
@@ -54,16 +94,12 @@
 }
 @keyframes bs-box {
   0%,
-  21.6% {
+  10.4% {
     opacity: 0.3;
   }
-  23%,
-  84% {
-    opacity: 1;
-  }
-  94%,
+  11.1%,
   100% {
-    opacity: 0.3;
+    opacity: 1;
   }
 }
 
@@ -78,23 +114,13 @@
 }
 @keyframes bs-edge {
   0%,
-  21.6% {
+  10.4% {
     stroke-dashoffset: 1;
-    opacity: 1;
     animation-timing-function: cubic-bezier(0.25, 0.6, 0.3, 1);
   }
-  27%,
-  84% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-  94% {
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
+  13%,
   100% {
-    stroke-dashoffset: 1;
-    opacity: 0;
+    stroke-dashoffset: 0;
   }
 }
 
@@ -105,20 +131,17 @@
 }
 @keyframes bs-track-out {
   0%,
-  21.6% {
+  10.4% {
     opacity: 0.3;
   }
-  26%,
-  84% {
-    opacity: 1;
-  }
-  94%,
+  12.5%,
   100% {
-    opacity: 0.3;
+    opacity: 1;
   }
 }
 
-/* The one blue line, drawing out once the edge reaches the right side */
+/* The one blue line, drawing out at a steady speed for the camera to
+   follow */
 .branch-streak .bs-out {
   stroke: var(--brand-solid);
   stroke-width: 2;
@@ -129,33 +152,170 @@
 }
 @keyframes bs-out {
   0%,
-  26.5% {
+  12.7% {
     stroke-dashoffset: 1;
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+    animation-timing-function: linear;
   }
-  46%,
-  84% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-  94% {
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
+  70%,
   100% {
-    stroke-dashoffset: 1;
-    opacity: 0;
+    stroke-dashoffset: 0;
   }
 }
 
-/* Reduced motion: the finished picture */
+/* Nodes on the line: white with a blue edge, popping (fade + scale up,
+   no overshoot) as the line's head passes */
+.branch-streak .bs-node {
+  fill: #fff;
+  stroke: var(--brand-solid);
+  stroke-width: 1.25;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: var(--bs-dur) infinite;
+}
+.branch-streak .bs-node.bs-at-1 {
+  animation-name: bs-node-1;
+}
+.branch-streak .bs-node.bs-at-2 {
+  animation-name: bs-node-2;
+}
+.branch-streak .bs-node.bs-at-3 {
+  animation-name: bs-node-3;
+}
+.branch-streak .bs-node.bs-at-4 {
+  animation-name: bs-node-4;
+}
+@keyframes bs-node-1 {
+  0%,
+  23.5% {
+    opacity: 0;
+    transform: scale(0.6);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  26%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes bs-node-2 {
+  0%,
+  35.4% {
+    opacity: 0;
+    transform: scale(0.6);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  37.9%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes bs-node-3 {
+  0%,
+  47.4% {
+    opacity: 0;
+    transform: scale(0.6);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  49.9%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes bs-node-4 {
+  0%,
+  59.3% {
+    opacity: 0;
+    transform: scale(0.6);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  61.8%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Faded branches growing out of each node just after it pops */
+.branch-streak .bs-branch {
+  stroke: var(--brand-solid);
+  stroke-opacity: 0.3;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: var(--bs-dur) infinite;
+}
+.branch-streak .bs-branch.bs-at-1 {
+  animation-name: bs-branch-1;
+}
+.branch-streak .bs-branch.bs-at-2 {
+  animation-name: bs-branch-2;
+}
+.branch-streak .bs-branch.bs-at-3 {
+  animation-name: bs-branch-3;
+}
+.branch-streak .bs-branch.bs-at-4 {
+  animation-name: bs-branch-4;
+}
+@keyframes bs-branch-1 {
+  0%,
+  24.5% {
+    stroke-dashoffset: 1;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  31.5%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bs-branch-2 {
+  0%,
+  36.4% {
+    stroke-dashoffset: 1;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  43.4%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bs-branch-3 {
+  0%,
+  48.4% {
+    stroke-dashoffset: 1;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  55.4%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bs-branch-4 {
+  0%,
+  60.3% {
+    stroke-dashoffset: 1;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  67.3%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Reduced motion: the converged picture, no camera move */
 @media (prefers-reduced-motion: reduce) {
+  .branch-streak .bs-world,
+  .branch-streak .bs-camera,
   .branch-streak .bs-run,
   .branch-streak .bs-box,
   .branch-streak .bs-edge,
   .branch-streak .bs-track-out,
-  .branch-streak .bs-out {
+  .branch-streak .bs-out,
+  .branch-streak .bs-node,
+  .branch-streak .bs-branch {
     animation: none;
   }
   .branch-streak .bs-run {
@@ -163,11 +323,13 @@
     stroke-dashoffset: 0;
   }
   .branch-streak .bs-box,
-  .branch-streak .bs-track-out {
+  .branch-streak .bs-track-out,
+  .branch-streak .bs-node {
     opacity: 1;
   }
   .branch-streak .bs-edge,
-  .branch-streak .bs-out {
+  .branch-streak .bs-out,
+  .branch-streak .bs-branch {
     stroke-dashoffset: 0;
   }
 }
