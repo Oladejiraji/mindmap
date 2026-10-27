@@ -85,6 +85,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 13 | 2026-10-27 | Connecting lines removed (and their measuring code); the row and the sphere stay | `51d8dbe` |
 | 12 | 2026-10-27 | **Glitch fix.** The bow side was chosen per frame and flipped as a logo crossed the row; photos were measured every frame (sub-pixel twitch). Now a cubic curve leaves the photo vertically towards its model then sweeps into the logo, every control point continuous with the logo's position; photo centres measured once when the lines appear and on resize. Measured: max 0.9px movement per frame | `541dbce` |
 | 11 | 2026-10-27 | Lines connect to the profiles: each starts at its person's photo centre, measured every frame, and runs behind it so it comes out of their circle; curves bow away from the row (up or down, 25%) so they leave their own photo, not a neighbour's | `96cb0cf` |
 | 10 | 2026-10-27 | Lines curve: each a quadratic arc bowed to one side by a third of its length (always the same way round), re-drawn each frame as the sphere turns | `eaf350c` |
