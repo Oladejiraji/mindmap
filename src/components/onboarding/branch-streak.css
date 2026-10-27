@@ -145,7 +145,7 @@
 /* The text box (iOS text field): a darker grey fill, no border, barely
    there until the blue line reaches it */
 .branch-streak .bs-text {
-  fill: oklch(0.93 0 0);
+  fill: oklch(0.955 0 0);
   opacity: 0.3;
   animation: bs-text var(--bs-dur) infinite;
 }
