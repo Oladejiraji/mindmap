@@ -48,6 +48,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 14 | 2026-10-27 | Tool row starts with "Samples" (same grey), then the three logos | `4f2c918` |
 | 13 | 2026-10-27 | The nexus line becomes sample tools reviewed: Linear, ClickUp and Notion, each with its 12px mark in brand colour (Simple Icons, `tool-logos.tsx`) and its name in the notes' grey | `ca73516` |
 | 12 | 2026-10-27 | "is researching…" in the notes' type and grey (12/16 regular, `oklch(0.68 0 0)`), shimmer switched to the grey Antalik one (band `oklch(0.45 0 0)`) | `34d5efc` |
 | 11 | 2026-10-27 | List regular (was medium) in a lighter grey, `oklch(0.68 0 0)` (was 0.55). Photo rings: Kurosawa keeps our blue; Deji coral `oklch(0.7 0.18 32)` and Stephen amber `oklch(0.8 0.16 82)`, from slide 1's complementary palette | `ed3fbe5` |
