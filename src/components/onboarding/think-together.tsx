@@ -132,7 +132,7 @@ export function ThinkTogether() {
             alt=""
             width={SIZES[i]}
             height={SIZES[i]}
-            className="tt-pop rounded-full ring-2 ring-(--tt-ring) ring-offset-2 ring-offset-white"
+            className="tt-pop rounded-full ring-2 ring-(--tt-ring)"
             style={{ ["--tt-ring" as string]: p.ring, animationDelay: `${200 + i * 120}ms` }}
           />
         ))}
