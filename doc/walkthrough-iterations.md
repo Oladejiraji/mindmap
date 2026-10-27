@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 12 | 2026-10-27 | Panel background #f5f5f5 → #f3f3f3 | `480a5cf` |
 | 11 | 2026-10-27 | **Impact from the line, understated.** The streak speeds up into the square, its head stays against it and nudges it 2px (eased back, no squash or bounce), and its tail collapses into the square. Square: blue edge, faint `oklch(0.97 0.02 262)` tint; soft 1px ring to 1.45×, gone in ~400ms | `fbeb013` |
 | 10 | 2026-10-27 | **Branch streak, with impact.** The square and the five branch tracks sit at 30% until the streak hits; on impact the square is knocked 5px and squashed (0.84 × 1.12), springs back, flashes light blue (`oklch(0.93 0.05 262)`) and takes a blue edge, and a blue ring ripples off it | `86b9636` |
 | 9 | 2026-10-27 | **Branch streak** (`branch-streak.tsx`). On the #f5f5f5 panel: a blue streak runs along a faint track into a 32px square (which pulses, edge turns blue), then five lines branch off it and draw out, each ending in a dot. Branch colours in OKLCH around our blue's complement (brand hue 262 → 82), 25° apart: coral 32, orange 57, amber 82, chartreuse 107, green 132. 4.8s loop; reduced motion shows the finished picture | `997c53e` |
