@@ -6,17 +6,19 @@
  * Mindmap?" types into it while Kurosawa "is typing…". Then it settles
  * onto the canvas, firing the auth page's pulse (VapourHalo) as it comes
  * to rest, and his tag becomes "created a nexus point". The chat composer
- * slides up at the foot. Kurosawa's tag sits above the card, as on the
+ * slides up at the foot; clicking it starts a new project. Kurosawa's tag sits above the card, as on the
  * earlier slides. Reduced motion shows it settled, without the pulse.
  * Laid out at the panel's 578 × 318 and scaled to fit.
  */
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import { SendIcon } from "@/components/icons/send-icon";
 import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
 import { cn } from "@/lib/utils";
+import { routes } from "@/lib/routes";
 import "./canvas-awaits.css";
 
 const W = 578;
@@ -118,8 +120,14 @@ export function CanvasAwaits() {
       {/* The chat composer, ready for the first question: our chat input
           (20px corners, the surface colour with a hairline ring, a round +
           and the black send button), at a smaller size */}
-      <div
-        className="ca-rise absolute bottom-5 left-1/2 flex w-[340px] -translate-x-1/2 flex-col gap-1.5 rounded-[20px] bg-surface-container p-2.5 inset-ring-[0.5px] inset-ring-border-strong"
+      {/* Clicking it starts a new project. The panel is decorative and
+          hidden from assistive tech, so this is a pointer shortcut only
+          (out of the tab order); the walkthrough's own buttons stay the
+          keyboard path. */}
+      <Link
+        href={routes.newProject}
+        tabIndex={-1}
+        className="ca-rise absolute bottom-5 left-1/2 flex w-[340px] -translate-x-1/2 cursor-text flex-col gap-1.5 rounded-[20px] bg-surface-container p-2.5 inset-ring-[0.5px] inset-ring-border-strong transition-shadow duration-150 ease-out hover:shadow-default"
         style={{ animationDelay: `${SETTLE_AT + SETTLE_MS + 200}ms` }}
       >
         <span className="px-1 pt-0.5 text-body-sm text-fg-tertiary">Ask anything…</span>
@@ -131,7 +139,7 @@ export function CanvasAwaits() {
             <SendIcon className="size-4" />
           </span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
