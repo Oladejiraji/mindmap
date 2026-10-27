@@ -35,9 +35,9 @@ type Card = {
   avatar: StaticImageData;
   notes?: Note[];
 };
-// The project card lists the work done and the nexus points reached in it
-// (12px/16px medium, grey; a nexus point gets a blue bullet): a 32px
-// title row, three 16px lines 4px apart, 10px below
+// Under the project card (not in it), a list of the work done and the
+// nexus points reached in it: 12px/16px medium, grey; a nexus point gets
+// a blue bullet
 const NOTES: Note[] = [
   { text: "Reviewed 12 research tools" },
   { text: "Synthesised 6 team interviews" },
@@ -47,7 +47,7 @@ const PARENT: Card = {
   x: 48,
   w: 220,
   mid: MID,
-  h: 32 + NOTES.length * 16 + (NOTES.length - 1) * 4 + 10,
+  h: 32,
   at: 760,
   title: "Build a group research tool",
   name: "Kurosawa",
@@ -135,12 +135,13 @@ export function BranchOut() {
             <p className="gradient-text-shimmer text-[12px] leading-4 font-medium opacity-50">is researching…</p>
           </div>
           <div
-            className="corner-squircle rounded-4xl bg-white text-body-sm text-fg-primary shadow-node"
+            className="corner-squircle flex items-center rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node"
             style={{ height: b.h }}
           >
-            <div className="flex h-8 items-center px-3">{b.title}</div>
-            {b.notes && (
-              <ul className="space-y-1 px-3">
+            {b.title}
+          </div>
+          {b.notes && (
+            <ul className="mt-2 space-y-1 px-3">
                 {b.notes.map((n, i) => (
                   <li
                     key={n.text}
@@ -153,9 +154,8 @@ export function BranchOut() {
                     {n.text}
                   </li>
                 ))}
-              </ul>
-            )}
-          </div>
+            </ul>
+          )}
         </div>
       ))}
     </div>
