@@ -97,6 +97,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 9 | 2026-10-27 | Clicking the composer opens a new project (/new) and the walkthrough closes. A pointer shortcut (text cursor, a shadow on hover), out of the tab order since the panel is decorative and hidden from assistive tech | `eff1dfd` |
 | 8 | 2026-10-27 | Composer matches our chat input (chat-input.tsx), smaller: 20px corners, surface colour with a hairline strong-border ring, placeholder in fg-tertiary, a round outlined + on the left and the black send button on the right (28px), 340 wide | `fcddcad` |
 | 7 | 2026-10-27 | **Typed, then settles.** The node appears hovering above the canvas in focus (lifted 10px, 1.03×, a soft blue focus ring and deep blue shadow); "So how do you get started on Mindmap?" types in (45ms a character, blinking white caret) while Kurosawa "is typing…"; then it settles (380ms), the pulse fires as it lands, and his tag becomes "created a nexus point". Composer follows. Card 300 wide, text left-aligned | `090ef16` |
 | 6 | 2026-10-27 | Set up like the earlier slides: Kurosawa's tag (16px photo in a blue ring, name, grey "is researching…" shimmer) sits above the card, outside it; the card is a 32px blue pill with just the question; the pulse hugs the card | `30efd6d` |
