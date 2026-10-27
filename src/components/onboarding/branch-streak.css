@@ -304,6 +304,81 @@
   }
 }
 
+/* Leaving (Continue): the picture jumps to its finished state, then the
+   blue line runs on out of the text box and off the right edge, speeding
+   up as it goes */
+.branch-streak .bs-exit {
+  stroke: var(--brand-solid);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.branch-streak.bs-leaving .bs-exit {
+  opacity: 1;
+  animation: bs-exit 450ms cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+@keyframes bs-exit {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.branch-streak.bs-leaving .bs-world,
+.branch-streak.bs-leaving .bs-run,
+.branch-streak.bs-leaving .bs-box-lit,
+.branch-streak.bs-leaving .bs-edge,
+.branch-streak.bs-leaving .bs-track-out,
+.branch-streak.bs-leaving .bs-out,
+.branch-streak.bs-leaving .bs-text,
+.branch-streak.bs-leaving .bs-text-ring,
+.branch-streak.bs-leaving .bs-sent,
+.branch-streak.bs-leaving .bs-caret,
+.branch-streak.bs-leaving .bs-caret-run,
+.branch-streak.bs-leaving [class*="bs-ch-"] {
+  animation: none;
+}
+.branch-streak.bs-leaving .bs-run {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.branch-streak.bs-leaving .bs-track-out,
+.branch-streak.bs-leaving .bs-text,
+.branch-streak.bs-leaving .bs-typed tspan {
+  opacity: 1;
+}
+.branch-streak.bs-leaving .bs-box-lit,
+.branch-streak.bs-leaving .bs-sent {
+  clip-path: none;
+}
+.branch-streak.bs-leaving .bs-edge,
+.branch-streak.bs-leaving .bs-out,
+.branch-streak.bs-leaving .bs-text-ring {
+  stroke-dashoffset: 0;
+}
+
+/* Entering the next slide: the line comes in from the left edge and eases
+   to a stop mid-panel, just after the slide fades in */
+.branch-streak .bs-in {
+  stroke: var(--brand-solid);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bs-in 700ms cubic-bezier(0.2, 0, 0, 1) 120ms forwards;
+}
+@keyframes bs-in {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Reduced motion: the finished picture */
 @media (prefers-reduced-motion: reduce) {
   .branch-streak .bs-world,
@@ -316,7 +391,8 @@
   .branch-streak .bs-text,
   .branch-streak .bs-text-ring,
   .branch-streak .bs-sent,
-  .branch-streak .bs-caret {
+  .branch-streak .bs-caret,
+  .branch-streak .bs-in {
     animation: none;
   }
   .branch-streak .bs-run {
@@ -333,7 +409,8 @@
   }
   .branch-streak .bs-edge,
   .branch-streak .bs-out,
-  .branch-streak .bs-text-ring {
+  .branch-streak .bs-text-ring,
+  .branch-streak .bs-in {
     stroke-dashoffset: 0;
   }
   .branch-streak .bs-typed tspan {

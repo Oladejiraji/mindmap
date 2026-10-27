@@ -92,7 +92,7 @@ const HALOS = [
 const linePath = (y: number) =>
   `M${START_X} ${y} L${BOX.x - 150} ${y} C${BOX.x - 85} ${y} ${BOX.x - 65} ${MID} ${BOX.x} ${MID}`;
 
-export function BranchStreak() {
+export function BranchStreak({ leaving = false }: { leaving?: boolean }) {
   const textTop = TT;
   const worldRef = useRef<SVGGElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -156,7 +156,11 @@ export function BranchStreak() {
           </div>
         ))}
       </div>
-    <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className={`branch-streak absolute inset-0 size-full${leaving ? " bs-leaving" : ""}`}
+      aria-hidden
+    >
       <g className="bs-world" ref={worldRef}>
         {/* Faint tracks for the five lines */}
         {LINES.map((l) => (
@@ -196,6 +200,9 @@ export function BranchStreak() {
         {/* Sent: the same box in blue with the question in white, revealed
             from the left over the grey one; its shadow sits outside the
             reveal so it grows in with the blue */}
+        {/* On Continue: the line runs on out of the text box, off the
+            panel's right edge, into the next slide */}
+        <line x1={TEXT.x + TEXT.w} y1={MID} x2={W + 2} y2={MID} pathLength={1} className="bs-exit" />
         <g className="bs-sent-shadow">
           <g className="bs-sent">
             <rect x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
@@ -215,5 +222,16 @@ export function BranchStreak() {
       </g>
     </svg>
     </>
+  );
+}
+
+/* The next slide's panel: the blue line carries on in from the left edge,
+ * at the same height it left the last one, easing to a stop mid-panel
+ * (where that slide's illustration will pick it up). */
+export function BranchStreakIn() {
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
+      <line x1={-2} y1={MID} x2={W / 2} y2={MID} pathLength={1} className="bs-in" />
+    </svg>
   );
 }

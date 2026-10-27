@@ -22,6 +22,10 @@ export function Walkthrough() {
   const searchParams = useSearchParams();
   const open = searchParams.get("tour") === "1";
   const [step, setStep] = useState(0);
+  // A slide with an exit plays it (its line runs on out of the panel)
+  // before the next slide comes in
+  const [leaving, setLeaving] = useState(false);
+  const exitTimer = useRef<number | undefined>(undefined);
   // Focus starts on Continue, the expected next action
   const continueRef = useRef<HTMLButtonElement>(null);
 
@@ -30,11 +34,25 @@ export function Walkthrough() {
     next.delete("tour");
     const qs = next.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    window.clearTimeout(exitTimer.current);
+    setLeaving(false);
     setStep(0);
   };
 
   const slide = TOUR[step];
   const last = step === TOTAL - 1;
+
+  const next = () => {
+    if (last) return close();
+    if (leaving) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!slide?.exit || reduced) return setStep(step + 1);
+    setLeaving(true);
+    exitTimer.current = window.setTimeout(() => {
+      setLeaving(false);
+      setStep((s) => s + 1);
+    }, slide.exit);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && close()}>
@@ -56,7 +74,7 @@ export function Walkthrough() {
                 <div className="min-w-0 flex-1">
                   <TourText slide={slide} />
                 </div>
-                <TourPanel slide={slide} />
+                <TourPanel slide={slide} leaving={leaving} />
               </div>
             ) : (
               <MakeItYours className="min-h-0 flex-1" />
@@ -77,7 +95,7 @@ export function Walkthrough() {
                 <button
                   ref={continueRef}
                   type="button"
-                  onClick={() => (last ? close() : setStep(step + 1))}
+                  onClick={next}
                   className="corner-squircle h-8 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-1.5 text-[13px] leading-[1.38] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
                 >
                   {last ? "Finish" : "Continue"}
