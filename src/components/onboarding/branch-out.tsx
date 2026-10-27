@@ -112,6 +112,10 @@ const CHILDREN: Card[] = [
 // The branches grow out of the project card's right side, 100ms apart,
 // once it has appeared
 const BRANCH_AT = 1100;
+// Then, before a fork's notes ("Forked" first), a pulse runs along its
+// connector from the project to it; the notes appear as it arrives
+const PULSE = { after: 100, ms: 600 };
+const notesAt = (b: Card) => (b === PARENT ? b.at + 260 : b.at + PULSE.after + PULSE.ms);
 
 // From the project card's right middle, curving to a branch card's left
 // middle
@@ -160,6 +164,17 @@ export function BranchOut() {
             fill="none"
           />
         ))}
+        {/* The pulse along each fork's connector, before its notes */}
+        {CHILDREN.map((c) => (
+          <path
+            key={c.title}
+            d={branchPath(c)}
+            pathLength={1}
+            className="bo-pulse"
+            style={{ animationDelay: `${c.at + PULSE.after}ms`, animationDuration: `${PULSE.ms}ms` }}
+            fill="none"
+          />
+        ))}
       </svg>
 
       {/* The cards, each appearing as the line or its branch arrives, with
@@ -205,7 +220,7 @@ export function BranchOut() {
                 <li
                   key={n.text}
                   className={`bo-note ${noteText}`}
-                  style={{ animationDelay: `${b.at + 260 + i * 120}ms` }}
+                  style={{ animationDelay: `${notesAt(b) + i * 120}ms` }}
                 >
                   <span className="flex items-center gap-1">
                     {n.forked && <BranchIcon pathClassName="fill-[oklch(0.68_0_0)]" />}
