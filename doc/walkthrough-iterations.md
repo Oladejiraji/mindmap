@@ -97,6 +97,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 3 | 2026-10-27 | **One blue node in the centre.** Just the project, "Build a group research tool", centred on the canvas as a solid blue card (brand fill, white text, node-primary shadow); the forks and edges removed (kept in the previous commit). It drops in and pulses as it lands; the composer follows at 1s | `423fafe` |
 | 2 | 2026-10-27 | **The whole panel is the canvas.** No dot grid, no square: the nodes (32px, our 20px squircle cards, the project selected in blue) and edges sit on the panel, the composer (320 wide) at the foot. Each node drops in (10px, blur) and fires the auth page's pulse (VapourHalo) as it comes to rest | `27f0b7e` |
 | 1 | 2026-10-27 | **A window onto the canvas** (`canvas-awaits.tsx`). A 260px white square (20px squircle, node shadow) with the dot grid; "Build a group research tool" as a selected node (blue ring), blue edges drawn down to User interviews and Core features, and the chat composer ("Ask anything…", blue send) at the foot. Blurs in, nodes pop, edges draw, composer slides up | `c3b4b1e` |
 
