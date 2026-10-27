@@ -22,7 +22,7 @@ const MID = H / 2;
 // the project the line arrives at, and two branches of it. x, w: the
 // card's left edge and width; mid: its vertical centre; at: when it
 // appears (ms).
-const CARD = { h: 48, chip: 20, gap: 6 };
+const CARD = { h: 32, chip: 20, gap: 6 };
 type Card = { x: number; w: number; mid: number; at: number; title: string; name: string; avatar: StaticImageData };
 const PARENT: Card = {
   x: 48,
@@ -113,7 +113,7 @@ export function BranchOut() {
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
             <p className="gradient-text-shimmer text-caption-base opacity-50">is researching…</p>
           </div>
-          <div className="corner-squircle flex h-12 items-center rounded-4xl bg-white px-3.5 text-body-sm text-fg-primary shadow-node">
+          <div className="corner-squircle flex h-8 items-center rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node">
             {b.title}
           </div>
         </div>

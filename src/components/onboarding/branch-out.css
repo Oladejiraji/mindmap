@@ -4,7 +4,7 @@
    1100–1800  two branches grow out of its right side, 100ms apart
    1640–2040  the branch cards (Deji, Stephen) appear as their branches
               arrive; the "is researching…" shimmer carries on
-   Cards: 48px, 20px squircle corners */
+   Cards: 32px tall, 20px squircle corners (so fully rounded ends) */
 .branch-out .bo-in {
   stroke: var(--brand-solid);
   stroke-width: 2;
