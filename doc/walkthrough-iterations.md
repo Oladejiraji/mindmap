@@ -48,6 +48,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 19 | 2026-10-27 | **Pulse before Forked.** After each fork card appears, a pulse (a short near-white streak with a soft blue glow, 0.6s) runs along its connector from the project to it; the fork's notes, "Forked" first, appear as it arrives | `c2bbc0c` |
 | 18 | 2026-10-27 | Notes under every card, in the same style, not inside them: the project keeps "Reviewed 12 research tools" + Competitor research (Linear, ClickUp, Notion); User interviews gets "Forked" (node symbol) + "User interviews at big tech" (Meta, Netflix, Google); Core features gets "Forked". Branch cards back to 32px pills | `ccc95a4` |
 | 17 | 2026-10-27 | Second fork is "Core features" (forking the group research tool's features). Card titles in a near-black with a faint blue tint, `oklch(0.22 0.012 262)` | `a5a4539` |
 | 16 | 2026-10-27 | Deji's and Stephen's own photos (public/walkthrough/) | `da0e991` |
