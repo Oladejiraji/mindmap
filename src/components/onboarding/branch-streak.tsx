@@ -4,7 +4,8 @@
  * its right) is barely there until they arrive. Their strike makes the
  * impact: a blue edge runs from the point of contact round the square to
  * its right side, and one blue line draws out of it into a text box (Apple's
- * iOS text field size), where "What does Mindmap do?" types in. The five colours sit around our blue's
+ * iOS text field size), where "What does Mindmap do?" types in; the box pulses
+ * blue twice, then fills blue with the text in white. The five colours sit around our blue's
  * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
  * fanned 25° apart. One 6s loop; reduced motion shows the finished
  * picture. Drawn at the panel's 578 × 318 and scaled to fit.
@@ -95,9 +96,11 @@ export function BranchStreak() {
         <line x1={BOX_RIGHT} y1={MID} x2={TEXT.x} y2={MID} pathLength={1} className="bs-out" />
 
         {/* The text box: "What does Mindmap do?" types in a character at a
-            time with the caret just after it, then the caret blinks */}
+            time with the caret just after it; the box then pulses a blue
+            stroke twice and fills blue, the text turning white */}
         <style>{typingCss}</style>
         <rect className="bs-text" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
+        <rect className="bs-text-ring" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
         <text className="bs-typed" x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
           {[...PHRASE].map((c, i) => (
             <tspan key={i} className={`bs-ch-${i}`}>
