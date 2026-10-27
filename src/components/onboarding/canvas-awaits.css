@@ -1,29 +1,74 @@
 /* The canvas awaits (canvas-awaits.tsx). The whole panel is the canvas.
-   Plays once on arrival (ms):
-   300–620    the blue node drops in to rest in the centre, pulsing as it
-              lands
-   1000       the chat composer slides up at the foot */
+   Plays once on arrival:
+   - the node appears hovering above the canvas, in focus (lifted 10px,
+     slightly larger, a deep blue shadow and a soft focus ring)
+   - "So how do you get started on Mindmap?" types in behind a blinking
+     white caret; Kurosawa "is typing…"
+   - it settles onto the canvas (scale, lift and shadow ease back) and the
+     pulse fires as it lands; his tag becomes "created a nexus point"
+   - the chat composer slides up at the foot */
 
-/* A node dropping onto the canvas: from a few px up, faded and soft, to
-   rest (duration and delay set inline) */
-.canvas-awaits .ca-drop {
+/* Appearing: blur in, already hovering */
+.canvas-awaits .ca-node {
   opacity: 0;
+  filter: blur(6px);
   translate: 0 -10px;
-  filter: blur(3px);
-  animation-name: ca-drop;
-  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
-  animation-fill-mode: forwards;
+  scale: 1.03;
+  animation: ca-appear 420ms cubic-bezier(0.2, 0, 0, 1) 150ms forwards;
+  transition:
+    translate var(--ca-settle) cubic-bezier(0.3, 0, 0.2, 1),
+    scale var(--ca-settle) cubic-bezier(0.3, 0, 0.2, 1);
 }
-@keyframes ca-drop {
+@keyframes ca-appear {
   to {
     opacity: 1;
-    translate: 0 0;
     filter: blur(0);
   }
 }
+.canvas-awaits .ca-node.ca-settled {
+  translate: 0 0;
+  scale: 1;
+}
+
+/* The card in focus (hovering) vs at rest */
+.canvas-awaits .ca-card {
+  box-shadow:
+    0 0 0 4px oklch(0.558 0.226 262 / 0.18),
+    0 14px 30px -8px oklch(0.558 0.226 262 / 0.5);
+  transition: box-shadow var(--ca-settle) cubic-bezier(0.3, 0, 0.2, 1);
+}
+.canvas-awaits .ca-settled .ca-card {
+  box-shadow: var(--shadow-node-primary);
+}
+
+/* The caret while it's typed into */
+.canvas-awaits .ca-caret {
+  animation: ca-blink 1s steps(1, end) infinite;
+}
+@keyframes ca-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* "created a nexus point" fades in as it settles */
+.canvas-awaits .ca-swap {
+  animation: ca-swap 300ms ease-out;
+}
+@keyframes ca-swap {
+  from {
+    opacity: 0;
+  }
+}
+
+/* "is typing…": the notes' grey with a darker grey band */
+.canvas-awaits .t-shimmer {
+  --shimmer-base: oklch(0.68 0 0);
+  --shimmer-highlight: oklch(0.45 0 0);
+}
 
 /* The composer keeps its -50% x translate (a Tailwind translate class), so
-   it rises with transform-independent opacity and margin */
+   it rises with opacity and margin */
 .canvas-awaits .ca-rise {
   opacity: 0;
   margin-bottom: -8px;
@@ -36,23 +81,14 @@
   }
 }
 
-/* "is researching…": the notes' grey with a darker grey band, as on the
-   earlier slides */
-.canvas-awaits .t-shimmer {
-  --shimmer-base: oklch(0.68 0 0);
-  --shimmer-highlight: oklch(0.45 0 0);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .canvas-awaits .ca-drop,
-  .canvas-awaits .ca-rise {
+  .canvas-awaits .ca-node,
+  .canvas-awaits .ca-rise,
+  .canvas-awaits .ca-swap {
     animation: none;
     opacity: 1;
     filter: none;
     margin-bottom: 0;
-  }
-  /* Only the node: the composer's translate is its centring */
-  .canvas-awaits .ca-drop {
-    translate: none;
+    transition: none;
   }
 }

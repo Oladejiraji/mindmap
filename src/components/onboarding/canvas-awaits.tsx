@@ -1,50 +1,45 @@
 "use client";
 
 /*
- * "The canvas awaits": the whole panel is the canvas, and one node waits
- * in its centre, in our blue: "How do we get started on Mindmap?", with
- * Kurosawa (photo, name, "is researching…") above it as on the earlier
- * slides. It drops
- * in and fires the auth page's pulse (VapourHalo) as it comes to rest, like
- * dropping a card on the auth canvas; then the chat composer slides up at
- * the foot, ready for the first question. Reduced
- * motion shows it finished, without the pulses. Laid out at the panel's
- * 578 × 318 and scaled to fit.
+ * "The canvas awaits": the whole panel is the canvas. The first node
+ * appears hovering above it, in focus, and "So how do you get started on
+ * Mindmap?" types into it while Kurosawa "is typing…". Then it settles
+ * onto the canvas, firing the auth page's pulse (VapourHalo) as it comes
+ * to rest, and his tag becomes "created a nexus point". The chat composer
+ * slides up at the foot. Kurosawa's tag sits above the card, as on the
+ * earlier slides. Reduced motion shows it settled, without the pulse.
+ * Laid out at the panel's 578 × 318 and scaled to fit.
  */
 import { useEffect, useRef, useState } from "react";
-import Image, { type StaticImageData } from "next/image";
+import Image from "next/image";
 import { ArrowUp } from "lucide-react";
 import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
+import { cn } from "@/lib/utils";
 import "./canvas-awaits.css";
 
 const W = 578;
 const H = 318;
 
-// The node: centre x, y, width; 32px tall like the cards on "Your team's
-// research in one place". lands: when it comes to rest (ms).
-// The card (32px, like the cards on "Your team's research in one place"),
-// with who's on it above it, outside the card, as on that slide
-const NODE_H = 32;
+// The node: a 32px blue card centred on the canvas, Kurosawa's tag above it
+const NODE = { x: W / 2, y: H / 2, w: 300, h: 32 };
 const TAG = { h: 20, gap: 6 };
-type Node = { x: number; y: number; w: number; title: string; name: string; avatar: StaticImageData; lands: number };
-const NODES: Node[] = [
-  {
-    x: W / 2,
-    y: H / 2,
-    w: 268,
-    title: "How do we get started on Mindmap?",
-    name: "Kurosawa",
-    avatar: KurosawaAvatar,
-    lands: 620,
-  },
-];
-// Each node drops in over this long before it lands
-const DROP_MS = 320;
+const QUESTION = "So how do you get started on Mindmap?";
+
+// Timing (ms): it appears hovering, the question types in, then it settles
+const TYPE_FROM = 600;
+const TYPE_MS = 45;
+const SETTLE_AT = TYPE_FROM + QUESTION.length * TYPE_MS + 400;
+const SETTLE_MS = 380;
 
 export function CanvasAwaits() {
   const stageRef = useRef<HTMLDivElement>(null);
-  const [halos, setHalos] = useState<number[]>([]);
+  const [reduced] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [typed, setTyped] = useState(reduced ? QUESTION.length : 0);
+  const [settled, setSettled] = useState(reduced);
+  const [pulse, setPulse] = useState(false);
 
   // Draw at the panel's scale, keeping the 578 × 318 layout
   useEffect(() => {
@@ -59,12 +54,14 @@ export function CanvasAwaits() {
     return () => ro.disconnect();
   }, []);
 
-  // The pulse as each node comes to rest
+  // Type the question, then settle the node and pulse as it lands
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timers = NODES.map((n, i) => window.setTimeout(() => setHalos((h) => [...h, i]), n.lands));
+    if (reduced) return;
+    const timers = [...QUESTION].map((_, i) => window.setTimeout(() => setTyped(i + 1), TYPE_FROM + i * TYPE_MS));
+    timers.push(window.setTimeout(() => setSettled(true), SETTLE_AT));
+    timers.push(window.setTimeout(() => setPulse(true), SETTLE_AT + SETTLE_MS - 60));
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [reduced]);
 
   return (
     <div
@@ -73,55 +70,54 @@ export function CanvasAwaits() {
       style={{ width: W, height: H }}
       aria-hidden
     >
-      {/* The pulses, behind everything */}
-      {halos.map((i) => {
-        const n = NODES[i];
-        return (
-          <VapourHalo
-            key={i}
-            x={n.x - n.w / 2}
-            y={n.y - NODE_H / 2}
-            width={n.w}
-            height={NODE_H}
-            onDone={() => setHalos((h) => h.filter((k) => k !== i))}
-          />
-        );
-      })}
+      {/* The pulse as the node comes to rest, behind it */}
+      {pulse && (
+        <VapourHalo
+          x={NODE.x - NODE.w / 2}
+          y={NODE.y - NODE.h / 2}
+          width={NODE.w}
+          height={NODE.h}
+          onDone={() => setPulse(false)}
+        />
+      )}
 
-      {/* The node, in our blue, dropping in to rest */}
-      {NODES.map((n) => (
-        <div
-          key={n.title}
-          className="ca-drop absolute"
-          style={{
-            left: n.x - n.w / 2,
-            top: n.y - NODE_H / 2 - TAG.h - TAG.gap,
-            width: n.w,
-            animationDelay: `${n.lands - DROP_MS}ms`,
-            animationDuration: `${DROP_MS}ms`,
-          }}
-        >
-          {/* Who: photo ringed in their colour, name, "is researching…" */}
-          <div className="mb-1.5 flex h-5 items-center gap-1.5">
-            <Image src={n.avatar} alt="" width={16} height={16} className="rounded-full ring-[1.5px] ring-brand-solid" />
-            <span className="text-caption-base font-medium text-fg-primary">{n.name}</span>
-            <p className="t-shimmer text-[12px] leading-4 font-normal" data-text="is researching…">
-              is researching…
+      <div
+        className={cn("ca-node absolute", settled && "ca-settled")}
+        style={{
+          left: NODE.x - NODE.w / 2,
+          top: NODE.y - NODE.h / 2 - TAG.h - TAG.gap,
+          width: NODE.w,
+          ["--ca-settle" as string]: `${SETTLE_MS}ms`,
+        }}
+      >
+        {/* Who: photo in his blue ring, name, and what he's doing */}
+        <div className="mb-1.5 flex h-5 items-center gap-1.5">
+          <Image src={KurosawaAvatar} alt="" width={16} height={16} className="rounded-full ring-[1.5px] ring-brand-solid" />
+          <span className="text-caption-base font-medium text-fg-primary">Kurosawa</span>
+          {settled ? (
+            <span key="created" className="ca-swap text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]">
+              created a nexus point
+            </span>
+          ) : (
+            <p className="t-shimmer text-[12px] leading-4 font-normal" data-text="is typing…">
+              is typing…
             </p>
-          </div>
-          <div
-            className="corner-squircle flex items-center justify-center rounded-4xl bg-brand-solid px-3 text-body-sm text-white shadow-node-primary"
-            style={{ height: NODE_H }}
-          >
-            <span className="truncate">{n.title}</span>
-          </div>
+          )}
         </div>
-      ))}
+        {/* The card: in focus while it's typed into, then settled */}
+        <div
+          className="ca-card corner-squircle flex items-center rounded-4xl bg-brand-solid px-4 text-body-sm text-white"
+          style={{ height: NODE.h }}
+        >
+          <span className="truncate">{QUESTION.slice(0, typed)}</span>
+          {!settled && <span className="ca-caret ml-px h-4 w-px shrink-0 bg-white" />}
+        </div>
+      </div>
 
       {/* The chat composer, ready for the first question */}
       <div
         className="ca-rise absolute bottom-6 left-1/2 flex h-10 w-[320px] -translate-x-1/2 items-center gap-2 rounded-full bg-white pr-1.5 pl-4 shadow-default"
-        style={{ animationDelay: "1000ms" }}
+        style={{ animationDelay: `${SETTLE_AT + SETTLE_MS + 200}ms` }}
       >
         <span className="flex-1 text-[13px] text-[oklch(0.68_0_0)]">Ask anything…</span>
         <span className="flex size-7 items-center justify-center rounded-full bg-brand-solid text-white">
