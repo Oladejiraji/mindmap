@@ -48,6 +48,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 22 | 2026-10-27 | Connectors in the ring colour of the person they lead to (Deji purple, Stephen amber; the line in to Kurosawa stays blue). Pulse is a gradient along the connector, our blue at the project shading to a light tint of the fork's colour, with a glow in that colour | `6446569` |
 | 21 | 2026-10-27 | Under Core features: Forked, "Core features for MVP", then "Collaboration · Clarity · Tracking"; the card moves up 8px so the list fits | `8be8dcb` |
 | 20 | 2026-10-27 | Core features lists the features it forks, "Collaboration · Clarity · Tracking", after Forked. Deji's ring purple, `oklch(0.62 0.19 295)` (was coral) | `9a4663e` |
 | 19 | 2026-10-27 | **Pulse before Forked.** After each fork card appears, a pulse (a short near-white streak with a soft blue glow, 0.6s) runs along its connector from the project to it; the fork's notes, "Forked" first, appear as it arrives | `c2bbc0c` |
