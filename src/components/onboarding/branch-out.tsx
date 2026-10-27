@@ -169,11 +169,12 @@ export function BranchOut() {
                     {n.text}
                   </li>
                 ))}
-              {/* The tools reviewed: sample marks and names */}
+              {/* The tools reviewed: "Samples", then their marks and names */}
               <li
-                className="bo-note flex items-center gap-3 text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]"
+                className="bo-note flex items-center gap-2.5 text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]"
                 style={{ animationDelay: `${b.at + 260 + b.notes.length * 120}ms` }}
               >
+                <span>Samples</span>
                 {TOOLS.map(({ name, Logo, color }) => (
                   <span key={name} className="flex items-center gap-1">
                     <Logo className="size-3" style={{ color }} />
