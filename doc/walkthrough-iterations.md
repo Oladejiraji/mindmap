@@ -48,6 +48,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 25 | 2026-10-27 | **Lists close up.** Each card's list, 1.5s after it has written in, closes up into its card like an accordion (grid rows 1fr → 0fr with a fade, 420ms ease-in-out); Kurosawa's first, then the forks'. Reduced motion keeps them open | `edb69ed` |
 | 24 | 2026-10-27 | Kurosawa's own photo (public/walkthrough/kurosawa.png); all three researchers now use their own photos | `0e3c442` |
 | 23 | 2026-10-27 | Purple and amber reviewed in OKLCH against our blue (0.558 0.226 262): purple `oklch(0.58 0.21 300)` (was 0.62 0.19 295, near the blue's lightness and chroma); amber `oklch(0.76 0.16 75)` (was 0.8 0.16 82, a deeper golden amber that holds on the light panel). Pulse tints follow | `97fa45c` |
 | 22 | 2026-10-27 | Connectors in the ring colour of the person they lead to (Deji purple, Stephen amber; the line in to Kurosawa stays blue). Pulse is a gradient along the connector, our blue at the project shading to a light tint of the fork's colour, with a glow in that colour | `6446569` |
