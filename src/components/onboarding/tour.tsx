@@ -48,7 +48,7 @@ export const TOUR: TourSlide[] = [
     // that branches out to people researching
     art: () => <BranchOut />,
     title: "Your team's research in one place",
-    body: "Select a node and press Tab to branch it, or ↵ to add a sibling beside it. You can also drag from a node's handle and drop the branch where you want it.",
+    body: "Everyone can work on the same goal, on different parts. All your research can be traced and seen in real time.",
     preview: <CreateNodes />,
   },
   {
