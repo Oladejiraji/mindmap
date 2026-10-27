@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * "Research with the team": five coloured lines, one per teammate, run in
  * from the left and converge on a 32px square, which (with everything to
@@ -8,12 +10,15 @@
  * Mindmap do?" types in; a blue stroke runs once round the box from its
  * left side, then blue flows into it from the left with the text in white.
  * The five colours sit around our blue's complement in OKLCH (brand
- * oklch(0.558 0.226 262) → complement hue 82), fanned 25° apart. One 7s
- * loop; reduced motion shows the finished
+ * oklch(0.558 0.226 262) → complement hue 82), fanned 25° apart. The auth
+ * page's pulse (VapourHalo) fires on the square once lit and on the text
+ * box once filled. One 7s loop; reduced motion shows the finished
  * picture. Drawn at the panel's 578 × 318 and scaled to fit.
  * (The earlier "follow the line" version, with nodes and faded branches,
  * is in 26737dc.)
  */
+import { useEffect, useRef, useState } from "react";
+import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
 import "./branch-streak.css";
 
 const W = 578;
@@ -74,6 +79,14 @@ const typingCss = [
   `@media (prefers-reduced-motion:reduce){.branch-streak [class*="bs-ch-"],.branch-streak .bs-caret-run{animation:none}.branch-streak .bs-caret-run{transform:translateX(${ENDS[ENDS.length - 1] + 1}px)}}`,
 ].join("");
 
+// The auth page's pulse (VapourHalo: pastel washes, the dot pattern the
+// wave reveals, a chromatic fringe) fires on the square once it's lit and
+// on the text box once the blue has filled it (seconds into the loop)
+const HALOS = [
+  { at: 1.64, x: BOX.x, y: TOP, width: BOX.size, height: BOX.size },
+  { at: 5.25, x: TEXT.x, y: TT, width: TEXT.w, height: TEXT.h },
+];
+
 // From its dot on the left, straight on, then curving into the square's
 // left side
 const linePath = (y: number) =>
@@ -81,9 +94,68 @@ const linePath = (y: number) =>
 
 export function BranchStreak() {
   const textTop = TT;
+  const worldRef = useRef<SVGGElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [halos, setHalos] = useState<{ id: number; i: number }[]>([]);
+
+  // Fire the halos at their moments in each loop, timed from the loop's
+  // own start and repeat events so they stay in step with the CSS
+  useEffect(() => {
+    const world = worldRef.current;
+    if (!world || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timers: number[] = [];
+    const onLoop = (e: AnimationEvent) => {
+      if (e.target !== world || e.animationName !== "bs-world") return;
+      timers.forEach(clearTimeout);
+      // A new loop: clear any halo still lingering from the last one
+      setHalos([]);
+      timers = HALOS.map((h, i) =>
+        window.setTimeout(() => setHalos((prev) => [...prev.filter((p) => p.i !== i), { id: Date.now(), i }]), h.at * 1000),
+      );
+    };
+    world.addEventListener("animationstart", onLoop);
+    world.addEventListener("animationiteration", onLoop);
+    return () => {
+      world.removeEventListener("animationstart", onLoop);
+      world.removeEventListener("animationiteration", onLoop);
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  // Keep the halo layer drawn at the SVG's scale and position (the SVG
+  // fits the panel, preserving its 578 × 318 aspect)
+  useEffect(() => {
+    const stage = stageRef.current;
+    const panel = stage?.parentElement;
+    if (!stage || !panel) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      stage.style.scale = String(Math.min(width / W, height / H));
+    });
+    ro.observe(panel);
+    return () => ro.disconnect();
+  }, []);
+
   return (
+    <>
+      {/* The halos, behind the drawing, on a 578 × 318 layer scaled with it;
+          it fades out with the drawing at the end of each loop */}
+      <div
+        ref={stageRef}
+        className="bs-halos pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{ width: W, height: H }}
+        aria-hidden
+      >
+        {halos.map((h) => (
+          <VapourHalo
+            key={h.id}
+            {...HALOS[h.i]}
+            onDone={() => setHalos((prev) => prev.filter((p) => p.id !== h.id))}
+          />
+        ))}
+      </div>
     <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
-      <g className="bs-world">
+      <g className="bs-world" ref={worldRef}>
         {/* Faint tracks for the five lines */}
         {LINES.map((l) => (
           <path key={l.y} d={linePath(l.y)} className="bs-track" fill="none" />
@@ -140,5 +212,6 @@ export function BranchStreak() {
         <path className="bs-edge" d={EDGE_BOTTOM} pathLength={1} fill="none" />
       </g>
     </svg>
+    </>
   );
 }

@@ -21,8 +21,9 @@
   overflow: visible;
 }
 
-.branch-streak .bs-world {
-  animation: bs-world var(--bs-dur) infinite;
+.branch-streak .bs-world,
+.bs-halos {
+  animation: bs-world 7s infinite;
 }
 @keyframes bs-world {
   0% {
@@ -259,6 +260,7 @@
 /* Reduced motion: the finished picture */
 @media (prefers-reduced-motion: reduce) {
   .branch-streak .bs-world,
+  .bs-halos,
   .branch-streak .bs-run,
   .branch-streak .bs-box-lit,
   .branch-streak .bs-edge,
