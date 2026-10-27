@@ -9,6 +9,7 @@ import { CheckIcon } from "@/components/icons/check-icon";
 import { MODELS } from "@/components/auth-canvas/models-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
+import "./tour.css";
 
 /*
  * Onboarding walkthrough: one slide per thing worth knowing before you
@@ -63,11 +64,12 @@ export function TourPanel() {
   );
 }
 
-/* The Mindmap logo tile, 32px, sitting 16px above a step's title. */
+/* The Mindmap logo tile, 64px with 10px corners and a 20px m, sitting
+ * 16px above a step's title. */
 export function TourLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("mb-4 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
-      <LogoIcon className="h-auto w-4" />
+    <span className={cn("mb-4 flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
+      <LogoIcon className="h-auto w-5" />
     </span>
   );
 }
@@ -81,8 +83,11 @@ export function TourText({ slide }: { slide: TourSlide }) {
       <div className="flex items-center gap-2">
         <h2 className="text-[24px] leading-[1.33] font-medium tracking-[-0.01em] text-[#111]">{slide.title}</h2>
         {slide.soon && (
-          <span className="rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">
-            {slide.soon}
+          // Antalik's shimmer sweeps the label (tour.css)
+          <span className="rounded-md px-1.5 text-caption-base inset-ring-[0.5px] inset-ring-border-default">
+            <span className="t-shimmer" data-text={slide.soon}>
+              {slide.soon}
+            </span>
           </span>
         )}
       </div>
