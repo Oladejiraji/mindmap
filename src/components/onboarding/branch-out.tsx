@@ -14,6 +14,8 @@
 import { useEffect, useRef, type ComponentType, type SVGProps } from "react";
 import Image, { type StaticImageData } from "next/image";
 import AuthAssets from "@/lib/asset-export/auth";
+import DejiAvatar from "../../../public/walkthrough/deji.png";
+import StephenAvatar from "../../../public/walkthrough/stephen.png";
 import { BranchIcon } from "@/lib/svg";
 import { ClickUpLogo, GoogleLogo, LinearLogo, MetaLogo, NetflixLogo, NotionLogo } from "./tool-logos";
 import "./branch-out.css";
@@ -61,7 +63,7 @@ const CHILDREN: Card[] = [
     at: 1640,
     title: "User interviews",
     name: "Deji",
-    avatar: AuthAssets.AuthAvatar2,
+    avatar: DejiAvatar,
     ring: "oklch(0.7 0.18 32)",
     forked: true,
   },
@@ -73,7 +75,7 @@ const CHILDREN: Card[] = [
     at: 1740,
     title: "Competitor research and analysis",
     name: "Stephen",
-    avatar: AuthAssets.AuthAvatar3,
+    avatar: StephenAvatar,
     ring: "oklch(0.8 0.16 82)",
     forked: true,
   },
