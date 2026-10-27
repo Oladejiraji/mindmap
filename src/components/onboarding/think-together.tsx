@@ -2,7 +2,7 @@
 
 /*
  * "Think together": the team from the last slide, Kurosawa, Deji and
- * Stephen, as an overlapping row of photos in their ring colours, and a
+ * Stephen, as an overlapping row of photos ringed in the panel colour, and a
  * "+" in a dashed circle to invite someone else. Each one is a step bigger
  * than the one before (28, 34, 39, then 45 for the +), like a thought
  * bubble's trail growing; they blur in one after another. Then a sphere of
@@ -31,11 +31,13 @@ import {
 } from "./tool-logos";
 import "./think-together.css";
 
-// Same people and ring colours as "Your team's research in one place"
-const TEAM: { name: string; avatar: StaticImageData; ring: string }[] = [
-  { name: "Kurosawa", avatar: KurosawaAvatar, ring: "var(--brand-solid)" },
-  { name: "Deji", avatar: DejiAvatar, ring: "oklch(0.58 0.21 300)" },
-  { name: "Stephen", avatar: StephenAvatar, ring: "oklch(0.76 0.16 75)" },
+// Same people as "Your team's research in one place"; here each photo is
+// ringed in the panel's own background colour, which separates them where
+// they overlap
+const TEAM: { name: string; avatar: StaticImageData }[] = [
+  { name: "Kurosawa", avatar: KurosawaAvatar },
+  { name: "Deji", avatar: DejiAvatar },
+  { name: "Stephen", avatar: StephenAvatar },
 ];
 // Sizes grow a step along the row (30% smaller than 40/48/56/64); the + is
 // the next step
@@ -144,8 +146,8 @@ export function ThinkTogether() {
             alt=""
             width={SIZES[i]}
             height={SIZES[i]}
-            className="tt-pop rounded-full ring-2 ring-(--tt-ring)"
-            style={{ ["--tt-ring" as string]: p.ring, animationDelay: `${200 + i * 120}ms` }}
+            className="tt-pop rounded-full ring-2 ring-[oklch(0.985_0_0)]"
+            style={{ animationDelay: `${200 + i * 120}ms` }}
           />
         ))}
         {/* Invite someone: a + in a dashed circle */}
@@ -158,7 +160,7 @@ export function ThinkTogether() {
               cx={INVITE / 2}
               cy={INVITE / 2}
               r={INVITE / 2 - 1}
-              stroke="oklch(0.78 0 0)"
+              stroke="oklch(0.86 0 0)"
               strokeWidth="1.5"
               strokeDasharray="4 4"
             />
