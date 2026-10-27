@@ -1,7 +1,9 @@
 /* Research with the team (branch-streak.tsx). One 4.8s loop:
    0–32%   the blue streak runs in (linear); its head reaches the square at
-           ~22% and it is gone into it by 32%
-   22–34%  the square pulses (scale + blue edge)
+           21.6% and it is gone into it by 32%. Until then the square and
+           the branch tracks sit at 30%
+   21.6%   impact: the square is knocked and squashed (springs back by 31%),
+           flashes light blue, takes a blue edge; a ring ripples off it
    24–50%  the five branches draw out, 90ms apart, then their end dots pop
    84–94%  everything fades; the loop restarts clean */
 .branch-streak {
@@ -35,33 +37,103 @@
   }
 }
 
+/* The square: barely there (30%) until the streak's head reaches it at
+   21.6%, then knocked right and squashed, springing back, with a light blue
+   flash and a blue edge that holds until the fade */
 .branch-streak .bs-box {
   fill: #fff;
   stroke: var(--bs-track);
   stroke-width: 1;
+  opacity: 0.3;
   transform-box: fill-box;
   transform-origin: center;
-  animation: bs-box var(--bs-dur) cubic-bezier(0.2, 0, 0, 1) infinite;
+  animation: bs-box var(--bs-dur) infinite;
 }
 @keyframes bs-box {
   0%,
-  21% {
-    transform: scale(1);
+  21.6% {
+    opacity: 0.3;
+    transform: none;
+    fill: #fff;
     stroke: var(--bs-track);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
-  25% {
-    transform: scale(1.12);
+  23% {
+    opacity: 1;
+    transform: translateX(5px) scale(0.84, 1.12);
+    fill: oklch(0.93 0.05 262);
     stroke: var(--brand-solid);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
   }
-  34%,
+  27% {
+    transform: translateX(-1.5px) scale(1.06, 0.95);
+  }
+  31% {
+    transform: none;
+    fill: #fff;
+  }
   84% {
-    transform: scale(1);
+    opacity: 1;
+    transform: none;
+    fill: #fff;
     stroke: var(--brand-solid);
   }
   94%,
   100% {
-    transform: scale(1);
+    opacity: 0.3;
+    transform: none;
+    fill: #fff;
     stroke: var(--bs-track);
+  }
+}
+
+/* The impact ring: a blue outline that grows off the square and fades */
+.branch-streak .bs-wave {
+  fill: none;
+  stroke: var(--brand-solid);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bs-wave var(--bs-dur) infinite;
+}
+@keyframes bs-wave {
+  /* Starts just after the knock, already a little out from the square,
+     so it never doubles the displaced square */
+  0%,
+  23.5% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+  24.5% {
+    opacity: 0.7;
+    transform: scale(1.2);
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+  38%,
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+/* The branch tracks: barely there until the impact, then up with the lines */
+.branch-streak .bs-track-branch {
+  opacity: 0.3;
+  animation: bs-track-branch var(--bs-dur) infinite;
+}
+@keyframes bs-track-branch {
+  0%,
+  21.6% {
+    opacity: 0.3;
+  }
+  26%,
+  84% {
+    opacity: 1;
+  }
+  94%,
+  100% {
+    opacity: 0.3;
   }
 }
 
@@ -124,6 +196,8 @@
 @media (prefers-reduced-motion: reduce) {
   .branch-streak .bs-streak,
   .branch-streak .bs-box,
+  .branch-streak .bs-wave,
+  .branch-streak .bs-track-branch,
   .branch-streak .bs-branch,
   .branch-streak .bs-dot {
     animation: none;
@@ -132,7 +206,11 @@
     transform: translateX(200px);
   }
   .branch-streak .bs-box {
+    opacity: 1;
     stroke: var(--brand-solid);
+  }
+  .branch-streak .bs-track-branch {
+    opacity: 1;
   }
   .branch-streak .bs-branch {
     stroke-dashoffset: 0;

@@ -1,7 +1,9 @@
 /*
  * "Research with the team": a blue streak runs along a faint track until it
- * hits a 32px square, which pulses, then five lines branch off it to the
- * right, each ending in a dot. The branch colours sit around our blue's
+ * hits a 32px square. The square and the five branch tracks are barely
+ * there until then; on impact the square is knocked and squashed, flashes
+ * blue and sends out a ring, and five lines branch off it to the right,
+ * each ending in a dot. The branch colours sit around our blue's
  * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
  * fanned 25° apart. One 4.8s loop; reduced motion shows the finished
  * picture. Drawn at the panel's 578 × 318 and scaled to fit.
@@ -46,7 +48,7 @@ export function BranchStreak() {
       {/* Faint tracks: the trunk and the five branches */}
       <line x1="0" y1={MID} x2={BOX.x} y2={MID} className="bs-track" />
       {BRANCHES.map((b) => (
-        <path key={b.y} d={branchPath(b.y)} className="bs-track" fill="none" />
+        <path key={b.y} d={branchPath(b.y)} className="bs-track bs-track-branch" fill="none" />
       ))}
 
       {/* The blue streak */}
@@ -62,7 +64,8 @@ export function BranchStreak() {
         </g>
       ))}
 
-      {/* The 32px square */}
+      {/* The 32px square, and the ring that ripples off it on impact */}
+      <rect className="bs-wave" x={BOX.x} y={MID - BOX.size / 2} width={BOX.size} height={BOX.size} rx="8" />
       <rect className="bs-box" x={BOX.x} y={MID - BOX.size / 2} width={BOX.size} height={BOX.size} rx="8" />
     </svg>
   );
