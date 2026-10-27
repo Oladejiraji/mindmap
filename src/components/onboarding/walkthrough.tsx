@@ -86,10 +86,16 @@ export function Walkthrough() {
           aria-label="Welcome to Mindmap"
           className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04),0_16px_40px_rgba(0,0,0,0.06)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
-          <div key={step} className="flex min-h-0 flex-1 flex-col motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
+          <div key={step} className="flex min-h-0 flex-1 flex-col">
             {/* Text and panel on one line, centred on each other */}
             <div className="flex min-h-0 flex-1 items-center gap-10">
-              <div className="min-w-0 flex-1">
+              {/* The text moves with the visuals: in from a slight scale and
+                  blur, and out (after the slide's own exit) by scaling and
+                  blurring, then fading (tour.css) */}
+              <div
+                className={cn("tour-art min-w-0 flex-1", leaving && "tour-art-leaving")}
+                style={{ transformOrigin: "left center", ["--tour-art-delay" as string]: `${slide.exit ?? 0}ms` }}
+              >
                 <TourText slide={slide} />
               </div>
               <TourPanel slide={slide} leaving={leaving} />
