@@ -1,12 +1,12 @@
 /* Research with the team (branch-streak.tsx). One 4.8s loop:
-   0–21.6% the blue streak runs in, speeding up, until its head meets the
-           square. Until then the square and the branch tracks sit at 30%
-   21.6%   impact, kept understated: the line nudges the square 2px and
-           eases it back (no squash or bounce), the square takes a blue edge
-           with a faint blue tint, a soft ring fades off it, and the
-           streak's tail collapses into the square by 30%
-   24–50%  the five branches draw out, 90ms apart, then their end dots pop
-   84–94%  everything fades; the loop restarts clean */
+   0–21.6%  five coloured lines run in together, speeding up, and their
+            heads meet the square's left edge at 21.6%. Until then the
+            square and the line out of it sit at 30%, with no blue
+   21.6–27% the strike: the square comes up to full and a blue edge runs
+            from the contact point round both sides to the right; the
+            lines' tails drain into the square by 30%
+   26.5–46% one blue line draws out of the square's right side
+   84–94%   everything fades; the loop restarts clean */
 .branch-streak {
   --bs-dur: 4800ms;
   --bs-track: oklch(0.9 0 0);
@@ -19,52 +19,32 @@
   stroke-linecap: round;
 }
 
-/* The streak runs in, speeding up, until its head meets the square's left
-   edge at 21.6%. It nudges the square 2px and rides it back, while its
-   tail collapses into it */
-.branch-streak .bs-streak-run {
-  animation: bs-streak-run var(--bs-dur) infinite;
+/* The five lines: a 22% length of colour travelling along each track. Its
+   head (at offset 0.22 − progress) reaches the square at 21.6%; the tail
+   then drains in */
+.branch-streak .bs-run {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 0.22 2;
+  stroke-dashoffset: 0.22;
+  animation: bs-run var(--bs-dur) infinite;
 }
-@keyframes bs-streak-run {
+@keyframes bs-run {
   0% {
-    transform: translateX(0);
+    stroke-dashoffset: 0.22;
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
   21.6% {
-    transform: translateX(200px);
-    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
-  }
-  23% {
-    transform: translateX(202px);
+    stroke-dashoffset: -0.78;
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
   30%,
   100% {
-    transform: translateX(200px);
-  }
-}
-.branch-streak .bs-streak {
-  transform-box: fill-box;
-  transform-origin: right center;
-  animation: bs-streak var(--bs-dur) infinite;
-}
-@keyframes bs-streak {
-  0%,
-  22% {
-    transform: scaleX(1);
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  30%,
-  100% {
-    transform: scaleX(0);
-    opacity: 0;
+    stroke-dashoffset: -1;
   }
 }
 
-/* The square: barely there (30%) until the streak's head reaches it at
-   21.6%, then nudged 2px by the line and eased back, with a blue edge that
-   holds until the fade and a faint blue tint that clears */
+/* The square: grey and barely there (30%) until the strike */
 .branch-streak .bs-box {
   fill: #fff;
   stroke: var(--bs-track);
@@ -76,106 +56,34 @@
   0%,
   21.6% {
     opacity: 0.3;
-    transform: none;
-    fill: #fff;
-    stroke: var(--bs-track);
-    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
-  23% {
-    opacity: 1;
-    transform: translateX(2px);
-    fill: oklch(0.97 0.02 262);
-    stroke: var(--brand-solid);
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  30% {
-    transform: none;
-  }
-  36% {
-    fill: #fff;
-  }
+  23%,
   84% {
     opacity: 1;
-    transform: none;
-    fill: #fff;
-    stroke: var(--brand-solid);
   }
   94%,
   100% {
     opacity: 0.3;
-    transform: none;
-    fill: #fff;
-    stroke: var(--bs-track);
   }
 }
 
-/* The impact ring: a faint blue outline that grows a little off the square
-   and fades */
-.branch-streak .bs-wave {
-  fill: none;
+/* The blue edge the strike sets off: from the contact point round both
+   sides of the square to its right side */
+.branch-streak .bs-edge {
   stroke: var(--brand-solid);
-  stroke-width: 1;
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: bs-wave var(--bs-dur) infinite;
-}
-@keyframes bs-wave {
-  /* A soft, short ring: starts just outside the square so it never
-     doubles it, faint, gone by 30% */
-  0%,
-  21.6% {
-    opacity: 0;
-    transform: scale(1.06);
-  }
-  22.4% {
-    opacity: 0.35;
-    transform: scale(1.08);
-    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
-  }
-  30%,
-  100% {
-    opacity: 0;
-    transform: scale(1.45);
-  }
-}
-
-/* The branch tracks: barely there until the impact, then up with the lines */
-.branch-streak .bs-track-branch {
-  opacity: 0.3;
-  animation: bs-track-branch var(--bs-dur) infinite;
-}
-@keyframes bs-track-branch {
-  0%,
-  21.6% {
-    opacity: 0.3;
-  }
-  26%,
-  84% {
-    opacity: 1;
-  }
-  94%,
-  100% {
-    opacity: 0.3;
-  }
-}
-
-.branch-streak .bs-branch {
-  stroke-width: 2;
-  stroke-linecap: round;
+  stroke-width: 1.25;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: bs-branch var(--bs-dur) infinite;
-  animation-delay: calc(var(--i) * 90ms);
+  animation: bs-edge var(--bs-dur) infinite;
 }
-@keyframes bs-branch {
+@keyframes bs-edge {
   0%,
-  24% {
+  21.6% {
     stroke-dashoffset: 1;
     opacity: 1;
-    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+    animation-timing-function: cubic-bezier(0.25, 0.6, 0.3, 1);
   }
-  50%,
+  27%,
   84% {
     stroke-dashoffset: 0;
     opacity: 1;
@@ -190,53 +98,76 @@
   }
 }
 
-.branch-streak .bs-dot {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: bs-dot var(--bs-dur) infinite;
-  animation-delay: calc(var(--i) * 90ms);
+/* The line out's track: barely there until the strike */
+.branch-streak .bs-track-out {
+  opacity: 0.3;
+  animation: bs-track-out var(--bs-dur) infinite;
 }
-@keyframes bs-dot {
+@keyframes bs-track-out {
   0%,
-  48% {
-    transform: scale(0);
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.3, 1.5, 0.6, 1);
+  21.6% {
+    opacity: 0.3;
   }
-  56%,
+  26%,
   84% {
-    transform: scale(1);
     opacity: 1;
   }
   94%,
   100% {
-    transform: scale(1);
+    opacity: 0.3;
+  }
+}
+
+/* The one blue line, drawing out once the edge reaches the right side */
+.branch-streak .bs-out {
+  stroke: var(--brand-solid);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bs-out var(--bs-dur) infinite;
+}
+@keyframes bs-out {
+  0%,
+  26.5% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  46%,
+  84% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  94% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 1;
     opacity: 0;
   }
 }
 
-/* Reduced motion: the finished picture, streak resting against the square */
+/* Reduced motion: the finished picture */
 @media (prefers-reduced-motion: reduce) {
-  .branch-streak .bs-streak-run,
-  .branch-streak .bs-streak,
+  .branch-streak .bs-run,
   .branch-streak .bs-box,
-  .branch-streak .bs-wave,
-  .branch-streak .bs-track-branch,
-  .branch-streak .bs-branch,
-  .branch-streak .bs-dot {
+  .branch-streak .bs-edge,
+  .branch-streak .bs-track-out,
+  .branch-streak .bs-out {
     animation: none;
   }
-  .branch-streak .bs-streak-run {
-    transform: translateX(200px);
+  .branch-streak .bs-run {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
   }
-  .branch-streak .bs-box {
-    opacity: 1;
-    stroke: var(--brand-solid);
-  }
-  .branch-streak .bs-track-branch {
+  .branch-streak .bs-box,
+  .branch-streak .bs-track-out {
     opacity: 1;
   }
-  .branch-streak .bs-branch {
+  .branch-streak .bs-edge,
+  .branch-streak .bs-out {
     stroke-dashoffset: 0;
   }
 }

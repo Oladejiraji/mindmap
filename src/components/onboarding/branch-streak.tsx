@@ -1,69 +1,69 @@
 /*
- * "Research with the team": a blue streak runs along a faint track until it
- * hits a 32px square. The square and the five branch tracks are barely
- * there until then; on impact the square is knocked and squashed, flashes
- * blue and sends out a ring, and five lines branch off it to the right,
- * each ending in a dot. The branch colours sit around our blue's
- * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
- * fanned 25° apart. One 4.8s loop; reduced motion shows the finished
- * picture. Drawn at the panel's 578 × 318 and scaled to fit.
+ * "Research with the team": five coloured lines, one per teammate, run in
+ * from the left and converge on a 32px square, which (with the blue line
+ * out of it) is barely there until they arrive. Their strike makes the
+ * impact: a blue edge runs from the point of contact round the square to
+ * its right side, and one blue line draws out of it. The five colours sit
+ * around our blue's complement in OKLCH (brand oklch(0.558 0.226 262) →
+ * complement hue 82), fanned 25° apart. One 4.8s loop; reduced motion shows
+ * the finished picture. Drawn at the panel's 578 × 318 and scaled to fit.
  */
 import "./branch-streak.css";
 
 const W = 578;
 const H = 318;
 const MID = H / 2;
-// The square, centred on the track
-const BOX = { x: 200, size: 32 };
+// The square, centred on the line out
+const BOX = { x: 346, size: 32 };
 const BOX_RIGHT = BOX.x + BOX.size;
+const TOP = MID - BOX.size / 2;
+const R = 8;
+// The square's outline in two halves, both starting where the lines strike
+// (left middle) and ending where the blue line leaves (right middle)
+const EDGE_TOP = `M${BOX.x} ${MID} V${TOP + R} A${R} ${R} 0 0 1 ${BOX.x + R} ${TOP} H${BOX_RIGHT - R} A${R} ${R} 0 0 1 ${BOX_RIGHT} ${TOP + R} V${MID}`;
+const EDGE_BOTTOM = `M${BOX.x} ${MID} V${TOP + BOX.size - R} A${R} ${R} 0 0 0 ${BOX.x + R} ${TOP + BOX.size} H${BOX_RIGHT - R} A${R} ${R} 0 0 0 ${BOX_RIGHT} ${TOP + BOX.size - R} V${MID}`;
 
-const BRANCHES = [
+const LINES = [
   { y: MID - 112, color: "oklch(0.7 0.18 32)" }, // coral
   { y: MID - 56, color: "oklch(0.74 0.17 57)" }, // orange
   { y: MID, color: "oklch(0.8 0.16 82)" }, // amber, the complement
   { y: MID + 56, color: "oklch(0.78 0.17 107)" }, // chartreuse
   { y: MID + 112, color: "oklch(0.72 0.17 132)" }, // green
 ];
-const END_X = W - 48;
+const START_X = 48;
 
-// Out of the square's right side, curving to its row, then straight on
-const branchPath = (y: number) =>
-  `M${BOX_RIGHT} ${MID} C${BOX_RIGHT + 70} ${MID} ${BOX_RIGHT + 90} ${y} ${BOX_RIGHT + 160} ${y} L${END_X} ${y}`;
+// From its dot on the left, straight on, then curving into the square's
+// left side
+const linePath = (y: number) =>
+  `M${START_X} ${y} L${BOX.x - 160} ${y} C${BOX.x - 90} ${y} ${BOX.x - 70} ${MID} ${BOX.x} ${MID}`;
 
 export function BranchStreak() {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
-      <defs>
-        {/* The streak: a fading tail into a bright blue head */}
-        <linearGradient id="bs-streak" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopColor="var(--brand-solid)" stopOpacity="0" />
-          <stop offset="1" stopColor="var(--brand-solid)" />
-        </linearGradient>
-      </defs>
-
-      {/* Faint tracks: the trunk and the five branches */}
-      <line x1="0" y1={MID} x2={BOX.x} y2={MID} className="bs-track" />
-      {BRANCHES.map((b) => (
-        <path key={b.y} d={branchPath(b.y)} className="bs-track bs-track-branch" fill="none" />
+      {/* Faint tracks for the five lines */}
+      {LINES.map((l) => (
+        <path key={l.y} d={linePath(l.y)} className="bs-track" fill="none" />
       ))}
+      {/* The line out, barely there until the strike */}
+      <line x1={BOX_RIGHT} y1={MID} x2={W} y2={MID} className="bs-track bs-track-out" />
 
-      {/* The blue streak: runs in, its head drives the square, then its
-          tail collapses into it */}
-      <g className="bs-streak-run">
-        <rect className="bs-streak" x={-96} y={MID - 1.5} width="96" height="3" rx="1.5" fill="url(#bs-streak)" />
-      </g>
-
-      {/* The branches drawing out, staggered, each ending in a dot */}
-      {BRANCHES.map((b, i) => (
-        <g key={b.y} style={{ ["--i" as string]: i, color: b.color }}>
-          <path d={branchPath(b.y)} pathLength={1} className="bs-branch" fill="none" stroke="currentColor" />
-          <circle cx={END_X} cy={b.y} r="4" className="bs-dot" fill="currentColor" />
+      {/* The five coloured lines running in together, from their dots */}
+      {LINES.map((l) => (
+        <g key={l.y} style={{ color: l.color }}>
+          <circle cx={START_X} cy={l.y} r="4" fill="currentColor" />
+          <path d={linePath(l.y)} pathLength={1} className="bs-run" fill="none" stroke="currentColor" />
         </g>
       ))}
 
-      {/* The 32px square, and the ring that ripples off it on impact */}
-      <rect className="bs-wave" x={BOX.x} y={MID - BOX.size / 2} width={BOX.size} height={BOX.size} rx="8" />
-      <rect className="bs-box" x={BOX.x} y={MID - BOX.size / 2} width={BOX.size} height={BOX.size} rx="8" />
+      {/* The one blue line out of the square */}
+      <line x1={BOX_RIGHT} y1={MID} x2={W} y2={MID} pathLength={1} className="bs-out" />
+
+      {/* The 32px square. Grey until the lines strike its left edge; then a
+          blue edge runs from that point round both sides to the right,
+          where the blue line leaves */}
+      <rect className="bs-box" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
+      <path className="bs-edge" d={EDGE_TOP} pathLength={1} fill="none" />
+      <path className="bs-edge" d={EDGE_BOTTOM} pathLength={1} fill="none" />
     </svg>
   );
 }
