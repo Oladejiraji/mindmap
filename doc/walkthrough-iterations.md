@@ -78,6 +78,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 9 | 2026-10-27 | **Lines to the models.** 1px lines from each person to two models (Kurosawa → OpenAI, Claude; Deji → Gemini, Perplexity; Stephen → Meta, Hugging Face), each an OKLCH gradient from the person's colour to the model's. They follow their logos round, fade with depth, sit between the far logos and the row, and fade in one by one after the sphere settles | `315dfaf` |
 | 8 | 2026-10-27 | Photo rings in the panel background colour `oklch(0.985 0 0)` (not blue/purple/amber), separating the overlaps. The + circle's dashed stroke lighter, `oklch(0.86 0 0)` (was 0.78) | `9427847` |
 | 7 | 2026-10-27 | **Explode, closer.** The logos burst out of the centre to the sphere (0.9s, fast-out, 30ms apart), then it turns. Chips 36px (was 28), scaled 0.5× at the back to 1.3× at the front; sphere 1.55× wider than tall (radius 128). Near logos (depth > 0.55) pass in front of the row; far ones fade and blur up to ~1.8px | `2660a4e` |
 | 6 | 2026-10-27 | White outline (ring offset) removed: the coloured rings sit right on the photos | `dc045d2` |
