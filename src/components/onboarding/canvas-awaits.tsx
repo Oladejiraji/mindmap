@@ -12,7 +12,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowUp } from "lucide-react";
+import { Plus } from "lucide-react";
+import { SendIcon } from "@/components/icons/send-icon";
 import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
 import { cn } from "@/lib/utils";
@@ -114,15 +115,22 @@ export function CanvasAwaits() {
         </div>
       </div>
 
-      {/* The chat composer, ready for the first question */}
+      {/* The chat composer, ready for the first question: our chat input
+          (20px corners, the surface colour with a hairline ring, a round +
+          and the black send button), at a smaller size */}
       <div
-        className="ca-rise absolute bottom-6 left-1/2 flex h-10 w-[320px] -translate-x-1/2 items-center gap-2 rounded-full bg-white pr-1.5 pl-4 shadow-default"
+        className="ca-rise absolute bottom-5 left-1/2 flex w-[340px] -translate-x-1/2 flex-col gap-1.5 rounded-[20px] bg-surface-container p-2.5 inset-ring-[0.5px] inset-ring-border-strong"
         style={{ animationDelay: `${SETTLE_AT + SETTLE_MS + 200}ms` }}
       >
-        <span className="flex-1 text-[13px] text-[oklch(0.68_0_0)]">Ask anything…</span>
-        <span className="flex size-7 items-center justify-center rounded-full bg-brand-solid text-white">
-          <ArrowUp className="size-4" strokeWidth={2.25} />
-        </span>
+        <span className="px-1 pt-0.5 text-body-sm text-fg-tertiary">Ask anything…</span>
+        <div className="flex items-center gap-1.5">
+          <span className="flex size-7 items-center justify-center rounded-full text-fg-secondary inset-ring-[0.5px] inset-ring-border-strong [&_svg]:size-3.5">
+            <Plus />
+          </span>
+          <span className="ml-auto flex size-7 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg">
+            <SendIcon className="size-4" />
+          </span>
+        </div>
       </div>
     </div>
   );
