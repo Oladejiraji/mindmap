@@ -1,30 +1,32 @@
 "use client";
 
 /*
- * "Create nodes": carries on from "Research with the team". The blue line
- * comes in from the left edge (where it left the last slide) to a project
- * card, "Build a group research tool", which then branches into two more
- * cards, each with someone researching it, drawn like the
- * auth canvas (an author chip with avatar and name, and its shimmering
- * "is researching…"). Plays once on arrival and holds; reduced motion
- * shows the finished picture. Laid out at the panel's 578 × 318 and
- * scaled to fit.
+ * "Your team's research in one place": carries on from "Research with the
+ * team". The blue line comes in from the left edge (where it left the last
+ * slide) to a project card, "Build a group research tool", which then
+ * forks into two more cards, each with someone researching it, drawn like
+ * the auth canvas (photo and name, and a shimmering "is researching…").
+ * Under the project card, what's been done in it: a line of work, then
+ * labelled samples (companies interviewed, competitors researched) with
+ * their logos. Plays once on arrival and holds; reduced motion shows the
+ * finished picture. Laid out at the panel's 578 × 318 and scaled to fit.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ComponentType, type SVGProps } from "react";
 import Image, { type StaticImageData } from "next/image";
 import AuthAssets from "@/lib/asset-export/auth";
-import { ClickUpLogo, LinearLogo, NotionLogo } from "./tool-logos";
+import { BranchIcon } from "@/lib/svg";
+import { ClickUpLogo, GoogleLogo, LinearLogo, MetaLogo, NetflixLogo, NotionLogo } from "./tool-logos";
 import "./branch-out.css";
 
 const W = 578;
 const H = 318;
 const MID = H / 2;
-// The cards, each with who's researching it (the auth canvas's look):
-// the project the line arrives at, and two branches of it. x, w: the
-// card's left edge and width; mid: its vertical centre; h: its height;
-// at: when it appears (ms); notes: what's been done in it so far.
+
+// The cards, each with who's researching it. x, w: the card's left edge
+// and width; mid: its vertical centre; h: its height; at: when it appears
+// (ms). Branch cards were forked from the project, so they say so under
+// their title with the node symbol.
 const CARD = { chip: 20, gap: 6 };
-type Note = { text: string };
 type Card = {
   x: number;
   w: number;
@@ -37,24 +39,11 @@ type Card = {
   // The photo's ring: our blue for the project's lead, colours from the
   // complementary palette (slide 1's teammate lines) for the others
   ring: string;
-  notes?: Note[];
+  forked?: boolean;
 };
-// Under the project card (not in it), a list of the work done and the
-// nexus points reached in it: 12px/16px regular, a light oklch grey, no
-// bullets
-const NOTES: Note[] = [
-  { text: "Reviewed 12 research tools" },
-  { text: "Synthesised 6 team interviews" },
-];
-// Samples of the tools reviewed, with their marks in brand colour
-const TOOLS = [
-  { name: "Linear", Logo: LinearLogo, color: "#5E6AD2" },
-  { name: "ClickUp", Logo: ClickUpLogo, color: "#7B68EE" },
-  { name: "Notion", Logo: NotionLogo, color: "#000000" },
-];
 const PARENT: Card = {
-  x: 48,
-  w: 220,
+  x: 40,
+  w: 210,
   mid: MID,
   h: 32,
   at: 760,
@@ -62,15 +51,61 @@ const PARENT: Card = {
   name: "Kurosawa",
   avatar: AuthAssets.AuthAvatar1,
   ring: "var(--brand-solid)",
-  notes: NOTES,
 };
 const CHILDREN: Card[] = [
-  { x: 340, w: 190, mid: 92, h: 32, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2, ring: "oklch(0.7 0.18 32)" },
-  { x: 340, w: 190, mid: 226, h: 32, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3, ring: "oklch(0.8 0.16 82)" },
+  {
+    x: 300,
+    w: 238,
+    mid: 88,
+    h: 52,
+    at: 1640,
+    title: "User interviews",
+    name: "Deji",
+    avatar: AuthAssets.AuthAvatar2,
+    ring: "oklch(0.7 0.18 32)",
+    forked: true,
+  },
+  {
+    x: 300,
+    w: 238,
+    mid: 230,
+    h: 52,
+    at: 1740,
+    title: "Competitor research and analysis",
+    name: "Stephen",
+    avatar: AuthAssets.AuthAvatar3,
+    ring: "oklch(0.8 0.16 82)",
+    forked: true,
+  },
 ];
 // The branches grow out of the project card's right side, 100ms apart,
 // once it has appeared
 const BRANCH_AT = 1100;
+
+// Under the project card (not in it): what's been done in it, 12px/16px
+// regular in a light oklch grey. A line of work, then labelled samples,
+// each a label line and a row of logos (brand colour) and names.
+type Sample = { name: string; Logo: ComponentType<SVGProps<SVGSVGElement>>; color: string };
+type Note = { text: string; samples?: Sample[] };
+const NOTES: Note[] = [
+  { text: "Reviewed 12 research tools" },
+  {
+    text: "User interviews at big tech",
+    samples: [
+      { name: "Meta", Logo: MetaLogo, color: "#0467DF" },
+      { name: "Netflix", Logo: NetflixLogo, color: "#E50914" },
+      { name: "Google", Logo: GoogleLogo, color: "#4285F4" },
+    ],
+  },
+  {
+    text: "Competitor research",
+    samples: [
+      { name: "Linear", Logo: LinearLogo, color: "#5E6AD2" },
+      { name: "ClickUp", Logo: ClickUpLogo, color: "#7B68EE" },
+      { name: "Notion", Logo: NotionLogo, color: "#000000" },
+    ],
+  },
+];
 
 // From the project card's right middle, curving to a branch card's left
 // middle
@@ -79,6 +114,8 @@ const branchPath = (to: Card) => {
   const bend = (to.x - from) / 2;
   return `M${from} ${MID} C${from + bend} ${MID} ${to.x - bend} ${to.mid} ${to.x} ${to.mid}`;
 };
+
+const noteText = "text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]";
 
 export function BranchOut() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -106,7 +143,7 @@ export function BranchOut() {
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full overflow-visible">
         {/* The line in from the last slide, to the project card */}
         <line x1={-2} y1={MID} x2={PARENT.x} y2={MID} pathLength={1} className="bo-in" />
-        {/* The project's two branches, growing out one after another */}
+        {/* The project's two forks, growing out one after another */}
         {CHILDREN.map((c, i) => (
           <path
             key={c.title}
@@ -145,47 +182,50 @@ export function BranchOut() {
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
             {/* Same type and grey as the notes, with the Antalik shimmer in
                 grey (tour.css; colours in branch-out.css) */}
-            <p
-              className="t-shimmer text-[12px] leading-4 font-normal"
-              data-text="is researching…"
-            >
+            <p className="t-shimmer text-[12px] leading-4 font-normal" data-text="is researching…">
               is researching…
             </p>
           </div>
           <div
-            className="corner-squircle flex items-center rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node"
+            className="corner-squircle flex flex-col justify-center gap-0.5 rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node"
             style={{ height: b.h }}
           >
-            {b.title}
+            <span className="truncate">{b.title}</span>
+            {b.forked && (
+              <span className={`flex items-center gap-1 ${noteText}`}>
+                <BranchIcon pathClassName="fill-[oklch(0.68_0_0)]" />
+                Forked
+              </span>
+            )}
           </div>
-          {b.notes && (
-            <ul className="mt-2 space-y-1 px-3">
-                {b.notes.map((n, i) => (
-                  <li
-                    key={n.text}
-                    className="bo-note text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]"
-                    style={{ animationDelay: `${b.at + 260 + i * 120}ms` }}
-                  >
-                    {n.text}
-                  </li>
-                ))}
-              {/* The tools reviewed: "Samples", then their marks and names */}
-              <li
-                className="bo-note flex items-center gap-2.5 text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]"
-                style={{ animationDelay: `${b.at + 260 + b.notes.length * 120}ms` }}
-              >
-                <span>Samples</span>
-                {TOOLS.map(({ name, Logo, color }) => (
+        </div>
+      ))}
+
+      {/* Under the project card: its work, and labelled samples with logos */}
+      <ul
+        className="absolute space-y-1 px-3"
+        style={{ left: PARENT.x, top: PARENT.mid + PARENT.h / 2 + 8, width: 240 }}
+      >
+        {NOTES.map((n, i) => (
+          <li
+            key={n.text}
+            className={`bo-note ${noteText}`}
+            style={{ animationDelay: `${PARENT.at + 260 + i * 120}ms` }}
+          >
+            {n.text}
+            {n.samples && (
+              <span className="mt-1 flex items-center gap-2.5">
+                {n.samples.map(({ name, Logo, color }) => (
                   <span key={name} className="flex items-center gap-1">
                     <Logo className="size-3" style={{ color }} />
                     {name}
                   </span>
                 ))}
-              </li>
-            </ul>
-          )}
-        </div>
-      ))}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
