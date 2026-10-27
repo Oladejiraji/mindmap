@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 35 | 2026-10-27 | Second slide body: "Everyone can work on the same goal, on different parts. All your research can be traced and seen in real time." | `cb85b61` |
 | 34 | 2026-10-27 | Text box 32px tall (was 36) | `ac1ca7c` |
 | 33 | 2026-10-27 | Second slide title "Create nodes" → "Your team's research in one place" (body unchanged) | `7e6de5f` |
 | 32 | 2026-10-27 | **Visuals transition.** On Continue the panel's visuals (not the panel or text), after the slide's own exit, scale to 0.96 and blur 6px, then fade (420ms). The next slide's visuals come in from 0.97 scale, 6px blur and transparent, sharpening (360ms). Reduced motion: none | `595632e` |
@@ -47,6 +48,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 12 | 2026-10-27 | "is researching…" in the notes' type and grey (12/16 regular, `oklch(0.68 0 0)`), shimmer switched to the grey Antalik one (band `oklch(0.45 0 0)`) | `34d5efc` |
 | 11 | 2026-10-27 | List regular (was medium) in a lighter grey, `oklch(0.68 0 0)` (was 0.55). Photo rings: Kurosawa keeps our blue; Deji coral `oklch(0.7 0.18 32)` and Stephen amber `oklch(0.8 0.16 82)`, from slide 1's complementary palette | `ed3fbe5` |
 | 10 | 2026-10-27 | Bullets removed from the list; lines align with the card title | `c610cbd` |
 | 9 | 2026-10-27 | The work/nexus list moves out of the project card to sit under it on the panel (8px below); the card is back to a 32px pill like the others | `acb3b75` |
