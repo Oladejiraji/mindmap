@@ -64,12 +64,12 @@ export function TourPanel() {
   );
 }
 
-/* The Mindmap logo tile, 64px with 10px corners and a 20px m, sitting
+/* The Mindmap logo tile, 32px with 10px corners and a 10px m, sitting
  * 16px above a step's title. */
 export function TourLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("mb-4 flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
-      <LogoIcon className="h-auto w-5" />
+    <span className={cn("mb-4 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
+      <LogoIcon className="h-auto w-2.5" />
     </span>
   );
 }
@@ -84,7 +84,7 @@ export function TourText({ slide }: { slide: TourSlide }) {
         <h2 className="text-[24px] leading-[1.33] font-medium tracking-[-0.01em] text-[#111]">{slide.title}</h2>
         {slide.soon && (
           // Antalik's shimmer sweeps the label (tour.css)
-          <span className="rounded-md px-1.5 text-caption-base inset-ring-[0.5px] inset-ring-border-default">
+          <span className="inline-flex h-5 shrink-0 items-center rounded-md px-1.5 text-caption-base inset-ring-[0.5px] inset-ring-border-default">
             <span className="t-shimmer" data-text={slide.soon}>
               {slide.soon}
             </span>
