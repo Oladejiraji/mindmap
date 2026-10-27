@@ -79,7 +79,7 @@ const sphere = Array.from({ length: POINTS }, (_, i) => {
   return { y, r, lon, logo: LOGOS[i % LOGOS.length] };
 });
 
-// Thin lines from each person to two of the models, each an OKLCH
+// Thin curved lines from each person to two of the models, each an OKLCH
 // gradient from the person's colour (their ring on the last slide) to the
 // model's. at: which sphere point (its logo); x: the person's photo centre
 // from the middle of the row (28/34/39/45 wide, 8px overlap).
@@ -106,7 +106,7 @@ const place = (p: (typeof sphere)[number], turn: number) => {
 
 export function ThinkTogether() {
   const items = useRef<(HTMLSpanElement | null)[]>([]);
-  const lines = useRef<(SVGLineElement | null)[]>([]);
+  const lines = useRef<(SVGPathElement | null)[]>([]);
   const grads = useRef<(SVGLinearGradientElement | null)[]>([]);
 
   // Explode the sphere out of the centre, then turn it: each logo's
@@ -138,11 +138,16 @@ export function ThinkTogether() {
         const grad = grads.current[j];
         if (!line || !grad) return;
         const { x, y, depth } = place(sphere[l.at], Math.max(turn, 0));
+        // A curve, not a straight line: bowed to one side by a third of
+        // its length, always the same way round
+        const mx = (l.x + x) / 2;
+        const my = y / 2;
+        const bow = 0.33;
+        const cx = mx - y * bow;
+        const cy = my + (x - l.x) * bow;
+        line.setAttribute("d", `M${l.x} 0 Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`);
         const coords = { x1: String(l.x), y1: "0", x2: String(x), y2: String(y) };
-        for (const [k, v] of Object.entries(coords)) {
-          line.setAttribute(k, v);
-          grad.setAttribute(k, v);
-        }
+        for (const [k, v] of Object.entries(coords)) grad.setAttribute(k, v);
         const fade = reduced ? 1 : Math.min(Math.max((elapsed - LINKS_AT - j * 90) / 400, 0), 1);
         line.style.opacity = String(fade * (0.2 + depth * 0.7));
       });
@@ -175,11 +180,12 @@ export function ThinkTogether() {
             ))}
           </defs>
           {LINKS.map((_, j) => (
-            <line
+            <path
               key={j}
               ref={(el) => {
                 lines.current[j] = el;
               }}
+              fill="none"
               stroke={`url(#tt-link-${j})`}
               strokeWidth="1"
               strokeLinecap="round"
