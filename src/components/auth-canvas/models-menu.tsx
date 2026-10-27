@@ -5,7 +5,7 @@ import { Menu } from "@base-ui/react/menu";
 import { PlusIcon } from "lucide-react";
 import { AnthropicIcon, GptIcon } from "@/lib/svg";
 import { CheckIcon } from "@/components/icons/check-icon";
-import { popupRow, popupSection, popupSurface } from "@/components/shared/sidebar/popover-styles";
+import { popupRow, popupSection, popupSurface } from "@/components/layout/sidebar/popover-styles";
 import { cn } from "@/lib/utils";
 
 export type ModelId = "gpt-5.5" | "claude-opus-5.5" | "claude-sonnet-5.5" | "claude-haiku-5.5";

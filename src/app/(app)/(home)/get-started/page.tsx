@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { GetStarted } from "@/components/shared/get-started";
+import { GetStarted } from "@/components/project/get-started";
 import { Walkthrough } from "@/components/onboarding/walkthrough";
 import { routes } from "@/lib/routes";
 

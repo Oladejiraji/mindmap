@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Select as BaseSelect } from "@base-ui/react/select";
 import { CheckIcon } from "@/components/icons/check-icon";
 import { SelectorIcon } from "@/components/icons/selector-icon";
-import { popupRow, popupSection, popupSurface } from "@/components/shared/sidebar/popover-styles";
+import { popupRow, popupSection, popupSurface } from "@/components/layout/sidebar/popover-styles";
 import { cn } from "@/lib/utils";
 
 /*

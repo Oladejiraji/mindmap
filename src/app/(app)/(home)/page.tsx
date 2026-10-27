@@ -13,8 +13,8 @@ import { useHomeLayout } from "@/lib/preferences";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
-import { ProjectCard } from "@/components/shared/project-card";
-import { ProjectRow } from "@/components/shared/project-row";
+import { ProjectCard } from "@/components/project/project-card";
+import { ProjectRow } from "@/components/project/project-row";
 import { useRouter } from "next/navigation";
 
 

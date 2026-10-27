@@ -6,7 +6,7 @@ import {
   SidebarToggleIcon,
   ChevronRightIcon,
 } from "@/components/icons/sidebar-toggle";
-import { CanvasToggle } from "@/components/shared/canvas-toggle";
+import { CanvasToggle } from "@/components/layout/canvas-toggle";
 import { useThread } from "@/services/threads/queries";
 import { useNode } from "@/services/nodes/queries";
 import type { Id } from "@convex/dataModel";

@@ -2,11 +2,11 @@
 
 import { Suspense, type ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { HomeSidebar } from "@/components/shared/sidebar/home-sidebar";
-import { CanvasPanel } from "@/components/shared/canvas-panel";
-import { NodePanel } from "@/components/shared/node-panel";
-import { FloatingChat } from "@/components/shared/floating-chat";
-import { TabStrip } from "@/components/shared/tab-strip";
+import { HomeSidebar } from "@/components/layout/sidebar/home-sidebar";
+import { CanvasPanel } from "@/components/thread/canvas-panel";
+import { NodePanel } from "@/components/thread/node-panel";
+import { FloatingChat } from "@/components/thread/floating-chat";
+import { TabStrip } from "@/components/layout/tab-strip";
 
 /*
  * Shell for project pages: the collapsible app sidebar, the tab strip and
