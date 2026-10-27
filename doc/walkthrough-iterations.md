@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 38 | 2026-10-27 | **Interruptible.** Every control takes effect at once, even mid-animation: Continue during an exit skips the rest of it (lands on the next slide, never two ahead); Back during an exit cancels it (Continue then Back returns you where you were); any move clears a pending exit timer. Scrubbed: 4 control cases, Esc mid-exit, 10 random Continue/Back runs; all settled (no exit stuck, visuals fully shown, dot matching the slide), no console errors. Fixed: Back mid-exit used to jump forward; a second Continue was ignored | `218129b` |
 | 37 | 2026-10-27 | **Four slides.** Teams, Choose your model and Make it yours archived (kept in `ARCHIVED_TOUR` in tour.tsx and make-it-yours.tsx). New last slide "The canvas awaits" (body: "Start with a question and watch your research take shape.", panel empty for now); its CTA reads "Get started" (button min 93px wide) and closes onto Get started. Four step dots | `24e0778` |
 | 36 | 2026-10-27 | The square's edge on impact is a gradient like the pulse, not plain blue: coral → amber → green (the struck colours) on the left into our blue on the right, where the blue line leaves | `8cf1646` |
 | 35 | 2026-10-27 | Second slide body: "Everyone can work on the same goal, on different parts. All your research can be traced and seen in real time." | `cb85b61` |
