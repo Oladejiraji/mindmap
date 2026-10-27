@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 25 | 2026-10-27 | **Pulse and send, smooth.** Two soft blue stroke pulses (0.6s each, sine ease in-out), then blue flows into the box from the left (0.6s wipe, the way the blue line arrives) revealing the question in white. A wipe instead of a colour fade, so no washed-out in-between colours; the caret fades as the blue arrives | `94627c0` |
 | 24 | 2026-10-27 | Pulse-and-fill reverted (didn't work); back to iteration 22: typed question with a blinking caret | `54fd0e3` |
 | 23 | 2026-10-27 | After typing, the text box pulses a 1.5px blue stroke twice (~0.36s each), then fills with our blue as the text turns white; the caret blinks through the pulses and goes when it fills | `61bc535` |
 | 22 | 2026-10-27 | Text box types "What does Mindmap do?" (Inter 13px, `oklch(0.4 0 0)`), one character at a time over ~1.3s, with the blue caret stepping after each (positions measured per glyph), then blinking. Field widened to 180 (x 350) so the phrase fits | `b7f9796` |
