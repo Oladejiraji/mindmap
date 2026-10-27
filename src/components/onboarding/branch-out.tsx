@@ -132,7 +132,7 @@ export function BranchOut() {
               className="rounded-full ring-[1.5px] ring-brand-solid ring-offset-1 ring-offset-white"
             />
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
-            <p className="gradient-text-shimmer text-caption-base opacity-50">is researching…</p>
+            <p className="gradient-text-shimmer text-[12px] leading-4 font-medium opacity-50">is researching…</p>
           </div>
           <div
             className="corner-squircle rounded-4xl bg-white text-body-sm text-fg-primary shadow-node"
