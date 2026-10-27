@@ -48,6 +48,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 17 | 2026-10-27 | Second fork is "Core features" (forking the group research tool's features). Card titles in a near-black with a faint blue tint, `oklch(0.22 0.012 262)` | `a5a4539` |
 | 16 | 2026-10-27 | Deji's and Stephen's own photos (public/walkthrough/) | `da0e991` |
 | 15 | 2026-10-27 | **Samples and forks.** Under the project card: "Reviewed 12 research tools", "User interviews at big tech" with Meta, Netflix and Google logos, "Competitor research" with Linear, ClickUp and Notion (labels on their own line, logos below). Branch cards say "Forked" with the node symbol under their title (52px tall, 238 wide); the second is "Competitor research and analysis". Layout rebalanced: project card x 40 / 210 wide, branch cards x 300 | `1aeea36` |
 | 14 | 2026-10-27 | Tool row starts with "Samples" (same grey), then the three logos | `4f2c918` |
