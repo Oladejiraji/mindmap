@@ -45,8 +45,9 @@ type Card = {
   title: string;
   name: string;
   avatar: StaticImageData;
-  // The photo's ring: our blue for the project's lead; purple for Deji,
-  // amber (slide 1's complementary palette) for Stephen
+  // The photo's ring (and its connector): our blue for the project's lead;
+  // a purple near the blue's lightness and chroma for Deji; a golden amber
+  // for Stephen, deep enough to hold on the light panel
   ring: string;
   // A forks' pulse ends in a light tint of its ring colour
   glow?: string;
@@ -84,8 +85,8 @@ const CHILDREN: Card[] = [
     title: "User interviews",
     name: "Deji",
     avatar: DejiAvatar,
-    ring: "oklch(0.62 0.19 295)",
-    glow: "oklch(0.84 0.1 295)",
+    ring: "oklch(0.58 0.21 300)",
+    glow: "oklch(0.84 0.1 300)",
     notes: [
       FORKED,
       {
@@ -108,8 +109,8 @@ const CHILDREN: Card[] = [
     title: "Core features",
     name: "Stephen",
     avatar: StephenAvatar,
-    ring: "oklch(0.8 0.16 82)",
-    glow: "oklch(0.92 0.11 88)",
+    ring: "oklch(0.76 0.16 75)",
+    glow: "oklch(0.9 0.1 80)",
     // The features it forks from the group research tool
     notes: [FORKED, { text: "Core features for MVP" }, { text: "Collaboration · Clarity · Tracking" }],
   },
