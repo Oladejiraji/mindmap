@@ -48,6 +48,8 @@ type Card = {
   // The photo's ring: our blue for the project's lead; purple for Deji,
   // amber (slide 1's complementary palette) for Stephen
   ring: string;
+  // A forks' pulse ends in a light tint of its ring colour
+  glow?: string;
   notes?: Note[];
 };
 const PARENT: Card = {
@@ -83,6 +85,7 @@ const CHILDREN: Card[] = [
     name: "Deji",
     avatar: DejiAvatar,
     ring: "oklch(0.62 0.19 295)",
+    glow: "oklch(0.84 0.1 295)",
     notes: [
       FORKED,
       {
@@ -106,6 +109,7 @@ const CHILDREN: Card[] = [
     name: "Stephen",
     avatar: StephenAvatar,
     ring: "oklch(0.8 0.16 82)",
+    glow: "oklch(0.92 0.11 88)",
     // The features it forks from the group research tool
     notes: [FORKED, { text: "Core features for MVP" }, { text: "Collaboration · Clarity · Tracking" }],
   },
@@ -154,25 +158,49 @@ export function BranchOut() {
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full overflow-visible">
         {/* The line in from the last slide, to the project card */}
         <line x1={-2} y1={MID} x2={PARENT.x} y2={MID} pathLength={1} className="bo-in" />
-        {/* The project's two forks, growing out one after another */}
+        {/* The pulses' gradients: our blue at the project, shading to a
+            light tint of the fork's ring colour as they arrive */}
+        <defs>
+          {CHILDREN.map((c, i) => (
+            <linearGradient
+              key={c.title}
+              id={`bo-pulse-${i}`}
+              gradientUnits="userSpaceOnUse"
+              x1={PARENT.x + PARENT.w}
+              y1={MID}
+              x2={c.x}
+              y2={c.mid}
+            >
+              <stop offset="0" stopColor="var(--brand-solid)" />
+              <stop offset="1" stopColor={c.glow} />
+            </linearGradient>
+          ))}
+        </defs>
+        {/* The project's two forks, growing out one after another, each in
+            the ring colour of the person it leads to */}
         {CHILDREN.map((c, i) => (
           <path
             key={c.title}
             d={branchPath(c)}
             pathLength={1}
             className="bo-branch"
-            style={{ animationDelay: `${BRANCH_AT + i * 100}ms` }}
+            style={{ animationDelay: `${BRANCH_AT + i * 100}ms`, stroke: c.ring }}
             fill="none"
           />
         ))}
         {/* The pulse along each fork's connector, before its notes */}
-        {CHILDREN.map((c) => (
+        {CHILDREN.map((c, i) => (
           <path
             key={c.title}
             d={branchPath(c)}
             pathLength={1}
             className="bo-pulse"
-            style={{ animationDelay: `${c.at + PULSE.after}ms`, animationDuration: `${PULSE.ms}ms` }}
+            style={{
+              animationDelay: `${c.at + PULSE.after}ms`,
+              animationDuration: `${PULSE.ms}ms`,
+              stroke: `url(#bo-pulse-${i})`,
+              ["--bo-glow" as string]: c.ring,
+            }}
             fill="none"
           />
         ))}

@@ -27,15 +27,16 @@
 }
 
 /* A pulse along a fork's connector, from the project to the fork: a short
-   near-white streak with a soft blue glow, before the fork's notes */
+   streak in a gradient (our blue shading to a light tint of the fork's ring
+   colour; set inline) with a soft glow in that colour, before the fork's
+   notes */
 .branch-out .bo-pulse {
-  stroke: oklch(0.93 0.05 262);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-dasharray: 0.16 2;
   stroke-dashoffset: 0.16;
   opacity: 0;
-  filter: drop-shadow(0 0 4px var(--brand-solid));
+  filter: drop-shadow(0 0 4px var(--bo-glow, var(--brand-solid)));
   animation: bo-pulse 600ms cubic-bezier(0.37, 0, 0.63, 1) both;
 }
 @keyframes bo-pulse {
