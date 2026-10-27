@@ -1,14 +1,17 @@
 /* Think together (think-together.tsx): each photo, then the dashed "+",
-   pops in (fade and a slight scale, no overshoot), 120ms apart */
+   blurs in (fade, a slight scale and a 6px blur sharpening; no overshoot),
+   120ms apart */
 .think-together .tt-pop {
   opacity: 0;
   scale: 0.9;
-  animation: tt-pop 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
+  filter: blur(6px);
+  animation: tt-pop 420ms cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 @keyframes tt-pop {
   to {
     opacity: 1;
     scale: 1;
+    filter: blur(0);
   }
 }
 
@@ -17,5 +20,6 @@
     animation: none;
     opacity: 1;
     scale: 1;
+    filter: none;
   }
 }
