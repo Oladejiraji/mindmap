@@ -47,6 +47,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 11 | 2026-10-27 | List regular (was medium) in a lighter grey, `oklch(0.68 0 0)` (was 0.55). Photo rings: Kurosawa keeps our blue; Deji coral `oklch(0.7 0.18 32)` and Stephen amber `oklch(0.8 0.16 82)`, from slide 1's complementary palette | `ed3fbe5` |
 | 10 | 2026-10-27 | Bullets removed from the list; lines align with the card title | `c610cbd` |
 | 9 | 2026-10-27 | The work/nexus list moves out of the project card to sit under it on the panel (8px below); the card is back to a 32px pill like the others | `acb3b75` |
 | 8 | 2026-10-27 | "is researching…" 12px/16px medium (was caption size, regular) | `7ea1d2b` |
