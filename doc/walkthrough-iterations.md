@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 21 | 2026-10-27 | Text box fill lighter: `oklch(0.93 0 0)` → `oklch(0.955 0 0)` | `268c5b8` |
 | 20 | 2026-10-27 | **Into a text box.** No more follow-the-line nodes (kept in 26737dc): the blue line runs from the square (moved left, x 236) into a text field at Apple's iOS size, 36pt tall with 10pt corners, darker grey fill `oklch(0.93 0 0)`, no border, 88px from the square, 48px right margin. A line of text writes in behind iOS's blue caret, which then blinks. 6s loop | `29c5afc` |
 | 19 | 2026-10-27 | Panel background a step lighter: `oklch(0.985 0 0)` | `b444803` |
 | 18 | 2026-10-27 | Panel background lighter: #f3f3f3 (~oklch 0.966) → `oklch(0.975 0 0)` | `5d8e0d5` |
