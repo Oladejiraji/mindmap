@@ -9,6 +9,7 @@ import { CheckIcon } from "@/components/icons/check-icon";
 import { MODELS } from "@/components/auth-canvas/models-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
+import { BranchStreak } from "./branch-streak";
 import "./tour.css";
 
 /*
@@ -17,13 +18,15 @@ import "./tour.css";
  * Features that aren't in the app yet say so ("Coming soon") instead of
  * promising them.
  */
-export type TourSlide = { id: string; title: string; body: string; soon?: string; preview: ReactNode };
+// art: what the panel shows now; preview: the earlier previews, kept
+export type TourSlide = { id: string; title: string; body: string; soon?: string; art?: ReactNode; preview: ReactNode };
 
 export const TOUR: TourSlide[] = [
   {
     id: "how",
     title: "Research with the team",
     body: "Start a project with a question. Each answer can branch into its own node, so you can follow every direction without losing the thread.",
+    art: <BranchStreak />,
     preview: <MessageBars />,
   },
   {
@@ -54,13 +57,18 @@ export const TOUR: TourSlide[] = [
   },
 ];
 
-/* A slide's illustration: for now an empty 578 × 318 #f5f5f5 container
- * beside the slide's text. The previews (the blue panel with the Ask then
- * Branch chat, and the others below) are kept but not shown; restore the
- * blue panel from e7ee4a3. */
-export function TourPanel() {
+/* A slide's illustration: a 578 × 318 #f5f5f5 panel beside the slide's
+ * text, showing the slide's art (empty until a slide has some). The earlier
+ * previews (the blue panel with the Ask then Branch chat, and the others
+ * below) are kept but not shown; restore the blue panel from e7ee4a3. */
+export function TourPanel({ slide }: { slide: TourSlide }) {
   return (
-    <div aria-hidden className="corner-squircle h-full max-h-[318px] w-[578px] max-w-full shrink-0 rounded-[16px] bg-[#f5f5f5]" />
+    <div
+      aria-hidden
+      className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[#f5f5f5]"
+    >
+      {slide.art}
+    </div>
   );
 }
 

@@ -1,0 +1,140 @@
+/* Research with the team (branch-streak.tsx). One 4.8s loop:
+   0–32%   the blue streak runs in (linear); its head reaches the square at
+           ~22% and it is gone into it by 32%
+   22–34%  the square pulses (scale + blue edge)
+   24–50%  the five branches draw out, 90ms apart, then their end dots pop
+   84–94%  everything fades; the loop restarts clean */
+.branch-streak {
+  --bs-dur: 4800ms;
+  --bs-track: oklch(0.9 0 0);
+  overflow: visible;
+}
+
+.branch-streak .bs-track {
+  stroke: var(--bs-track);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.branch-streak .bs-streak {
+  animation: bs-streak var(--bs-dur) linear infinite;
+}
+@keyframes bs-streak {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  32% {
+    transform: translateX(296px);
+    opacity: 1;
+  }
+  32.1%,
+  100% {
+    transform: translateX(296px);
+    opacity: 0;
+  }
+}
+
+.branch-streak .bs-box {
+  fill: #fff;
+  stroke: var(--bs-track);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bs-box var(--bs-dur) cubic-bezier(0.2, 0, 0, 1) infinite;
+}
+@keyframes bs-box {
+  0%,
+  21% {
+    transform: scale(1);
+    stroke: var(--bs-track);
+  }
+  25% {
+    transform: scale(1.12);
+    stroke: var(--brand-solid);
+  }
+  34%,
+  84% {
+    transform: scale(1);
+    stroke: var(--brand-solid);
+  }
+  94%,
+  100% {
+    transform: scale(1);
+    stroke: var(--bs-track);
+  }
+}
+
+.branch-streak .bs-branch {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bs-branch var(--bs-dur) infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+@keyframes bs-branch {
+  0%,
+  24% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  50%,
+  84% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  94% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+.branch-streak .bs-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bs-dot var(--bs-dur) infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+@keyframes bs-dot {
+  0%,
+  48% {
+    transform: scale(0);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.3, 1.5, 0.6, 1);
+  }
+  56%,
+  84% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  94%,
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: the finished picture, streak resting against the square */
+@media (prefers-reduced-motion: reduce) {
+  .branch-streak .bs-streak,
+  .branch-streak .bs-box,
+  .branch-streak .bs-branch,
+  .branch-streak .bs-dot {
+    animation: none;
+  }
+  .branch-streak .bs-streak {
+    transform: translateX(200px);
+  }
+  .branch-streak .bs-box {
+    stroke: var(--brand-solid);
+  }
+  .branch-streak .bs-branch {
+    stroke-dashoffset: 0;
+  }
+}

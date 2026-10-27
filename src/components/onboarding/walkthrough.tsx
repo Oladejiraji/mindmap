@@ -54,7 +54,7 @@ export function Walkthrough() {
                 <div className="min-w-0 flex-1">
                   <TourText slide={slide} />
                 </div>
-                <TourPanel />
+                <TourPanel slide={slide} />
               </div>
             ) : (
               <MakeItYours className="min-h-0 flex-1" />
