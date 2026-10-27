@@ -36,6 +36,13 @@
   }
 }
 
+/* "is researching…": the notes' grey with a darker grey band, as on the
+   earlier slides */
+.canvas-awaits .t-shimmer {
+  --shimmer-base: oklch(0.68 0 0);
+  --shimmer-highlight: oklch(0.45 0 0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .canvas-awaits .ca-drop,
   .canvas-awaits .ca-rise {

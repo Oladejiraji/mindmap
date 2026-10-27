@@ -2,8 +2,9 @@
 
 /*
  * "The canvas awaits": the whole panel is the canvas, and one node waits
- * in its centre, in our blue: Kurosawa (photo and name) asking "How do we
- * get started on Mindmap?". It drops
+ * in its centre, in our blue: "How do we get started on Mindmap?", with
+ * Kurosawa (photo, name, "is researching…") above it as on the earlier
+ * slides. It drops
  * in and fires the auth page's pulse (VapourHalo) as it comes to rest, like
  * dropping a card on the auth canvas; then the chat composer slides up at
  * the foot, ready for the first question. Reduced
@@ -22,14 +23,16 @@ const H = 318;
 
 // The node: centre x, y, width; 32px tall like the cards on "Your team's
 // research in one place". lands: when it comes to rest (ms).
-// Two rows: who's asking (photo and name), then the question
-const NODE_H = 56;
+// The card (32px, like the cards on "Your team's research in one place"),
+// with who's on it above it, outside the card, as on that slide
+const NODE_H = 32;
+const TAG = { h: 20, gap: 6 };
 type Node = { x: number; y: number; w: number; title: string; name: string; avatar: StaticImageData; lands: number };
 const NODES: Node[] = [
   {
     x: W / 2,
     y: H / 2,
-    w: 264,
+    w: 268,
     title: "How do we get started on Mindmap?",
     name: "Kurosawa",
     avatar: KurosawaAvatar,
@@ -89,21 +92,29 @@ export function CanvasAwaits() {
       {NODES.map((n) => (
         <div
           key={n.title}
-          className="ca-drop corner-squircle absolute flex flex-col justify-center gap-1.5 rounded-4xl bg-brand-solid px-3.5 text-white shadow-node-primary"
+          className="ca-drop absolute"
           style={{
             left: n.x - n.w / 2,
-            top: n.y - NODE_H / 2,
+            top: n.y - NODE_H / 2 - TAG.h - TAG.gap,
             width: n.w,
-            height: NODE_H,
             animationDelay: `${n.lands - DROP_MS}ms`,
             animationDuration: `${DROP_MS}ms`,
           }}
         >
-          <span className="flex items-center gap-1.5 text-[12px] leading-4 text-white/75">
-            <Image src={n.avatar} alt="" width={20} height={20} className="rounded-full ring-[1.5px] ring-white" />
-            {n.name}
-          </span>
-          <span className="truncate text-body-sm">{n.title}</span>
+          {/* Who: photo ringed in their colour, name, "is researching…" */}
+          <div className="mb-1.5 flex h-5 items-center gap-1.5">
+            <Image src={n.avatar} alt="" width={16} height={16} className="rounded-full ring-[1.5px] ring-brand-solid" />
+            <span className="text-caption-base font-medium text-fg-primary">{n.name}</span>
+            <p className="t-shimmer text-[12px] leading-4 font-normal" data-text="is researching…">
+              is researching…
+            </p>
+          </div>
+          <div
+            className="corner-squircle flex items-center justify-center rounded-4xl bg-brand-solid px-3 text-body-sm text-white shadow-node-primary"
+            style={{ height: NODE_H }}
+          >
+            <span className="truncate">{n.title}</span>
+          </div>
         </div>
       ))}
 
