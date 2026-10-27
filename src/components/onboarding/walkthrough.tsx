@@ -4,17 +4,17 @@ import { useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
-import { MakeItYours } from "./make-it-yours";
 import { ART_OUT_MS, TOUR, TourPanel, TourText } from "./tour";
 
 /*
  * The walkthrough after onboarding (after Pond): a dialog over the Get
- * started page, opened with ?tour=1 when onboarding finishes. The tour
- * slides (how it works, nodes, collaborate, teams, models), then "Make it
- * yours". Finish, Esc or clicking outside close it and drop the
- * param, leaving you on Get started.
+ * started page, opened with ?tour=1 when onboarding finishes. Four slides:
+ * Research with the team, Your team's research in one place, Think
+ * together, The canvas awaits (Teams, Choose your model and Make it yours
+ * are archived). "Get started" on the last, Esc or clicking outside close
+ * it and drop the param, leaving you on Get started.
  */
-const TOTAL = TOUR.length + 1;
+const TOTAL = TOUR.length;
 
 export function Walkthrough() {
   const router = useRouter();
@@ -73,17 +73,13 @@ export function Walkthrough() {
           className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04),0_16px_40px_rgba(0,0,0,0.06)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
           <div key={step} className="flex min-h-0 flex-1 flex-col motion-safe:motion-opacity-in-0 motion-safe:motion-translate-y-in-[6px] motion-safe:motion-duration-300 motion-safe:motion-ease-out">
-            {slide ? (
-              // Text and panel on one line, centred on each other
-              <div className="flex min-h-0 flex-1 items-center gap-10">
-                <div className="min-w-0 flex-1">
-                  <TourText slide={slide} />
-                </div>
-                <TourPanel slide={slide} leaving={leaving} />
+            {/* Text and panel on one line, centred on each other */}
+            <div className="flex min-h-0 flex-1 items-center gap-10">
+              <div className="min-w-0 flex-1">
+                <TourText slide={slide} />
               </div>
-            ) : (
-              <MakeItYours className="min-h-0 flex-1" />
-            )}
+              <TourPanel slide={slide} leaving={leaving} />
+            </div>
           </div>
 
           {/* Footer: step dots, then the actions */}
@@ -96,14 +92,15 @@ export function Walkthrough() {
                     Back
                   </button>
                 )}
-                {/* Continue 93 × 32 (500 13px); close with Esc or outside */}
+                {/* Continue (Get started on the last slide): 32px tall, at least 93
+                    wide, 500 13px; close with Esc or outside */}
                 <button
                   ref={continueRef}
                   type="button"
                   onClick={next}
-                  className="corner-squircle h-8 w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-1.5 text-[13px] leading-[1.38] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
+                  className="corner-squircle h-8 min-w-[93px] shrink-0 cursor-pointer rounded-3xl bg-[#1e1e1e] px-4 py-1.5 text-[13px] leading-[1.38] font-medium tracking-normal text-white outline-none transition-[background-color,scale] duration-200 ease-out hover:bg-[#333] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100"
                 >
-                  {last ? "Finish" : "Continue"}
+                  {last ? "Get started" : "Continue"}
                 </button>
               </div>
             </div>

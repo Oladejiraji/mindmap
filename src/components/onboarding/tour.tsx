@@ -30,7 +30,7 @@ export type TourSlide = {
   soon?: string;
   art?: (props: { leaving: boolean }) => ReactNode;
   exit?: number;
-  preview: ReactNode;
+  preview?: ReactNode;
 };
 
 export const TOUR: TourSlide[] = [
@@ -61,6 +61,16 @@ export const TOUR: TourSlide[] = [
     art: () => <ThinkTogether />,
     preview: <Collaborate />,
   },
+  {
+    id: "canvas",
+    title: "The canvas awaits",
+    body: "Start with a question and watch your research take shape.",
+  },
+];
+
+/* Archived slides: out of the walkthrough for now, kept to bring back
+ * ("Make it yours" lives in make-it-yours.tsx). */
+export const ARCHIVED_TOUR: TourSlide[] = [
   {
     id: "teams",
     title: "Teams",
