@@ -100,6 +100,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 13 | 2026-10-27 | Wireframe lines much subtler: `oklch(0.955 0 0)` (was 0.88) on the 0.985 panel, about a quarter of the contrast | `9608dff` |
 | 12 | 2026-10-27 | Wireframe connectors run on beyond the container: four subtle grey lines fan out of the node's foot and off the bottom edge (900ms, 120ms apart); the empty dashed nodes removed | `6eba4f9` |
 | 11 | 2026-10-27 | **Wireframes.** Once the node settles, three 1px connectors in `oklch(0.88 0 0)` draw down from its foot (600ms, 120ms apart) to three empty 112 × 28 nodes, dashed 3/3 in the same grey, which fade in after them. Reduced motion shows them drawn | `dd8a132` |
 | 10 | 2026-10-27 | Composer removed (and its new-project click). The pulse beats rhythmically: from the moment the node settles, the auth pulse fires round it every 3s (measured 3000ms apart); off for reduced motion | `b66c674` |
