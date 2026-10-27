@@ -97,6 +97,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 7 | 2026-10-27 | **Typed, then settles.** The node appears hovering above the canvas in focus (lifted 10px, 1.03×, a soft blue focus ring and deep blue shadow); "So how do you get started on Mindmap?" types in (45ms a character, blinking white caret) while Kurosawa "is typing…"; then it settles (380ms), the pulse fires as it lands, and his tag becomes "created a nexus point". Composer follows. Card 300 wide, text left-aligned | `090ef16` |
 | 6 | 2026-10-27 | Set up like the earlier slides: Kurosawa's tag (16px photo in a blue ring, name, grey "is researching…" shimmer) sits above the card, outside it; the card is a 32px blue pill with just the question; the pulse hugs the card | `30efd6d` |
 | 5 | 2026-10-27 | Fix: under reduced motion the composer kept its centring (the reset no longer clears its translate) | `a2b7dea` |
 | 4 | 2026-10-27 | The node is Kurosawa's question: a 264 × 56 blue card, his 20px photo (white ring) and name in white at 75% above "How do we get started on Mindmap?" in white; its pulse matches the new size | `1628584` |
