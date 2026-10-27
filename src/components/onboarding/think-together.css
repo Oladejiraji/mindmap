@@ -1,0 +1,21 @@
+/* Think together (think-together.tsx): each photo, then the dashed "+",
+   pops in (fade and a slight scale, no overshoot), 120ms apart */
+.think-together .tt-pop {
+  opacity: 0;
+  scale: 0.9;
+  animation: tt-pop 320ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+@keyframes tt-pop {
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .think-together .tt-pop {
+    animation: none;
+    opacity: 1;
+    scale: 1;
+  }
+}

@@ -11,6 +11,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
 import { BranchStreak } from "./branch-streak";
 import { BranchOut } from "./branch-out";
+import { ThinkTogether } from "./think-together";
 import "./tour.css";
 
 /*
@@ -56,6 +57,8 @@ export const TOUR: TourSlide[] = [
     title: "Think together",
     body: "Invite your team onto a project so everyone can follow and add to the same branches.",
     soon: "Invites coming soon",
+    // The team from the last slide, and a + to invite someone
+    art: () => <ThinkTogether />,
     preview: <Collaborate />,
   },
   {
