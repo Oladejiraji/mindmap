@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, type CSSProperties } from "react";
-import "./vapour-halo.css";
 
 /*
  * Drop effect, after Apple's chip renders: the card splits into
@@ -12,7 +11,7 @@ import "./vapour-halo.css";
  * steam. As the wave front passes it reveals a dot grid, which fades
  * behind it. The fringe settles into a faint coloured residue on the card's
  * edges that fades last. Sits in flow coordinates behind the nodes; the
- * animation lives in vapour-halo.css.
+ * animation lives in src/app/styles/animations.css.
  */
 
 // reach: how far past the card the wash spreads (px); peak: its opacity

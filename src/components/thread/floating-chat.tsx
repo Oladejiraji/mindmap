@@ -20,7 +20,9 @@ export function FloatingChat() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const threadId = pathname.match(/^\/t\/([^/]+)$/)?.[1] as Id<"threads"> | undefined;
+  const threadId = pathname.match(/^\/t\/([^/]+)$/)?.[1] as
+    | Id<"threads">
+    | undefined;
   const nodeId = searchParams.get("float") as Id<"nodes"> | null;
   const inChatView = searchParams.get("view") === "chat";
 
@@ -39,7 +41,15 @@ export function FloatingChat() {
     });
 
   if (!threadId || !nodeId || inChatView) return null;
-  return <FloatingCard key={nodeId} threadId={threadId} nodeId={nodeId} onDock={dock} onClose={close} />;
+  return (
+    <FloatingCard
+      key={nodeId}
+      threadId={threadId}
+      nodeId={nodeId}
+      onDock={dock}
+      onClose={close}
+    />
+  );
 }
 
 function FloatingCard({
@@ -57,7 +67,9 @@ function FloatingCard({
   const cardRef = useRef<HTMLDivElement>(null);
   // Offset from its resting corner, kept inside the canvas card
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+  const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(
+    null,
+  );
 
   const onPointerDown = (e: PointerEvent<HTMLElement>) => {
     if ((e.target as HTMLElement).closest("button")) return;
@@ -97,14 +109,26 @@ function FloatingCard({
         onPointerCancel={onPointerUp}
         className="flex h-11 shrink-0 cursor-grab touch-none items-center gap-2 border-b border-border-default pr-2 pl-4 select-none active:cursor-grabbing"
       >
-        <p className="min-w-0 flex-1 truncate text-body-sm font-medium text-fg-primary">{node?.title ?? "Chat"}</p>
+        <p className="min-w-0 flex-1 truncate text-body-sm font-medium text-fg-primary">
+          {node?.title ?? "Chat"}
+        </p>
         <Tip label="Dock in side panel">
-          <button type="button" onClick={onDock} aria-label="Dock in side panel" className={iconButton}>
+          <button
+            type="button"
+            onClick={onDock}
+            aria-label="Dock in side panel"
+            className={iconButton}
+          >
             <FloatIcon className="size-4" />
           </button>
         </Tip>
         <Tip label="Close">
-          <button type="button" onClick={onClose} aria-label="Close chat" className={iconButton}>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close chat"
+            className={iconButton}
+          >
             <CloseIcon className="size-4" />
           </button>
         </Tip>

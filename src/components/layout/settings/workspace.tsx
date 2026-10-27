@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { api } from "@convex/api";
@@ -15,8 +15,13 @@ function OrgNameField({
   onCommit: (next: string) => void;
 }) {
   const [draft, setDraft] = useState(name);
+  const escapingRef = useRef(false);
 
   const commit = () => {
+    if (escapingRef.current) {
+      escapingRef.current = false;
+      return;
+    }
     const next = draft.trim();
     if (!next || next === name) {
       setDraft(name);
@@ -33,6 +38,7 @@ function OrgNameField({
       onKeyDown={(e) => {
         if (e.key === "Enter") (e.target as HTMLInputElement).blur();
         if (e.key === "Escape") {
+          escapingRef.current = true;
           setDraft(name);
           (e.target as HTMLInputElement).blur();
         }

@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "./styles/colors.css";
+@import "./styles/animations.css";
 
 @plugin "tailwindcss-motion";
 
@@ -224,6 +225,77 @@
   --s-default: inset 0 0 0 0.5px #ffffff12, 0 0 0 0.5px #00000066, 0 1px 2px 0 #00000040;
   --s-large: inset 0 0 0 0.5px #ffffff12, 0 0 0 1px #0000004d, 0 2px 3px -2px #00000026, 0 3px 8px -2px #00000066, 0 4px 12px -4px #00000080;
   --s-extra-large: inset 0 0 0 0.5px #ffffff12, 0 0 0 1px #00000066, 0 8px 40px 0 #0000004d, 0 12px 32px -16px #00000080;
+}
+
+/* Shared motion. Entrances fill backwards: the element's own styles are its
+ * resting state, so `motion-reduce:animate-none` leaves it there. Tune per
+ * use with the vars or [animation-duration:…]. */
+@theme {
+  --shadow-node-focus: 0 0 0 4px oklch(from var(--brand-solid) l c h / 0.18),
+    0 14px 30px -8px oklch(from var(--brand-solid) l c h / 0.5);
+
+  --animate-word-in: word-in 450ms ease-out backwards;
+  --animate-blur-in: blur-in 420ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  --animate-fade-up: fade-up 300ms cubic-bezier(0.2, 0, 0, 1) backwards;
+  --animate-collapse: collapse 420ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  --animate-blink: blink 1s steps(1, end) infinite;
+  /* SVG strokes with pathLength={1} and stroke-dasharray 1 */
+  --animate-draw: draw 600ms cubic-bezier(0.3, 0, 0.2, 1) both;
+  --animate-streak: streak 600ms cubic-bezier(0.37, 0, 0.63, 1) both;
+
+  @keyframes word-in {
+    from {
+      opacity: 0;
+      filter: blur(2px);
+    }
+  }
+  @keyframes blur-in {
+    from {
+      opacity: 0;
+      scale: var(--blur-in-scale, 1);
+      filter: blur(6px);
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      translate: 0 var(--fade-up-y, 4px);
+    }
+  }
+  @keyframes collapse {
+    to {
+      grid-template-rows: 0fr;
+      opacity: 0;
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  /* A short dash travelling the length of the path */
+  @keyframes streak {
+    0% {
+      stroke-dashoffset: 0.16;
+      opacity: 0;
+    }
+    10%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      stroke-dashoffset: -1;
+      opacity: 0;
+    }
+  }
 }
 
 
@@ -702,14 +774,16 @@
   }
 }
 
+/* Override the colours inline: [--shimmer-base:…] [--shimmer-highlight:…] */
 .gradient-text-shimmer {
+  --_base: var(--shimmer-base, var(--foreground-3));
   background-image: linear-gradient(
     90deg,
-    var(--foreground-3) 0%,
-    var(--foreground-3) 35%,
-    var(--primary) 50%,
-    var(--foreground-3) 65%,
-    var(--foreground-3) 100%
+    var(--_base) 0%,
+    var(--_base) 35%,
+    var(--shimmer-highlight, var(--primary)) 50%,
+    var(--_base) 65%,
+    var(--_base) 100%
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;

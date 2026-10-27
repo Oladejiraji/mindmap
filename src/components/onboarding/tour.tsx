@@ -13,7 +13,6 @@ import { BranchStreak } from "./branch-streak";
 import { BranchOut } from "./branch-out";
 import { ThinkTogether } from "./think-together";
 import { CanvasAwaits } from "./canvas-awaits";
-import "./tour.css";
 
 /*
  * Onboarding walkthrough: one slide per thing worth knowing before you
@@ -95,17 +94,23 @@ export const ARCHIVED_TOUR: TourSlide[] = [
  * text, showing the slide's art (empty until a slide has some). The earlier
  * previews (the blue panel with the Ask then Branch chat, and the others
  * below) are kept but not shown; restore the blue panel from e7ee4a3. */
-export function TourPanel({ slide, leaving = false }: { slide: TourSlide; leaving?: boolean }) {
+export function TourPanel({
+  slide,
+  leaving = false,
+}: {
+  slide: TourSlide;
+  leaving?: boolean;
+}) {
   return (
     <div
       aria-hidden
-      className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[oklch(0.985_0_0)]"
+      className="corner-squircle relative h-full max-h-79.5 w-144.5 max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[oklch(0.985_0_0)]"
     >
       {/* The visuals, not the panel: they come in sharpening from a
           slight scale and blur, and leave by scaling and blurring, then
           fading (after the slide's own exit) */}
       <div
-        className={cn("tour-art absolute inset-0", leaving && "tour-art-leaving")}
+        className={cn("absolute inset-0", tourArt(leaving))}
         style={{ ["--tour-art-delay" as string]: `${slide.exit ?? 0}ms` }}
       >
         {slide.art?.({ leaving })}
@@ -114,14 +119,31 @@ export function TourPanel({ slide, leaving = false }: { slide: TourSlide; leavin
   );
 }
 
-/** How long the visuals take to scale, blur and fade out (tour.css) */
+/** How long the visuals take to scale, blur and fade out (tourArt) */
 export const ART_OUT_MS = 420;
+
+/* A slide's visuals and text. In: a keyframe (filling backwards, so the
+ * transitions own the resting state). Out: transitions, so they can be
+ * interrupted and reverse; after the slide's own exit (--tour-art-delay)
+ * scale and blur go first, then the fade, done by 400ms, inside ART_OUT_MS. */
+export const tourArt = (leaving: boolean) =>
+  cn(
+    "animate-[blur-in_360ms_cubic-bezier(0.2,0,0,1)_backwards] [--blur-in-scale:0.97] motion-reduce:animate-none motion-reduce:transition-none",
+    leaving
+      ? "scale-[0.98] opacity-0 blur-[4px] [transition:opacity_170ms_ease-out_calc(var(--tour-art-delay,0ms)_+_230ms),scale_230ms_cubic-bezier(0.4,0,1,1)_var(--tour-art-delay,0ms),filter_230ms_cubic-bezier(0.4,0,1,1)_var(--tour-art-delay,0ms)]"
+      : "transition-[opacity,scale,filter] duration-200 ease-out",
+  );
 
 /* The Mindmap logo tile, 32px with 10px corners and a 10px m, sitting
  * 24px above a step's title (3× the title–body gap). */
 export function TourLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("mb-6 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
+    <span
+      className={cn(
+        "mb-6 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid",
+        className,
+      )}
+    >
       <LogoIcon className="h-auto w-2.5" />
     </span>
   );
@@ -134,17 +156,20 @@ export function TourText({ slide }: { slide: TourSlide }) {
     <div>
       <TourLogo />
       <div className="flex items-center gap-2">
-        <h2 className="text-[24px] leading-[1.33] font-medium tracking-[-0.01em] text-[#111]">{slide.title}</h2>
+        <h2 className="text-[24px] leading-[1.33] font-medium tracking-[-0.01em] text-[#111]">
+          {slide.title}
+        </h2>
         {slide.soon && (
-          // Antalik's shimmer sweeps the label (tour.css)
           <span className="inline-flex h-5 shrink-0 items-center rounded-md px-1.5 text-caption-base inset-ring-[0.5px] inset-ring-border-default">
-            <span className="t-shimmer" data-text={slide.soon}>
+            <span className="gradient-text-shimmer [--shimmer-base:var(--fg-tertiary)] [--shimmer-highlight:#111]">
               {slide.soon}
             </span>
           </span>
         )}
       </div>
-      <p className="mt-2 max-w-[460px] text-[13px] leading-[18px] font-normal tracking-normal text-pretty text-[rgba(17,17,17,0.6)]">{slide.body}</p>
+      <p className="mt-2 max-w-115 text-13 leading-4.5 font-normal tracking-normal text-pretty text-[rgba(17,17,17,0.6)]">
+        {slide.body}
+      </p>
     </div>
   );
 }
@@ -169,7 +194,9 @@ function MessageBars() {
   const steps = CHAT.reduce((n, c) => n + 2 + c.reply.length, 0);
   // Reduced motion: show the finished chat, no timeline
   const [reduced] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   const [step, setPhase] = useState(0);
   const [run, setRun] = useState(0);
@@ -193,12 +220,19 @@ function MessageBars() {
     }
     const timers = at.map((ms, i) => setTimeout(() => setPhase(i + 1), ms));
     timers.push(setTimeout(() => setPhase(-1), t + 1800)); // fade out
-    timers.push(setTimeout(() => { setPhase(0); setRun((r) => r + 1); }, t + 2300));
+    timers.push(
+      setTimeout(() => {
+        setPhase(0);
+        setRun((r) => r + 1);
+      }, t + 2300),
+    );
     return () => timers.forEach(clearTimeout);
   }, [run, reduced]);
 
   // Where each exchange's steps start in the timeline
-  const starts = CHAT.map((_, i) => CHAT.slice(0, i).reduce((n, c) => n + 2 + c.reply.length, 0));
+  const starts = CHAT.map((_, i) =>
+    CHAT.slice(0, i).reduce((n, c) => n + 2 + c.reply.length, 0),
+  );
   return (
     <div
       key={run}
@@ -219,15 +253,32 @@ function MessageBars() {
               style={{ width: c.you }}
               className={cn(
                 "flex origin-right items-center self-end rounded-[18px] bg-[#027fff] px-2.5 py-3 transition-[opacity,translate,scale] duration-300 ease-out [corner-shape:round]",
-                shown(sent) ? "opacity-100" : "translate-y-2 scale-[0.97] opacity-0",
+                shown(sent)
+                  ? "opacity-100"
+                  : "translate-y-2 scale-[0.97] opacity-0",
               )}
             >
               <span className="h-3 flex-1 rounded-full bg-white/15" />
             </div>
-            <div className={cn("relative w-[60%] transition-opacity duration-200", shown(thinking) ? "opacity-100" : "opacity-0")}>
+            <div
+              className={cn(
+                "relative w-[60%] transition-opacity duration-200",
+                shown(thinking) ? "opacity-100" : "opacity-0",
+              )}
+            >
               {/* Thinking, until the first line arrives */}
-              <div className={cn("absolute top-0 left-0 transition-opacity duration-200", replying ? "opacity-0" : "opacity-100")}>
-                <ThinkingOrb state="working" size={20} theme="dark" aria-hidden />
+              <div
+                className={cn(
+                  "absolute top-0 left-0 transition-opacity duration-200",
+                  replying ? "opacity-0" : "opacity-100",
+                )}
+              >
+                <ThinkingOrb
+                  state="working"
+                  size={20}
+                  theme="dark"
+                  aria-hidden
+                />
               </div>
               <div className="flex flex-col gap-2">
                 {c.reply.map((w, li) => (
@@ -236,7 +287,9 @@ function MessageBars() {
                     style={{ width: w }}
                     className={cn(
                       "h-2.5 origin-left rounded-full bg-white/35 transition-[opacity,scale] duration-300 ease-out",
-                      shown(firstLine + li) ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0",
+                      shown(firstLine + li)
+                        ? "scale-x-100 opacity-100"
+                        : "scale-x-0 opacity-0",
                     )}
                   />
                 ))}
@@ -253,12 +306,29 @@ function MessageBars() {
 function CreateNodes() {
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className={cn(card, "w-40 px-3 py-2 text-caption-lg font-medium text-fg-primary ring-2 ring-brand-solid")}>
+      <div
+        className={cn(
+          card,
+          "w-40 px-3 py-2 text-caption-lg font-medium text-fg-primary ring-2 ring-brand-solid",
+        )}
+      >
         Pricing research
       </div>
       <div className="flex gap-3">
-        <div className={cn(card, "w-32 px-3 py-2 text-caption-lg text-fg-secondary")}>Per-seat</div>
-        <div className={cn(card, "w-32 px-3 py-2 text-caption-lg text-fg-tertiary outline-1 -outline-offset-1 outline-dashed outline-border-strong shadow-none")}>
+        <div
+          className={cn(
+            card,
+            "w-32 px-3 py-2 text-caption-lg text-fg-secondary",
+          )}
+        >
+          Per-seat
+        </div>
+        <div
+          className={cn(
+            card,
+            "w-32 px-3 py-2 text-caption-lg text-fg-tertiary outline-1 -outline-offset-1 outline-dashed outline-border-strong shadow-none",
+          )}
+        >
           New branch
         </div>
       </div>
@@ -282,7 +352,9 @@ function Collaborate() {
   ];
   return (
     <div className={cn(card, "flex items-center gap-3 px-4 py-3")}>
-      <span className="text-body-sm font-medium text-fg-primary">Pricing research</span>
+      <span className="text-body-sm font-medium text-fg-primary">
+        Pricing research
+      </span>
       <span className="flex items-center -space-x-1.5">
         <span className="relative flex size-7 overflow-hidden rounded-full ring-2 ring-surface-container">
           <UserAvatar size={28} />
@@ -345,9 +417,13 @@ function Models() {
             i === 1 && "bg-transparent-hover",
           )}
         >
-          <span className="flex size-4 items-center justify-center">{m.icon}</span>
+          <span className="flex size-4 items-center justify-center">
+            {m.icon}
+          </span>
           <span className="flex-1 text-left">{m.name}</span>
-          <span className="text-caption-lg font-normal text-fg-tertiary">{m.provider}</span>
+          <span className="text-caption-lg font-normal text-fg-tertiary">
+            {m.provider}
+          </span>
           {i === 1 && <CheckIcon className="size-4 text-fg-secondary" />}
         </div>
       ))}
