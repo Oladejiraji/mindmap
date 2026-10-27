@@ -120,12 +120,15 @@ export function BranchStreak() {
         </g>
         <path className="bs-text-ring" d={TEXT_RING} pathLength={1} fill="none" />
         {/* Sent: the same box in blue with the question in white, revealed
-            from the left over the grey one */}
-        <g className="bs-sent">
-          <rect x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
-          <text x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
-            {PHRASE}
-          </text>
+            from the left over the grey one; its shadow sits outside the
+            reveal so it grows in with the blue */}
+        <g className="bs-sent-shadow">
+          <g className="bs-sent">
+            <rect x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
+            <text x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
+              {PHRASE}
+            </text>
+          </g>
         </g>
 
         {/* The 32px square. Faint and colourless until the lines strike

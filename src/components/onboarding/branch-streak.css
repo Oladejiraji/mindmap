@@ -196,6 +196,12 @@
     stroke-dashoffset: 0;
   }
 }
+/* A subtle layered shadow under the blue (interfaces.dev: layered
+   shadows for depth), tinted with the brand blue: a tight contact shadow
+   and a soft lift */
+.branch-streak .bs-sent-shadow {
+  filter: drop-shadow(0 1px 2px oklch(0.558 0.226 262 / 0.16)) drop-shadow(0 4px 12px oklch(0.558 0.226 262 / 0.14));
+}
 .branch-streak .bs-sent {
   clip-path: inset(0 100% 0 0);
   animation: bs-sent var(--bs-dur) infinite;
