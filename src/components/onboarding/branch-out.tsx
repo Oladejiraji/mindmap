@@ -137,7 +137,14 @@ export function BranchOut() {
               style={{ ["--bo-ring" as string]: b.ring }}
             />
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
-            <p className="gradient-text-shimmer text-[12px] leading-4 font-medium opacity-50">is researching…</p>
+            {/* Same type and grey as the notes, with the Antalik shimmer in
+                grey (tour.css; colours in branch-out.css) */}
+            <p
+              className="t-shimmer text-[12px] leading-4 font-normal"
+              data-text="is researching…"
+            >
+              is researching…
+            </p>
           </div>
           <div
             className="corner-squircle flex items-center rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node"

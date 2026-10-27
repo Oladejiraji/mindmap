@@ -39,6 +39,13 @@
   animation: bo-card 300ms cubic-bezier(0.2, 0, 0, 1) forwards;
 }
 
+/* "is researching…": the notes' grey, with a darker grey band sweeping
+   through it */
+.branch-out .t-shimmer {
+  --shimmer-base: oklch(0.68 0 0);
+  --shimmer-highlight: oklch(0.45 0 0);
+}
+
 @keyframes bo-draw {
   to {
     stroke-dashoffset: 0;
