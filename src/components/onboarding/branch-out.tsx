@@ -2,9 +2,8 @@
 
 /*
  * "Create nodes": carries on from "Research with the team". The blue line
- * comes in from the left edge (where it left the last slide) into a node,
- * which lights up behind a travelling blue edge; then three branches grow
- * out of it to cards, each with someone researching it, drawn like the
+ * comes in from the left edge (where it left the last slide) and branches
+ * out into three lines to cards, each with someone researching it, drawn like the
  * auth canvas (an author chip with avatar and name, and its shimmering
  * "is researching…"). Plays once on arrival and holds; reduced motion
  * shows the finished picture. Laid out at the panel's 578 × 318 and
@@ -18,27 +17,20 @@ import "./branch-out.css";
 const W = 578;
 const H = 318;
 const MID = H / 2;
-// The node the line runs into
-const ROOT = { x: 120, size: 32, r: 8 };
-const ROOT_RIGHT = ROOT.x + ROOT.size;
-const ROOT_TOP = MID - ROOT.size / 2;
-// Its outline in two halves, from where the line arrives (left middle) to
-// where the branches leave (right middle)
-const EDGE_TOP = `M${ROOT.x} ${MID} V${ROOT_TOP + ROOT.r} A${ROOT.r} ${ROOT.r} 0 0 1 ${ROOT.x + ROOT.r} ${ROOT_TOP} H${ROOT_RIGHT - ROOT.r} A${ROOT.r} ${ROOT.r} 0 0 1 ${ROOT_RIGHT} ${ROOT_TOP + ROOT.r} V${MID}`;
-const EDGE_BOTTOM = `M${ROOT.x} ${MID} V${ROOT_TOP + ROOT.size - ROOT.r} A${ROOT.r} ${ROOT.r} 0 0 0 ${ROOT.x + ROOT.r} ${ROOT_TOP + ROOT.size} H${ROOT_RIGHT - ROOT.r} A${ROOT.r} ${ROOT.r} 0 0 0 ${ROOT_RIGHT} ${ROOT_TOP + ROOT.size - ROOT.r} V${MID}`;
-
+// Where the line splits into its branches
+const SPLIT = 152;
 // The branched nodes: a card each, with who's researching it (the auth
 // canvas's people). mid: the card's vertical centre.
-const CARD = { x: 300, w: 230, h: 44, chip: 20, gap: 6 };
+const CARD = { x: 300, w: 230, h: 48, chip: 20, gap: 6 };
 const BRANCHES: { mid: number; title: string; name: string; avatar: StaticImageData; bg: string }[] = [
   { mid: 64, title: "Pricing models", name: "Lex Porto", avatar: AuthAssets.AuthAvatar1, bg: "#2D2D2D" },
   { mid: MID, title: "User interviews", name: "Oladeji Raji", avatar: AuthAssets.AuthAvatar2, bg: "#2D2D2D" },
   { mid: 254, title: "Competitor teardown", name: "Felipe Rocha", avatar: AuthAssets.AuthAvatar3, bg: "#3476FB" },
 ];
 
-// Out of the node's right side, curving to the card's left middle
+// From the split, curving to the card's left middle
 const branchPath = (mid: number) =>
-  `M${ROOT_RIGHT} ${MID} C${ROOT_RIGHT + 68} ${MID} ${CARD.x - 68} ${mid} ${CARD.x} ${mid}`;
+  `M${SPLIT} ${MID} C${SPLIT + 68} ${MID} ${CARD.x - 68} ${mid} ${CARD.x} ${mid}`;
 
 export function BranchOut() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -64,8 +56,8 @@ export function BranchOut() {
       aria-hidden
     >
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full overflow-visible">
-        {/* The line in from the last slide, into the node */}
-        <line x1={-2} y1={MID} x2={ROOT.x} y2={MID} pathLength={1} className="bo-in" />
+        {/* The line in from the last slide, up to where it splits */}
+        <line x1={-2} y1={MID} x2={SPLIT} y2={MID} pathLength={1} className="bo-in" />
         {/* The branches, growing out one after another */}
         {BRANCHES.map((b, i) => (
           <path
@@ -73,16 +65,10 @@ export function BranchOut() {
             d={branchPath(b.mid)}
             pathLength={1}
             className="bo-branch"
-            style={{ animationDelay: `${1380 + i * 100}ms` }}
+            style={{ animationDelay: `${820 + i * 100}ms` }}
             fill="none"
           />
         ))}
-        {/* The node: faint until the line reaches it, then a blue edge
-            travels round it and it lights up behind it */}
-        <rect className="bo-root" x={ROOT.x} y={ROOT_TOP} width={ROOT.size} height={ROOT.size} rx={ROOT.r} />
-        <rect className="bo-root-lit" x={ROOT.x} y={ROOT_TOP} width={ROOT.size} height={ROOT.size} rx={ROOT.r} />
-        <path className="bo-edge" d={EDGE_TOP} pathLength={1} fill="none" />
-        <path className="bo-edge" d={EDGE_BOTTOM} pathLength={1} fill="none" />
       </svg>
 
       {/* The cards, each appearing as its branch arrives, with who's on it */}
@@ -94,7 +80,7 @@ export function BranchOut() {
             left: CARD.x,
             top: b.mid - CARD.h / 2 - CARD.chip - CARD.gap,
             width: CARD.w,
-            animationDelay: `${1920 + i * 100}ms`,
+            animationDelay: `${1360 + i * 100}ms`,
           }}
         >
           <div className="mb-1.5 flex h-5 items-center gap-1">
@@ -113,7 +99,7 @@ export function BranchOut() {
             </div>
             <p className="gradient-text-shimmer text-caption-base opacity-50">is researching…</p>
           </div>
-          <div className="corner-squircle flex h-11 items-center rounded-2xl bg-white px-3.5 text-body-sm text-fg-primary shadow-node">
+          <div className="corner-squircle flex h-12 items-center rounded-4xl bg-white px-3.5 text-body-sm text-fg-primary shadow-node">
             {b.title}
           </div>
         </div>
