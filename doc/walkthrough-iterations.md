@@ -42,6 +42,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 28 | 2026-10-27 | Logo to title lockup 16px → 24px (3× the 8px title–body gap); same on Make it yours | `ae36bb1` |
 | 27 | 2026-10-27 | Panel shadow reverted: back to the flat `oklch(0.985 0 0)` panel, no ring or shadow | `5de3ba3` |
 | 26 | 2026-10-27 | Illustration panel gets the modal's edge: 1px shadow ring at 8%, then the same layered depth (0 1px 2px 4%, 0 4px 12px 4%, 0 16px 40px 6%) | `b5ebaae` |
 | 25 | 2026-10-27 | Modal edge per interfaces.dev: the 1px ring stays a shadow at 8% (no border), and the single 0 4px 16px shadow becomes layered depth: 0 1px 2px 4%, 0 4px 12px 4%, 0 16px 40px 6% | `22042d6` |
