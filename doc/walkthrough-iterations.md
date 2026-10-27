@@ -21,6 +21,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 22 | 2026-10-27 | Logo tile 64px, 10px corners, smaller m (20px, 31% of the tile). Coming soon badges get Antalik's shimmer from libraries.dev/orbs (dark band on a tertiary-grey label, 2s linear; off for reduced motion) | `8599984` |
 | 21 | 2026-10-26 | Skip removed (Esc or clicking outside still close it); the 166px button group goes with it, so Back sits 8px from Continue | `c3b05e0` |
 | 20 | 2026-10-26 | Slide body text 13px/18px, regular | `46eed1b` |
 | 19 | 2026-10-26 | Slide body text regular (400), 14px/143% | `79ebd35` |
