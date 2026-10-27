@@ -46,6 +46,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 6 | 2026-10-27 | Cards 32px tall (was 48), all three; still 20px squircle corners and centred on their branch ends | `37603a3` |
 | 5 | 2026-10-27 | Author tags without the chip: just the 16px photo with a 1.5px brand-blue ring (1px white offset) and the name in fg-primary, then the shimmering "is researching…" | `174c266` |
 | 4 | 2026-10-27 | **A project and its branches.** The line comes in to a project card, "Build a group research tool" (Kurosawa, left, 220 wide), which then branches into two cards, User interviews (Deji) and Competitor teardown (Stephen, on blue), on the right | `88f4110` |
 | 3 | 2026-10-27 | Researchers renamed: Kurosawa (was Lex Porto), Deji (was Oladeji Raji), Stephen (was Felipe Rocha, still on blue); avatars unchanged | `997c59e` |
