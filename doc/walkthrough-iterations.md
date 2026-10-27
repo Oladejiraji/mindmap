@@ -77,6 +77,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 3 | 2026-10-27 | **Growing row.** Back to the overlapping row (thought-bubble version kept in its commit), but each one a step bigger than the one before, like a thought bubble's trail: Kurosawa 40, Deji 48, Stephen 56, the dashed + 64; centred on one line | `a5c63eb` |
 | 2 | 2026-10-27 | **Thought bubbles.** "Build a group research tool" in the middle as the shared thought; Kurosawa, Deji, Stephen and the dashed + float around it as 56px bubbles in their ring colours, each with a trail of two circles (10px, 6px) shrinking in towards the project, outlined in its colour (dashed grey for the invite). Pop in (project, then trails and bubbles), then bob 3px on staggered rhythms | `6660f22` |
 | 1 | 2026-10-27 | **The team and an invite** (`think-together.tsx`). Centred row of the three researchers from slide 2, 48px photos overlapping, each in its ring colour (Kurosawa blue, Deji purple, Stephen amber) with a white gap; then a 48px "+" in a dashed grey circle. They pop in 120ms apart (fade + slight scale) | `eb32a18` |
 
