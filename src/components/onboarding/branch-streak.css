@@ -1,8 +1,9 @@
 /* Research with the team (branch-streak.tsx). One 7s loop, each step a
    process that hands on to the next (times in seconds):
    0–1.04    five coloured lines run in together, speeding up, until their
-             heads meet the square's left edge. Until then the square, the
-             way out and the text box are faint and colourless
+             heads meet the square's left edge. Until then the square and
+             the way out are faint and colourless, and the text box isn't
+             there
    1.04–1.64 a blue edge travels from the point of contact round both sides
              of the square, and the square lights up behind it (left to
              right); the lines' tails drain into it by 1.44
@@ -158,17 +159,18 @@
   }
 }
 
-/* The text box (iOS text field): a darker grey fill, no border, faint
-   until the blue line reaches it */
+/* The text box (iOS text field): a darker grey fill, no border, not
+   there at all until the blue line reaches it, then fading in */
 .branch-streak .bs-text {
   fill: oklch(0.955 0 0);
-  opacity: 0.3;
+  opacity: 0;
   animation: bs-text var(--bs-dur) infinite;
 }
 @keyframes bs-text {
   0%,
   30% {
-    opacity: 0.3;
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
   32.14%,
   100% {
