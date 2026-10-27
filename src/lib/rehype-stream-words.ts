@@ -4,7 +4,7 @@
  *
  * Each word is identified by its position in the reply (nth word), and
  * the time it first appeared is kept in `arrivals`. A word still within
- * its fade is wrapped in <span class="stream-word"> with a negative
+ * its fade is wrapped in a span (animate-word-in) with a negative
  * animation-delay of its age, so if half-finished markdown makes React
  * rebuild it (an unclosed **bold** closing, say), it resumes mid-fade
  * instead of starting over. Older words are left as plain text. Code is
@@ -45,7 +45,10 @@ export function rehypeStreamWords({ arrivals }: { arrivals: Map<number, number> 
                 : {
                     type: "element",
                     tagName: "span",
-                    properties: { className: ["stream-word"], style: `animation-delay:-${age}ms` },
+                    properties: {
+                      className: ["animate-word-in", "motion-reduce:animate-none"],
+                      style: `animation-delay:-${age}ms`,
+                    },
                     children: [{ type: "text", value: part }],
                   },
             );

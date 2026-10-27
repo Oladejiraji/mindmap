@@ -29,7 +29,10 @@ import {
   PerplexityLogo,
   XLogo,
 } from "./tool-logos";
-import "./think-together.css";
+import { cn } from "@/lib/utils";
+
+// Each photo, then the +, blurs in from a slight scale (delays set inline)
+const POP = "animate-blur-in [--blur-in-scale:0.9] motion-reduce:animate-none";
 
 // Same people as "Your team's research in one place"; here each photo is
 // ringed in the panel's own background colour, which separates them where
@@ -130,7 +133,7 @@ export function ThinkTogether() {
             ref={(el) => {
               items.current[i] = el;
             }}
-            className="tt-logo absolute flex items-center justify-center rounded-full bg-white opacity-0 shadow-node"
+            className="absolute flex will-change-[transform,opacity,filter] items-center justify-center rounded-full bg-white opacity-0 shadow-node"
             style={{ width: CHIP, height: CHIP, left: -CHIP / 2, top: -CHIP / 2 }}
           >
             <p.logo.Logo className="size-[18px]" style={{ color: p.logo.color }} />
@@ -146,13 +149,13 @@ export function ThinkTogether() {
             alt=""
             width={SIZES[i]}
             height={SIZES[i]}
-            className="tt-pop rounded-full ring-2 ring-[oklch(0.985_0_0)]"
+            className={cn("rounded-full ring-2 ring-[oklch(0.985_0_0)]", POP)}
             style={{ animationDelay: `${200 + i * 120}ms` }}
           />
         ))}
         {/* Invite someone: a + in a dashed circle */}
         <span
-          className="tt-pop relative flex items-center justify-center rounded-full bg-white"
+          className={cn("relative flex items-center justify-center rounded-full bg-white", POP)}
           style={{ width: INVITE, height: INVITE, animationDelay: `${200 + TEAM.length * 120}ms` }}
         >
           <svg viewBox={`0 0 ${INVITE} ${INVITE}`} className="absolute inset-0 size-full" fill="none">

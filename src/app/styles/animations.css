@@ -1,0 +1,359 @@
+/*
+ * Exception to "style with Tailwind" (AGENTS.md): choreographed animations
+ * whose keyframes, @property, masks or timeline can't be expressed as
+ * utilities. Simple motion belongs in the shared --animate-* tokens in
+ * globals.css, not here.
+ */
+
+/* ── Vapour halo (auth-canvas/vapour-halo.tsx) ──────────────────────────
+ * Drop effect: chromatic fringes on the card, pastel clouds washing outward
+ * and losing steam, and a faint coloured residue left on the card's edges. */
+.vapour-halo {
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* A wash grows from the card's footprint; turbulence (an SVG filter on
+   the wrapper) warps its edges so it reads as a cloud, not a shape. */
+.vapour-wave {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  opacity: 0;
+  animation: vapour-wave 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Uneven colour: lavender and sky up top, rose and peach to one side,
+   butter low down; never an even ring. Oversized so the warp and rotation
+   never show its edge. */
+.vapour-wash {
+  position: absolute;
+  inset: -12%;
+  border-radius: inherit;
+  background:
+    radial-gradient(60% 55% at 72% 8%, oklch(0.8 0.1 285) 0%, transparent 70%),
+    radial-gradient(45% 50% at 30% 0%, oklch(0.84 0.08 240) 0%, transparent 70%),
+    radial-gradient(55% 60% at 0% 45%, oklch(0.86 0.08 15) 0%, transparent 70%),
+    radial-gradient(50% 55% at 10% 95%, oklch(0.94 0.09 95) 0%, transparent 70%),
+    radial-gradient(55% 50% at 85% 100%, oklch(0.87 0.08 40) 0%, transparent 70%),
+    radial-gradient(40% 50% at 100% 50%, oklch(0.84 0.09 330) 0%, transparent 70%);
+}
+
+/* Opacity keyframes use plain numbers: a var() there breaks the
+   composited animation and the wave never paints. */
+@keyframes vapour-wave {
+  0% { inset: 0; opacity: 0; }
+  12% { opacity: 1; }
+  45% { opacity: 0.65; }
+  100% { inset: calc(var(--wave-reach) * -1); opacity: 0; }
+}
+
+/* Dot grid revealed by the wave: a band of visibility (--dots-r) sweeps
+   out from the card and the dots fade behind it. */
+@property --dots-r {
+  syntax: "<percentage>";
+  initial-value: 0%;
+  inherits: false;
+}
+
+.vapour-dots {
+  position: absolute;
+  opacity: 0;
+  background-image: radial-gradient(circle, oklch(0.55 0.06 285 / 0.55) 1px, transparent 1.5px);
+  mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(var(--dots-r) - 45%),
+    #000 calc(var(--dots-r) - 12%),
+    #000 var(--dots-r),
+    transparent calc(var(--dots-r) + 12%)
+  );
+  animation:
+    vapour-dots-sweep 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards,
+    vapour-dots-fade 2s ease-out 0.08s forwards;
+}
+
+@keyframes vapour-dots-sweep {
+  from { --dots-r: 20%; }
+  to { --dots-r: 120%; }
+}
+
+@keyframes vapour-dots-fade {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  55% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* Chromatic fringe: each edge picks up a different colour, split wide at
+   first and settling tight, then lingering faintly as residue. The three
+   spreads are shared with the lighter variant (.bs-halo-light). */
+.vapour-fringe {
+  --fringe-sky: oklch(0.74 0.16 255);
+  --fringe-rose: oklch(0.76 0.16 345);
+  --fringe-butter: oklch(0.9 0.15 95);
+  --fringe-peach: oklch(0.8 0.14 45);
+  --fringe-wide:
+    -10px -3px 14px 2px var(--fringe-sky), 10px 2px 14px 2px var(--fringe-rose),
+    -4px 10px 14px 2px var(--fringe-butter), 6px 9px 14px 2px var(--fringe-peach);
+  --fringe-mid:
+    -4px -1px 6px 1px var(--fringe-sky), 4px 1px 6px 1px var(--fringe-rose),
+    -1px 4px 6px 1px var(--fringe-butter), 2px 4px 6px 1px var(--fringe-peach);
+  --fringe-tight:
+    -3px -1px 4px 0 var(--fringe-sky), 3px 1px 4px 0 var(--fringe-rose),
+    -1px 3px 4px 0 var(--fringe-butter), 2px 3px 4px 0 var(--fringe-peach);
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  animation: vapour-fringe 3.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes vapour-fringe {
+  0% { opacity: 0; box-shadow: var(--fringe-wide); }
+  8% { opacity: 0.3; }
+  35% { opacity: 0.3; box-shadow: var(--fringe-mid); }
+  70% { opacity: 0.21; box-shadow: var(--fringe-tight); }
+  100% { opacity: 0; box-shadow: var(--fringe-tight); }
+}
+
+/* Lighter residue (6% instead of 21%), gone sooner */
+.bs-halo-light .vapour-fringe {
+  animation-name: vapour-fringe-light;
+}
+@keyframes vapour-fringe-light {
+  0% { opacity: 0; box-shadow: var(--fringe-wide); }
+  8% { opacity: 0.3; }
+  35% { opacity: 0.18; box-shadow: var(--fringe-mid); }
+  55% { opacity: 0.06; box-shadow: var(--fringe-tight); }
+  75%, 100% { opacity: 0; box-shadow: var(--fringe-tight); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vapour-halo > .vapour-wave {
+    animation-name: vapour-fade;
+  }
+  .vapour-halo > .vapour-dots {
+    --dots-r: 80%;
+    animation: vapour-fade 1.6s ease-out forwards;
+  }
+}
+
+@keyframes vapour-fade {
+  0%, 100% { opacity: 0; }
+  30% { opacity: 0.5; }
+}
+
+/* ── Research with the team (onboarding/branch-streak.tsx) ──────────────
+ * One 7s loop, each step handing on to the next (seconds):
+ *   0–1.04    five coloured lines run in, speeding up, until their heads
+ *             meet the square's left edge; the square and the way out are
+ *             faint and colourless, and the text box isn't there
+ *   1.04–1.64 a blue edge travels round both sides of the square, which
+ *             lights up behind it; the lines' tails drain in by 1.44
+ *   1.6–2.1   the blue line draws from the square into the text box
+ *   2.1–2.25  the text box comes up; the caret appears
+ *   2.3–3.6   "What does Mindmap do?" types in (keyframes generated in TSX)
+ *   3.8–4.6   a blue stroke runs once round the box
+ *   4.65–5.25 blue flows into the box from the left, the question in white
+ *   6.0–6.6   everything fades; hidden until the loop restarts
+ *
+ * Each element's own style is its FINISHED state; the keyframes carry the
+ * hidden states. So leaving and reduced motion only switch animations off. */
+.branch-streak {
+  --bs-dur: 7s;
+  --bs-track: oklch(0.96 0 0);
+  --bs-sine: cubic-bezier(0.37, 0, 0.63, 1);
+  overflow: visible;
+}
+
+.bs-world,
+.bs-halos {
+  animation: bs-world 7s infinite;
+}
+@keyframes bs-world {
+  0% { opacity: 0; }
+  2%, 85.71% { opacity: 1; }
+  94.29%, 100% { opacity: 0; }
+}
+
+/* Shared stroke setups (paths use pathLength={1}) */
+.bs-track,
+.bs-run,
+.bs-out,
+.bs-exit {
+  stroke-linecap: round;
+}
+.bs-run,
+.bs-out,
+.bs-exit {
+  stroke-width: 2;
+}
+.bs-edge,
+.bs-out,
+.bs-exit,
+.bs-text-ring {
+  stroke-dasharray: 1;
+}
+.bs-out,
+.bs-exit,
+.bs-text-ring {
+  stroke: var(--brand-solid);
+}
+
+.bs-track {
+  stroke: var(--bs-track);
+  stroke-width: 1.5;
+}
+
+/* The five lines: a 22% length of colour travelling along each track; its
+   head reaches the square at 1.04s, then the tail drains in */
+.bs-run {
+  stroke-dasharray: 1;
+  animation: bs-run var(--bs-dur) infinite;
+}
+@keyframes bs-run {
+  0% {
+    stroke-dasharray: 0.22 2;
+    stroke-dashoffset: 0.22;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  14.86% {
+    stroke-dasharray: 0.22 2;
+    stroke-dashoffset: -0.78;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  20.57%, 100% {
+    stroke-dasharray: 0.22 2;
+    stroke-dashoffset: -1;
+  }
+}
+
+/* The square: faint, then lit left to right in step with the blue edge */
+.bs-box,
+.bs-box-lit {
+  fill: #fff;
+  stroke: var(--bs-track);
+  stroke-width: 1;
+}
+.bs-box {
+  opacity: 0.3;
+}
+.bs-box-lit {
+  animation: bs-box-lit var(--bs-dur) infinite;
+}
+@keyframes bs-box-lit {
+  0%, 14.86% { clip-path: inset(0 100% 0 0); animation-timing-function: var(--bs-sine); }
+  23.43%, 100% { clip-path: inset(0 0 0 0); }
+}
+
+/* The blue edge, in a gradient from the struck colours into our blue */
+.bs-edge {
+  stroke: url(#bs-edge-grad);
+  stroke-width: 1.25;
+  animation: bs-edge var(--bs-dur) infinite;
+}
+@keyframes bs-edge {
+  0%, 14.86% { stroke-dashoffset: 1; animation-timing-function: var(--bs-sine); }
+  23.43%, 100% { stroke-dashoffset: 0; }
+}
+
+/* The way to the text box: faint until the strike */
+.bs-track-out {
+  animation: bs-track-out var(--bs-dur) infinite;
+}
+@keyframes bs-track-out {
+  0%, 14.86% { opacity: 0.3; }
+  17.86%, 100% { opacity: 1; }
+}
+
+/* The blue line into the text box */
+.bs-out {
+  animation: bs-out var(--bs-dur) infinite;
+}
+@keyframes bs-out {
+  0%, 22.86% { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
+  30%, 100% { stroke-dashoffset: 0; }
+}
+
+/* The text box (iOS text field): grey, no border, fading in */
+.bs-text {
+  fill: oklch(0.955 0 0);
+  animation: bs-text var(--bs-dur) infinite;
+}
+@keyframes bs-text {
+  0%, 30% { opacity: 0; animation-timing-function: cubic-bezier(0.2, 0, 0, 1); }
+  32.14%, 100% { opacity: 1; }
+}
+
+/* One blue stroke round the box once the question is typed */
+.bs-text-ring {
+  stroke-width: 1.5;
+  animation: bs-text-ring var(--bs-dur) infinite;
+}
+@keyframes bs-text-ring {
+  0%, 54.29% { stroke-dashoffset: 1; animation-timing-function: var(--bs-sine); }
+  65.71%, 100% { stroke-dashoffset: 0; }
+}
+
+/* Then blue flows in from the left, the question in white, over a
+   brand-tinted layered shadow */
+.bs-sent-shadow {
+  filter: drop-shadow(0 1px 2px oklch(from var(--brand-solid) l c h / 0.16))
+    drop-shadow(0 4px 12px oklch(from var(--brand-solid) l c h / 0.14));
+}
+.bs-sent {
+  animation: bs-sent var(--bs-dur) infinite;
+}
+.bs-sent rect {
+  fill: var(--brand-solid);
+}
+.bs-sent text {
+  fill: #fff;
+}
+@keyframes bs-sent {
+  0%, 66.43% { clip-path: inset(0 100% 0 0); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  75%, 100% { clip-path: inset(0 0 0 0); }
+}
+
+.bs-typed {
+  fill: oklch(0.4 0 0);
+}
+
+/* The caret: appears with the box, steps along as it types (bs-caret-run,
+   generated in TSX), fades as the blue comes in. Hidden at rest. */
+.bs-caret {
+  fill: var(--brand-solid);
+  opacity: 0;
+  animation: bs-caret var(--bs-dur) infinite;
+}
+@keyframes bs-caret {
+  0%, 30.71% { opacity: 0; }
+  31.5%, 66.43% { opacity: 1; animation-timing-function: var(--bs-sine); }
+  69.29%, 100% { opacity: 0; }
+}
+
+/* Leaving (Continue): everything jumps to its finished state, the lines
+   drained, then the blue line runs on out of the text box, speeding up */
+.bs-exit {
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.branch-streak.bs-leaving * {
+  animation: none;
+}
+.bs-leaving .bs-run {
+  stroke-dashoffset: 1;
+}
+.bs-leaving .bs-exit {
+  opacity: 1;
+  animation: draw 450ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+/* Reduced motion: the finished picture */
+@media (prefers-reduced-motion: reduce) {
+  .branch-streak *,
+  .bs-halos {
+    animation: none !important;
+  }
+}

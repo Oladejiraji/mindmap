@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
-import { ART_OUT_MS, TOUR, TourPanel, TourText } from "./tour";
+import { ART_OUT_MS, TOUR, TourPanel, TourText, tourArt } from "./tour";
 
 /*
  * The walkthrough after onboarding (after Pond): a dialog over the Get
@@ -63,7 +63,7 @@ export function Walkthrough() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!slide?.art || reduced) return goTo(step + 1);
     // The slide's own exit (its line running out) plays first, then its
-    // visuals scale and blur, then fade (ART_OUT_MS, tour.css)
+    // visuals scale and blur, then fade (ART_OUT_MS, tourArt)
     setLeaving(true);
     exitTimer.current = window.setTimeout(
       () => {
@@ -92,9 +92,9 @@ export function Walkthrough() {
             <div className="flex min-h-0 flex-1 items-center gap-10">
               {/* The text moves with the visuals: in from a slight scale and
                   blur, and out (after the slide's own exit) by scaling and
-                  blurring, then fading (tour.css) */}
+                  blurring, then fading */}
               <div
-                className={cn("tour-art min-w-0 flex-1", leaving && "tour-art-leaving")}
+                className={cn("min-w-0 flex-1", tourArt(leaving))}
                 style={{ transformOrigin: "left center", ["--tour-art-delay" as string]: `${slide.exit ?? 0}ms` }}
               >
                 <TourText slide={slide} />

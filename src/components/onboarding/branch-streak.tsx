@@ -19,7 +19,6 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
-import "./branch-streak.css";
 
 const W = 578;
 const H = 318;
@@ -66,17 +65,19 @@ const TYPE_TO = 51.43;
 const typedAt = (i: number) => +(TYPE_FROM + ((TYPE_TO - TYPE_FROM) * i) / (PHRASE.length - 1)).toFixed(2);
 
 // One keyframe per character (it appears at its moment), and the caret's
-// steps, generated so each lands exactly when its character does
+// steps, generated so each lands exactly when its character does (keyframe
+// offsets can't take CSS vars). Single-class selectors, so the leaving and
+// reduced-motion rules in animations.css override them.
+const CARET_END = `translateX(${ENDS[ENDS.length - 1] + 1}px)`;
 const typingCss = [
   ...[...PHRASE].map(
     (_, i) =>
-      `@keyframes bs-ch-${i}{0%,${typedAt(i)}%{opacity:0}${typedAt(i) + 0.01}%,100%{opacity:1}}.branch-streak .bs-ch-${i}{animation:bs-ch-${i} var(--bs-dur) infinite}`,
+      `@keyframes bs-ch-${i}{0%,${typedAt(i)}%{opacity:0}${typedAt(i) + 0.01}%,100%{opacity:1}}.bs-ch-${i}{animation:bs-ch-${i} var(--bs-dur) infinite}`,
   ),
   `@keyframes bs-caret-run{0%,${TYPE_FROM - 0.01}%{transform:translateX(0)}${[...PHRASE]
     .map((_, i) => `${typedAt(i)}%{transform:translateX(${ENDS[i] + 1}px)}`)
-    .join("")}100%{transform:translateX(${ENDS[ENDS.length - 1] + 1}px)}}`,
-  `.branch-streak .bs-caret-run{animation:bs-caret-run var(--bs-dur) steps(1,end) infinite}`,
-  `@media (prefers-reduced-motion:reduce){.branch-streak [class*="bs-ch-"],.branch-streak .bs-caret-run{animation:none}.branch-streak .bs-caret-run{transform:translateX(${ENDS[ENDS.length - 1] + 1}px)}}`,
+    .join("")}100%{transform:${CARET_END}}}`,
+  `.bs-caret-run{animation:bs-caret-run var(--bs-dur) steps(1,end) infinite}`,
 ].join("");
 
 // The auth page's pulse (VapourHalo: pastel washes, the dot pattern the
@@ -147,7 +148,7 @@ export function BranchStreak({ leaving = false }: { leaving?: boolean }) {
         aria-hidden
       >
         {halos.map((h) => (
-          // The text box's halo leaves a lighter residue (branch-streak.css)
+          // The text box's halo leaves a lighter residue (animations.css)
           <div key={h.id} className={HALOS[h.i].lightResidue ? "bs-halo-light" : undefined}>
             <VapourHalo
               {...HALOS[h.i]}
@@ -193,7 +194,7 @@ export function BranchStreak({ leaving = false }: { leaving?: boolean }) {
             </tspan>
           ))}
         </text>
-        <g className="bs-caret-run">
+        <g className="bs-caret-run" style={{ transform: CARET_END }}>
           <rect className="bs-caret" x={TEXT.x + TEXT.pad} y={MID - 9} width="2" height="18" rx="1" />
         </g>
         <path className="bs-text-ring" d={TEXT_RING} pathLength={1} fill="none" />

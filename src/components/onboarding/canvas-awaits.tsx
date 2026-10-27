@@ -16,7 +16,6 @@ import Image from "next/image";
 import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
 import { cn } from "@/lib/utils";
-import "./canvas-awaits.css";
 
 const W = 578;
 const H = 318;
@@ -108,19 +107,29 @@ export function CanvasAwaits() {
 
       {/* The wireframes: connectors running off the canvas, once it's at
           rest */}
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className={cn("ca-wires absolute inset-0 size-full", settled && "ca-wires-on")}
-        fill="none"
-        style={{ ["--ca-wires-at" as string]: `${SETTLE_MS + 200}ms` }}
-      >
+      <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full" fill="none">
         {ENDS.map((ex, i) => (
-          <path key={ex} d={wire(ex)} pathLength={1} className="ca-wire" style={{ ["--i" as string]: i }} />
+          <path
+            key={ex}
+            d={wire(ex)}
+            pathLength={1}
+            stroke="oklch(0.955 0 0)"
+            strokeLinecap="round"
+            strokeDasharray={1}
+            strokeDashoffset={1}
+            className={cn(settled && "animate-draw", "motion-reduce:animate-none motion-reduce:[stroke-dashoffset:0]")}
+            style={{ animationDuration: "900ms", animationDelay: `${SETTLE_MS + 200 + i * 120}ms` }}
+          />
         ))}
       </svg>
 
+      {/* Appears blurring in, already hovering (lifted, slightly larger),
+          then settles onto the canvas */}
       <div
-        className={cn("ca-node absolute", settled && "ca-settled")}
+        className={cn(
+          "absolute animate-[blur-in_420ms_cubic-bezier(0.2,0,0,1)_150ms_backwards] [--blur-in-scale:1.03] transition-[translate,scale] duration-(--ca-settle) ease-[cubic-bezier(0.3,0,0.2,1)] motion-reduce:animate-none motion-reduce:transition-none",
+          !settled && "-translate-y-2.5 scale-[1.03]",
+        )}
         style={{
           left: NODE.x - NODE.w / 2,
           top: NODE.y - NODE.h / 2 - TAG.h - TAG.gap,
@@ -141,7 +150,7 @@ export function CanvasAwaits() {
                 settled ? "opacity-0 blur-[4px]" : "opacity-100",
               )}
             >
-              <span className="t-shimmer text-[12px] leading-4 font-normal" data-text="is typing…">
+              <span className="gradient-text-shimmer text-[12px] leading-4 font-normal [--shimmer-base:oklch(0.68_0_0)] [--shimmer-highlight:oklch(0.45_0_0)]">
                 is typing…
               </span>
             </span>
@@ -157,11 +166,14 @@ export function CanvasAwaits() {
         </div>
         {/* The card: in focus while it's typed into, then settled */}
         <div
-          className="ca-card corner-squircle flex items-center rounded-4xl bg-brand-solid px-4 text-body-sm text-white"
+          className={cn(
+            "corner-squircle flex items-center rounded-4xl bg-brand-solid px-4 text-body-sm text-white transition-shadow duration-(--ca-settle) ease-[cubic-bezier(0.3,0,0.2,1)]",
+            settled ? "shadow-node-primary" : "shadow-node-focus",
+          )}
           style={{ height: NODE.h }}
         >
           <span className="truncate">{QUESTION.slice(0, typed)}</span>
-          {!settled && <span className="ca-caret ml-px h-4 w-px shrink-0 bg-white" />}
+          {!settled && <span className="ml-px h-4 w-px shrink-0 animate-blink bg-white" />}
         </div>
       </div>
 

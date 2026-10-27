@@ -18,7 +18,6 @@ import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import StephenAvatar from "../../../public/walkthrough/stephen.png";
 import { BranchIcon } from "@/lib/svg";
 import { ClickUpLogo, GoogleLogo, LinearLogo, MetaLogo, NetflixLogo, NotionLogo } from "./tool-logos";
-import "./branch-out.css";
 
 const W = 578;
 const H = 318;
@@ -136,6 +135,9 @@ const branchPath = (to: Card) => {
 };
 
 const noteText = "text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]";
+// Lines draw in (pathLength 1); reduced motion shows them drawn
+const line = { strokeWidth: 2, strokeLinecap: "round", strokeDasharray: 1, strokeDashoffset: 1 } as const;
+const drawnIfReduced = "motion-reduce:animate-none motion-reduce:[stroke-dashoffset:0]";
 
 export function BranchOut() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -156,13 +158,22 @@ export function BranchOut() {
   return (
     <div
       ref={stageRef}
-      className="branch-out absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       style={{ width: W, height: H }}
       aria-hidden
     >
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full overflow-visible">
         {/* The line in from the last slide, to the project card */}
-        <line x1={-2} y1={MID} x2={PARENT.x} y2={MID} pathLength={1} className="bo-in" />
+        <line
+          x1={-2}
+          y1={MID}
+          x2={PARENT.x}
+          y2={MID}
+          pathLength={1}
+          stroke="var(--brand-solid)"
+          {...line}
+          className={`animate-[draw_700ms_cubic-bezier(0.2,0,0,1)_120ms_both] ${drawnIfReduced}`}
+        />
         {/* The pulses' gradients: our blue at the project, shading to a
             light tint of the fork's ring colour as they arrive */}
         <defs>
@@ -188,8 +199,10 @@ export function BranchOut() {
             key={c.title}
             d={branchPath(c)}
             pathLength={1}
-            className="bo-branch"
-            style={{ animationDelay: `${BRANCH_AT + i * 100}ms`, stroke: c.ring }}
+            stroke={c.ring}
+            {...line}
+            className={`animate-draw ${drawnIfReduced}`}
+            style={{ animationDelay: `${BRANCH_AT + i * 100}ms` }}
             fill="none"
           />
         ))}
@@ -199,12 +212,16 @@ export function BranchOut() {
             key={c.title}
             d={branchPath(c)}
             pathLength={1}
-            className="bo-pulse"
+            stroke={`url(#bo-pulse-${i})`}
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeDasharray="0.16 2"
+            strokeDashoffset={0.16}
+            className="animate-streak opacity-0 motion-reduce:animate-none"
             style={{
               animationDelay: `${c.at + PULSE.after}ms`,
               animationDuration: `${PULSE.ms}ms`,
-              stroke: `url(#bo-pulse-${i})`,
-              ["--bo-glow" as string]: c.ring,
+              filter: `drop-shadow(0 0 4px ${c.ring})`,
             }}
             fill="none"
           />
@@ -216,7 +233,7 @@ export function BranchOut() {
       {[PARENT, ...CHILDREN].map((b) => (
         <div
           key={b.title}
-          className="bo-card-group absolute"
+          className="absolute animate-fade-up motion-reduce:animate-none"
           style={{
             left: b.x,
             top: b.mid - b.h / 2 - CARD.chip - CARD.gap,
@@ -235,26 +252,28 @@ export function BranchOut() {
               style={{ ["--bo-ring" as string]: b.ring }}
             />
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
-            {/* Same type and grey as the notes, with the Antalik shimmer in
-                grey (tour.css; colours in branch-out.css) */}
-            <p className="t-shimmer text-[12px] leading-4 font-normal" data-text="is researching…">
+            {/* Same type and grey as the notes, with a darker grey shimmer */}
+            <p className="gradient-text-shimmer text-[12px] leading-4 font-normal [--shimmer-base:oklch(0.68_0_0)] [--shimmer-highlight:oklch(0.45_0_0)]">
               is researching…
             </p>
           </div>
           <div
-            className="bo-card corner-squircle flex items-center rounded-4xl px-3 text-body-sm text-[oklch(0.22_0.012_262)]"
+            className="corner-squircle flex items-center rounded-4xl bg-[oklch(0.965_0_0)] px-3 shadow-[0_0_0_1px_oklch(0_0_0/0.06),0_1px_2px_oklch(0_0_0/0.04),0_2px_8px_oklch(0_0_0/0.04)] text-body-sm text-[oklch(0.22_0.012_262)]"
             style={{ height: b.h }}
           >
             <span className="truncate">{b.title}</span>
           </div>
           {/* Under the card: what's been done in it */}
           {b.notes && (
-            <div className="bo-notes" style={{ animationDelay: `${closesAt(b)}ms` }}>
+            <div
+              className="grid grid-rows-[1fr] animate-collapse motion-reduce:animate-none"
+              style={{ animationDelay: `${closesAt(b)}ms` }}
+            >
             <ul className="mt-2 min-h-0 space-y-1 overflow-hidden px-3">
               {b.notes.map((n, i) => (
                 <li
                   key={n.text}
-                  className={`bo-note ${noteText}`}
+                  className={`animate-fade-up [--fade-up-y:3px] motion-reduce:animate-none ${noteText}`}
                   style={{ animationDelay: `${notesAt(b) + i * 120}ms` }}
                 >
                   <span className="flex items-center gap-1">

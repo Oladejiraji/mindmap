@@ -6,7 +6,6 @@ import { Switch } from "@/components/ui/switch";
 import { useAnimatedReplies, useCanvasHints, useHomeLayout, type HomeLayout } from "@/lib/preferences";
 import { cn } from "@/lib/utils";
 import { TourLogo } from "./tour";
-import "./make-it-yours.css";
 
 /*
  * Onboarding step 2, after Pond's "Make it yours": a walkthrough of the
@@ -135,7 +134,7 @@ function ReplyPreview({ animated }: { animated: boolean }) {
         {words.map((w, i) => (
           <span
             key={i}
-            className={animated ? "stream-word-preview" : undefined}
+            className={animated ? "animate-word-in motion-reduce:animate-none" : undefined}
             style={animated ? { animationDelay: `${i * 70}ms` } : undefined}
           >
             {w}{" "}

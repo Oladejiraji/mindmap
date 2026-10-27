@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ThinkingOrb } from "thinking-orbs";
-import "./message-bubble.css";
 import { cn } from "@/lib/utils";
 import { useAnimatedReplies } from "@/lib/preferences";
 import { STREAM_FADE_MS, rehypeStreamWords } from "@/lib/rehype-stream-words";
