@@ -73,10 +73,10 @@ export function TourPanel({ slide }: { slide: TourSlide }) {
 }
 
 /* The Mindmap logo tile, 32px with 10px corners and a 10px m, sitting
- * 16px above a step's title. */
+ * 24px above a step's title (3× the title–body gap). */
 export function TourLogo({ className }: { className?: string }) {
   return (
-    <span className={cn("mb-4 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
+    <span className={cn("mb-6 flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-solid text-on-brand-solid", className)}>
       <LogoIcon className="h-auto w-2.5" />
     </span>
   );
