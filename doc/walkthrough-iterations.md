@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 29 | 2026-10-27 | Text box pulse residue reduced: its fringe settles at 18% and leaves a 6% rim (was 30% / 21%), gone by 75% of the effect; the auth page's own pulse unchanged | `a0e2b9a` |
 | 28 | 2026-10-27 | **The auth page's pulse.** The VapourHalo from the auth canvas (pastel washes losing steam, the dot pattern the wave reveals, a chromatic fringe) fires on the square when it's fully lit (1.64s) and on the text box when the blue has filled it (5.25s). Drawn on a 578 × 318 layer behind the SVG, scaled with it; timed from the loop's own animation events; fades with the loop and clears on restart; off for reduced motion | `dbc8db5` |
 | 27 | 2026-10-27 | Subtle layered shadow under the blue text box (interfaces.dev: layered shadows for depth), tinted with the brand blue: `0 1px 2px` at 16% + `0 4px 12px` at 14%; grows in with the blue wipe | `7227b5d` |
 | 26 | 2026-10-27 | **A process, step to step.** The square stays faint and colourless until the lines hit; the blue edge then travels round it over 0.6s and the square lights up behind it (left to right), and only then does the blue line leave. The text box: one blue stroke starts at its left side and runs the whole way round, once (0.8s), then blue flows in from the left. Loop 7s | `fde1889` |
