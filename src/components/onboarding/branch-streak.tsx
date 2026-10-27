@@ -1,23 +1,23 @@
 /*
  * "Research with the team": five coloured lines, one per teammate, run in
- * from the left and converge on a 32px square, which (with the blue line
- * out of it) is barely there until they arrive. Their strike makes the
+ * from the left and converge on a 32px square, which (with everything to
+ * its right) is barely there until they arrive. Their strike makes the
  * impact: a blue edge runs from the point of contact round the square to
- * its right side, and one blue line draws out of it. We then follow that
- * line: the view pans with its head, and nodes pop up along it, each
- * growing faded branches. The five colours sit around our blue's
+ * its right side, and one blue line draws out of it into a text box (Apple's
+ * iOS text field size), where a line of text writes in behind the caret. The five colours sit around our blue's
  * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
- * fanned 25° apart. One 10s loop; reduced motion shows the converged
- * picture. Drawn at the panel's 578 × 318 and scaled to fit; the world is
- * wider than the panel and the camera moves across it.
+ * fanned 25° apart. One 6s loop; reduced motion shows the finished
+ * picture. Drawn at the panel's 578 × 318 and scaled to fit.
+ * (The earlier "follow the line" version, with nodes and faded branches,
+ * is in 26737dc.)
  */
 import "./branch-streak.css";
 
 const W = 578;
 const H = 318;
 const MID = H / 2;
-// The square, centred on the line out
-const BOX = { x: 346, size: 32 };
+// The square
+const BOX = { x: 236, size: 32 };
 const BOX_RIGHT = BOX.x + BOX.size;
 const TOP = MID - BOX.size / 2;
 const R = 8;
@@ -35,85 +35,62 @@ const LINES = [
 ];
 const START_X = 48;
 
-// The blue line runs to LINE_END; its faint track carries on past it
-const LINE_END = 1340;
-const TRACK_END = 1540;
-
-// Nodes along the blue line, each with faded branches (dy: where each
-// branch settles above or below the line). Their pop times are in the CSS.
-const NODES = [
-  { x: 560, branches: [-50, 44] },
-  { x: 760, branches: [52] },
-  { x: 960, branches: [-44, 50] },
-  { x: 1160, branches: [-52] },
-];
-const NODE = 12;
+// The text box the blue line runs into, at Apple's iOS text field size:
+// 36pt tall, 10pt corners, a grey fill and no border, one line of text
+// with the blue caret. Its right margin matches the dots' 48 on the left.
+const TEXT = { x: 356, w: 174, h: 36, r: 10, pad: 12 };
+const TEXT_W = 104;
+const TEXT_LINE_H = 7;
 
 // From its dot on the left, straight on, then curving into the square's
 // left side
 const linePath = (y: number) =>
-  `M${START_X} ${y} L${BOX.x - 160} ${y} C${BOX.x - 90} ${y} ${BOX.x - 70} ${MID} ${BOX.x} ${MID}`;
-
-// Out of a node, curving off the line, then straight on
-const branchPath = (x: number, dy: number) =>
-  `M${x} ${MID} C${x + 25} ${MID} ${x + 30} ${MID + dy} ${x + 60} ${MID + dy} L${x + 110} ${MID + dy}`;
+  `M${START_X} ${y} L${BOX.x - 150} ${y} C${BOX.x - 85} ${y} ${BOX.x - 65} ${MID} ${BOX.x} ${MID}`;
 
 export function BranchStreak() {
+  const textTop = MID - TEXT.h / 2;
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
       <g className="bs-world">
-        <g className="bs-camera">
-          {/* Faint tracks for the five lines */}
-          {LINES.map((l) => (
-            <path key={l.y} d={linePath(l.y)} className="bs-track" fill="none" />
-          ))}
-          {/* The line out, barely there until the strike */}
-          <line x1={BOX_RIGHT} y1={MID} x2={TRACK_END} y2={MID} className="bs-track bs-track-out" />
+        {/* Faint tracks for the five lines */}
+        {LINES.map((l) => (
+          <path key={l.y} d={linePath(l.y)} className="bs-track" fill="none" />
+        ))}
+        {/* The way to the text box, barely there until the strike */}
+        <line x1={BOX_RIGHT} y1={MID} x2={TEXT.x} y2={MID} className="bs-track bs-track-out" />
 
-          {/* The five coloured lines running in together, from their dots */}
-          {LINES.map((l) => (
-            <g key={l.y} style={{ color: l.color }}>
-              <circle cx={START_X} cy={l.y} r="4" fill="currentColor" />
-              <path d={linePath(l.y)} pathLength={1} className="bs-run" fill="none" stroke="currentColor" />
-            </g>
-          ))}
+        {/* The five coloured lines running in together, from their dots */}
+        {LINES.map((l) => (
+          <g key={l.y} style={{ color: l.color }}>
+            <circle cx={START_X} cy={l.y} r="4" fill="currentColor" />
+            <path d={linePath(l.y)} pathLength={1} className="bs-run" fill="none" stroke="currentColor" />
+          </g>
+        ))}
 
-          {/* Faded branches, growing out of each node once it pops */}
-          {NODES.map((n, i) =>
-            n.branches.map((dy) => (
-              <path
-                key={`${n.x}${dy}`}
-                d={branchPath(n.x, dy)}
-                pathLength={1}
-                className={`bs-branch bs-at-${i + 1}`}
-                fill="none"
-              />
-            )),
-          )}
+        {/* The blue line from the square into the text box */}
+        <line x1={BOX_RIGHT} y1={MID} x2={TEXT.x} y2={MID} pathLength={1} className="bs-out" />
 
-          {/* The one blue line out of the square */}
-          <line x1={BOX_RIGHT} y1={MID} x2={LINE_END} y2={MID} pathLength={1} className="bs-out" />
-
-          {/* Nodes popping up on the line as its head passes */}
-          {NODES.map((n, i) => (
-            <rect
-              key={n.x}
-              className={`bs-node bs-at-${i + 1}`}
-              x={n.x - NODE / 2}
-              y={MID - NODE / 2}
-              width={NODE}
-              height={NODE}
-              rx="3"
-            />
-          ))}
-
-          {/* The 32px square. Grey until the lines strike its left edge;
-              then a blue edge runs from that point round both sides to the
-              right, where the blue line leaves */}
-          <rect className="bs-box" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
-          <path className="bs-edge" d={EDGE_TOP} pathLength={1} fill="none" />
-          <path className="bs-edge" d={EDGE_BOTTOM} pathLength={1} fill="none" />
+        {/* The text box: its text writes in with the caret riding ahead
+            of it, then the caret blinks */}
+        <rect className="bs-text" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
+        <rect
+          className="bs-text-line"
+          x={TEXT.x + TEXT.pad}
+          y={MID - TEXT_LINE_H / 2}
+          width={TEXT_W}
+          height={TEXT_LINE_H}
+          rx={TEXT_LINE_H / 2}
+        />
+        <g className="bs-caret-run" style={{ ["--bs-text-w" as string]: `${TEXT_W + 3}px` }}>
+          <rect className="bs-caret" x={TEXT.x + TEXT.pad} y={MID - 10} width="2" height="20" rx="1" />
         </g>
+
+        {/* The 32px square. Grey until the lines strike its left edge;
+            then a blue edge runs from that point round both sides to the
+            right, where the blue line leaves */}
+        <rect className="bs-box" x={BOX.x} y={TOP} width={BOX.size} height={BOX.size} rx={R} />
+        <path className="bs-edge" d={EDGE_TOP} pathLength={1} fill="none" />
+        <path className="bs-edge" d={EDGE_BOTTOM} pathLength={1} fill="none" />
       </g>
     </svg>
   );
