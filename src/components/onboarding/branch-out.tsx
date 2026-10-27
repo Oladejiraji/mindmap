@@ -23,7 +23,7 @@ const MID = H / 2;
 // card's left edge and width; mid: its vertical centre; h: its height;
 // at: when it appears (ms); notes: what's been done in it so far.
 const CARD = { chip: 20, gap: 6 };
-type Note = { text: string; nexus?: boolean };
+type Note = { text: string };
 type Card = {
   x: number;
   w: number;
@@ -36,12 +36,11 @@ type Card = {
   notes?: Note[];
 };
 // Under the project card (not in it), a list of the work done and the
-// nexus points reached in it: 12px/16px medium, grey; a nexus point gets
-// a blue bullet
+// nexus points reached in it: 12px/16px medium, grey, no bullets
 const NOTES: Note[] = [
   { text: "Reviewed 12 research tools" },
   { text: "Synthesised 6 team interviews" },
-  { text: "Nexus: teams lose context", nexus: true },
+  { text: "Nexus: teams lose context" },
 ];
 const PARENT: Card = {
   x: 48,
@@ -145,12 +144,9 @@ export function BranchOut() {
                 {b.notes.map((n, i) => (
                   <li
                     key={n.text}
-                    className="bo-note flex items-center gap-2 text-[12px] leading-4 font-medium text-[oklch(0.55_0_0)]"
+                    className="bo-note text-[12px] leading-4 font-medium text-[oklch(0.55_0_0)]"
                     style={{ animationDelay: `${b.at + 260 + i * 120}ms` }}
                   >
-                    <span
-                      className={`size-1 shrink-0 rounded-full ${n.nexus ? "bg-brand-solid" : "bg-[oklch(0.75_0_0)]"}`}
-                    />
                     {n.text}
                   </li>
                 ))}
