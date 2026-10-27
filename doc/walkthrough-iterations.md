@@ -42,6 +42,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Change | Commit |
 |---|---|---|---|
+| 25 | 2026-10-27 | Modal edge per interfaces.dev: the 1px ring stays a shadow at 8% (no border), and the single 0 4px 16px shadow becomes layered depth: 0 1px 2px 4%, 0 4px 12px 4%, 0 16px 40px 6% | `22042d6` |
 | 24 | 2026-10-27 | First slide title "Ask then Branch" → "Research with the team" (body unchanged) | `af568e3` |
 | 23 | 2026-10-27 | Logo back to 32px (keeps the smaller 10px m and 10px corners). Coming soon badge is a 20px chip, centred on the title | `9fd9446` |
 | 22 | 2026-10-27 | Logo tile 64px, 10px corners, smaller m (20px, 31% of the tile). Coming soon badges get Antalik's shimmer from libraries.dev/orbs (dark band on a tertiary-grey label, 2s linear; off for reduced motion) | `8599984` |
