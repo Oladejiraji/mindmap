@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 34 | 2026-10-27 | Text box 32px tall (was 36) | `ac1ca7c` |
 | 33 | 2026-10-27 | Second slide title "Create nodes" → "Your team's research in one place" (body unchanged) | `7e6de5f` |
 | 32 | 2026-10-27 | **Visuals transition.** On Continue the panel's visuals (not the panel or text), after the slide's own exit, scale to 0.96 and blur 6px, then fade (420ms). The next slide's visuals come in from 0.97 scale, 6px blur and transparent, sharpening (360ms). Reduced motion: none | `595632e` |
 | 31 | 2026-10-27 | **Line carries into the next slide.** On Continue, the first slide snaps to its finished picture and the blue line runs on out of the text box and off the panel's right edge (0.45s, speeding up); then Create nodes comes in and the line enters its panel from the left edge at the same height, easing to a stop mid-panel. Reduced motion skips the exit | `d53cce2` |
@@ -46,6 +47,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 8 | 2026-10-27 | "is researching…" 12px/16px medium (was caption size, regular) | `7ea1d2b` |
 | 7 | 2026-10-27 | Project card lists its work and nexus points: Reviewed 12 research tools, Synthesised 6 team interviews, Nexus: teams lose context. 12px/16px medium, `oklch(0.55 0 0)`; grey bullets for work, a blue bullet for the nexus point; they fade up 120ms apart after the card. Card grows to 98px, still centred on the line | `7a19d9c` |
 | 6 | 2026-10-27 | Cards 32px tall (was 48), all three; still 20px squircle corners and centred on their branch ends | `37603a3` |
 | 5 | 2026-10-27 | Author tags without the chip: just the 16px photo with a 1.5px brand-blue ring (1px white offset) and the name in fg-primary, then the shimmering "is researching…" | `174c266` |
