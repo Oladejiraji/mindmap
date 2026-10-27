@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 9 | 2026-10-27 | **Branch streak** (`branch-streak.tsx`). On the #f5f5f5 panel: a blue streak runs along a faint track into a 32px square (which pulses, edge turns blue), then five lines branch off it and draw out, each ending in a dot. Branch colours in OKLCH around our blue's complement (brand hue 262 → 82), 25° apart: coral 32, orange 57, amber 82, chartreuse 107, green 132. 4.8s loop; reduced motion shows the finished picture | `997c53e` |
 | 8 | 2026-10-26 | **Empty placeholder.** The panel is a plain 578 × 318 `#f5f5f5` container for now. The blue panel with the chat is saved: the previews stay in `tour.tsx`, and the blue panel can be restored from `e7ee4a3` | `2c666f9` |
 | 7 | 2026-10-26 | **Tree removed; back to the simulated chat** (iteration 3) on the blue 770px panel. `three` dependency dropped. The tree versions (4–6) stay restorable from their commits | `290a75b` |
 | 6 | 2026-10-26 | **3D roots, centred.** The 578px tree panel sits in the middle of the modal instead of right-aligned | `19403cd` |
