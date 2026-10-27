@@ -4,7 +4,8 @@
  * its right) is barely there until they arrive. Their strike makes the
  * impact: a blue edge runs from the point of contact round the square to
  * its right side, and one blue line draws out of it into a text box (Apple's
- * iOS text field size), where "What does Mindmap do?" types in. The five colours sit around our blue's
+ * iOS text field size), where "What does Mindmap do?" types in; two soft blue
+ * pulses, then blue flows into it from the left with the text in white. The five colours sit around our blue's
  * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
  * fanned 25° apart. One 6s loop; reduced motion shows the finished
  * picture. Drawn at the panel's 578 × 318 and scaled to fit.
@@ -95,7 +96,8 @@ export function BranchStreak() {
         <line x1={BOX_RIGHT} y1={MID} x2={TEXT.x} y2={MID} pathLength={1} className="bs-out" />
 
         {/* The text box: "What does Mindmap do?" types in a character at a
-            time with the caret just after it, then the caret blinks */}
+            time with the caret just after it; then two soft blue pulses and
+            blue flows in from the left, the text in white */}
         <style>{typingCss}</style>
         <rect className="bs-text" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
         <text className="bs-typed" x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
@@ -107,6 +109,15 @@ export function BranchStreak() {
         </text>
         <g className="bs-caret-run">
           <rect className="bs-caret" x={TEXT.x + TEXT.pad} y={MID - 9} width="2" height="18" rx="1" />
+        </g>
+        <rect className="bs-text-ring" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
+        {/* Sent: the same box in blue with the question in white, revealed
+            from the left over the grey one */}
+        <g className="bs-sent">
+          <rect x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
+          <text x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
+            {PHRASE}
+          </text>
         </g>
 
         {/* The 32px square. Grey until the lines strike its left edge;

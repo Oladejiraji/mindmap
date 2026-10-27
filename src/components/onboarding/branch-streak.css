@@ -9,7 +9,10 @@
    29.2–31.5% the text box (iOS text field, 36pt) comes up to full and the
              blue caret appears
    33–55%    "What does Mindmap do?" types in a character at a time, the
-             caret stepping after each; then the caret blinks
+             caret stepping after each
+   57–67%    two soft blue stroke pulses round the box
+   67–77%    blue flows into the box from the left, the question in white
+             (the caret fades out)
    86–95%    everything fades; hidden until the loop restarts */
 .branch-streak {
   --bs-dur: 6s;
@@ -160,6 +163,62 @@
   }
 }
 
+/* After the question is typed: two soft blue stroke pulses (each a 0.6s
+   sine ease in and out), then blue flows into the box from the left,
+   revealing the question in white (a wipe, so no in-between colours) */
+.branch-streak .bs-text-ring {
+  fill: none;
+  stroke: var(--brand-solid);
+  stroke-width: 1.5;
+  opacity: 0;
+  animation: bs-text-ring var(--bs-dur) infinite;
+}
+@keyframes bs-text-ring {
+  0%,
+  57% {
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  59.5% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  62% {
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  64.5% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+  }
+  67%,
+  100% {
+    opacity: 0;
+  }
+}
+.branch-streak .bs-sent {
+  clip-path: inset(0 100% 0 0);
+  animation: bs-sent var(--bs-dur) infinite;
+}
+.branch-streak .bs-sent rect {
+  fill: var(--brand-solid);
+}
+.branch-streak .bs-sent text {
+  fill: #fff;
+}
+/* The blue flows in from the left, the way the blue line arrives */
+@keyframes bs-sent {
+  0%,
+  67% {
+    clip-path: inset(0 100% 0 0);
+    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  77%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 /* The typed text (each character's keyframe and the caret's steps are
    generated in branch-streak.tsx from the measured glyph positions) */
 .branch-streak .bs-typed {
@@ -170,7 +229,8 @@
 }
 
 /* The blue caret: appears with the box, steps along after each character
-   as it types (33–55%), then blinks */
+   as it types (33–55%), holds through the pulses, fades as the blue comes
+   in */
 .branch-streak .bs-caret {
   fill: var(--brand-solid);
   opacity: 0;
@@ -182,24 +242,13 @@
     opacity: 0;
   }
   31%,
-  56% {
+  67% {
     opacity: 1;
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
   }
-  57%,
-  64% {
-    opacity: 0;
-  }
-  65%,
-  72% {
-    opacity: 1;
-  }
-  73%,
-  80% {
-    opacity: 0;
-  }
-  81%,
+  71%,
   100% {
-    opacity: 1;
+    opacity: 0;
   }
 }
 
@@ -212,6 +261,8 @@
   .branch-streak .bs-track-out,
   .branch-streak .bs-out,
   .branch-streak .bs-text,
+  .branch-streak .bs-text-ring,
+  .branch-streak .bs-sent,
   .branch-streak .bs-caret {
     animation: none;
   }
@@ -231,7 +282,7 @@
   .branch-streak .bs-typed tspan {
     opacity: 1;
   }
-  .branch-streak .bs-caret {
-    opacity: 1;
+  .branch-streak .bs-sent {
+    clip-path: none;
   }
 }
