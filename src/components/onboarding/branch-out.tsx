@@ -13,8 +13,8 @@
  */
 import { useEffect, useRef, type ComponentType, type SVGProps } from "react";
 import Image, { type StaticImageData } from "next/image";
-import AuthAssets from "@/lib/asset-export/auth";
 import DejiAvatar from "../../../public/walkthrough/deji.png";
+import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import StephenAvatar from "../../../public/walkthrough/stephen.png";
 import { BranchIcon } from "@/lib/svg";
 import { ClickUpLogo, GoogleLogo, LinearLogo, MetaLogo, NetflixLogo, NotionLogo } from "./tool-logos";
@@ -61,7 +61,7 @@ const PARENT: Card = {
   at: 760,
   title: "Build a group research tool",
   name: "Kurosawa",
-  avatar: AuthAssets.AuthAvatar1,
+  avatar: KurosawaAvatar,
   ring: "var(--brand-solid)",
   notes: [
     { text: "Reviewed 12 research tools" },
