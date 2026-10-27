@@ -78,6 +78,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 5 | 2026-10-27 | **Sphere of models.** Row 30% smaller (28, 34, 39, + 45). After it blurs in, 18 AI model logos (OpenAI, Claude, Gemini, Perplexity, Meta, Anthropic, Hugging Face, Ollama, Copilot, X/Grok; Simple Icons, brand colours) in 28px white circles blur in on a Fibonacci sphere (radius 118, tilted 14°) around the row and turn once every 24s; far logos shrink to 60% and fade to 25%; the row stays in front. Reduced motion: still | `c1755e1` |
 | 4 | 2026-10-27 | Blur in: each circle starts at a 6px blur and sharpens as it fades and scales in (420ms, 120ms apart) | `9b7ba8d` |
 | 3 | 2026-10-27 | **Growing row.** Back to the overlapping row (thought-bubble version kept in its commit), but each one a step bigger than the one before, like a thought bubble's trail: Kurosawa 40, Deji 48, Stephen 56, the dashed + 64; centred on one line | `a5c63eb` |
 | 2 | 2026-10-27 | **Thought bubbles.** "Build a group research tool" in the middle as the shared thought; Kurosawa, Deji, Stephen and the dashed + float around it as 56px bubbles in their ring colours, each with a trail of two circles (10px, 6px) shrinking in towards the project, outlined in its colour (dashed grey for the invite). Pop in (project, then trails and bubbles), then bob 3px on staggered rhythms | `6660f22` |
