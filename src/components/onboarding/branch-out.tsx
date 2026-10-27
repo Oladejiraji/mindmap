@@ -122,6 +122,10 @@ const BRANCH_AT = 1100;
 // connector from the project to it; the notes appear as it arrives
 const PULSE = { after: 100, ms: 600 };
 const notesAt = (b: Card) => (b === PARENT ? b.at + 260 : b.at + PULSE.after + PULSE.ms);
+// Once a list has written in and been read, it closes up into its card
+// like an accordion
+const READ_MS = 1500;
+const closesAt = (b: Card) => notesAt(b) + (b.notes?.length ?? 0) * 120 + 300 + READ_MS;
 
 // From the project card's right middle, curving to a branch card's left
 // middle
@@ -245,7 +249,8 @@ export function BranchOut() {
           </div>
           {/* Under the card: what's been done in it */}
           {b.notes && (
-            <ul className="mt-2 space-y-1 px-3">
+            <div className="bo-notes" style={{ animationDelay: `${closesAt(b)}ms` }}>
+            <ul className="mt-2 min-h-0 space-y-1 overflow-hidden px-3">
               {b.notes.map((n, i) => (
                 <li
                   key={n.text}
@@ -269,6 +274,7 @@ export function BranchOut() {
                 </li>
               ))}
             </ul>
+            </div>
           )}
         </div>
       ))}

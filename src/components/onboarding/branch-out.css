@@ -7,6 +7,8 @@
               arrive; the "is researching…" shimmer carries on
    1740–2440  a pulse runs along each fork's connector; its notes
               ("Forked" first) appear as the pulse arrives
+   then       each list, 1.5s after it has written in, closes up into its
+              card like an accordion (420ms)
    Cards: 32px tall, 20px squircle corners (so fully rounded ends) */
 .branch-out .bo-in {
   stroke: var(--brand-solid);
@@ -78,6 +80,21 @@
   --shimmer-highlight: oklch(0.45 0 0);
 }
 
+/* A card's notes, once written in and read, close up into it like an
+   accordion: the row collapses from its full height to none as the lines
+   fade (delay set inline per card) */
+.branch-out .bo-notes {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: bo-close 420ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes bo-close {
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+
 @keyframes bo-draw {
   to {
     stroke-dashoffset: 0;
@@ -96,7 +113,8 @@
   .branch-out .bo-branch,
   .branch-out .bo-pulse,
   .branch-out .bo-card-group,
-  .branch-out .bo-note {
+  .branch-out .bo-note,
+  .branch-out .bo-notes {
     animation: none;
   }
   .branch-out .bo-in,
