@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { BranchStreak } from "./branch-streak";
 import { BranchOut } from "./branch-out";
 import { ThinkTogether } from "./think-together";
+import { CanvasAwaits } from "./canvas-awaits";
 import "./tour.css";
 
 /*
@@ -65,6 +66,8 @@ export const TOUR: TourSlide[] = [
     id: "canvas",
     title: "The canvas awaits",
     body: "Start with a question and watch your research take shape.",
+    // A window onto the canvas: the project's nodes and the chat
+    art: () => <CanvasAwaits />,
   },
 ];
 
