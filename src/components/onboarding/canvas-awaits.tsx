@@ -2,7 +2,8 @@
 
 /*
  * "The canvas awaits": the whole panel is the canvas, and one node waits
- * in its centre: the project from the earlier slides, in our blue. It drops
+ * in its centre, in our blue: Kurosawa (photo and name) asking "How do we
+ * get started on Mindmap?". It drops
  * in and fires the auth page's pulse (VapourHalo) as it comes to rest, like
  * dropping a card on the auth canvas; then the chat composer slides up at
  * the foot, ready for the first question. Reduced
@@ -10,7 +11,9 @@
  * 578 × 318 and scaled to fit.
  */
 import { useEffect, useRef, useState } from "react";
+import Image, { type StaticImageData } from "next/image";
 import { ArrowUp } from "lucide-react";
+import KurosawaAvatar from "../../../public/walkthrough/kurosawa.png";
 import { VapourHalo } from "@/components/auth-canvas/vapour-halo";
 import "./canvas-awaits.css";
 
@@ -19,9 +22,20 @@ const H = 318;
 
 // The node: centre x, y, width; 32px tall like the cards on "Your team's
 // research in one place". lands: when it comes to rest (ms).
-const NODE_H = 32;
-type Node = { x: number; y: number; w: number; title: string; lands: number };
-const NODES: Node[] = [{ x: W / 2, y: H / 2, w: 212, title: "Build a group research tool", lands: 620 }];
+// Two rows: who's asking (photo and name), then the question
+const NODE_H = 56;
+type Node = { x: number; y: number; w: number; title: string; name: string; avatar: StaticImageData; lands: number };
+const NODES: Node[] = [
+  {
+    x: W / 2,
+    y: H / 2,
+    w: 264,
+    title: "How do we get started on Mindmap?",
+    name: "Kurosawa",
+    avatar: KurosawaAvatar,
+    lands: 620,
+  },
+];
 // Each node drops in over this long before it lands
 const DROP_MS = 320;
 
@@ -75,7 +89,7 @@ export function CanvasAwaits() {
       {NODES.map((n) => (
         <div
           key={n.title}
-          className="ca-drop corner-squircle absolute flex items-center justify-center rounded-4xl bg-brand-solid px-3 text-body-sm text-white shadow-node-primary"
+          className="ca-drop corner-squircle absolute flex flex-col justify-center gap-1.5 rounded-4xl bg-brand-solid px-3.5 text-white shadow-node-primary"
           style={{
             left: n.x - n.w / 2,
             top: n.y - NODE_H / 2,
@@ -85,7 +99,11 @@ export function CanvasAwaits() {
             animationDuration: `${DROP_MS}ms`,
           }}
         >
-          <span className="truncate">{n.title}</span>
+          <span className="flex items-center gap-1.5 text-[12px] leading-4 text-white/75">
+            <Image src={n.avatar} alt="" width={20} height={20} className="rounded-full ring-[1.5px] ring-white" />
+            {n.name}
+          </span>
+          <span className="truncate text-body-sm">{n.title}</span>
         </div>
       ))}
 
