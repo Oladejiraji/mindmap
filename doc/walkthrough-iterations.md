@@ -48,6 +48,8 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 16 | 2026-10-27 | Deji's and Stephen's own photos (public/walkthrough/) | `da0e991` |
+| 15 | 2026-10-27 | **Samples and forks.** Under the project card: "Reviewed 12 research tools", "User interviews at big tech" with Meta, Netflix and Google logos, "Competitor research" with Linear, ClickUp and Notion (labels on their own line, logos below). Branch cards say "Forked" with the node symbol under their title (52px tall, 238 wide); the second is "Competitor research and analysis". Layout rebalanced: project card x 40 / 210 wide, branch cards x 300 | `1aeea36` |
 | 14 | 2026-10-27 | Tool row starts with "Samples" (same grey), then the three logos | `4f2c918` |
 | 13 | 2026-10-27 | The nexus line becomes sample tools reviewed: Linear, ClickUp and Notion, each with its 12px mark in brand colour (Simple Icons, `tool-logos.tsx`) and its name in the notes' grey | `ca73516` |
 | 12 | 2026-10-27 | "is researching…" in the notes' type and grey (12/16 regular, `oklch(0.68 0 0)`), shimmer switched to the grey Antalik one (band `oklch(0.45 0 0)`) | `34d5efc` |
