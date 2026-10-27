@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 37 | 2026-10-27 | **Four slides.** Teams, Choose your model and Make it yours archived (kept in `ARCHIVED_TOUR` in tour.tsx and make-it-yours.tsx). New last slide "The canvas awaits" (body: "Start with a question and watch your research take shape.", panel empty for now); its CTA reads "Get started" (button min 93px wide) and closes onto Get started. Four step dots | `24e0778` |
 | 36 | 2026-10-27 | The square's edge on impact is a gradient like the pulse, not plain blue: coral → amber → green (the struck colours) on the left into our blue on the right, where the blue line leaves | `8cf1646` |
 | 35 | 2026-10-27 | Second slide body: "Everyone can work on the same goal, on different parts. All your research can be traced and seen in real time." | `cb85b61` |
 | 34 | 2026-10-27 | Text box 32px tall (was 36) | `ac1ca7c` |
