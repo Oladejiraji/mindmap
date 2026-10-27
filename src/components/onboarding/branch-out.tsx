@@ -23,9 +23,9 @@ const SPLIT = 152;
 // canvas's people). mid: the card's vertical centre.
 const CARD = { x: 300, w: 230, h: 48, chip: 20, gap: 6 };
 const BRANCHES: { mid: number; title: string; name: string; avatar: StaticImageData; bg: string }[] = [
-  { mid: 64, title: "Pricing models", name: "Lex Porto", avatar: AuthAssets.AuthAvatar1, bg: "#2D2D2D" },
-  { mid: MID, title: "User interviews", name: "Oladeji Raji", avatar: AuthAssets.AuthAvatar2, bg: "#2D2D2D" },
-  { mid: 254, title: "Competitor teardown", name: "Felipe Rocha", avatar: AuthAssets.AuthAvatar3, bg: "#3476FB" },
+  { mid: 64, title: "Pricing models", name: "Kurosawa", avatar: AuthAssets.AuthAvatar1, bg: "#2D2D2D" },
+  { mid: MID, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2, bg: "#2D2D2D" },
+  { mid: 254, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3, bg: "#3476FB" },
 ];
 
 // From the split, curving to the card's left middle
