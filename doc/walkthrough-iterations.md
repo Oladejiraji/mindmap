@@ -47,6 +47,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 9 | 2026-10-27 | The work/nexus list moves out of the project card to sit under it on the panel (8px below); the card is back to a 32px pill like the others | `acb3b75` |
 | 8 | 2026-10-27 | "is researching…" 12px/16px medium (was caption size, regular) | `7ea1d2b` |
 | 7 | 2026-10-27 | Project card lists its work and nexus points: Reviewed 12 research tools, Synthesised 6 team interviews, Nexus: teams lose context. 12px/16px medium, `oklch(0.55 0 0)`; grey bullets for work, a blue bullet for the nexus point; they fade up 120ms apart after the card. Card grows to 98px, still centred on the line | `7a19d9c` |
 | 6 | 2026-10-27 | Cards 32px tall (was 48), all three; still 20px squircle corners and centred on their branch ends | `37603a3` |
