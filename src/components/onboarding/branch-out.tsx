@@ -23,7 +23,7 @@ const MID = H / 2;
 // card's left edge and width; mid: its vertical centre; at: when it
 // appears (ms).
 const CARD = { h: 48, chip: 20, gap: 6 };
-type Card = { x: number; w: number; mid: number; at: number; title: string; name: string; avatar: StaticImageData; bg: string };
+type Card = { x: number; w: number; mid: number; at: number; title: string; name: string; avatar: StaticImageData };
 const PARENT: Card = {
   x: 48,
   w: 220,
@@ -32,11 +32,10 @@ const PARENT: Card = {
   title: "Build a group research tool",
   name: "Kurosawa",
   avatar: AuthAssets.AuthAvatar1,
-  bg: "#2D2D2D",
 };
 const CHILDREN: Card[] = [
-  { x: 340, w: 190, mid: 92, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2, bg: "#2D2D2D" },
-  { x: 340, w: 190, mid: 226, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3, bg: "#3476FB" },
+  { x: 340, w: 190, mid: 92, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2 },
+  { x: 340, w: 190, mid: 226, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3 },
 ];
 // The branches grow out of the project card's right side, 100ms apart,
 // once it has appeared
@@ -102,20 +101,16 @@ export function BranchOut() {
             animationDelay: `${b.at}ms`,
           }}
         >
-          <div className="mb-1.5 flex h-5 items-center gap-1">
-            <div
-              className="flex items-center gap-1 rounded-md border border-black/2 px-1.5 py-0.5 shadow-default"
-              style={{ backgroundColor: b.bg }}
-            >
-              <Image
-                src={b.avatar}
-                alt=""
-                width={16}
-                height={16}
-                className="rounded-full outline-1 -outline-offset-1 outline-black/8"
-              />
-              <span className="text-caption-base text-background">{b.name}</span>
-            </div>
+          {/* Who: just their photo, ringed in our blue, and their name */}
+          <div className="mb-1.5 flex h-5 items-center gap-1.5">
+            <Image
+              src={b.avatar}
+              alt=""
+              width={16}
+              height={16}
+              className="rounded-full ring-[1.5px] ring-brand-solid ring-offset-1 ring-offset-white"
+            />
+            <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
             <p className="gradient-text-shimmer text-caption-base opacity-50">is researching…</p>
           </div>
           <div className="corner-squircle flex h-12 items-center rounded-4xl bg-white px-3.5 text-body-sm text-fg-primary shadow-node">
