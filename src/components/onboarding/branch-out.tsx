@@ -13,6 +13,7 @@
 import { useEffect, useRef } from "react";
 import Image, { type StaticImageData } from "next/image";
 import AuthAssets from "@/lib/asset-export/auth";
+import { ClickUpLogo, LinearLogo, NotionLogo } from "./tool-logos";
 import "./branch-out.css";
 
 const W = 578;
@@ -44,7 +45,12 @@ type Card = {
 const NOTES: Note[] = [
   { text: "Reviewed 12 research tools" },
   { text: "Synthesised 6 team interviews" },
-  { text: "Nexus: teams lose context" },
+];
+// Samples of the tools reviewed, with their marks in brand colour
+const TOOLS = [
+  { name: "Linear", Logo: LinearLogo, color: "#5E6AD2" },
+  { name: "ClickUp", Logo: ClickUpLogo, color: "#7B68EE" },
+  { name: "Notion", Logo: NotionLogo, color: "#000000" },
 ];
 const PARENT: Card = {
   x: 48,
@@ -163,6 +169,18 @@ export function BranchOut() {
                     {n.text}
                   </li>
                 ))}
+              {/* The tools reviewed: sample marks and names */}
+              <li
+                className="bo-note flex items-center gap-3 text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]"
+                style={{ animationDelay: `${b.at + 260 + b.notes.length * 120}ms` }}
+              >
+                {TOOLS.map(({ name, Logo, color }) => (
+                  <span key={name} className="flex items-center gap-1">
+                    <Logo className="size-3" style={{ color }} />
+                    {name}
+                  </span>
+                ))}
+              </li>
             </ul>
           )}
         </div>
