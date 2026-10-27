@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 36 | 2026-10-27 | The square's edge on impact is a gradient like the pulse, not plain blue: coral → amber → green (the struck colours) on the left into our blue on the right, where the blue line leaves | `8cf1646` |
 | 35 | 2026-10-27 | Second slide body: "Everyone can work on the same goal, on different parts. All your research can be traced and seen in real time." | `cb85b61` |
 | 34 | 2026-10-27 | Text box 32px tall (was 36) | `ac1ca7c` |
 | 33 | 2026-10-27 | Second slide title "Create nodes" → "Your team's research in one place" (body unchanged) | `7e6de5f` |
