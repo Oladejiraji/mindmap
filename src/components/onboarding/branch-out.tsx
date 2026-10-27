@@ -33,10 +33,14 @@ type Card = {
   title: string;
   name: string;
   avatar: StaticImageData;
+  // The photo's ring: our blue for the project's lead, colours from the
+  // complementary palette (slide 1's teammate lines) for the others
+  ring: string;
   notes?: Note[];
 };
 // Under the project card (not in it), a list of the work done and the
-// nexus points reached in it: 12px/16px medium, grey, no bullets
+// nexus points reached in it: 12px/16px regular, a light oklch grey, no
+// bullets
 const NOTES: Note[] = [
   { text: "Reviewed 12 research tools" },
   { text: "Synthesised 6 team interviews" },
@@ -51,11 +55,12 @@ const PARENT: Card = {
   title: "Build a group research tool",
   name: "Kurosawa",
   avatar: AuthAssets.AuthAvatar1,
+  ring: "var(--brand-solid)",
   notes: NOTES,
 };
 const CHILDREN: Card[] = [
-  { x: 340, w: 190, mid: 92, h: 32, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2 },
-  { x: 340, w: 190, mid: 226, h: 32, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3 },
+  { x: 340, w: 190, mid: 92, h: 32, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2, ring: "oklch(0.7 0.18 32)" },
+  { x: 340, w: 190, mid: 226, h: 32, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3, ring: "oklch(0.8 0.16 82)" },
 ];
 // The branches grow out of the project card's right side, 100ms apart,
 // once it has appeared
@@ -121,14 +126,15 @@ export function BranchOut() {
             animationDelay: `${b.at}ms`,
           }}
         >
-          {/* Who: just their photo, ringed in our blue, and their name */}
+          {/* Who: just their photo, ringed in their colour, and their name */}
           <div className="mb-1.5 flex h-5 items-center gap-1.5">
             <Image
               src={b.avatar}
               alt=""
               width={16}
               height={16}
-              className="rounded-full ring-[1.5px] ring-brand-solid ring-offset-1 ring-offset-white"
+              className="rounded-full ring-[1.5px] ring-(--bo-ring) ring-offset-1 ring-offset-white"
+              style={{ ["--bo-ring" as string]: b.ring }}
             />
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
             <p className="gradient-text-shimmer text-[12px] leading-4 font-medium opacity-50">is researching…</p>
@@ -144,7 +150,7 @@ export function BranchOut() {
                 {b.notes.map((n, i) => (
                   <li
                     key={n.text}
-                    className="bo-note text-[12px] leading-4 font-medium text-[oklch(0.55_0_0)]"
+                    className="bo-note text-[12px] leading-4 font-normal text-[oklch(0.68_0_0)]"
                     style={{ animationDelay: `${b.at + 260 + i * 120}ms` }}
                   >
                     {n.text}
