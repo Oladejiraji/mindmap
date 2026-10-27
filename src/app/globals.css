@@ -30,6 +30,12 @@
   --color-placeholder-inverse: var(--placeholder-inverse);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+  --font-diatype: var(--font-diatype);
+  --font-inter-display: var(--font-inter-display);
+  --font-bricolage: var(--font-bricolage);
+  --font-exo2: var(--font-exo2);
+  --font-google-sans: var(--font-google-sans);
   --font-heading: var(--font-inter);
   /* Body: Inter 14 / 20, -0.46% tracking */
   --text-sm: 0.875rem; /* 14px */
