@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { cn } from "@/lib/utils";
 import { MakeItYours } from "./make-it-yours";
-import { TOUR, TourPanel, TourText } from "./tour";
+import { ART_OUT_MS, TOUR, TourPanel, TourText } from "./tour";
 
 /*
  * The walkthrough after onboarding (after Pond): a dialog over the Get
@@ -46,12 +46,17 @@ export function Walkthrough() {
     if (last) return close();
     if (leaving) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!slide?.exit || reduced) return setStep(step + 1);
+    if (!slide?.art || reduced) return setStep(step + 1);
+    // The slide's own exit (its line running out) plays first, then its
+    // visuals scale and blur, then fade (ART_OUT_MS, tour.css)
     setLeaving(true);
-    exitTimer.current = window.setTimeout(() => {
-      setLeaving(false);
-      setStep((s) => s + 1);
-    }, slide.exit);
+    exitTimer.current = window.setTimeout(
+      () => {
+        setLeaving(false);
+        setStep((s) => s + 1);
+      },
+      (slide.exit ?? 0) + ART_OUT_MS,
+    );
   };
 
   return (

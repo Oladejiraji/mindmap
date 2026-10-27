@@ -83,10 +83,21 @@ export function TourPanel({ slide, leaving = false }: { slide: TourSlide; leavin
       aria-hidden
       className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[oklch(0.985_0_0)]"
     >
-      {slide.art?.({ leaving })}
+      {/* The visuals, not the panel: they come in sharpening from a
+          slight scale and blur, and leave by scaling and blurring, then
+          fading (after the slide's own exit) */}
+      <div
+        className={cn("tour-art absolute inset-0", leaving && "tour-art-leaving")}
+        style={{ ["--tour-art-delay" as string]: `${slide.exit ?? 0}ms` }}
+      >
+        {slide.art?.({ leaving })}
+      </div>
     </div>
   );
 }
+
+/** How long the visuals take to scale, blur and fade out (tour.css) */
+export const ART_OUT_MS = 420;
 
 /* The Mindmap logo tile, 32px with 10px corners and a 10px m, sitting
  * 24px above a step's title (3× the title–body gap). */
