@@ -9,7 +9,8 @@ import { CheckIcon } from "@/components/icons/check-icon";
 import { MODELS } from "@/components/auth-canvas/models-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { cn } from "@/lib/utils";
-import { BranchStreak, BranchStreakIn } from "./branch-streak";
+import { BranchStreak } from "./branch-streak";
+import { BranchOut } from "./branch-out";
 import "./tour.css";
 
 /*
@@ -43,8 +44,9 @@ export const TOUR: TourSlide[] = [
   },
   {
     id: "nodes",
-    // ...and enters here, carrying on from the last slide
-    art: () => <BranchStreakIn />,
+    // ...and enters here, carrying on from the last slide, into a node
+    // that branches out to people researching
+    art: () => <BranchOut />,
     title: "Create nodes",
     body: "Select a node and press Tab to branch it, or ↵ to add a sibling beside it. You can also drag from a node's handle and drop the branch where you want it.",
     preview: <CreateNodes />,

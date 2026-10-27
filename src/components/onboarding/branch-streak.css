@@ -360,25 +360,6 @@
   stroke-dashoffset: 0;
 }
 
-/* Entering the next slide: the line comes in from the left edge and eases
-   to a stop mid-panel, just after the slide fades in */
-.branch-streak .bs-in {
-  stroke: var(--brand-solid);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: bs-in 700ms cubic-bezier(0.2, 0, 0, 1) 120ms forwards;
-}
-@keyframes bs-in {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 /* Reduced motion: the finished picture */
 @media (prefers-reduced-motion: reduce) {
   .branch-streak .bs-world,
@@ -391,8 +372,7 @@
   .branch-streak .bs-text,
   .branch-streak .bs-text-ring,
   .branch-streak .bs-sent,
-  .branch-streak .bs-caret,
-  .branch-streak .bs-in {
+  .branch-streak .bs-caret {
     animation: none;
   }
   .branch-streak .bs-run {
@@ -409,8 +389,7 @@
   }
   .branch-streak .bs-edge,
   .branch-streak .bs-out,
-  .branch-streak .bs-text-ring,
-  .branch-streak .bs-in {
+  .branch-streak .bs-text-ring {
     stroke-dashoffset: 0;
   }
   .branch-streak .bs-typed tspan {

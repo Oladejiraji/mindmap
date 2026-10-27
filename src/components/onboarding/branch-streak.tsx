@@ -224,14 +224,3 @@ export function BranchStreak({ leaving = false }: { leaving?: boolean }) {
     </>
   );
 }
-
-/* The next slide's panel: the blue line carries on in from the left edge,
- * at the same height it left the last one, easing to a stop mid-panel
- * (where that slide's illustration will pick it up). */
-export function BranchStreakIn() {
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="branch-streak absolute inset-0 size-full" aria-hidden>
-      <line x1={-2} y1={MID} x2={W / 2} y2={MID} pathLength={1} className="bs-in" />
-    </svg>
-  );
-}
