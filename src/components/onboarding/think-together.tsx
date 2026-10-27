@@ -8,9 +8,8 @@
  * bubble's trail growing; they blur in one after another. Then a sphere of
  * AI model logos explodes out of the centre around them, each in a white
  * circle, and turns slowly: near logos are bigger, closer and pass in front
- * of the row; far ones shrink, fade, blur and go behind. Thin lines, each
- * an OKLCH gradient, run from each person to two of the models and follow
- * them round. Reduced motion shows the sphere still.
+ * of the row; far ones shrink, fade, blur and go behind. Reduced motion
+ * shows the sphere still.
  */
 import { useEffect, useRef, type ComponentType, type SVGProps } from "react";
 import Image, { type StaticImageData } from "next/image";
@@ -79,22 +78,6 @@ const sphere = Array.from({ length: POINTS }, (_, i) => {
   return { y, r, lon, logo: LOGOS[i % LOGOS.length] };
 });
 
-// Thin curved lines from each person to two of the models, each an OKLCH
-// gradient from the person's colour (their ring on the last slide) to the
-// model's. who: which person (TEAM); at: which sphere point (its logo).
-// Each starts at the centre of that person's photo, measured as it draws,
-// and runs behind it, so it comes out of their circle.
-const LINKS = [
-  { who: 0, from: "oklch(0.56 0.22 262)", at: 0, to: "oklch(0.4 0 0)" }, // Kurosawa → OpenAI
-  { who: 0, from: "oklch(0.56 0.22 262)", at: 11, to: "oklch(0.68 0.13 40)" }, // Kurosawa → Claude
-  { who: 1, from: "oklch(0.58 0.21 300)", at: 2, to: "oklch(0.62 0.1 300)" }, // Deji → Gemini
-  { who: 1, from: "oklch(0.58 0.21 300)", at: 13, to: "oklch(0.72 0.12 205)" }, // Deji → Perplexity
-  { who: 2, from: "oklch(0.76 0.16 75)", at: 14, to: "oklch(0.53 0.2 258)" }, // Stephen → Meta
-  { who: 2, from: "oklch(0.76 0.16 75)", at: 6, to: "oklch(0.8 0.16 85)" }, // Stephen → Hugging Face
-];
-// The lines fade in once the sphere has settled, one after another
-const LINKS_AT = SPHERE_AT + EXPLODE_MS + 200;
-
 // Where a point sits on screen at a turn: x, y from the centre, its depth
 // (0 at the back, 1 at the front)
 const place = (p: (typeof sphere)[number], turn: number) => {
@@ -107,10 +90,6 @@ const place = (p: (typeof sphere)[number], turn: number) => {
 
 export function ThinkTogether() {
   const items = useRef<(HTMLSpanElement | null)[]>([]);
-  const lines = useRef<(SVGPathElement | null)[]>([]);
-  const grads = useRef<(SVGLinearGradientElement | null)[]>([]);
-  const origin = useRef<HTMLDivElement>(null);
-  const photos = useRef<(HTMLImageElement | null)[]>([]);
 
   // Explode the sphere out of the centre, then turn it: each logo's
   // position, size, fade, blur and layer (in front of the row when it's on
@@ -119,22 +98,6 @@ export function ThinkTogether() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     const start = performance.now();
-    // Where each photo's centre sits from the sphere's centre: measured
-    // once the row has settled, and again if the panel resizes (measuring
-    // every frame made the lines twitch)
-    let starts: { x: number; y: number }[] | null = null;
-    const measure = () => {
-      const o = origin.current?.getBoundingClientRect();
-      if (!o) return;
-      starts = photos.current.map((el) => {
-        const r = el?.getBoundingClientRect();
-        return r ? { x: r.left + r.width / 2 - o.left, y: r.top + r.height / 2 - o.top } : { x: 0, y: 0 };
-      });
-    };
-    const ro = new ResizeObserver(() => {
-      if (starts) measure();
-    });
-    if (origin.current?.parentElement) ro.observe(origin.current.parentElement);
     // Fast out, settling: a burst
     const burst = (t: number) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 4);
     const draw = (now: number) => {
@@ -151,76 +114,16 @@ export function ThinkTogether() {
         el.style.filter = depth < 0.45 ? `blur(${((0.45 - depth) * 4).toFixed(2)}px)` : "none";
         el.style.zIndex = depth > 0.55 ? "20" : "0";
       });
-      // The lines run from each photo's centre (measured, relative to the
-      // sphere's centre) and follow their logos, fading as a logo swings to
-      // the back
-      if (!starts && (reduced || elapsed >= LINKS_AT)) measure();
-      LINKS.forEach((l, j) => {
-        const line = lines.current[j];
-        const grad = grads.current[j];
-        const start = starts?.[l.who];
-        if (!line || !grad || !start) return;
-        const { x: sx, y: sy } = start;
-        const { x, y, depth } = place(sphere[l.at], Math.max(turn, 0));
-        // Leaves the photo straight up or down towards its model, then
-        // sweeps across into the logo. Every control point moves smoothly
-        // with the logo, so the curve never jumps.
-        const c1y = sy + (y - sy) * 0.65;
-        const c2x = x - (x - sx) * 0.45;
-        line.setAttribute(
-          "d",
-          `M${sx.toFixed(1)} ${sy.toFixed(1)} C${sx.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${y.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`,
-        );
-        const coords = { x1: sx.toFixed(1), y1: sy.toFixed(1), x2: String(x), y2: String(y) };
-        for (const [k, v] of Object.entries(coords)) grad.setAttribute(k, v);
-        const fade = reduced ? 1 : Math.min(Math.max((elapsed - LINKS_AT - j * 90) / 400, 0), 1);
-        line.style.opacity = String(fade * (0.2 + depth * 0.7));
-      });
       if (!reduced) frame = requestAnimationFrame(draw);
     };
     frame = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(frame);
-      ro.disconnect();
-    };
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   return (
     <div className="think-together absolute inset-0 flex items-center justify-center" aria-hidden>
       {/* The sphere of AI models: near ones pass in front of the row */}
-      <div ref={origin} className="absolute top-1/2 left-1/2">
-        {/* The lines from the people to their models, between the far
-            logos and the row */}
-        <svg className="absolute top-0 left-0 z-[5] overflow-visible" width="1" height="1">
-          <defs>
-            {LINKS.map((l, j) => (
-              <linearGradient
-                key={j}
-                id={`tt-link-${j}`}
-                gradientUnits="userSpaceOnUse"
-                ref={(el) => {
-                  grads.current[j] = el;
-                }}
-              >
-                <stop offset="0" stopColor={l.from} />
-                <stop offset="1" stopColor={l.to} />
-              </linearGradient>
-            ))}
-          </defs>
-          {LINKS.map((_, j) => (
-            <path
-              key={j}
-              ref={(el) => {
-                lines.current[j] = el;
-              }}
-              fill="none"
-              stroke={`url(#tt-link-${j})`}
-              strokeWidth="1"
-              strokeLinecap="round"
-              style={{ opacity: 0 }}
-            />
-          ))}
-        </svg>
+      <div className="absolute top-1/2 left-1/2">
         {sphere.map((p, i) => (
           <span
             key={i}
@@ -239,9 +142,6 @@ export function ThinkTogether() {
         {TEAM.map((p, i) => (
           <Image
             key={p.name}
-            ref={(el) => {
-              photos.current[i] = el;
-            }}
             src={p.avatar}
             alt=""
             width={SIZES[i]}
