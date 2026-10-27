@@ -73,7 +73,8 @@ const CHILDREN: Card[] = [
     mid: 230,
     h: 52,
     at: 1740,
-    title: "Competitor research and analysis",
+    // Forks the features of the group research tool
+    title: "Core features",
     name: "Stephen",
     avatar: StephenAvatar,
     ring: "oklch(0.8 0.16 82)",
@@ -189,7 +190,7 @@ export function BranchOut() {
             </p>
           </div>
           <div
-            className="corner-squircle flex flex-col justify-center gap-0.5 rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node"
+            className="corner-squircle flex flex-col justify-center gap-0.5 rounded-4xl bg-white px-3 text-body-sm text-[oklch(0.22_0.012_262)] shadow-node"
             style={{ height: b.h }}
           >
             <span className="truncate">{b.title}</span>
