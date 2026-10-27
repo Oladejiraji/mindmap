@@ -11,16 +11,21 @@
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as http from "../http.js";
+import type * as invitations from "../invitations.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_blocks from "../lib/blocks.js";
 import type * as lib_context from "../lib/context.js";
 import type * as lib_functions from "../lib/functions.js";
 import type * as lib_llm from "../lib/llm.js";
 import type * as lib_models from "../lib/models.js";
 import type * as lib_rateLimiter from "../lib/rateLimiter.js";
 import type * as lib_validation from "../lib/validation.js";
+import type * as memberships from "../memberships.js";
 import type * as messages from "../messages.js";
 import type * as nodes from "../nodes.js";
+import type * as organizations from "../organizations.js";
 import type * as threads from "../threads.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -32,16 +37,21 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   chat: typeof chat;
   http: typeof http;
+  invitations: typeof invitations;
   "lib/auth": typeof lib_auth;
+  "lib/blocks": typeof lib_blocks;
   "lib/context": typeof lib_context;
   "lib/functions": typeof lib_functions;
   "lib/llm": typeof lib_llm;
   "lib/models": typeof lib_models;
   "lib/rateLimiter": typeof lib_rateLimiter;
   "lib/validation": typeof lib_validation;
+  memberships: typeof memberships;
   messages: typeof messages;
   nodes: typeof nodes;
+  organizations: typeof organizations;
   threads: typeof threads;
+  users: typeof users;
 }>;
 
 /**

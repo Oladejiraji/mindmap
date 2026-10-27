@@ -8,26 +8,30 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Mindmap
 
-A spatial research tool where you think through problems with AI, and the output is a living graph of structured knowledge. Each node is a research unit with distilled content. Nodes form a tree — children inherit parent context through node content, not chat transcripts. The chat inside each node is an optional tool for exploration; the node's content is the artifact. See [SPEC.md](./SPEC.md) for the full data model and rationale.
+A spatial thinking tool where you build structured knowledge through AI-assisted exploration. See [SPEC.md](./doc/SPEC.md) for the full product spec, data model, and architecture.
 
 ## Non-negotiables
 
 - **Package manager: pnpm.** Never use `npm` or `yarn`. All install/run commands go through `pnpm`.
 - **Messages are append-only.** No edits, no deletes once finalized. The chat is a record of exploration.
-- **Node is the primary entity, chat is secondary.** A node can exist without a chat. Context inheritance flows through node `content`, not messages.
+- **Node is the primary entity, chat is secondary.** A node can exist without a chat. Content is a BlockNote document. Context inheritance flows through serialized block content, not messages.
 - **Auth checks are manual.** Convex has no row-level security. Every query/mutation that touches a `node`, `chat`, or `message` must verify ownership via the thread/node's `userId`.
 - **LLM calls happen in Convex actions**, not mutations or queries. Actions read context via `ctx.runQuery` and write results via `ctx.runMutation`.
 
 ## Stack notes
 
 - **Backend: Convex.** Schema and functions live in `convex/`. Mutations for writes (transactional), queries for reads (reactive), actions for external/LLM calls (non-reactive).
+- **BlockNote.** Node content uses BlockNote (`@blocknote/react` + `@blocknote/mantine`). Content stored as BlockNote JSON, serialized to markdown for context inheritance.
 - **Tailwind v4.** No `tailwind.config.ts`. Plugins and theme are declared in `src/app/globals.css` via `@import`, `@plugin`, and `@theme`. `tailwindcss-motion` is already wired there.
 - **React Flow CSS.** When you first use `@xyflow/react`, import its stylesheet once at the top of the component that renders the canvas: `import "@xyflow/react/dist/style.css";`.
 
 ## Frontend guidelines
 
+- **Use Convex hooks directly.** Call `useMutation` / `useQuery` / `useAction` from `convex/react` directly in components. Do not wrap them in custom service hooks or abstractions. The exceptions are `useConvexMutation` (adds pending/error/success state that `useMutation` lacks) and `useAuthedConvexQuery` (handles auth state).
 - **Avoid `useEffect` as much as possible.** Before reaching for one, read [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) — it lists the exact patterns where `useEffect` is the wrong tool. Most "I need an effect" situations are actually one of: transforming data for rendering (use `useMemo` or compute inline), responding to user input (use an event handler), or caching expensive computation (use `useMemo`). Legitimate uses are narrow: synchronizing with an external (non-React) system, subscribing to a browser API, or running cleanup on unmount. If your effect fires a fetch, updates state based on props, or resets state when something changes — it's probably the wrong tool.
 - **Use `@base-ui/react` patterns, not Radix.** This project uses shadcn's `base-nova` style with `@base-ui/react` as the primitive layer. Use the `render` prop for polymorphism (e.g., `render={<Link href="..." />}`), not `asChild` which is a Radix concept.
+- **Style with Tailwind, not vanilla CSS.** Don't create component `.css` files. Use Tailwind utilities (including arbitrary values and variants like `[&_svg]:`, `data-*:`, `motion-reduce:`) in `className`. Only when Tailwind genuinely can't express something (`@keyframes`, `@property`, complex selectors, pseudo-element content) put it in `src/app/globals.css`: register it as a theme token (`--animate-*`, `--color-*`) or a `@utility`, then use it as a class. Reuse the shared motion tokens there (`animate-blur-in`, `animate-fade-up`, `animate-draw`, …) before adding new keyframes. Choreographed, multi-element animations go in `src/app/styles/animations.css`, the one exception file.
+- **Use `RenderIf` for conditional rendering.** Use the `<RenderIf condition={...}>` component (`src/components/shared/render-if.tsx`) instead of ternary chains for conditional rendering.
 
 ## Role check (start of every session)
 
@@ -58,6 +62,10 @@ These rules apply only when the user identified as **designer** in the role chec
 - **Good typography and hierarchy.** Use font weight, size, and color to establish clear visual hierarchy. Headlines should be noticeably distinct from body text without being loud.
 - **Prefer smaller font sizes.** Default to `text-sm` (14px) for body content and UI controls. Use `text-xs` (12px) for secondary/meta information. Reserve `text-base` (16px) and above for page titles and headers only.
 - **Let spacing do the work.** Use whitespace and grouping to communicate structure, not lines or boxes. When two things look related, proximity handles it — an extra border or background is noise.
+
+## Git commits
+
+- **No AI co-author attribution.** Do not add `Co-Authored-By` lines for Claude or any AI tool in commit messages.
 
 <!-- convex-ai-start -->
 

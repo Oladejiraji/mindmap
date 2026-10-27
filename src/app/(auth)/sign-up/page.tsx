@@ -31,17 +31,13 @@ export default function SignUpPage() {
       return;
     }
     queryClient.clear();
-    router.replace(routes.home);
+    // New accounts set up their organization first (B2B onboarding).
+    router.replace(routes.onboarding);
   };
 
   return (
     <div
-      className="flex h-full items-center justify-center px-4 py-8 font-diatype rounded-l-md"
-      style={{
-        background:
-          "linear-gradient(180deg, #0B0B0B -14.91%, #111111 63.07%, #252525 102.06%, #ABABAB 112.89%, #2E2E2E 112.89%)",
-        boxShadow: "0px 0px 0px 1px #00000008",
-      }}
+      className="flex h-full items-center justify-center px-4 py-8 rounded-l-lg bg-(image:--gradient-auth-panel) shadow-border"
     >
       <div className="flex flex-col justify-center items-center h-full w-full">
         <div>
@@ -52,7 +48,7 @@ export default function SignUpPage() {
           className="flex w-full max-w-78 flex-col justify-center  flex-1"
         >
           <div className="space-y-1.5">
-            <h1 className=" font-medium text-center text-white text-lg pb-8">
+            <h1 className=" font-medium text-center text-white text-heading-6 pb-8">
               Welcome to mindmap
             </h1>
           </div>
@@ -105,12 +101,12 @@ export default function SignUpPage() {
               className="relative w-full flex items-center justify-center"
             >
               <p>Continue</p>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-sidebar-ring rounded-[3px] h-4 w-9.5 flex items-center justify-center">
-                <p className="text-background/87 text-11 font-medium">return</p>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-sidebar-ring rounded-sm h-4 w-9.5 flex items-center justify-center">
+                <p className="text-background/87 text-caption-base font-medium">return</p>
               </div>
             </Button>
           </div>
-          <p className="text-center text-background/67 text-11">
+          <p className="text-center text-background/67 text-caption-base">
             Already have an account?{" "}
             <Link href={routes.signIn} className="underline">
               Sign in
@@ -118,7 +114,7 @@ export default function SignUpPage() {
           </p>
         </form>
         <div>
-          <p className="text-background/67 text-11 text-center max-w-78">
+          <p className="text-background/67 text-caption-lg font-medium text-center max-w-78">
             By subscribing, you agree Mindmap’s  Terms of Use, and acknowledge
             its Information Collection Notice and Privacy Policy.
           </p>

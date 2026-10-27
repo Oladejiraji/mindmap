@@ -8,6 +8,9 @@ export function useThreads() {
   return useAuthedConvexQuery(api.threads.list, {});
 }
 
-export function useThread(threadId: Id<"threads">) {
-  return useAuthedConvexQuery(api.threads.get, { threadId });
+export function useThread(threadId: Id<"threads"> | undefined) {
+  return useAuthedConvexQuery(
+    api.threads.get,
+    threadId ? { threadId } : ("skip" as any),
+  );
 }
