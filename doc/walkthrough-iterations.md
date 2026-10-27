@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 23 | 2026-10-27 | After typing, the text box pulses a 1.5px blue stroke twice (~0.36s each), then fills with our blue as the text turns white; the caret blinks through the pulses and goes when it fills | `61bc535` |
 | 22 | 2026-10-27 | Text box types "What does Mindmap do?" (Inter 13px, `oklch(0.4 0 0)`), one character at a time over ~1.3s, with the blue caret stepping after each (positions measured per glyph), then blinking. Field widened to 180 (x 350) so the phrase fits | `b7f9796` |
 | 21 | 2026-10-27 | Text box fill lighter: `oklch(0.93 0 0)` → `oklch(0.955 0 0)` | `268c5b8` |
 | 20 | 2026-10-27 | **Into a text box.** No more follow-the-line nodes (kept in 26737dc): the blue line runs from the square (moved left, x 236) into a text field at Apple's iOS size, 36pt tall with 10pt corners, darker grey fill `oklch(0.93 0 0)`, no border, 88px from the square, 48px right margin. A line of text writes in behind iOS's blue caret, which then blinks. 6s loop | `29c5afc` |
