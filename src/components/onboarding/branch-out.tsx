@@ -20,22 +20,43 @@ const H = 318;
 const MID = H / 2;
 // The cards, each with who's researching it (the auth canvas's look):
 // the project the line arrives at, and two branches of it. x, w: the
-// card's left edge and width; mid: its vertical centre; at: when it
-// appears (ms).
-const CARD = { h: 32, chip: 20, gap: 6 };
-type Card = { x: number; w: number; mid: number; at: number; title: string; name: string; avatar: StaticImageData };
+// card's left edge and width; mid: its vertical centre; h: its height;
+// at: when it appears (ms); notes: what's been done in it so far.
+const CARD = { chip: 20, gap: 6 };
+type Note = { text: string; nexus?: boolean };
+type Card = {
+  x: number;
+  w: number;
+  mid: number;
+  h: number;
+  at: number;
+  title: string;
+  name: string;
+  avatar: StaticImageData;
+  notes?: Note[];
+};
+// The project card lists the work done and the nexus points reached in it
+// (12px/16px medium, grey; a nexus point gets a blue bullet): a 32px
+// title row, three 16px lines 4px apart, 10px below
+const NOTES: Note[] = [
+  { text: "Reviewed 12 research tools" },
+  { text: "Synthesised 6 team interviews" },
+  { text: "Nexus: teams lose context", nexus: true },
+];
 const PARENT: Card = {
   x: 48,
   w: 220,
   mid: MID,
+  h: 32 + NOTES.length * 16 + (NOTES.length - 1) * 4 + 10,
   at: 760,
   title: "Build a group research tool",
   name: "Kurosawa",
   avatar: AuthAssets.AuthAvatar1,
+  notes: NOTES,
 };
 const CHILDREN: Card[] = [
-  { x: 340, w: 190, mid: 92, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2 },
-  { x: 340, w: 190, mid: 226, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3 },
+  { x: 340, w: 190, mid: 92, h: 32, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2 },
+  { x: 340, w: 190, mid: 226, h: 32, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3 },
 ];
 // The branches grow out of the project card's right side, 100ms apart,
 // once it has appeared
@@ -96,7 +117,7 @@ export function BranchOut() {
           className="bo-card-group absolute"
           style={{
             left: b.x,
-            top: b.mid - CARD.h / 2 - CARD.chip - CARD.gap,
+            top: b.mid - b.h / 2 - CARD.chip - CARD.gap,
             width: b.w,
             animationDelay: `${b.at}ms`,
           }}
@@ -113,8 +134,27 @@ export function BranchOut() {
             <span className="text-caption-base font-medium text-fg-primary">{b.name}</span>
             <p className="gradient-text-shimmer text-caption-base opacity-50">is researching…</p>
           </div>
-          <div className="corner-squircle flex h-8 items-center rounded-4xl bg-white px-3 text-body-sm text-fg-primary shadow-node">
-            {b.title}
+          <div
+            className="corner-squircle rounded-4xl bg-white text-body-sm text-fg-primary shadow-node"
+            style={{ height: b.h }}
+          >
+            <div className="flex h-8 items-center px-3">{b.title}</div>
+            {b.notes && (
+              <ul className="space-y-1 px-3">
+                {b.notes.map((n, i) => (
+                  <li
+                    key={n.text}
+                    className="bo-note flex items-center gap-2 text-[12px] leading-4 font-medium text-[oklch(0.55_0_0)]"
+                    style={{ animationDelay: `${b.at + 260 + i * 120}ms` }}
+                  >
+                    <span
+                      className={`size-1 shrink-0 rounded-full ${n.nexus ? "bg-brand-solid" : "bg-[oklch(0.75_0_0)]"}`}
+                    />
+                    {n.text}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       ))}
