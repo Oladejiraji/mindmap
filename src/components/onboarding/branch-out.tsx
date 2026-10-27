@@ -45,8 +45,8 @@ type Card = {
   title: string;
   name: string;
   avatar: StaticImageData;
-  // The photo's ring: our blue for the project's lead, colours from the
-  // complementary palette (slide 1's teammate lines) for the others
+  // The photo's ring: our blue for the project's lead; purple for Deji,
+  // amber (slide 1's complementary palette) for Stephen
   ring: string;
   notes?: Note[];
 };
@@ -82,7 +82,7 @@ const CHILDREN: Card[] = [
     title: "User interviews",
     name: "Deji",
     avatar: DejiAvatar,
-    ring: "oklch(0.7 0.18 32)",
+    ring: "oklch(0.62 0.19 295)",
     notes: [
       FORKED,
       {
@@ -106,7 +106,8 @@ const CHILDREN: Card[] = [
     name: "Stephen",
     avatar: StephenAvatar,
     ring: "oklch(0.8 0.16 82)",
-    notes: [FORKED],
+    // The features it forks from the group research tool
+    notes: [FORKED, { text: "Collaboration · Clarity · Tracking" }],
   },
 ];
 // The branches grow out of the project card's right side, 100ms apart,
