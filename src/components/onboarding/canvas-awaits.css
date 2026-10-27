@@ -41,8 +41,11 @@
   .canvas-awaits .ca-rise {
     animation: none;
     opacity: 1;
-    translate: none;
     filter: none;
     margin-bottom: 0;
+  }
+  /* Only the node: the composer's translate is its centring */
+  .canvas-awaits .ca-drop {
+    translate: none;
   }
 }
