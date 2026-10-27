@@ -4,7 +4,13 @@ import type { ReactNode } from "react";
 import { ChevronLeftIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Building2, ChartColumn, Palette, SquareUser } from "lucide-react";
+import {
+  ArrowUpRight,
+  Building2,
+  ChartColumn,
+  Palette,
+  SquareUser,
+} from "lucide-react";
 import { ImportIcon } from "@/components/icons/import-icon";
 import { SecurityIcon } from "@/components/icons/security-icon";
 import { FlameIcon } from "@/components/icons/flame-icon";
@@ -54,11 +60,26 @@ function NavLink({ href, children }: { href: string; children: ReactNode }) {
 }
 
 const PAGES: Record<string, { title: string; icon: ReactNode }> = {
-  [routes.settingsAccount]: { title: "Account", icon: <UserAvatar size={16} /> },
-  [routes.settingsPreferences]: { title: "Preferences", icon: <PreferencesIcon className="size-4 text-fg-secondary" /> },
-  [routes.settingsHotkeys]: { title: "Hotkeys", icon: <HotkeysIcon className="size-4 text-fg-secondary" /> },
-  [routes.settingsWorkspace]: { title: "Workspace", icon: <Building2 className="size-4 text-fg-secondary" /> },
-  [routes.settingsTeams]: { title: "Teams", icon: <SquareUser className="size-4 text-fg-secondary" /> },
+  [routes.settingsAccount]: {
+    title: "Account",
+    icon: <UserAvatar size={16} />,
+  },
+  [routes.settingsPreferences]: {
+    title: "Preferences",
+    icon: <PreferencesIcon className="size-4 text-fg-secondary" />,
+  },
+  [routes.settingsHotkeys]: {
+    title: "Hotkeys",
+    icon: <HotkeysIcon className="size-4 text-fg-secondary" />,
+  },
+  [routes.settingsWorkspace]: {
+    title: "Workspace",
+    icon: <Building2 className="size-4 text-fg-secondary" />,
+  },
+  [routes.settingsTeams]: {
+    title: "Teams",
+    icon: <SquareUser className="size-4 text-fg-secondary" />,
+  },
 };
 
 /* The current page as a tab in its hover style: a rounded pill on the
@@ -80,10 +101,18 @@ function PageTab() {
 /* A page that isn't available yet: muted, not a link, with a Soon tag. */
 function Soon({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <span aria-disabled className={cn(row, "cursor-default text-fg-disabled hover:bg-transparent hover:text-fg-disabled [&>svg:first-child]:text-fg-disabled")}>
+    <span
+      aria-disabled
+      className={cn(
+        row,
+        "cursor-default text-fg-disabled hover:bg-transparent hover:text-fg-disabled [&>svg:first-child]:text-fg-disabled",
+      )}
+    >
       {icon}
       {children}
-      <span className="ml-auto rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">Soon</span>
+      <span className="ml-auto rounded-md px-1.5 text-caption-base text-fg-tertiary inset-ring-[0.5px] inset-ring-border-default">
+        Soon
+      </span>
     </span>
   );
 }
@@ -91,8 +120,15 @@ function Soon({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 export function SettingsShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-svh overflow-hidden bg-sidebar">
-      <nav aria-label="Settings" className="flex w-56 shrink-0 flex-col px-3 pt-3 pb-4">
-        <Link href={routes.home} className={cn(row, "mb-5 w-fit pr-3")}>
+      <nav
+        aria-label="Settings"
+        className="flex w-56 shrink-0 flex-col px-3 pt-3 pb-4"
+      >
+        <Link
+          href={routes.home}
+          className={cn(row, "mb-5 w-fit pr-3")}
+          prefetch
+        >
           <ChevronLeftIcon />
           Back to app
         </Link>
@@ -136,7 +172,12 @@ export function SettingsShell({ children }: { children: ReactNode }) {
           </NavGroup>
         </div>
 
-        <a href={CHANGELOG_URL} target="_blank" rel="noreferrer" className={cn(row, "mt-auto")}>
+        <a
+          href={CHANGELOG_URL}
+          target="_blank"
+          rel="noreferrer"
+          className={cn(row, "mt-auto")}
+        >
           <FlameIcon />
           What&apos;s new?
           <ArrowUpRight className="ml-auto size-4 text-fg-tertiary" />

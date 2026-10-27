@@ -14,9 +14,18 @@ import { TabStrip } from "@/components/layout/tab-strip";
  * node opened with ?panel=<nodeId> is a second card beside it, 8px apart,
  * spanning the tabs + canvas height.
  */
-export function ThreadShell({ defaultOpen, children }: { defaultOpen: boolean; children: ReactNode }) {
+export function ThreadShell({
+  defaultOpen,
+  children,
+}: {
+  defaultOpen: boolean;
+  children: ReactNode;
+}) {
   return (
-    <SidebarProvider defaultOpen={defaultOpen} className="h-svh overflow-hidden bg-sidebar">
+    <SidebarProvider
+      defaultOpen={defaultOpen}
+      className="h-svh overflow-hidden bg-sidebar"
+    >
       <HomeSidebar />
       <div className="@container flex min-h-0 min-w-0 flex-1 gap-2 pr-1 pb-1">
         {/* Tabs + canvas form one column; the node panel runs the full
