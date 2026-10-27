@@ -36,7 +36,8 @@ export function Walkthrough() {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     window.clearTimeout(exitTimer.current);
     setLeaving(false);
-    setStep(0);
+    // Back to the first slide only once the dialog has finished closing
+    // (onOpenChangeComplete), or slide 1 flashes up as it fades out
   };
 
   const slide = TOUR[step];
@@ -74,7 +75,7 @@ export function Walkthrough() {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={(o) => !o && close()}>
+    <Dialog.Root open={open} onOpenChange={(o) => !o && close()} onOpenChangeComplete={(o) => !o && setStep(0)}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] transition-opacity duration-200 ease-out data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:opacity-0" />
         {/* 1040 × 628, 20px corners, white. Edge per interfaces.dev: a 1px
@@ -84,7 +85,7 @@ export function Walkthrough() {
         <Dialog.Popup
           initialFocus={continueRef}
           aria-label="Welcome to Mindmap"
-          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04),0_16px_40px_rgba(0,0,0,0.06)] outline-none transition-[opacity,scale] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
+          className="corner-squircle fixed top-1/2 left-1/2 z-50 flex h-[min(628px,calc(100svh-32px))] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-[20px] bg-white p-6 md:p-10 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04),0_16px_40px_rgba(0,0,0,0.06)] outline-none transition-[opacity,scale,filter] duration-200 ease-out data-ending-style:scale-[0.99] data-ending-style:opacity-0 data-ending-style:blur-[4px] data-ending-style:duration-150 data-starting-style:scale-[0.97] data-starting-style:opacity-0 motion-reduce:transition-opacity"
         >
           <div key={step} className="flex min-h-0 flex-1 flex-col">
             {/* Text and panel on one line, centred on each other */}
@@ -131,10 +132,10 @@ export function Walkthrough() {
   );
 }
 
-// Back: 500 14px/143%, #111 at 60%; buttons use our
-// 16px squircle button radius
+// Back: 500 14px/143%, #111 at 60%; presses down to 0.97 like Continue;
+// buttons use our 16px squircle button radius
 const textButton =
-  "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-colors hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50";
+  "corner-squircle h-9 cursor-pointer rounded-3xl px-4 py-2 text-[14px] leading-[1.43] font-medium tracking-normal text-[rgba(17,17,17,0.6)] outline-none transition-[color,scale] duration-200 ease-out hover:text-[#111] focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] motion-reduce:active:scale-100";
 
 /* One dot per step (5.6px, 5.6px apart), the current one dark. */
 function Dots({ step }: { step: number }) {
