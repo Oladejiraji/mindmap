@@ -1,9 +1,10 @@
 /* Create nodes (branch-out.tsx). Plays once on arrival (ms):
-   120–820    the blue line comes in from the left edge
-   820–1620   it branches out into three lines, 100ms apart
-   1360–1860  each card (48px, 20px squircle corners) appears as its
-              branch arrives, with its author chip; the "is researching…"
-              shimmer carries on */
+   120–820    the blue line comes in from the left edge to the project card
+   760–1060   "Build a group research tool" (Kurosawa) appears as it arrives
+   1100–1800  two branches grow out of its right side, 100ms apart
+   1640–2040  the branch cards (Deji, Stephen) appear as their branches
+              arrive; the "is researching…" shimmer carries on
+   Cards: 48px, 20px squircle corners */
 .branch-out .bo-in {
   stroke: var(--brand-solid);
   stroke-width: 2;

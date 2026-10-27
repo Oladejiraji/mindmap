@@ -2,8 +2,9 @@
 
 /*
  * "Create nodes": carries on from "Research with the team". The blue line
- * comes in from the left edge (where it left the last slide) and branches
- * out into three lines to cards, each with someone researching it, drawn like the
+ * comes in from the left edge (where it left the last slide) to a project
+ * card, "Build a group research tool", which then branches into two more
+ * cards, each with someone researching it, drawn like the
  * auth canvas (an author chip with avatar and name, and its shimmering
  * "is researching…"). Plays once on arrival and holds; reduced motion
  * shows the finished picture. Laid out at the panel's 578 × 318 and
@@ -17,20 +18,37 @@ import "./branch-out.css";
 const W = 578;
 const H = 318;
 const MID = H / 2;
-// Where the line splits into its branches
-const SPLIT = 152;
-// The branched nodes: a card each, with who's researching it (the auth
-// canvas's people). mid: the card's vertical centre.
-const CARD = { x: 300, w: 230, h: 48, chip: 20, gap: 6 };
-const BRANCHES: { mid: number; title: string; name: string; avatar: StaticImageData; bg: string }[] = [
-  { mid: 64, title: "Pricing models", name: "Kurosawa", avatar: AuthAssets.AuthAvatar1, bg: "#2D2D2D" },
-  { mid: MID, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2, bg: "#2D2D2D" },
-  { mid: 254, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3, bg: "#3476FB" },
+// The cards, each with who's researching it (the auth canvas's look):
+// the project the line arrives at, and two branches of it. x, w: the
+// card's left edge and width; mid: its vertical centre; at: when it
+// appears (ms).
+const CARD = { h: 48, chip: 20, gap: 6 };
+type Card = { x: number; w: number; mid: number; at: number; title: string; name: string; avatar: StaticImageData; bg: string };
+const PARENT: Card = {
+  x: 48,
+  w: 220,
+  mid: MID,
+  at: 760,
+  title: "Build a group research tool",
+  name: "Kurosawa",
+  avatar: AuthAssets.AuthAvatar1,
+  bg: "#2D2D2D",
+};
+const CHILDREN: Card[] = [
+  { x: 340, w: 190, mid: 92, at: 1640, title: "User interviews", name: "Deji", avatar: AuthAssets.AuthAvatar2, bg: "#2D2D2D" },
+  { x: 340, w: 190, mid: 226, at: 1740, title: "Competitor teardown", name: "Stephen", avatar: AuthAssets.AuthAvatar3, bg: "#3476FB" },
 ];
+// The branches grow out of the project card's right side, 100ms apart,
+// once it has appeared
+const BRANCH_AT = 1100;
 
-// From the split, curving to the card's left middle
-const branchPath = (mid: number) =>
-  `M${SPLIT} ${MID} C${SPLIT + 68} ${MID} ${CARD.x - 68} ${mid} ${CARD.x} ${mid}`;
+// From the project card's right middle, curving to a branch card's left
+// middle
+const branchPath = (to: Card) => {
+  const from = PARENT.x + PARENT.w;
+  const bend = (to.x - from) / 2;
+  return `M${from} ${MID} C${from + bend} ${MID} ${to.x - bend} ${to.mid} ${to.x} ${to.mid}`;
+};
 
 export function BranchOut() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -56,31 +74,32 @@ export function BranchOut() {
       aria-hidden
     >
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 size-full overflow-visible">
-        {/* The line in from the last slide, up to where it splits */}
-        <line x1={-2} y1={MID} x2={SPLIT} y2={MID} pathLength={1} className="bo-in" />
-        {/* The branches, growing out one after another */}
-        {BRANCHES.map((b, i) => (
+        {/* The line in from the last slide, to the project card */}
+        <line x1={-2} y1={MID} x2={PARENT.x} y2={MID} pathLength={1} className="bo-in" />
+        {/* The project's two branches, growing out one after another */}
+        {CHILDREN.map((c, i) => (
           <path
-            key={b.title}
-            d={branchPath(b.mid)}
+            key={c.title}
+            d={branchPath(c)}
             pathLength={1}
             className="bo-branch"
-            style={{ animationDelay: `${820 + i * 100}ms` }}
+            style={{ animationDelay: `${BRANCH_AT + i * 100}ms` }}
             fill="none"
           />
         ))}
       </svg>
 
-      {/* The cards, each appearing as its branch arrives, with who's on it */}
-      {BRANCHES.map((b, i) => (
+      {/* The cards, each appearing as the line or its branch arrives, with
+          who's on it */}
+      {[PARENT, ...CHILDREN].map((b) => (
         <div
           key={b.title}
           className="bo-card-group absolute"
           style={{
-            left: CARD.x,
+            left: b.x,
             top: b.mid - CARD.h / 2 - CARD.chip - CARD.gap,
-            width: CARD.w,
-            animationDelay: `${1360 + i * 100}ms`,
+            width: b.w,
+            animationDelay: `${b.at}ms`,
           }}
         >
           <div className="mb-1.5 flex h-5 items-center gap-1">
