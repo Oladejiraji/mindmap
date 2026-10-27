@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 17 | 2026-10-27 | Grey tracks lighter again: `oklch(0.96 0 0)`, just under the panel's ~0.966 | `71c6310` |
 | 16 | 2026-10-27 | Grey tracks even lighter: `oklch(0.95 0 0)` | `18744dd` |
 | 15 | 2026-10-27 | Grey tracks (and the square's grey edge) lighter: `oklch(0.9 0 0)` → `oklch(0.93 0 0)` on the #f3f3f3 panel | `ae07e54` |
 | 14 | 2026-10-27 | **Follow the blue line.** After the converge, the camera pans with the blue line's head (line and camera move at the same steady speed, so the head holds 420px in). Four 12px nodes (white, blue edge) pop up on the line as the head passes, each growing one or two faded branches (blue at 30%). Loop is now 10s; fades out at the end and restarts at the converge | `26737dc` |
