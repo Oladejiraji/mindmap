@@ -8,6 +8,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 33 | 2026-10-27 | Second slide title "Create nodes" → "Your team's research in one place" (body unchanged) | `7e6de5f` |
 | 32 | 2026-10-27 | **Visuals transition.** On Continue the panel's visuals (not the panel or text), after the slide's own exit, scale to 0.96 and blur 6px, then fade (420ms). The next slide's visuals come in from 0.97 scale, 6px blur and transparent, sharpening (360ms). Reduced motion: none | `595632e` |
 | 31 | 2026-10-27 | **Line carries into the next slide.** On Continue, the first slide snaps to its finished picture and the blue line runs on out of the text box and off the panel's right edge (0.45s, speeding up); then Create nodes comes in and the line enters its panel from the left edge at the same height, easing to a stop mid-panel. Reduced motion skips the exit | `d53cce2` |
 | 30 | 2026-10-27 | Text box hidden (0%, was 30%) until the blue line reaches it, then fades in over 0.15s | `5dbaf73` |
