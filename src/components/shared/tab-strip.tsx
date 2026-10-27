@@ -110,7 +110,7 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
               {!active && (
                 <PreviewCard.Portal>
                   <PreviewCard.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
-                    <PreviewCard.Popup className="origin-(--transform-origin) rounded-2xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-reduce:transition-opacity">
+                    <PreviewCard.Popup className="corner-squircle origin-(--transform-origin) rounded-4xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-reduce:transition-opacity">
                       <TabPreview tab={tab} />
                     </PreviewCard.Popup>
                   </PreviewCard.Positioner>
