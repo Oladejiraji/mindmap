@@ -198,10 +198,10 @@ export function ChatInput({
                   sideOffset={8}
                   className="z-50"
                 >
-                  <Menu.Popup className="min-w-48 rounded-lg bg-surface-modal p-1 text-body-sm text-fg-primary shadow-large outline-none">
+                  <Menu.Popup className="corner-squircle min-w-48 rounded-4xl bg-surface-modal p-1.5 text-body-sm text-fg-primary shadow-large outline-none">
                     <Menu.Item
                       onClick={onNewBranch}
-                      className="flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 outline-none data-highlighted:bg-transparent-hover [&_svg]:size-4 [&_svg]:text-fg-tertiary"
+                      className="corner-squircle flex h-8 cursor-pointer items-center gap-2 rounded-[14px] px-2 outline-none data-highlighted:bg-transparent-hover [&_svg]:size-4 [&_svg]:text-fg-tertiary"
                     >
                       <GitBranch />
                       New branch

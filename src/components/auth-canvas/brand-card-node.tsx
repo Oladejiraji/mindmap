@@ -56,7 +56,7 @@ export function BrandCardNode({ data }: NodeProps) {
       {author ? (
         <div className="flex items-center mb-2 gap-1">
           <div
-            className=" flex items-center gap-1 border border-black/2 rounded-md px-1 py-0.5 shadow-default"
+            className=" flex items-center gap-1 border border-black/2 rounded-md px-1.5 py-0.5 shadow-default"
             style={{ backgroundColor: author.bg || "#2D2D2D" }}
           >
             <div className="shrink-0">

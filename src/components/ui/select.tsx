@@ -23,7 +23,7 @@ export type SelectOption<T extends string> = { value: T; label: string; itemLabe
 /* An option's icon on a small tile, in the list and in the field. */
 function IconTile({ children }: { children: ReactNode }) {
   return (
-    <span className="flex size-4 shrink-0 items-center justify-center rounded-sm bg-surface-container text-fg-secondary shadow-border [&_svg]:size-2.5">
+    <span className="flex size-4 shrink-0 items-center justify-center rounded-sm bg-surface-container text-fg-secondary [&_svg]:size-2.5">
       {children}
     </span>
   );
@@ -49,7 +49,7 @@ export function Select<T extends string>({
       <BaseSelect.Trigger
         aria-label={ariaLabel}
         className={cn(
-          "group corner-squircle flex h-10 w-full cursor-pointer items-center gap-2 rounded-xl bg-surface-container px-3.5 text-left text-body-sm text-fg-primary shadow-border outline-none transition-shadow focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:ring-3 data-popup-open:ring-ring/50",
+          "group corner-squircle flex h-10 w-full cursor-pointer items-center gap-2 rounded-xl bg-surface-container px-3.5 text-left text-body-sm text-fg-primary shadow-border outline-none transition-[box-shadow,background-color] duration-150 ease-out hover:bg-[#f5f5f5] data-popup-open:bg-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-ring/70 data-popup-open:ring-2 data-popup-open:ring-ring/70 motion-reduce:transition-none",
           className,
         )}
       >

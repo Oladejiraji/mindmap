@@ -114,7 +114,7 @@ export default function SignUpPage() {
           </p>
         </form>
         <div>
-          <p className="text-background/67 text-caption-base text-center max-w-78">
+          <p className="text-background/67 text-caption-lg font-medium text-center max-w-78">
             By subscribing, you agree Mindmap’s  Terms of Use, and acknowledge
             its Information Collection Notice and Privacy Policy.
           </p>

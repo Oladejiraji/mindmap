@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useCanvasHints, useHomeLayout } from "@/lib/preferences";
+import { useAnimatedReplies, useCanvasHints, useHomeLayout } from "@/lib/preferences";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { SettingsPage, Section, Row, Segmented } from "@/components/settings";
@@ -68,12 +68,13 @@ function LayoutPreview({
 
 export function PreferencesSettings() {
   const [hints, setHints] = useCanvasHints();
+  const [animatedReplies, setAnimatedReplies] = useAnimatedReplies();
   const [layout, setLayout] = useHomeLayout();
   const [switchedLayout, setSwitchedLayout] = useState(false);
   return (
     <SettingsPage
       title="Preferences"
-      description="How the canvas and Home behave. Saved in this browser."
+      description="How the canvas, chat and Home behave. Saved in this browser."
     >
       <Section title="Canvas">
         <Row
@@ -84,6 +85,18 @@ export function PreferencesSettings() {
             checked={hints}
             onCheckedChange={setHints}
             aria-label="Shortcut hints"
+          />
+        </Row>
+      </Section>
+      <Section title="Chat">
+        <Row
+          label="Animated replies"
+          hint="Fade replies in word by word as they arrive."
+        >
+          <Switch
+            checked={animatedReplies}
+            onCheckedChange={setAnimatedReplies}
+            aria-label="Animated replies"
           />
         </Row>
       </Section>

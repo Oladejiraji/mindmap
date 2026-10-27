@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { ThinkingOrb } from "thinking-orbs";
 import "./message-bubble.css";
 import { cn } from "@/lib/utils";
+import { useAnimatedReplies } from "@/lib/preferences";
 import { STREAM_FADE_MS, rehypeStreamWords } from "@/lib/rehype-stream-words";
 import type { Message } from "@/services/messages/queries";
 
@@ -29,7 +30,8 @@ export function MessageBubble({ message }: { message: Message }) {
     const t = setTimeout(() => setSettling(false), STREAM_FADE_MS);
     return () => clearTimeout(t);
   }, [settling]);
-  const fading = isStreaming || settling;
+  const [animatedReplies] = useAnimatedReplies();
+  const fading = animatedReplies && (isStreaming || settling);
 
   return (
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>

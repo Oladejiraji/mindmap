@@ -160,10 +160,10 @@ export function CreateMenu({
         <Popover.Positioner side="bottom" align="start" sideOffset={6} className="z-50">
           <Popover.Popup
             initialFocus={false}
-            className={cn("w-80 overflow-hidden rounded-2xl bg-surface-modal text-fg-primary shadow-large outline-none", popupMotion, "data-starting-style:scale-100 data-starting-style:opacity-100")}
+            className={cn("corner-squircle w-80 overflow-hidden rounded-4xl bg-surface-modal text-fg-primary shadow-large outline-none", popupMotion, "data-starting-style:scale-100 data-starting-style:opacity-100")}
           >
             <div className="border-b border-border-subtle p-1.5">
-              <label className="flex h-9.5 items-center gap-2 rounded-xl bg-component px-3">
+              <label className="corner-squircle flex h-9.5 items-center gap-2 rounded-[14px] bg-component px-3">
                 <Search className="size-4 shrink-0 text-fg-tertiary" />
                 <input
                   autoFocus
@@ -195,7 +195,7 @@ export function CreateMenu({
                         onMouseMove={() => setActive(i)}
                         onClick={entry.run}
                         className={cn(
-                          "flex w-full cursor-pointer items-center gap-3 rounded-md px-2.5 py-2 text-left outline-none",
+                          "corner-squircle flex w-full cursor-pointer items-center gap-3 rounded-[14px] px-2.5 py-2 text-left outline-none",
                           i === current && "bg-transparent-hover",
                         )}
                       >

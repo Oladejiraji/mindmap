@@ -64,12 +64,6 @@ export function HomeSidebar() {
         <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:px-2">
           <SidebarMenu className="gap-0.5">
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={pathname === routes.getStarted} tooltip="Get started" className={row} render={<Link href={routes.getStarted} />}>
-                <PartyPopper className="size-4" />
-                <span>Get started</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton isActive={pathname === routes.home} tooltip="Home" className={row} render={<Link href={routes.home} />}>
                 <HomeIcon className="size-4" />
                 <span>Home</span>
@@ -98,6 +92,18 @@ export function HomeSidebar() {
             {projects.map((t) => (
               <ProjectRow key={t._id} thread={t} rowClassName={row} />
             ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* Get started, as an option at the bottom of the nav */}
+        <SidebarGroup className="mt-auto px-3 py-0 group-data-[collapsible=icon]:px-2">
+          <SidebarMenu className="gap-0.5">
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={pathname === routes.getStarted} tooltip="Get started" className={row} render={<Link href={routes.getStarted} />}>
+                <PartyPopper className="size-4" />
+                <span>Get started</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

@@ -15,7 +15,7 @@ import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
 
 const menuItemClass =
-  "flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
+  "corner-squircle flex w-full cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
 
 
 export function ProjectRow({
@@ -119,7 +119,7 @@ export function ProjectRow({
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
           <ContextMenu.Positioner sideOffset={4} className="z-50">
-            <ContextMenu.Popup className="min-w-40 rounded-xl border border-foreground/8 bg-background p-1 shadow-large outline-none">
+            <ContextMenu.Popup className="corner-squircle min-w-40 rounded-4xl border border-foreground/8 bg-background p-1.5 shadow-large outline-none">
               <ContextMenu.Item
                 className={menuItemClass}
                 onClick={() => router.push(href)}
@@ -137,7 +137,7 @@ export function ProjectRow({
                 Rename
               </ContextMenu.Item>
               <ContextMenu.Item
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-caption-lg text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
+                className="corner-squircle flex w-full cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-caption-lg text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
                 onClick={() => setShowDelete(true)}
               >
                 Delete
