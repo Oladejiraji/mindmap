@@ -6,9 +6,10 @@
  * "+" in a dashed circle to invite someone else. Each one is a step bigger
  * than the one before (28, 34, 39, then 45 for the +), like a thought
  * bubble's trail growing; they blur in one after another. Then a sphere of
- * AI model logos forms around them, each in a small white circle, and
- * turns slowly; logos on the far side shrink and fade, and the row always
- * stays in front. Reduced motion shows everything still.
+ * AI model logos explodes out of the centre around them, each in a white
+ * circle, and turns slowly: near logos are bigger, closer and pass in front
+ * of the row; far ones shrink, fade, blur and go behind. Reduced motion
+ * shows the sphere still.
  */
 import { useEffect, useRef, type ComponentType, type SVGProps } from "react";
 import Image, { type StaticImageData } from "next/image";
@@ -56,12 +57,18 @@ const LOGOS: Logo[] = [
   { Logo: CopilotLogo, color: "#000000" },
   { Logo: XLogo, color: "#000000" },
 ];
-// 18 points spread evenly over the sphere (Fibonacci), cycling the logos
+// 18 points spread evenly over the sphere (Fibonacci), cycling the logos.
+// The sphere is wider than tall to use the panel; it explodes out of the
+// centre (EXPLODE_MS, each logo a little after the last), then turns.
 const POINTS = 18;
-const RADIUS = 118;
+const RADIUS = 128;
+const STRETCH = 1.55;
 const TILT = (-14 * Math.PI) / 180;
 const TURN_MS = 24000;
 const SPHERE_AT = 900;
+const EXPLODE_MS = 900;
+const STAGGER_MS = 30;
+const CHIP = 36;
 const sphere = Array.from({ length: POINTS }, (_, i) => {
   const y = 1 - (2 * (i + 0.5)) / POINTS;
   const r = Math.sqrt(1 - y * y);
@@ -76,25 +83,34 @@ const place = (p: (typeof sphere)[number], turn: number) => {
   const z = p.r * Math.cos(p.lon + turn);
   const y = p.y * Math.cos(TILT) - z * Math.sin(TILT);
   const zt = p.y * Math.sin(TILT) + z * Math.cos(TILT);
-  return { x: x * RADIUS, y: y * RADIUS, depth: (zt + 1) / 2 };
+  return { x: x * RADIUS * STRETCH, y: y * RADIUS, depth: (zt + 1) / 2 };
 };
 
 export function ThinkTogether() {
   const items = useRef<(HTMLSpanElement | null)[]>([]);
 
-  // Turn the sphere: each logo's position, size and fade by its depth
+  // Explode the sphere out of the centre, then turn it: each logo's
+  // position, size, fade, blur and layer (in front of the row when it's on
+  // the near side) by its depth
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     const start = performance.now();
+    // Fast out, settling: a burst
+    const burst = (t: number) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 4);
     const draw = (now: number) => {
-      const turn = reduced ? 0 : ((now - start) / TURN_MS) * Math.PI * 2;
+      const elapsed = now - start;
+      const turn = reduced ? 0 : ((elapsed - SPHERE_AT) / TURN_MS) * Math.PI * 2;
       sphere.forEach((p, i) => {
         const el = items.current[i];
         if (!el) return;
-        const { x, y, depth } = place(p, turn);
-        el.style.transform = `translate(${x}px, ${y}px) scale(${0.6 + depth * 0.4})`;
-        el.style.setProperty("--tt-depth", String(0.25 + depth * 0.75));
+        const { x, y, depth } = place(p, Math.max(turn, 0));
+        const out = reduced ? 1 : burst((elapsed - SPHERE_AT - i * STAGGER_MS) / EXPLODE_MS);
+        const scale = (0.5 + depth * 0.8) * (0.3 + out * 0.7);
+        el.style.transform = `translate(${x * out}px, ${y * out}px) scale(${scale})`;
+        el.style.opacity = String((0.3 + depth * 0.7) * Math.min(out * 2, 1));
+        el.style.filter = depth < 0.45 ? `blur(${((0.45 - depth) * 4).toFixed(2)}px)` : "none";
+        el.style.zIndex = depth > 0.55 ? "20" : "0";
       });
       if (!reduced) frame = requestAnimationFrame(draw);
     };
@@ -104,7 +120,7 @@ export function ThinkTogether() {
 
   return (
     <div className="think-together absolute inset-0 flex items-center justify-center" aria-hidden>
-      {/* The sphere of AI models, behind the row */}
+      {/* The sphere of AI models: near ones pass in front of the row */}
       <div className="absolute top-1/2 left-1/2">
         {sphere.map((p, i) => (
           <span
@@ -112,19 +128,15 @@ export function ThinkTogether() {
             ref={(el) => {
               items.current[i] = el;
             }}
-            className="tt-logo absolute -top-3.5 -left-3.5 size-7"
+            className="tt-logo absolute flex items-center justify-center rounded-full bg-white opacity-0 shadow-node"
+            style={{ width: CHIP, height: CHIP, left: -CHIP / 2, top: -CHIP / 2 }}
           >
-            <span
-              className="tt-pop flex size-7 items-center justify-center rounded-full bg-white shadow-node"
-              style={{ animationDelay: `${SPHERE_AT + i * 50}ms` }}
-            >
-              <p.logo.Logo className="size-3.5" style={{ color: p.logo.color }} />
-            </span>
+            <p.logo.Logo className="size-[18px]" style={{ color: p.logo.color }} />
           </span>
         ))}
       </div>
 
-      <div className="relative flex items-center -space-x-2">
+      <div className="relative z-10 flex items-center -space-x-2">
         {TEAM.map((p, i) => (
           <Image
             key={p.name}

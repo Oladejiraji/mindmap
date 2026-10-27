@@ -15,11 +15,10 @@
   }
 }
 
-/* The sphere's logos: placed, sized and layered by depth each frame
-   (think-together.tsx); far ones fade back */
+/* The sphere's logos: placed, sized, faded, blurred and layered by depth
+   each frame (think-together.tsx) */
 .think-together .tt-logo {
-  opacity: var(--tt-depth, 1);
-  will-change: transform;
+  will-change: transform, opacity, filter;
 }
 
 @media (prefers-reduced-motion: reduce) {
