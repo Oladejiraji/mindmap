@@ -58,15 +58,14 @@ export const TOUR: TourSlide[] = [
 ];
 
 /* A slide's illustration: a 578 × 318 oklch(0.985 0 0) panel beside the slide's
- * text, showing the slide's art (empty until a slide has some). Edge as
- * the modal's (interfaces.dev): a 1px shadow ring, then layered depth. The earlier
+ * text, showing the slide's art (empty until a slide has some). The earlier
  * previews (the blue panel with the Ask then Branch chat, and the others
  * below) are kept but not shown; restore the blue panel from e7ee4a3. */
 export function TourPanel({ slide }: { slide: TourSlide }) {
   return (
     <div
       aria-hidden
-      className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[oklch(0.985_0_0)] shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.04),0_16px_40px_rgba(0,0,0,0.06)]"
+      className="corner-squircle relative h-full max-h-[318px] w-[578px] max-w-full shrink-0 overflow-hidden rounded-[16px] bg-[oklch(0.985_0_0)]"
     >
       {slide.art}
     </div>
