@@ -81,15 +81,16 @@ const sphere = Array.from({ length: POINTS }, (_, i) => {
 
 // Thin curved lines from each person to two of the models, each an OKLCH
 // gradient from the person's colour (their ring on the last slide) to the
-// model's. at: which sphere point (its logo); x: the person's photo centre
-// from the middle of the row (28/34/39/45 wide, 8px overlap).
+// model's. who: which person (TEAM); at: which sphere point (its logo).
+// Each starts at the centre of that person's photo, measured as it draws,
+// and runs behind it, so it comes out of their circle.
 const LINKS = [
-  { x: -47, from: "oklch(0.56 0.22 262)", at: 0, to: "oklch(0.4 0 0)" }, // Kurosawa → OpenAI
-  { x: -47, from: "oklch(0.56 0.22 262)", at: 11, to: "oklch(0.68 0.13 40)" }, // Kurosawa → Claude
-  { x: -24, from: "oklch(0.58 0.21 300)", at: 2, to: "oklch(0.62 0.1 300)" }, // Deji → Gemini
-  { x: -24, from: "oklch(0.58 0.21 300)", at: 13, to: "oklch(0.72 0.12 205)" }, // Deji → Perplexity
-  { x: 4.5, from: "oklch(0.76 0.16 75)", at: 14, to: "oklch(0.53 0.2 258)" }, // Stephen → Meta
-  { x: 4.5, from: "oklch(0.76 0.16 75)", at: 6, to: "oklch(0.8 0.16 85)" }, // Stephen → Hugging Face
+  { who: 0, from: "oklch(0.56 0.22 262)", at: 0, to: "oklch(0.4 0 0)" }, // Kurosawa → OpenAI
+  { who: 0, from: "oklch(0.56 0.22 262)", at: 11, to: "oklch(0.68 0.13 40)" }, // Kurosawa → Claude
+  { who: 1, from: "oklch(0.58 0.21 300)", at: 2, to: "oklch(0.62 0.1 300)" }, // Deji → Gemini
+  { who: 1, from: "oklch(0.58 0.21 300)", at: 13, to: "oklch(0.72 0.12 205)" }, // Deji → Perplexity
+  { who: 2, from: "oklch(0.76 0.16 75)", at: 14, to: "oklch(0.53 0.2 258)" }, // Stephen → Meta
+  { who: 2, from: "oklch(0.76 0.16 75)", at: 6, to: "oklch(0.8 0.16 85)" }, // Stephen → Hugging Face
 ];
 // The lines fade in once the sphere has settled, one after another
 const LINKS_AT = SPHERE_AT + EXPLODE_MS + 200;
@@ -108,6 +109,8 @@ export function ThinkTogether() {
   const items = useRef<(HTMLSpanElement | null)[]>([]);
   const lines = useRef<(SVGPathElement | null)[]>([]);
   const grads = useRef<(SVGLinearGradientElement | null)[]>([]);
+  const origin = useRef<HTMLDivElement>(null);
+  const photos = useRef<(HTMLImageElement | null)[]>([]);
 
   // Explode the sphere out of the centre, then turn it: each logo's
   // position, size, fade, blur and layer (in front of the row when it's on
@@ -132,21 +135,34 @@ export function ThinkTogether() {
         el.style.filter = depth < 0.45 ? `blur(${((0.45 - depth) * 4).toFixed(2)}px)` : "none";
         el.style.zIndex = depth > 0.55 ? "20" : "0";
       });
-      // The lines follow their logos, fading as a logo swings to the back
+      // The lines run from each photo's centre (measured, relative to the
+      // sphere's centre) and follow their logos, fading as a logo swings to
+      // the back
+      const o = origin.current?.getBoundingClientRect();
       LINKS.forEach((l, j) => {
         const line = lines.current[j];
         const grad = grads.current[j];
-        if (!line || !grad) return;
+        const photo = photos.current[l.who]?.getBoundingClientRect();
+        if (!line || !grad || !o || !photo) return;
+        const sx = photo.left + photo.width / 2 - o.left;
+        const sy = photo.top + photo.height / 2 - o.top;
         const { x, y, depth } = place(sphere[l.at], Math.max(turn, 0));
-        // A curve, not a straight line: bowed to one side by a third of
-        // its length, always the same way round
-        const mx = (l.x + x) / 2;
-        const my = y / 2;
-        const bow = 0.33;
-        const cx = mx - y * bow;
-        const cy = my + (x - l.x) * bow;
-        line.setAttribute("d", `M${l.x} 0 Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`);
-        const coords = { x1: String(l.x), y1: "0", x2: String(x), y2: String(y) };
+        // Bowed away from the row (up or down), so a line leaves its own
+        // photo rather than passing behind a neighbour's
+        const mx = (sx + x) / 2;
+        const my = (sy + y) / 2;
+        const bow = 0.25;
+        let cx = mx - (y - sy) * bow;
+        let cy = my + (x - sx) * bow;
+        if (Math.abs(cy) < Math.abs(my - (x - sx) * bow)) {
+          cx = mx + (y - sy) * bow;
+          cy = my - (x - sx) * bow;
+        }
+        line.setAttribute(
+          "d",
+          `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`,
+        );
+        const coords = { x1: sx.toFixed(1), y1: sy.toFixed(1), x2: String(x), y2: String(y) };
         for (const [k, v] of Object.entries(coords)) grad.setAttribute(k, v);
         const fade = reduced ? 1 : Math.min(Math.max((elapsed - LINKS_AT - j * 90) / 400, 0), 1);
         line.style.opacity = String(fade * (0.2 + depth * 0.7));
@@ -160,7 +176,7 @@ export function ThinkTogether() {
   return (
     <div className="think-together absolute inset-0 flex items-center justify-center" aria-hidden>
       {/* The sphere of AI models: near ones pass in front of the row */}
-      <div className="absolute top-1/2 left-1/2">
+      <div ref={origin} className="absolute top-1/2 left-1/2">
         {/* The lines from the people to their models, between the far
             logos and the row */}
         <svg className="absolute top-0 left-0 z-[5] overflow-visible" width="1" height="1">
@@ -211,6 +227,9 @@ export function ThinkTogether() {
         {TEAM.map((p, i) => (
           <Image
             key={p.name}
+            ref={(el) => {
+              photos.current[i] = el;
+            }}
             src={p.avatar}
             alt=""
             width={SIZES[i]}
