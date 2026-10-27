@@ -39,9 +39,11 @@ export const TOUR: TourSlide[] = [
     id: "how",
     title: "Research with the team",
     body: "Start a project with a question. Each answer can branch into its own node, so you can follow every direction without losing the thread.",
-    art: ({ leaving }) => <BranchStreak leaving={leaving} />,
-    // On Continue the blue line runs on out of the text box
-    exit: 450,
+    // Exits like the others, straight away from wherever it is (scale,
+    // blur, fade). BranchStreak's own exit (finish the picture, run the
+    // line out of the text box) is kept but not used, for an interruptible
+    // exit.
+    art: () => <BranchStreak />,
     preview: <MessageBars />,
   },
   {
