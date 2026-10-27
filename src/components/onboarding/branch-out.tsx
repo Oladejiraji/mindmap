@@ -242,7 +242,7 @@ export function BranchOut() {
             </p>
           </div>
           <div
-            className="corner-squircle flex items-center rounded-4xl bg-white px-3 text-body-sm text-[oklch(0.22_0.012_262)] shadow-node"
+            className="bo-card corner-squircle flex items-center rounded-4xl px-3 text-body-sm text-[oklch(0.22_0.012_262)]"
             style={{ height: b.h }}
           >
             <span className="truncate">{b.title}</span>

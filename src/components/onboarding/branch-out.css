@@ -95,6 +95,17 @@
   }
 }
 
+/* The cards: a grey one step darker than the panel (oklch 0.985 → 0.965);
+   their edge per interfaces.dev, a 1px ring drawn with a shadow (no
+   border), then layered shadows for depth */
+.branch-out .bo-card {
+  background: oklch(0.965 0 0);
+  box-shadow:
+    0 0 0 1px oklch(0 0 0 / 0.06),
+    0 1px 2px oklch(0 0 0 / 0.04),
+    0 2px 8px oklch(0 0 0 / 0.04);
+}
+
 @keyframes bo-draw {
   to {
     stroke-dashoffset: 0;
