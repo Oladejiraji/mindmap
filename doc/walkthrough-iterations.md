@@ -78,6 +78,7 @@ Where it lives: `src/components/onboarding/` (`walkthrough.tsx` the dialog, `tou
 
 | # | Date | Version | Commit |
 |---|---|---|---|
+| 7 | 2026-10-27 | **Explode, closer.** The logos burst out of the centre to the sphere (0.9s, fast-out, 30ms apart), then it turns. Chips 36px (was 28), scaled 0.5× at the back to 1.3× at the front; sphere 1.55× wider than tall (radius 128). Near logos (depth > 0.55) pass in front of the row; far ones fade and blur up to ~1.8px | `2660a4e` |
 | 6 | 2026-10-27 | White outline (ring offset) removed: the coloured rings sit right on the photos | `dc045d2` |
 | 5 | 2026-10-27 | **Sphere of models.** Row 30% smaller (28, 34, 39, + 45). After it blurs in, 18 AI model logos (OpenAI, Claude, Gemini, Perplexity, Meta, Anthropic, Hugging Face, Ollama, Copilot, X/Grok; Simple Icons, brand colours) in 28px white circles blur in on a Fibonacci sphere (radius 118, tilted 14°) around the row and turn once every 24s; far logos shrink to 60% and fade to 25%; the row stays in front. Reduced motion: still | `c1755e1` |
 | 4 | 2026-10-27 | Blur in: each circle starts at a 6px blur and sharpens as it fades and scales in (420ms, 120ms apart) | `9b7ba8d` |
