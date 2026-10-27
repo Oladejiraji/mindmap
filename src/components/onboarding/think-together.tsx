@@ -119,6 +119,22 @@ export function ThinkTogether() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     const start = performance.now();
+    // Where each photo's centre sits from the sphere's centre: measured
+    // once the row has settled, and again if the panel resizes (measuring
+    // every frame made the lines twitch)
+    let starts: { x: number; y: number }[] | null = null;
+    const measure = () => {
+      const o = origin.current?.getBoundingClientRect();
+      if (!o) return;
+      starts = photos.current.map((el) => {
+        const r = el?.getBoundingClientRect();
+        return r ? { x: r.left + r.width / 2 - o.left, y: r.top + r.height / 2 - o.top } : { x: 0, y: 0 };
+      });
+    };
+    const ro = new ResizeObserver(() => {
+      if (starts) measure();
+    });
+    if (origin.current?.parentElement) ro.observe(origin.current.parentElement);
     // Fast out, settling: a burst
     const burst = (t: number) => 1 - Math.pow(1 - Math.min(Math.max(t, 0), 1), 4);
     const draw = (now: number) => {
@@ -138,29 +154,22 @@ export function ThinkTogether() {
       // The lines run from each photo's centre (measured, relative to the
       // sphere's centre) and follow their logos, fading as a logo swings to
       // the back
-      const o = origin.current?.getBoundingClientRect();
+      if (!starts && (reduced || elapsed >= LINKS_AT)) measure();
       LINKS.forEach((l, j) => {
         const line = lines.current[j];
         const grad = grads.current[j];
-        const photo = photos.current[l.who]?.getBoundingClientRect();
-        if (!line || !grad || !o || !photo) return;
-        const sx = photo.left + photo.width / 2 - o.left;
-        const sy = photo.top + photo.height / 2 - o.top;
+        const start = starts?.[l.who];
+        if (!line || !grad || !start) return;
+        const { x: sx, y: sy } = start;
         const { x, y, depth } = place(sphere[l.at], Math.max(turn, 0));
-        // Bowed away from the row (up or down), so a line leaves its own
-        // photo rather than passing behind a neighbour's
-        const mx = (sx + x) / 2;
-        const my = (sy + y) / 2;
-        const bow = 0.25;
-        let cx = mx - (y - sy) * bow;
-        let cy = my + (x - sx) * bow;
-        if (Math.abs(cy) < Math.abs(my - (x - sx) * bow)) {
-          cx = mx + (y - sy) * bow;
-          cy = my - (x - sx) * bow;
-        }
+        // Leaves the photo straight up or down towards its model, then
+        // sweeps across into the logo. Every control point moves smoothly
+        // with the logo, so the curve never jumps.
+        const c1y = sy + (y - sy) * 0.65;
+        const c2x = x - (x - sx) * 0.45;
         line.setAttribute(
           "d",
-          `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`,
+          `M${sx.toFixed(1)} ${sy.toFixed(1)} C${sx.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${y.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`,
         );
         const coords = { x1: sx.toFixed(1), y1: sy.toFixed(1), x2: String(x), y2: String(y) };
         for (const [k, v] of Object.entries(coords)) grad.setAttribute(k, v);
@@ -170,7 +179,10 @@ export function ThinkTogether() {
       if (!reduced) frame = requestAnimationFrame(draw);
     };
     frame = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      ro.disconnect();
+    };
   }, []);
 
   return (
