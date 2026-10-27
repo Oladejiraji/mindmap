@@ -6,8 +6,8 @@
  * Mindmap?" types into it while Kurosawa "is typing…". Then it settles
  * onto the canvas and his tag becomes "created a nexus point"; from the
  * moment it comes to rest the auth page's pulse (VapourHalo) beats round
- * it rhythmically, and subtle wireframes of connectors and empty nodes
- * draw out below it. Kurosawa's tag sits above the card, as on the earlier
+ * it rhythmically, and subtle wireframe connectors draw out of it and on
+ * past the panel's edge. Kurosawa's tag sits above the card, as on the earlier
  * slides. Reduced motion shows it settled, without the pulse.
  * Laid out at the panel's 578 × 318 and scaled to fit.
  */
@@ -34,15 +34,14 @@ const SETTLE_MS = 380;
 // Once it's at rest, the pulse beats this often
 const BEAT_MS = 3000;
 
-// Wireframes of what could grow from it: thin connectors from the node's
-// foot to empty dashed nodes below, in subtle greys, drawn once it settles
-const GHOST = { y: 252, w: 112, h: 28 };
-const GHOSTS = [NODE.x - 150, NODE.x, NODE.x + 150];
-const wire = (gx: number) => {
+// Wireframes of what could grow from it: thin connectors in a subtle grey
+// fanning out of the node's foot and running on past the panel's edge,
+// drawn once it settles
+const ENDS = [NODE.x - 230, NODE.x - 80, NODE.x + 80, NODE.x + 230];
+const wire = (ex: number) => {
   const y1 = NODE.y + NODE.h / 2;
-  const y2 = GHOST.y - GHOST.h / 2;
-  const mid = (y1 + y2) / 2;
-  return `M${NODE.x} ${y1} C${NODE.x} ${mid} ${gx} ${mid} ${gx} ${y2}`;
+  const y2 = H + 24; // beyond the bottom edge
+  return `M${NODE.x} ${y1} C${NODE.x} ${y1 + 70} ${ex} ${y2 - 90} ${ex} ${y2}`;
 };
 
 export function CanvasAwaits() {
@@ -107,25 +106,16 @@ export function CanvasAwaits() {
         />
       ))}
 
-      {/* The wireframes: connectors and empty nodes, once it's at rest */}
+      {/* The wireframes: connectors running off the canvas, once it's at
+          rest */}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className={cn("ca-wires absolute inset-0 size-full", settled && "ca-wires-on")}
         fill="none"
         style={{ ["--ca-wires-at" as string]: `${SETTLE_MS + 200}ms` }}
       >
-        {GHOSTS.map((gx, i) => (
-          <g key={gx} style={{ ["--i" as string]: i }}>
-            <path d={wire(gx)} pathLength={1} className="ca-wire" />
-            <rect
-              className="ca-ghost"
-              x={gx - GHOST.w / 2}
-              y={GHOST.y - GHOST.h / 2}
-              width={GHOST.w}
-              height={GHOST.h}
-              rx={14}
-            />
-          </g>
+        {ENDS.map((ex, i) => (
+          <path key={ex} d={wire(ex)} pathLength={1} className="ca-wire" style={{ ["--i" as string]: i }} />
         ))}
       </svg>
 
