@@ -4,7 +4,7 @@
  * its right) is barely there until they arrive. Their strike makes the
  * impact: a blue edge runs from the point of contact round the square to
  * its right side, and one blue line draws out of it into a text box (Apple's
- * iOS text field size), where a line of text writes in behind the caret. The five colours sit around our blue's
+ * iOS text field size), where "What does Mindmap do?" types in. The five colours sit around our blue's
  * complement in OKLCH (brand oklch(0.558 0.226 262) → complement hue 82),
  * fanned 25° apart. One 6s loop; reduced motion shows the finished
  * picture. Drawn at the panel's 578 × 318 and scaled to fit.
@@ -36,11 +36,35 @@ const LINES = [
 const START_X = 48;
 
 // The text box the blue line runs into, at Apple's iOS text field size:
-// 36pt tall, 10pt corners, a grey fill and no border, one line of text
-// with the blue caret. Its right margin matches the dots' 48 on the left.
-const TEXT = { x: 356, w: 174, h: 36, r: 10, pad: 12 };
-const TEXT_W = 104;
-const TEXT_LINE_H = 7;
+// 36pt tall, 10pt corners, a grey fill and no border, with the blue caret.
+// Its right margin matches the dots' 48 on the left.
+const TEXT = { x: 350, w: 180, h: 36, r: 10, pad: 12 };
+
+// What gets typed, and where each character ends (Inter 13px, measured
+// with getSubStringLength) so the caret lands right after it. Characters
+// appear one at a time from TYPE_FROM to TYPE_TO (% of the loop).
+const PHRASE = "What does Mindmap do?";
+const ENDS = [
+  12.8, 20.4, 27.6, 31.8, 35.4, 43.3, 51, 58.6, 65.4, 69, 80.7, 83.7, 91.4, 99.3, 110.6, 117.8, 125.7, 129.3, 137.2,
+  145, 151.5,
+];
+const TYPE_FROM = 33;
+const TYPE_TO = 55;
+const typedAt = (i: number) => +(TYPE_FROM + ((TYPE_TO - TYPE_FROM) * i) / (PHRASE.length - 1)).toFixed(2);
+
+// One keyframe per character (it appears at its moment), and the caret's
+// steps, generated so each lands exactly when its character does
+const typingCss = [
+  ...[...PHRASE].map(
+    (_, i) =>
+      `@keyframes bs-ch-${i}{0%,${typedAt(i)}%{opacity:0}${typedAt(i) + 0.01}%,100%{opacity:1}}.branch-streak .bs-ch-${i}{animation:bs-ch-${i} var(--bs-dur) infinite}`,
+  ),
+  `@keyframes bs-caret-run{0%,${TYPE_FROM - 0.01}%{transform:translateX(0)}${[...PHRASE]
+    .map((_, i) => `${typedAt(i)}%{transform:translateX(${ENDS[i] + 1}px)}`)
+    .join("")}100%{transform:translateX(${ENDS[ENDS.length - 1] + 1}px)}}`,
+  `.branch-streak .bs-caret-run{animation:bs-caret-run var(--bs-dur) steps(1,end) infinite}`,
+  `@media (prefers-reduced-motion:reduce){.branch-streak [class*="bs-ch-"],.branch-streak .bs-caret-run{animation:none}.branch-streak .bs-caret-run{transform:translateX(${ENDS[ENDS.length - 1] + 1}px)}}`,
+].join("");
 
 // From its dot on the left, straight on, then curving into the square's
 // left side
@@ -70,19 +94,19 @@ export function BranchStreak() {
         {/* The blue line from the square into the text box */}
         <line x1={BOX_RIGHT} y1={MID} x2={TEXT.x} y2={MID} pathLength={1} className="bs-out" />
 
-        {/* The text box: its text writes in with the caret riding ahead
-            of it, then the caret blinks */}
+        {/* The text box: "What does Mindmap do?" types in a character at a
+            time with the caret just after it, then the caret blinks */}
+        <style>{typingCss}</style>
         <rect className="bs-text" x={TEXT.x} y={textTop} width={TEXT.w} height={TEXT.h} rx={TEXT.r} />
-        <rect
-          className="bs-text-line"
-          x={TEXT.x + TEXT.pad}
-          y={MID - TEXT_LINE_H / 2}
-          width={TEXT_W}
-          height={TEXT_LINE_H}
-          rx={TEXT_LINE_H / 2}
-        />
-        <g className="bs-caret-run" style={{ ["--bs-text-w" as string]: `${TEXT_W + 3}px` }}>
-          <rect className="bs-caret" x={TEXT.x + TEXT.pad} y={MID - 10} width="2" height="20" rx="1" />
+        <text className="bs-typed" x={TEXT.x + TEXT.pad} y={MID} dominantBaseline="central" fontSize="13">
+          {[...PHRASE].map((c, i) => (
+            <tspan key={i} className={`bs-ch-${i}`}>
+              {c}
+            </tspan>
+          ))}
+        </text>
+        <g className="bs-caret-run">
+          <rect className="bs-caret" x={TEXT.x + TEXT.pad} y={MID - 9} width="2" height="18" rx="1" />
         </g>
 
         {/* The 32px square. Grey until the lines strike its left edge;

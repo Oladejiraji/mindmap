@@ -8,8 +8,8 @@
    21.2–29.2% the blue line draws from the square into the text box
    29.2–31.5% the text box (iOS text field, 36pt) comes up to full and the
              blue caret appears
-   33–48%    its line of text writes in behind the caret; then the caret
-             blinks
+   33–55%    "What does Mindmap do?" types in a character at a time, the
+             caret stepping after each; then the caret blinks
    86–95%    everything fades; hidden until the loop restarts */
 .branch-streak {
   --bs-dur: 6s;
@@ -160,42 +160,17 @@
   }
 }
 
-/* Its line of text, writing in from the left (33–48%) */
-.branch-streak .bs-text-line {
-  fill: oklch(0.8 0 0);
-  transform-box: fill-box;
-  transform-origin: left center;
-  transform: scaleX(0);
-  animation: bs-text-line var(--bs-dur) infinite;
+/* The typed text (each character's keyframe and the caret's steps are
+   generated in branch-streak.tsx from the measured glyph positions) */
+.branch-streak .bs-typed {
+  fill: oklch(0.4 0 0);
 }
-@keyframes bs-text-line {
-  0%,
-  33% {
-    transform: scaleX(0);
-    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
-  }
-  48%,
-  100% {
-    transform: scaleX(1);
-  }
+.branch-streak .bs-typed tspan {
+  opacity: 0;
 }
 
-/* The blue caret: appears with the box, rides ahead of the text as it
-   writes (same timing), then blinks */
-.branch-streak .bs-caret-run {
-  animation: bs-caret-run var(--bs-dur) infinite;
-}
-@keyframes bs-caret-run {
-  0%,
-  33% {
-    transform: translateX(0);
-    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
-  }
-  48%,
-  100% {
-    transform: translateX(var(--bs-text-w));
-  }
-}
+/* The blue caret: appears with the box, steps along after each character
+   as it types (33–55%), then blinks */
 .branch-streak .bs-caret {
   fill: var(--brand-solid);
   opacity: 0;
@@ -237,8 +212,6 @@
   .branch-streak .bs-track-out,
   .branch-streak .bs-out,
   .branch-streak .bs-text,
-  .branch-streak .bs-text-line,
-  .branch-streak .bs-caret-run,
   .branch-streak .bs-caret {
     animation: none;
   }
@@ -255,11 +228,8 @@
   .branch-streak .bs-out {
     stroke-dashoffset: 0;
   }
-  .branch-streak .bs-text-line {
-    transform: none;
-  }
-  .branch-streak .bs-caret-run {
-    transform: translateX(var(--bs-text-w));
+  .branch-streak .bs-typed tspan {
+    opacity: 1;
   }
   .branch-streak .bs-caret {
     opacity: 1;
