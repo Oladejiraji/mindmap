@@ -21,6 +21,10 @@
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-geist-sans);
   --font-diatype: var(--font-diatype);
+  --font-inter-display: var(--font-inter-display);
+  --font-bricolage: var(--font-bricolage);
+  --font-exo2: var(--font-exo2);
+  --font-google-sans: var(--font-google-sans);
   --text-13: 0.8125rem; /* 13px */
   --text-11: 0.6875rem; /* 11px */
   --color-sidebar-ring: var(--sidebar-ring);
