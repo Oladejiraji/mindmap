@@ -30,7 +30,6 @@
   --color-placeholder-inverse: var(--placeholder-inverse);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist-sans);
   --font-diatype: var(--font-diatype);
   --font-inter-display: var(--font-inter-display);
   --font-bricolage: var(--font-bricolage);
@@ -174,20 +173,42 @@
   --placeholder-inverse: oklch(0.982 0 0 / 0.4);
 
   /* Component shadows — each belongs to one element */
-  --elevation-button-primary: 0 0 0 0.7px #5e83cf, inset 0 0.4px 0 0 #8daef0e5,
+  --elevation-button-primary:
+    0 0 0 0.7px #5e83cf, inset 0 0.4px 0 0 #8daef0e5,
     inset 0 -0.5px 0 0 #00000040, 0 8px 16px 0 #165eef1f;
   --elevation-input-dark: 0 0 0 1px #f9f9f90d;
-  --elevation-node: 0 0 0 1px #1251cb09, 0 3px 12px 0 #0b0b0b10, 0 8px 24px 0 #00000009;
+  --elevation-node:
+    0 0 0 1px #1251cb09, 0 3px 12px 0 #0b0b0b10, 0 8px 24px 0 #00000009;
   --elevation-node-primary: 0 8px 30px -12px rgb(37 99 235 / 0.27);
   --elevation-node-inset: 0 1px 3px 0 #82a7f121, 0 0 0 0.5px #82a7f1;
-  --elevation-handle: inset 0 1.17px 2.33px 0 #00000040, inset 0.18px 0.18px 0.58px 0 #4080fd,
+  --elevation-handle:
+    inset 0 1.17px 2.33px 0 #00000040, inset 0.18px 0.18px 0.58px 0 #4080fd,
     inset -0.18px -0.18px 0.58px 0 #4080fd;
 
   /* Gradients */
   --gradient-button-primary: linear-gradient(180deg, #226afa 0%, #155ded 100%);
-  --gradient-button-primary-hover: linear-gradient(180deg, #3277fb 0%, #1d66f5 100%);
-  --gradient-auth-panel: linear-gradient(180deg, #0b0b0b -14.91%, #111111 63.07%, #252525 102.06%, #ababab 112.89%, #2e2e2e 112.89%);
-  --gradient-spectrum: linear-gradient(var(--gradient-angle), #dffbff 5.2%, #c2daf9 21.33%, #aeb3e4 37.46%, #e2909c 54.48%, #ffa189 69.71%, #ffd060 94.8%);
+  --gradient-button-primary-hover: linear-gradient(
+    180deg,
+    #3277fb 0%,
+    #1d66f5 100%
+  );
+  --gradient-auth-panel: linear-gradient(
+    180deg,
+    #0b0b0b -14.91%,
+    #111111 63.07%,
+    #252525 102.06%,
+    #ababab 112.89%,
+    #2e2e2e 112.89%
+  );
+  --gradient-spectrum: linear-gradient(
+    var(--gradient-angle),
+    #dffbff 5.2%,
+    #c2daf9 21.33%,
+    #aeb3e4 37.46%,
+    #e2909c 54.48%,
+    #ffa189 69.71%,
+    #ffd060 94.8%
+  );
 }
 
 /*
@@ -216,28 +237,42 @@
   /* Main-panel surface, matching how define.app renders: lightest at the
    * top centre, easing to a slightly darker edge. One line — the CSS build
    * drops multi-line custom properties. */
-  --gradient-panel: radial-gradient(120% 95% at 50% 0%, var(--surface-page) 35%, var(--surface-panel-edge) 100%);
+  --gradient-panel: radial-gradient(
+    120% 95% at 50% 0%,
+    var(--surface-page) 35%,
+    var(--surface-panel-edge) 100%
+  );
 }
 
 /* Elevation scale values, light and dark */
 :root {
   --s-border: 0 0 0 1px var(--border-default);
-  --s-default: 0 0 0 0.5px #0000000f, 0 1px 1px -1px #0000001a, 0 1px 2px 0 #0000000d;
-  --s-large: 0 0 0 0.5px #0000000f, 0 2px 3px -2px #0000000f, 0 3px 12px -4px #0000001a, 0 4px 16px -8px #0000000d;
-  --s-extra-large: 0 0 0 0.5px #0000000f, 0 8px 40px 0 #0000000d, 0 12px 32px -16px #00000026;
+  --s-default:
+    0 0 0 0.5px #0000000f, 0 1px 1px -1px #0000001a, 0 1px 2px 0 #0000000d;
+  --s-large:
+    0 0 0 0.5px #0000000f, 0 2px 3px -2px #0000000f, 0 3px 12px -4px #0000001a,
+    0 4px 16px -8px #0000000d;
+  --s-extra-large:
+    0 0 0 0.5px #0000000f, 0 8px 40px 0 #0000000d, 0 12px 32px -16px #00000026;
 }
 .dark {
   --s-border: 0 0 0 1px var(--border-default);
-  --s-default: inset 0 0 0 0.5px #ffffff12, 0 0 0 0.5px #00000066, 0 1px 2px 0 #00000040;
-  --s-large: inset 0 0 0 0.5px #ffffff12, 0 0 0 1px #0000004d, 0 2px 3px -2px #00000026, 0 3px 8px -2px #00000066, 0 4px 12px -4px #00000080;
-  --s-extra-large: inset 0 0 0 0.5px #ffffff12, 0 0 0 1px #00000066, 0 8px 40px 0 #0000004d, 0 12px 32px -16px #00000080;
+  --s-default:
+    inset 0 0 0 0.5px #ffffff12, 0 0 0 0.5px #00000066, 0 1px 2px 0 #00000040;
+  --s-large:
+    inset 0 0 0 0.5px #ffffff12, 0 0 0 1px #0000004d, 0 2px 3px -2px #00000026,
+    0 3px 8px -2px #00000066, 0 4px 12px -4px #00000080;
+  --s-extra-large:
+    inset 0 0 0 0.5px #ffffff12, 0 0 0 1px #00000066, 0 8px 40px 0 #0000004d,
+    0 12px 32px -16px #00000080;
 }
 
 /* Shared motion. Entrances fill backwards: the element's own styles are its
  * resting state, so `motion-reduce:animate-none` leaves it there. Tune per
  * use with the vars or [animation-duration:…]. */
 @theme {
-  --shadow-node-focus: 0 0 0 4px oklch(from var(--brand-solid) l c h / 0.18),
+  --shadow-node-focus:
+    0 0 0 4px oklch(from var(--brand-solid) l c h / 0.18),
     0 14px 30px -8px oklch(from var(--brand-solid) l c h / 0.5);
 
   --animate-word-in: word-in 450ms ease-out backwards;
@@ -303,7 +338,6 @@
     }
   }
 }
-
 
 @layer base {
   * {
