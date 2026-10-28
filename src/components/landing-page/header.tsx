@@ -4,12 +4,7 @@ import Link from "next/link";
 import { Search } from "../icons";
 import { useSetAtom } from "jotai";
 import { gridLinesAtom } from "@/lib/atoms/grid-lines";
-
-const links = [
-  { id: 1, label: "Features", href: "#" },
-  { id: 2, label: "Solutions", href: "#" },
-  { id: 3, label: "Developers", href: "#" },
-];
+import { NavArea } from "./nav/nav-area";
 
 export function Header() {
   const ref = useRef<HTMLDivElement>(null);
@@ -52,17 +47,7 @@ export function Header() {
       </div>
       <div className="flex items-center flex-1 justify-between">
         <div className="flex gap-1 items-center">
-          {links.map((item) => {
-            return (
-              <Link key={item?.id} href={item?.href}>
-                <div className="h-7 flex items-center px-2">
-                  <p className="font-inter-display text-[#BAE1FB] text-13 leading-5 tracking-[-2.6%] text-shadow-[0_1px_1px_0_rgb(0_0_0/0.12)]">
-                    {item?.label}
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
+          <NavArea />
 
           <div className="w-7 h-7 flex items-center justify-center">
             <Search />
