@@ -22,6 +22,7 @@ import type * as lib_rateLimiter from "../lib/rateLimiter.js";
 import type * as lib_validation from "../lib/validation.js";
 import type * as memberships from "../memberships.js";
 import type * as messages from "../messages.js";
+import type * as migrations from "../migrations.js";
 import type * as nodes from "../nodes.js";
 import type * as organizations from "../organizations.js";
 import type * as threads from "../threads.js";
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   "lib/validation": typeof lib_validation;
   memberships: typeof memberships;
   messages: typeof messages;
+  migrations: typeof migrations;
   nodes: typeof nodes;
   organizations: typeof organizations;
   threads: typeof threads;

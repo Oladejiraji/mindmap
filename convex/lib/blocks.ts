@@ -1,14 +1,11 @@
 /**
- * The one converter from BlockNote JSON (how node content is stored) to text.
- * Shared by the backend (AI context) and the frontend (canvas previews,
- * snippets), so what the AI sees and what the user sees cannot drift apart.
+ * MIGRATION ONLY: converts legacy BlockNote JSON node content to markdown.
+ * Node content is stored as markdown now; this exists for
+ * convex/migrations.ts and goes away with it.
  *
- * Pure functions with no imports: safe to load in Convex and in the browser.
  * Covers BlockNote's default schema (v0.55). Unknown block or inline types
- * fall back to their text, so new content degrades instead of disappearing.
- *
- * What markdown can't carry is dropped on purpose: underline, text and
- * background colors, alignment, column widths, media dimensions.
+ * fall back to their text. What markdown can't carry is dropped: underline,
+ * text and background colors, alignment, column widths, media dimensions.
  */
 
 type Styles = Record<string, boolean | string | undefined>;
@@ -43,30 +40,12 @@ const LIST_TYPES = new Set([
   "toggleListItem",
 ]);
 
-/**
- * Makes an editor document storable in Convex. BlockNote leaves `undefined`
- * in places Convex rejects (e.g. a table's `columnWidths: [undefined, …]`).
- * A JSON round trip turns those into `null` and drops undefined fields;
- * BlockNote reads `null` the same as `undefined` when it loads them back.
- */
-export function toStorableContent<T>(blocks: T): T {
-  return JSON.parse(JSON.stringify(blocks)) as T;
-}
-
 /** Converts stored node content to markdown. Accepts anything `content` may hold. */
 export function contentToMarkdown(content: unknown): string {
   if (!content) return "";
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   return blocksToMarkdown(content as Block[], 0).trim();
-}
-
-/** Converts stored node content to a single line of plain text, for snippets. */
-export function contentToPlainText(content: unknown): string {
-  if (!content) return "";
-  if (typeof content === "string") return content.trim();
-  if (!Array.isArray(content)) return "";
-  return blocksToPlainText(content as Block[]).replace(/\s+/g, " ").trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -222,35 +201,6 @@ function styleText(text: string, styles: Styles | undefined): string {
   if (styles.italic) s = `*${s}*`;
   if (styles.bold) s = `**${s}**`;
   return `${lead}${s}${trail}`;
-}
-
-// ---------------------------------------------------------------------------
-// Plain text
-
-function blocksToPlainText(blocks: Block[]): string {
-  return blocks
-    .map((block) => {
-      let text = "";
-      if (Array.isArray(block.content)) {
-        text = inlineToPlainText(block.content);
-      } else if (block.content?.type === "tableContent") {
-        text = block.content.rows
-          .flatMap((row) =>
-            row.cells.map((cell) =>
-              inlineToPlainText(Array.isArray(cell) ? cell : (cell.content ?? [])),
-            ),
-          )
-          .join(" ");
-      }
-      // Media blocks carry their text in props, not content.
-      if (!text && block.props) {
-        text = str(block.props.caption) || str(block.props.name);
-      }
-      const children = block.children?.length ? blocksToPlainText(block.children) : "";
-      return [text, children].filter(Boolean).join(" ");
-    })
-    .filter(Boolean)
-    .join(" ");
 }
 
 function inlineToPlainText(content: InlineContent[]): string {

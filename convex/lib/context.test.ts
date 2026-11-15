@@ -5,9 +5,7 @@ import type { Id } from "../_generated/dataModel";
 import { modules } from "../test.setup";
 import { buildPromptContext, toModelInput, type PromptContext } from "./context";
 
-const paragraph = (t: string) => [
-  { type: "paragraph", props: {}, content: [{ type: "text", text: t, styles: {} }], children: [] },
-];
+const paragraph = (t: string) => t;
 
 /**
  * Pricing (root)
@@ -19,7 +17,7 @@ async function setupTree() {
   const t = convexTest(schema, modules);
   const ids = await t.run(async (ctx) => {
     const threadId = await ctx.db.insert("threads", { userId: "u1", name: "Pricing" });
-    const node = (parentId: Id<"nodes"> | null, title: string, content?: unknown) =>
+    const node = (parentId: Id<"nodes"> | null, title: string, content?: string) =>
       ctx.db.insert("nodes", { userId: "u1", threadId, parentId, title, content });
 
     const root = await node(null, "Pricing", paragraph("We sell to small teams."));

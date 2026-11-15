@@ -133,13 +133,24 @@ describe("nodes", () => {
 
   test("updateContent", async () => {
     const { t, alice, bob, childId } = await setup();
-    const content = [{ type: "paragraph", content: [{ type: "text", text: "Hi", styles: {} }] }];
+    const content = "Hi **there**";
     await expect(bob.mutation(api.nodes.updateContent, { nodeId: childId, content })).rejects.toMatchObject(NOT_FOUND);
     await expect(t.mutation(api.nodes.updateContent, { nodeId: childId, content })).rejects.toMatchObject(UNAUTHORIZED);
     expect((await t.run((ctx) => ctx.db.get(childId)))?.content).toBeUndefined();
 
     await alice.mutation(api.nodes.updateContent, { nodeId: childId, content });
     expect((await t.run((ctx) => ctx.db.get(childId)))?.content).toEqual(content);
+  });
+
+  test("updateContent stores an empty document as no content and refuses oversized ones", async () => {
+    const { t, alice, childId } = await setup();
+    await alice.mutation(api.nodes.updateContent, { nodeId: childId, content: "Draft" });
+    await alice.mutation(api.nodes.updateContent, { nodeId: childId, content: "  \n " });
+    expect((await t.run((ctx) => ctx.db.get(childId)))?.content).toBeUndefined();
+
+    await expect(
+      alice.mutation(api.nodes.updateContent, { nodeId: childId, content: "x".repeat(200_001) }),
+    ).rejects.toThrow(/exceeds/);
   });
 
   test("createEmptyBranch can't attach a branch to someone else's node", async () => {

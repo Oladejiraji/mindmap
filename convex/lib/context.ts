@@ -1,6 +1,5 @@
 import type { QueryCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
-import { contentToMarkdown } from "./blocks";
 
 /*
  * What the AI sees when you chat in a node, in two steps:
@@ -84,7 +83,7 @@ function toNodeContext(node: Doc<"nodes">): NodeContext {
   return {
     nodeId: node._id,
     title: node.title,
-    markdown: contentToMarkdown(node.content),
+    markdown: node.content?.trim() ?? "",
   };
 }
 
