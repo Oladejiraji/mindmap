@@ -1,13 +1,13 @@
 import { v } from "convex/values";
 import { internalQuery } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import { buildPromptContext, type ChatMessage } from "./lib/context";
+import { buildPromptContext, type PromptContext } from "./lib/context";
 import { maybeGenerateTitle, streamAssistantResponse } from "./lib/llm";
 import { llmAction } from "./lib/functions";
 
 export const getContext = internalQuery({
   args: { nodeId: v.id("nodes") },
-  handler: async (ctx, args): Promise<ChatMessage[]> => {
+  handler: async (ctx, args): Promise<PromptContext | null> => {
     return await buildPromptContext(ctx, args.nodeId);
   },
 });

@@ -3,7 +3,7 @@ import { generateText, streamText } from "ai";
 import type { ActionCtx } from "../_generated/server";
 import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import type { ChatMessage } from "./context";
+import { toModelInput, type PromptContext } from "./context";
 import { CHAT_MODEL, TITLE_MODEL } from "./models";
 
 const PATCH_INTERVAL_MS = 100;
@@ -20,10 +20,12 @@ export async function streamAssistantResponse(
   ctx: ActionCtx,
   nodeId: Id<"nodes">,
 ): Promise<void> {
-  const messages: ChatMessage[] = await ctx.runQuery(
+  const context: PromptContext | null = await ctx.runQuery(
     internal.chat.getContext,
     { nodeId },
   );
+  if (!context) throw new Error("Node not found");
+  const { system, messages } = toModelInput(context);
 
   const { messageId } = await ctx.runMutation(
     internal.messages.startAssistantMessage,
@@ -32,7 +34,7 @@ export async function streamAssistantResponse(
 
   const result = streamText({
     model: anthropic(CHAT_MODEL),
-    system: "You are a research assistant. Never use emojis.",
+    system,
     messages,
   });
 
