@@ -2,7 +2,8 @@ export interface MindMapNodeData {
   title: string;
   isRoot: boolean;
   isParent: boolean;
-  content?: unknown;
+  /** Markdown. */
+  content?: string;
   onDelete?: (nodeId: string) => void;
   onRename?: (nodeId: string, title: string) => void;
   [key: string]: unknown;

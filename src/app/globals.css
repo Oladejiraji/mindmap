@@ -642,50 +642,45 @@
   font-weight: 600;
 }
 
-.inline-node-editor,
-.inline-node-editor .bn-container,
-.inline-node-editor .bn-editor {
-  background: transparent !important;
-  font-family: inherit;
+/* Node document editor (Tiptap). Typography comes from .markdown-body (side
+   panel) or .node-markdown (canvas card), so editing looks like the preview. */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--muted-foreground);
 }
 
-.inline-node-editor .bn-editor {
-  padding: 0 !important;
-  padding-inline: 0 !important;
-  --bn-colors-editor-background: transparent;
-}
-
-.inline-node-editor .bn-default-styles {
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
-.inline-node-editor .bn-block-group {
+/* Checklists: Tiptap renders ul[data-type=taskList]; the markdown preview
+   (remark-gfm) renders ul.contains-task-list. Same look for both. */
+:is(.markdown-body, .node-markdown) :is(ul[data-type="taskList"], ul.contains-task-list) {
+  list-style: none;
   padding-left: 0;
 }
 
-.inline-node-editor .bn-block-outer {
-  padding: 0;
+:is(.markdown-body, .node-markdown) ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+:is(.markdown-body, .node-markdown) ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  user-select: none;
+}
+
+:is(.markdown-body, .node-markdown) ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+
+:is(.markdown-body, .node-markdown) ul[data-type="taskList"] li > div > p {
   margin: 0;
-  line-height: 1.5;
 }
 
-.inline-node-editor .bn-block-content {
-  padding: 0 !important;
-  min-height: 0;
-}
-
-.inline-node-editor .bn-inline-content {
-  padding: 0;
-  margin: 0;
-}
-
-.inline-node-editor .bn-default-styles p {
-  min-height: 0 !important;
-}
-
-.inline-node-editor .bn-trailing-block {
-  display: none;
+:is(.markdown-body, .node-markdown) input[type="checkbox"] {
+  margin: 0.3em 0.5em 0 0;
+  accent-color: var(--foreground);
 }
 
 .inline-node-editor,
@@ -693,14 +688,13 @@
   cursor: text !important;
 }
 
-.inline-node-editor-dark .bn-editor,
-.inline-node-editor-dark .bn-inline-content,
-.inline-node-editor-dark .bn-default-styles p {
-  color: white !important;
+.inline-node-editor-dark,
+.inline-node-editor-dark .tiptap p.is-editor-empty:first-child::before {
+  color: white;
 }
 
-.inline-node-editor-dark .bn-inline-content::before {
-  color: rgba(255, 255, 255, 0.5) !important;
+.inline-node-editor-dark .tiptap p.is-editor-empty:first-child::before {
+  opacity: 0.5;
 }
 
 .auth-canvas .react-flow__handle {
