@@ -20,7 +20,7 @@ import { ChatInput } from "./chat-input";
 import { CanvasPanel } from "@/components/thread/canvas-panel";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
 import { CheckIcon } from "@/components/icons/check-icon";
-import { contentToPlainText } from "@convex-lib/blocks";
+import { markdownToPlainText } from "@/lib/markdown";
 
 /*
  * ChatGPT-style view of a project's tree.
@@ -329,7 +329,7 @@ function ReplySteps({ parentNotes, priorMessages }: { parentNotes: string[]; pri
   );
 }
 
-const hasNotes = (content: unknown) => contentToPlainText(content).length > 0;
+const hasNotes = (content: string | undefined) => markdownToPlainText(content).length > 0;
 
 // Icon swap (interfaces.dev): the incoming icon grows from 0.25 and
 // unblurs as the outgoing one does the reverse
