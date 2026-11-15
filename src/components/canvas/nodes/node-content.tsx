@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Block } from "@blocknote/core";
-import { blocksToMarkdown } from "@/lib/blocks-to-markdown";
+import { contentToMarkdown } from "@convex-lib/blocks";
 import { InlineNodeEditor } from "./inline-node-editor";
 
 export function NodeContent({
@@ -18,12 +18,7 @@ export function NodeContent({
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const markdown = useMemo(() => {
-    if (!content) return "";
-    if (typeof content === "string") return content;
-    if (Array.isArray(content)) return blocksToMarkdown(content);
-    return "";
-  }, [content]);
+  const markdown = useMemo(() => contentToMarkdown(content), [content]);
 
   if (nodeId && isEditing) {
     return (
