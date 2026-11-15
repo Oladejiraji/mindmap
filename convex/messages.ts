@@ -5,7 +5,7 @@ import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { normalizeMessageContent } from "./lib/validation";
 import { requireNode } from "./lib/auth";
-import { userMutation, userQuery } from "./lib/functions";
+import { userQuery } from "./lib/functions";
 
 export const listByNode = userQuery({
   args: { nodeId: v.id("nodes") },
@@ -23,10 +23,18 @@ export const listByNode = userQuery({
   },
 });
 
-export const append = userMutation({
+/**
+ * Saves the user's chat message. Internal so the browser can't write to the
+ * chat directly: only `chat.sendMessage` calls it, and assistant replies have
+ * their own path (startAssistantMessage → finishStreamingMessage). That keeps
+ * every assistant message in the record a real model reply.
+ *
+ * The ownership check stays as a second guard; the caller's identity carries
+ * over from the action.
+ */
+export const appendUserMessage = internalMutation({
   args: {
     nodeId: v.id("nodes"),
-    role: v.union(v.literal("user"), v.literal("assistant")),
     content: v.string(),
   },
   handler: async (ctx, args) => {
@@ -44,7 +52,7 @@ export const append = userMutation({
 
     const messageId = await ctx.db.insert("messages", {
       chatId,
-      role: args.role,
+      role: "user",
       content,
       index: nextIndex,
     });

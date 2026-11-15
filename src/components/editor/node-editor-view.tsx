@@ -28,6 +28,7 @@ import { BlockEditor } from "./block-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
+import { toStorableContent } from "@convex-lib/blocks";
 
 /*
  * Node view, shown as a side panel over its project (?panel=<nodeId>)
@@ -100,7 +101,7 @@ export function NodeEditorView({
     (blocks: Block[]) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
-        updateContent({ nodeId, content: blocks }).catch((err) =>
+        updateContent({ nodeId, content: toStorableContent(blocks) }).catch((err) =>
           handleError(err, "Failed to save content"),
         );
       }, 500);

@@ -22,7 +22,9 @@ export function GetStarted() {
   return (
     <div className="flex min-h-full flex-col">
       <header className="flex h-12 shrink-0 items-center border-b border-border-default px-6">
-        <h1 className="text-body-sm font-medium text-fg-primary">Get started</h1>
+        <h1 className="text-body-sm font-medium text-fg-primary">
+          Get started
+        </h1>
       </header>
 
       <div className="mx-auto w-full max-w-[1000px] px-6 pt-14 pb-16">
@@ -73,7 +75,10 @@ function Card({
 }) {
   const inner = (
     <>
-      <div className="relative aspect-[12/5] overflow-hidden" style={{ background: backdrop }}>
+      <div
+        className="relative aspect-[12/5] overflow-hidden"
+        style={{ background: backdrop }}
+      >
         {illustration}
       </div>
       <p className="px-5 pt-3.5 pb-4 text-body-sm/[17px] text-fg-secondary">
@@ -93,9 +98,20 @@ function Card({
 }
 
 /* A window chrome the illustrations sit in. */
-function Window({ className, children }: { className?: string; children: React.ReactNode }) {
+function Window({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className={cn("absolute overflow-hidden rounded-lg bg-surface-container shadow-large", className)}>
+    <div
+      className={cn(
+        "absolute overflow-hidden rounded-lg bg-surface-container shadow-large",
+        className,
+      )}
+    >
       <div className="flex h-4 items-center gap-1 border-b border-border-subtle px-2">
         <span className="size-1.5 rounded-full bg-[#FF5F57]" />
         <span className="size-1.5 rounded-full bg-[#FEBC2E]" />
@@ -112,9 +128,13 @@ function ChatIllustration() {
   return (
     <Window className="inset-x-[10%] top-[14%] bottom-[-10%]">
       <div className="flex h-full flex-col items-center px-4 pt-3">
-        <p className="text-[9px] font-semibold text-fg-primary">What are you trying to figure out?</p>
+        <p className="text-[9px] font-semibold text-fg-primary">
+          What are you trying to figure out?
+        </p>
         <div className="mt-2.5 w-full rounded-lg bg-surface-container p-2 inset-ring-[0.5px] inset-ring-border-strong">
-          <p className="text-[8px] text-fg-tertiary">How should we price the team plan?</p>
+          <p className="text-[8px] text-fg-tertiary">
+            How should we price the team plan?
+          </p>
           <div className="mt-1 flex justify-end">
             <span className="flex size-4 items-center justify-center rounded-full bg-inverted-solid text-on-inverted-fg">
               <SendIcon className="size-2.5" />
@@ -126,12 +146,22 @@ function ChatIllustration() {
   );
 }
 
-function MiniNode({ className, label, primary }: { className?: string; label: string; primary?: boolean }) {
+function MiniNode({
+  className,
+  label,
+  primary,
+}: {
+  className?: string;
+  label: string;
+  primary?: boolean;
+}) {
   return (
     <div
       className={cn(
         "absolute rounded-md px-2 py-1 text-[7px] font-medium whitespace-nowrap shadow-default",
-        primary ? "bg-brand-solid text-on-brand-solid" : "bg-surface-container text-fg-primary",
+        primary
+          ? "bg-brand-solid text-on-brand-solid"
+          : "bg-surface-container text-fg-primary",
         className,
       )}
     >
@@ -144,14 +174,39 @@ function CanvasIllustration() {
   return (
     <Window className="inset-x-[10%] top-[14%] bottom-[-10%]">
       <div className="relative h-full">
-        <svg className="absolute inset-0 size-full text-border-strong" viewBox="0 0 100 80" preserveAspectRatio="none" fill="none">
-          <path d="M50 17 V20 H24 V24 M50 20 H76 V24 M24 38 V41 H14 V45 M24 41 H38 V45" stroke="currentColor" strokeWidth="0.6" />
+        <svg
+          className="absolute inset-0 size-full text-border-strong"
+          viewBox="0 0 100 80"
+          preserveAspectRatio="none"
+          fill="none"
+        >
+          <path
+            d="M50 17 V20 H24 V24 M50 20 H76 V24 M24 38 V41 H14 V45 M24 41 H38 V45"
+            stroke="currentColor"
+            strokeWidth="0.6"
+          />
         </svg>
-        <MiniNode primary label="Pricing" className="top-[4%] left-1/2 -translate-x-1/2" />
-        <MiniNode label="Per-seat" className="top-[30%] left-[24%] -translate-x-1/2" />
-        <MiniNode label="Usage-based" className="top-[30%] left-[76%] -translate-x-1/2" />
-        <MiniNode label="Annual" className="top-[56%] left-[14%] -translate-x-1/2" />
-        <MiniNode label="Monthly" className="top-[56%] left-[38%] -translate-x-1/2" />
+        <MiniNode
+          primary
+          label="Pricing"
+          className="top-[4%] left-1/2 -translate-x-1/2"
+        />
+        <MiniNode
+          label="Per-seat"
+          className="top-[30%] left-[24%] -translate-x-1/2"
+        />
+        <MiniNode
+          label="Usage-based"
+          className="top-[30%] left-[76%] -translate-x-1/2"
+        />
+        <MiniNode
+          label="Annual"
+          className="top-[56%] left-[14%] -translate-x-1/2"
+        />
+        <MiniNode
+          label="Monthly"
+          className="top-[56%] left-[38%] -translate-x-1/2"
+        />
       </div>
     </Window>
   );
@@ -162,7 +217,9 @@ function NotesIllustration() {
     <>
       <Window className="top-[12%] left-[8%] h-[62%] w-[52%]">
         <div className="space-y-1.5 p-3">
-          <p className="text-[8px] font-semibold text-fg-primary">Pricing · notes</p>
+          <p className="text-[8px] font-semibold text-fg-primary">
+            Pricing · notes
+          </p>
           <div className={cn(line, "w-full")} />
           <div className={cn(line, "w-5/6")} />
           <div className={cn(line, "w-2/3")} />
@@ -172,7 +229,9 @@ function NotesIllustration() {
       <div className="absolute top-[56%] left-[56%] h-px w-[10%] bg-fg-primary/30" />
       <Window className="top-[38%] right-[8%] h-[56%] w-[34%]">
         <div className="space-y-1.5 p-2.5">
-          <span className="inline-block rounded-full bg-brand-subtle px-1.5 py-0.5 text-[6px] font-medium text-brand-fg">+ context</span>
+          <span className="inline-block rounded-full bg-brand-subtle px-1.5 py-0.5 text-[6px] font-medium text-brand-fg">
+            + context
+          </span>
           <div className={cn(line, "w-full")} />
           <div className={cn(line, "w-4/5")} />
           <div className={cn(line, "w-2/3")} />

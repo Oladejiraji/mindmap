@@ -8,13 +8,14 @@ interface IProps {
   data: IMenuData[];
   title: string;
   isVisible?: boolean;
+  onItemHover?: (item: IMenuData) => void;
 }
 
 const EXPANDED_WIDTH = 284;
 const SPRING = { type: "spring", visualDuration: 0.32, bounce: 0 } as const;
 
 export function MenuGroup(props: IProps) {
-  const { data, title, isVisible = true } = props;
+  const { data, title, isVisible = true, onItemHover } = props;
 
   const raw = useMotionValue(isVisible ? EXPANDED_WIDTH : 0);
 
@@ -40,12 +41,12 @@ export function MenuGroup(props: IProps) {
       className="shrink-0 overflow-hidden"
       style={{ width, opacity, pointerEvents: isVisible ? "auto" : "none" }}
     >
-      <div className="w-69 shrink-0 pt-3 pb-3.5 pl-3 pr-2 mr-2 flex flex-col border-r border-[#D4ECFC]">
+      <div className="w-69 shrink-0 pt-3 pb-3.5 pl-3 pr-2 mr-2 flex flex-col border-r border-[#ECECEC]">
         <div className="w-63.75 flex flex-col">
           <div className="h-7 flex items-center px-2">
             <TextMorph
               as="p"
-              className="text-[#3A89FF] text-[11px] leading-3 tracking-[-0.56%] font-medium font-inter-display"
+              className="text-[#8F8F8F] text-11 leading-3 tracking-[-0.56%] font-medium font-inter-display"
               scale={false}
               duration={320}
             >
@@ -61,6 +62,7 @@ export function MenuGroup(props: IProps) {
                 key={index}
                 title={item.title}
                 description={item.description}
+                onHover={() => onItemHover?.(item)}
               />
             ))}
           </div>
