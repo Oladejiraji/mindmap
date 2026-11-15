@@ -8,6 +8,7 @@ import { useMutation } from "convex/react";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { handleError } from "@/lib/handle-error";
+import { toStorableContent } from "@convex-lib/blocks";
 import "@blocknote/core/style.css";
 import "@blocknote/mantine/style.css";
 
@@ -33,7 +34,7 @@ export function InlineNodeEditor({
   const save = useCallback(() => {
     updateContent({
       nodeId: nodeId as Id<"nodes">,
-      content: editor.document,
+      content: toStorableContent(editor.document),
     }).catch((err) => handleError(err, "Failed to save content"));
   }, [editor, nodeId, updateContent]);
 

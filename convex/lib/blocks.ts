@@ -43,6 +43,16 @@ const LIST_TYPES = new Set([
   "toggleListItem",
 ]);
 
+/**
+ * Makes an editor document storable in Convex. BlockNote leaves `undefined`
+ * in places Convex rejects (e.g. a table's `columnWidths: [undefined, …]`).
+ * A JSON round trip turns those into `null` and drops undefined fields;
+ * BlockNote reads `null` the same as `undefined` when it loads them back.
+ */
+export function toStorableContent<T>(blocks: T): T {
+  return JSON.parse(JSON.stringify(blocks)) as T;
+}
+
 /** Converts stored node content to markdown. Accepts anything `content` may hold. */
 export function contentToMarkdown(content: unknown): string {
   if (!content) return "";
