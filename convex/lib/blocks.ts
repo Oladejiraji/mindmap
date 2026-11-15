@@ -241,7 +241,9 @@ function blocksToPlainText(blocks: Block[]): string {
             ),
           )
           .join(" ");
-      } else if (block.props) {
+      }
+      // Media blocks carry their text in props, not content.
+      if (!text && block.props) {
         text = str(block.props.caption) || str(block.props.name);
       }
       const children = block.children?.length ? blocksToPlainText(block.children) : "";
