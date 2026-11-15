@@ -7,14 +7,15 @@ import type { MindMapNodeData } from "@/components/canvas/nodes";
 export function useSyncConvexToFlow(
   rfNodes: RFNode<MindMapNodeData>[],
   setFlowNodes: React.Dispatch<React.SetStateAction<RFNode<MindMapNodeData>[]>>,
-  nodes: { _id: string; parentId: string | null; title: string; position?: { x: number; y: number } | null; content?: string | null }[] | undefined,
+  nodes: { _id: string; parentId: string | null; title: string; position?: { x: number; y: number } | null; content?: unknown }[] | undefined,
 ) {
   const fingerprint = useMemo(
     () =>
       nodes
         ?.map(
+          // Content is BlockNote JSON: stringify it, or every edit reads as "[object Object]".
           (n) =>
-            `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${n.content ?? ""}`,
+            `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${JSON.stringify(n.content ?? null)}`,
         )
         .join("|") ?? "",
     [nodes],
