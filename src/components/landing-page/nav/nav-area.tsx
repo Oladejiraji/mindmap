@@ -2,12 +2,13 @@
 import React, { useRef, useState } from "react";
 import { MenuContent } from "./menu-content";
 
-export type NavState = "features" | "solutions" | null;
+export type NavState = "product" | "solutions" | null;
 
 const navButtonOptions: { id: number; label: string; menu: NavState }[] = [
-  { id: 1, label: "Features", menu: "features" },
+  { id: 1, label: "Product", menu: "product" },
   { id: 2, label: "Solutions", menu: "solutions" },
   { id: 3, label: "Developers", menu: null },
+  { id: 4, label: "Pricing", menu: null },
 ];
 
 interface INavButton {
