@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internalQuery } from "./_generated/server";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { buildPromptContext, type PromptContext } from "./lib/context";
 import { maybeGenerateTitle, streamAssistantResponse } from "./lib/llm";
 import { llmAction } from "./lib/functions";
@@ -20,9 +20,8 @@ export const sendMessage = llmAction({
   handler: async (ctx, args) => {
     await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.nodeId });
 
-    await ctx.runMutation(api.messages.append, {
+    await ctx.runMutation(internal.messages.appendUserMessage, {
       nodeId: args.nodeId,
-      role: "user",
       content: args.content,
     });
 
