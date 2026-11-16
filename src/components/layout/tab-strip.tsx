@@ -4,12 +4,18 @@ import Link from "next/link";
 import { MotionConfig, motion } from "motion/react";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import { TabPreview } from "./tab-preview";
+import { useCallback, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
 import { Plus } from "lucide-react";
+import type { Doc } from "@convex/dataModel";
+import { api } from "@convex/api";
 import { CloseIcon } from "@/components/icons/close-icon";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { handleError } from "@/lib/handle-error";
 import { NewTabIcon } from "@/components/icons/new-tab-icon";
 import { NodeTabIcon } from "@/components/icons/node-tab-icon";
-import { closeTab, useTabs } from "@/lib/tabs";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
@@ -19,18 +25,50 @@ import { Tip } from "@/components/ui/tooltip";
  * the colour of the panel below (--tab-bg) and joins it with inverted
  * corners; that shape is one shared-layout element, so switching tabs
  * slides it across instead of snapping (instant with reduced motion). Every title fades out across the back half of the tab (no hard
- * truncation); close appears on hover. Inactive tabs are split by hairlines.
+ * truncation). Inactive tabs are split by hairlines.
+ *
+ * One tab per project, in the same order as Home's grid (newest first),
+ * so the strip and the grid always list the same projects. A tab's ×
+ * deletes its project, after the same confirmation as the grid. While on
+ * /new, a "New project" tab sits at the end until the first message
+ * creates the project; its × just leaves for Home.
  */
+type Tab = { href: string; title: string; thread?: Doc<"threads"> };
 export function TabStrip({ className, skipOnNodePages = false }: { className?: string; skipOnNodePages?: boolean }) {
-  const tabs = useTabs();
   const pathname = usePathname();
   const router = useRouter();
+  const removeThread = useMutation(api.threads.remove);
+  const [toDelete, setToDelete] = useState<Doc<"threads"> | null>(null);
+  const { data: threads } = useAuthedConvexQuery(api.threads.list, {});
+  const tabs: Tab[] = (threads ?? []).map((thread) => ({
+    href: routes.thread(thread._id),
+    title: thread.name || "Untitled",
+    thread,
+  }));
+  if (pathname === routes.newProject) tabs.push({ href: routes.newProject, title: "New project" });
+  // Keeps the active tab visible when the strip scrolls sideways.
+  const revealActive = useCallback((el: HTMLDivElement | null) => {
+    el?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, []);
   // Node pages render their own strip above the main column (beside the sidebar).
   if (skipOnNodePages && /\/n\//.test(pathname)) return null;
   // Node pages sit on the container surface; the canvas on the page surface.
   const panelColor = /\/n\//.test(pathname) ? "var(--surface-container)" : "var(--background)";
 
   const activeIndex = tabs.findIndex((t) => t.href === pathname);
+
+  const deleteProject = async (thread: Doc<"threads">) => {
+    const href = routes.thread(thread._id);
+    // Leaving the project being deleted: go to its neighbour, else Home.
+    const i = tabs.findIndex((t) => t.href === href);
+    const neighbour = tabs.filter((t) => t.thread && t.href !== href)[Math.max(i - 1, 0)];
+    try {
+      if (pathname === href) router.push(neighbour?.href ?? routes.home);
+      await removeThread({ threadId: thread._id });
+    } catch (err) {
+      handleError(err, "Failed to delete project");
+    }
+  };
 
   return (
     <div
@@ -44,11 +82,12 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
       <MotionConfig reducedMotion="user">
       {tabs.map((tab, i) => {
         const active = i === activeIndex;
-        const Icon = tab.kind === "new" ? NewTabIcon : NodeTabIcon;
+        const Icon = tab.thread ? NodeTabIcon : NewTabIcon;
         const showDivider = i > 0 && !active && i - 1 !== activeIndex;
         return (
           <div
             key={tab.href}
+            ref={active ? revealActive : undefined}
             role="presentation"
             className={cn(
               "group/tab relative flex h-8 max-w-42 min-w-28 flex-1 basis-42 items-center",
@@ -107,25 +146,20 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
                   </Link>
                 }
               />
-              {!active && (
+              {!active && tab.thread && (
                 <PreviewCard.Portal>
                   <PreviewCard.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
                     <PreviewCard.Popup className="corner-squircle origin-(--transform-origin) rounded-4xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-reduce:transition-opacity">
-                      <TabPreview tab={tab} />
+                      <TabPreview thread={tab.thread} />
                     </PreviewCard.Popup>
                   </PreviewCard.Positioner>
                 </PreviewCard.Portal>
               )}
             </PreviewCard.Root>
             <button
-              aria-label={`Close ${tab.title}`}
-              onClick={() => {
-                const next = closeTab(tab.href, pathname);
-                if (next) router.push(next);
-              }}
-              className={cn(
-                "absolute right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-md text-fg-tertiary opacity-0 outline-none transition-opacity group-hover/tab:opacity-100 hover:bg-transparent-hover hover:text-fg-primary focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",
-              )}
+              aria-label={tab.thread ? `Delete ${tab.title}` : "Close new project"}
+              onClick={() => (tab.thread ? setToDelete(tab.thread) : router.push(routes.home))}
+              className="absolute right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-md text-fg-tertiary opacity-0 outline-none transition-opacity group-hover/tab:opacity-100 hover:bg-transparent-hover hover:text-fg-primary focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <CloseIcon className="size-3.5" />
             </button>
@@ -142,6 +176,15 @@ export function TabStrip({ className, skipOnNodePages = false }: { className?: s
           <Plus className="size-4" />
         </Link>
       </Tip>
+      <ConfirmDialog
+        open={toDelete !== null}
+        onOpenChange={(open) => !open && setToDelete(null)}
+        title={`Delete "${toDelete?.name || "Untitled"}"?`}
+        description="This will delete the project and all its contents. This cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => toDelete && void deleteProject(toDelete)}
+      />
     </div>
   );
 }

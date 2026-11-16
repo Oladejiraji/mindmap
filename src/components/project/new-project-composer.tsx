@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useAction } from "convex/react";
 import { api } from "@convex/api";
-import { closeTab, useRegisterTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { ChatInput } from "@/components/chat/chat-input";
@@ -26,13 +25,10 @@ export function NewProjectComposer() {
   // The + menu can hand over text typed into its search (?name=).
   const initial = useSearchParams().get("name") ?? "";
 
-  useRegisterTab({ href: routes.newProject, kind: "new", title: "New project" });
-
   const start = async (content: string) => {
     setStarting(true);
     try {
       const { threadId, rootNodeId } = await createThread({});
-      closeTab(routes.newProject, routes.newProject);
       // Land on the canvas with the root's panel open on its chat: the reply
       // streams in there, and its suggested first document shows under it.
       router.replace(`${routes.node(threadId, rootNodeId)}&tab=chat`);
