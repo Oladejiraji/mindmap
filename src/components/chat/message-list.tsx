@@ -4,15 +4,19 @@ import { useRef, useCallback } from "react";
 import type { ChatItem } from "@/services/messages/queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "./message-bubble";
+import { ProposalCard, type Proposal } from "./proposal-card";
 
 export function MessageList({
   items,
   isLoading,
   isStreaming,
+  proposals,
 }: {
   items: ChatItem[];
   isLoading: boolean;
   isStreaming: boolean;
+  /** Suggested document edits, by the message that made them. */
+  proposals?: Map<string, Proposal>;
 }) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -61,10 +65,14 @@ export function MessageList({
         const isLast = i === items.length - 1;
         const key = item.kind === "message" ? item.message._id : item.id;
         const plainText = item.kind !== "message" || item.message.role !== "user";
+        const proposal = item.kind === "message" ? proposals?.get(item.message._id) : undefined;
         return (
           <div key={key} ref={isLast ? lastItemRef : undefined} className={plainText ? "px-3" : undefined}>
             {item.kind === "message" ? (
-              <MessageBubble message={item.message} />
+              <>
+                <MessageBubble message={item.message} />
+                {proposal && <ProposalCard proposal={proposal} />}
+              </>
             ) : (
               <BranchMarker fromTitle={item.fromTitle} intoTitle={item.intoTitle} />
             )}

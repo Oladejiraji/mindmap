@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Id } from "@convex/dataModel";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 import { useNodeContextMessages } from "@/services/messages/queries";
 import { useSendMessage } from "@/services/chat/actions";
@@ -18,6 +20,11 @@ export function NodeChat({
 }) {
   const { items, targetMessages, isLoading, error, retry } =
     useNodeContextMessages(threadId, nodeId);
+  const { data: proposalList } = useAuthedConvexQuery(api.proposals.listByNode, { nodeId });
+  const proposals = useMemo(
+    () => new Map((proposalList ?? []).map((p) => [p.messageId as string, p])),
+    [proposalList],
+  );
   const sendMessage = useSendMessage();
   const [isSending, setIsSending] = useState(false);
 
@@ -53,7 +60,7 @@ export function NodeChat({
             </button>
           </div>
         ) : (
-          <MessageList items={items} isLoading={isLoading} isStreaming={isStreaming} />
+          <MessageList items={items} isLoading={isLoading} isStreaming={isStreaming} proposals={proposals} />
         )}
         <div className="sticky bottom-0 bg-background">
           <ChatInput onSend={handleSend} disabled={isBusy || !!error} className="px-2 pt-3 pb-2" />
