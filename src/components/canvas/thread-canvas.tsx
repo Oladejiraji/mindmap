@@ -24,7 +24,6 @@ import { cn } from "@/lib/utils";
 import type { Id } from "@convex/dataModel";
 
 import { api } from "@convex/api";
-import { useNodesByThread } from "@/services/nodes/queries";
 import { useMutation } from "convex/react";
 import { layoutNodes } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
@@ -36,6 +35,7 @@ import {
   CANVAS_NODE_WIDTH,
   type MindMapNodeData,
 } from "./nodes";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 const nodeTypes: NodeTypes = {
   parent: ParentNode,
@@ -54,7 +54,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   // Hooks first (before any early return): the view lives in the URL.
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { data: nodes, isLoading } = useNodesByThread(threadId);
+  const { data: nodes, isLoading } = useAuthedConvexQuery(api.nodes.listByThread, { threadId });
   const updatePosition = useMutation(api.nodes.updatePosition);
   const createEmptyBranch = useMutation(api.nodes.createEmptyBranch);
   const deleteLeafNode = useMutation(api.nodes.deleteLeafNode);

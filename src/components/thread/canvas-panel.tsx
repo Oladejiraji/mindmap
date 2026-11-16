@@ -6,14 +6,16 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { NodesIcon } from "@/components/icons/nodes-icon";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useThread } from "@/services/threads/queries";
 import { formatRelativeTime } from "@/lib/format-time";
 import { handleError } from "@/lib/handle-error";
-import { useRenameThread } from "@/services/threads/mutations";
 import { ThreadItem } from "@/components/layout/sidebar/thread-item";
 import type { Id } from "@convex/dataModel";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+import { renameThreadOptimistic } from "@/lib/optimistic";
+import { useMutation } from "convex/react";
 
 function useThreadIdFromRoute() {
   const pathname = usePathname();
@@ -35,7 +37,7 @@ function PanelHeader({
   setOpen: (open: boolean | ((o: boolean) => boolean)) => void;
 }) {
   const threadId = useThreadIdFromRoute();
-  const renameThread = useRenameThread();
+  const renameThread = useMutation(api.threads.rename).withOptimisticUpdate(renameThreadOptimistic);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -185,7 +187,7 @@ export function CanvasPanel({
   const embedded = variant === "embedded";
   const [open, setOpen] = useState(false);
   const threadId = useThreadIdFromRoute();
-  const { data: thread, isPending } = useThread(threadId);
+  const { data: thread, isPending } = useAuthedConvexQuery(api.threads.get, threadId ? { threadId } : "skip");
 
   if (!threadId || (!embedded && /\/n\//.test(pathname))) return null;
   if (variant === "floating" && inChat) return null;

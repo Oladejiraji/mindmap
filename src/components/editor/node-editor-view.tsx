@@ -17,8 +17,6 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
-import { useNode, useNodesByThread } from "@/services/nodes/queries";
-import { useThread } from "@/services/threads/queries";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
@@ -26,6 +24,7 @@ import { NodeDocumentEditor } from "./node-document-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 /*
  * Node view, shown as a side panel over its project (?panel=<nodeId>)
@@ -50,9 +49,9 @@ export function NodeEditorView({
   /** Pop this node's chat out to float over the canvas. */
   onPopOut?: () => void;
 }) {
-  const { data: node, isPending } = useNode(nodeId);
-  const { data: thread } = useThread(threadId);
-  const { data: nodes } = useNodesByThread(threadId);
+  const { data: node, isPending } = useAuthedConvexQuery(api.nodes.get, { nodeId });
+  const { data: thread } = useAuthedConvexQuery(api.threads.get, { threadId });
+  const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, { threadId });
   const updateContent = useMutation(api.nodes.updateContent);
 
   const hasContent = Boolean(node?.content?.trim());
@@ -266,7 +265,7 @@ export function NodeEditorView({
                 </div>
               </div>
             ) : (
-              <NodeChat key={nodeId} threadId={threadId} nodeId={nodeId} />
+              <NodeChat key={nodeId} nodeId={nodeId} />
             )}
           </div>
         </section>

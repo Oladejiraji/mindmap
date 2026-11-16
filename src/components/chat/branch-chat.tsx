@@ -2,14 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons/chevron-down";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { ArrowDown, Check, Copy, GitBranch } from "lucide-react";
 import { CanvasViewIcon } from "@/components/icons/canvas-view-icon";
-import type { Id } from "@convex/dataModel";
+import type { Id, Doc } from "@convex/dataModel";
 import { api } from "@convex/api";
-import type { Node } from "@/services/nodes/queries";
-import { useMessagesByNode, type Message } from "@/services/messages/queries";
-import { useSendMessage } from "@/services/chat/actions";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
@@ -21,6 +18,7 @@ import { CanvasPanel } from "@/components/thread/canvas-panel";
 import { Kbd } from "@/components/canvas/canvas-shortcuts";
 import { CheckIcon } from "@/components/icons/check-icon";
 import { markdownToPlainText } from "@/lib/markdown";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 /*
  * ChatGPT-style view of a project's tree.
@@ -40,13 +38,13 @@ export function BranchChat({
   onActiveNodeChange,
 }: {
   threadId: Id<"threads">;
-  nodes: Node[];
+  nodes: Doc<"nodes">[];
   activeNodeId: Id<"nodes">;
   onActiveNodeChange: (id: Id<"nodes">) => void;
 }) {
   const nodeMap = useMemo(() => buildNodeMap(nodes), [nodes]);
   const childrenOf = useMemo(() => {
-    const map = new Map<string, Node[]>();
+    const map = new Map<string, Doc<"nodes">[]>();
     for (const n of nodes) {
       if (!n.parentId) continue;
       const list = map.get(n.parentId) ?? [];
@@ -72,9 +70,9 @@ export function BranchChat({
     return current;
   };
 
-  const { data: activeMessages } = useMessagesByNode(activeNodeId);
+  const { data: activeMessages } = useAuthedConvexQuery(api.messages.listByNode, { nodeId: activeNodeId });
   const isStreaming = activeMessages?.some((m) => m.isStreaming) ?? false;
-  const sendMessage = useSendMessage();
+  const sendMessage = useAction(api.chat.sendMessage);
   const createBranch = useMutation(api.nodes.createEmptyBranch);
   const [isSending, setIsSending] = useState(false);
 
@@ -268,7 +266,7 @@ function NodeSection({
   onBranch: () => void;
   parentNotes: string[];
 }) {
-  const { data: messages, isLoading } = useMessagesByNode(nodeId);
+  const { data: messages, isLoading } = useAuthedConvexQuery(api.messages.listByNode, { nodeId });
   // An empty node adds nothing to the conversation: no header, no line.
   if (!isLoading && !messages?.length) return null;
   return (
@@ -285,13 +283,13 @@ function NodeMessages({
   onBranch,
   parentNotes,
 }: {
-  messages: Message[];
+  messages: Doc<"messages">[];
   onBranch: () => void;
   parentNotes: string[];
 }) {
   return (
     <div className="flex flex-col gap-6">
-      {messages.map((m: Message, i) => (
+      {messages.map((m: Doc<"messages">, i) => (
         <div key={m._id} className="group/msg">
           {m.role !== "user" && <ReplySteps parentNotes={parentNotes} priorMessages={i} />}
           <MessageBubble message={m} />

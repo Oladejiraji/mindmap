@@ -11,8 +11,8 @@ import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useMutation } from "convex/react";
 import { handleError } from "@/lib/handle-error";
-import { useRenameThread } from "@/services/threads/mutations";
 import type { Id } from "@convex/dataModel";
+import { renameThreadOptimistic } from "@/lib/optimistic";
 
 const itemClass =
   "corner-squircle flex w-full cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
@@ -29,7 +29,7 @@ export function ProjectCard({
 }) {
   const router = useRouter();
   const removeThread = useMutation(api.threads.remove);
-  const renameThread = useRenameThread();
+  const renameThread = useMutation(api.threads.rename).withOptimisticUpdate(renameThreadOptimistic);
   const [showDelete, setShowDelete] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);

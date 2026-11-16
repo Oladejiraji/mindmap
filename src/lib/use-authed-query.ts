@@ -18,9 +18,11 @@ import type {
 // Redirecting on auth errors is intentionally NOT done here — that's the
 // `ClientAuthWatcher`'s job. Keeping concerns separate: this hook only
 // decides when a query may run.
+//
+// Pass "skip" to hold the query yourself, e.g. while an id isn't known yet.
 export function useAuthedConvexQuery<Query extends FunctionReference<"query">>(
   funcRef: Query,
-  args: FunctionArgs<Query>,
+  args: FunctionArgs<Query> | "skip",
 ) {
   const { isAuthenticated } = useConvexAuth();
   const options = convexQuery(

@@ -7,9 +7,9 @@ import { ThinkingOrb } from "thinking-orbs";
 import { cn } from "@/lib/utils";
 import { useAnimatedReplies } from "@/lib/preferences";
 import { STREAM_FADE_MS, rehypeStreamWords } from "@/lib/rehype-stream-words";
-import type { Message } from "@/services/messages/queries";
+import type { Doc } from "@convex/dataModel";
 
-export function MessageBubble({ message }: { message: Message }) {
+export function MessageBubble({ message }: { message: Doc<"messages"> }) {
   const isUser = message.role === "user";
   const isStreaming = message.isStreaming === true;
   const isEmpty = message.content.length === 0;

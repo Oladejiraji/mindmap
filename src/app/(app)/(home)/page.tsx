@@ -7,7 +7,6 @@ import { MotionConfig, motion } from "motion/react";
 import { api } from "@convex/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useThreads } from "@/services/threads/queries";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { useHomeLayout } from "@/lib/preferences";
 import { handleError } from "@/lib/handle-error";
@@ -16,11 +15,12 @@ import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { ProjectCard } from "@/components/project/project-card";
 import { ProjectRow } from "@/components/project/project-row";
 import { useRouter } from "next/navigation";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 
 export default function Home() {
   const router = useRouter();
-  const { data: threads, isPending } = useThreads();
+  const { data: threads, isPending } = useAuthedConvexQuery(api.threads.list, {});
   const { mutate: createThread, isPending: isCreating } = useConvexMutation(
     api.threads.create,
   );

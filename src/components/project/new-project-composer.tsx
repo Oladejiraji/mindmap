@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "@convex/api";
 import { closeTab, useRegisterTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
-import { useSendMessage } from "@/services/chat/actions";
 import { ChatInput } from "@/components/chat/chat-input";
 
 /*
@@ -22,7 +21,7 @@ import { ChatInput } from "@/components/chat/chat-input";
 export function NewProjectComposer() {
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
-  const sendMessage = useSendMessage();
+  const sendMessage = useAction(api.chat.sendMessage);
   const [starting, setStarting] = useState(false);
   // The + menu can hand over text typed into its search (?name=).
   const initial = useSearchParams().get("name") ?? "";

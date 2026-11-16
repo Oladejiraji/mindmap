@@ -6,8 +6,9 @@ import type { Id } from "@convex/dataModel";
 import { NodeChat } from "@/components/chat/node-chat";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { FloatIcon } from "@/components/icons/float-icon";
-import { useNode } from "@/services/nodes/queries";
 import { Tip } from "@/components/ui/tooltip";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 /*
  * A node's chat popped out of the side panel (?float=<nodeId>): a card
@@ -44,7 +45,6 @@ export function FloatingChat() {
   return (
     <FloatingCard
       key={nodeId}
-      threadId={threadId}
       nodeId={nodeId}
       onDock={dock}
       onClose={close}
@@ -53,17 +53,15 @@ export function FloatingChat() {
 }
 
 function FloatingCard({
-  threadId,
   nodeId,
   onDock,
   onClose,
 }: {
-  threadId: Id<"threads">;
   nodeId: Id<"nodes">;
   onDock: () => void;
   onClose: () => void;
 }) {
-  const { data: node } = useNode(nodeId);
+  const { data: node } = useAuthedConvexQuery(api.nodes.get, { nodeId });
   const cardRef = useRef<HTMLDivElement>(null);
   // Offset from its resting corner, kept inside the canvas card
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -134,7 +132,7 @@ function FloatingCard({
         </Tip>
       </header>
       <div className="min-h-0 flex-1">
-        <NodeChat threadId={threadId} nodeId={nodeId} />
+        <NodeChat nodeId={nodeId} />
       </div>
     </div>
   );
