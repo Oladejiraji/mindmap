@@ -11,7 +11,7 @@ import { BorderBeam } from "border-beam";
 import { NodeContent } from "./node-content";
 
 export function LeafNode({ id, data, selected }: NodeProps) {
-  const { title, content, onDelete, onRename } = data as MindMapNodeData;
+  const { title, content, onOpen, onDelete, onRename } = data as MindMapNodeData;
 
   return (
     <div className="group" style={{ width: CANVAS_NODE_WIDTH }}>
@@ -35,7 +35,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
               className="text-fg-primary focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
-          <NodeMenu id={id} onDelete={onDelete} />
+          <NodeMenu id={id} onOpen={onOpen} onDelete={onDelete} />
         </div>
 
         {/* Antalik's border beam at 20% strength around the writing area
