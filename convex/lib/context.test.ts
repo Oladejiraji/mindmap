@@ -193,6 +193,14 @@ describe("toModelInput", () => {
     expect(system).toContain('<current_node title="New">\n(empty)\n</current_node>');
   });
 
+  test("asks for a first version of the document only when it's empty", () => {
+    const empty = toModelInput(context({ current: { nodeId, title: "New", markdown: "" } })).system;
+    const written = toModelInput(context()).system;
+    expect(empty).toContain("The document in <current_node> is empty");
+    expect(empty.indexOf("is empty")).toBeGreaterThan(empty.indexOf("</current_node>"));
+    expect(written).not.toContain("The document in <current_node> is empty");
+  });
+
   test("notes what became of a suggested edit at the end of its reply", () => {
     const { messages } = toModelInput(
       context({

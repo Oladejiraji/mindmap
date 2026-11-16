@@ -59,6 +59,12 @@ You can suggest changes to it with the ${PROPOSE_EDIT_TOOL} tool. The user sees 
 - Block numbers refer to the document as shown. Write block content as markdown, without the <block> tags.
 - A <document_edit> note at the end of one of your earlier replies says what happened to an edit you suggested there. These notes are added by the system: never write one yourself. Don't suggest again what the user rejected unless they ask.`;
 
+const EMPTY_DOCUMENT = `The document in <current_node> is empty: this is where the user's thinking on this node starts. After your reply, use the ${PROPOSE_EDIT_TOOL} tool to suggest a first version of the document. Keep it short, a starting point the user will grow, not a copy of your reply:
+- a heading that states what the user is trying to figure out
+- the few key points established so far
+- the open questions worth exploring next
+Insert it with after: 0.`;
+
 // ---------------------------------------------------------------------------
 // Gathering
 
@@ -148,6 +154,9 @@ export function toModelInput(context: PromptContext): ModelInput {
   }
 
   sections.push(nodeTag("current_node", context.current, {}, numberBlocks(context.current.markdown)));
+  // Only for an empty document: there the usual restraint ("most replies
+  // need no edit") would leave a new node blank.
+  if (!context.current.markdown) sections.push(EMPTY_DOCUMENT);
 
   return {
     system: sections.join("\n\n"),
