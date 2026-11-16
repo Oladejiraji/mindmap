@@ -68,6 +68,20 @@ describe("suggesting", () => {
     ]);
   });
 
+  test("a reply is marked while it writes an edit, and the mark clears when it finishes", async () => {
+    const { t, nodeId } = await setup();
+    const { messageId } = await t.mutation(internal.messages.startAssistantMessage, { nodeId });
+    await t.mutation(internal.messages.startDraftingEdit, { messageId, content: "Reply" });
+    expect(await t.run((ctx) => ctx.db.get(messageId))).toMatchObject({ content: "Reply", draftingEdit: true });
+
+    await t.mutation(internal.messages.finishStreamingMessage, {
+      messageId,
+      content: "Reply",
+      proposal: { baseVersion: 3, reason: "r", edits: SWITCH },
+    });
+    expect((await t.run((ctx) => ctx.db.get(messageId)))?.draftingEdit).toBeUndefined();
+  });
+
   test("a new suggestion replaces the unanswered one", async () => {
     const { suggest, status } = await setup();
     const first = await suggest(SWITCH);

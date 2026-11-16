@@ -109,6 +109,27 @@ export const patchStreamingContent = internalMutation({
 });
 
 /**
+ * Marks a streaming reply as writing a document edit, so the chat can show
+ * a placeholder until the suggestion arrives. Also saves the reply text so
+ * far: the text is done once the model moves on to the edit.
+ */
+export const startDraftingEdit = internalMutation({
+  args: {
+    messageId: v.id("messages"),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId);
+    if (!message) throw new ConvexError("Message not found");
+    if (!message.isStreaming) {
+      throw new ConvexError("Cannot patch a finalized message");
+    }
+    await ctx.db.patch(args.messageId, { content: args.content, draftingEdit: true });
+    return null;
+  },
+});
+
+/**
  * Finalizes an assistant reply, with the document edit it suggested, if any.
  * A new suggestion replaces any unanswered one for the same node: only one
  * can apply cleanly, and the newest reflects the conversation.
@@ -134,6 +155,7 @@ export const finishStreamingMessage = internalMutation({
     await ctx.db.patch(args.messageId, {
       content: args.content,
       isStreaming: false,
+      draftingEdit: undefined,
     });
 
     const chat = await ctx.db.get(message.chatId);

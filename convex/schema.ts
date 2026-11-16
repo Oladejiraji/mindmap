@@ -123,6 +123,8 @@ export default defineSchema({
     content: v.string(),
     index: v.number(),
     isStreaming: v.optional(v.boolean()),
+    /** While streaming: the model has started writing a document edit. Cleared when the reply finishes. */
+    draftingEdit: v.optional(v.boolean()),
   }).index("by_chatId_and_index", ["chatId", "index"]),
 
   /**

@@ -50,8 +50,20 @@ export async function streamAssistantResponse(
   // The streaming message row is already marked `isStreaming: true`. If the
   // stream throws mid-flight, finalize in `finally` so it never stays orphaned.
   try {
-    for await (const chunk of result.textStream) {
-      buffer += chunk;
+    // The full stream, not just the text: it also says when the model
+    // starts writing an edit, which takes a few seconds after the text
+    // ends. The chat shows a placeholder for that wait.
+    let draftingEdit = false;
+    for await (const part of result.fullStream) {
+      if (part.type === "error") throw part.error;
+      if (part.type === "tool-input-start" && part.toolName === PROPOSE_EDIT_TOOL && !draftingEdit) {
+        draftingEdit = true;
+        await ctx.runMutation(internal.messages.startDraftingEdit, { messageId, content: buffer });
+        lastPatch = Date.now();
+        continue;
+      }
+      if (part.type !== "text-delta") continue;
+      buffer += part.text;
       if (Date.now() - lastPatch >= PATCH_INTERVAL_MS) {
         await ctx.runMutation(internal.messages.patchStreamingContent, {
           messageId,
