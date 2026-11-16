@@ -84,6 +84,27 @@ describe("buildPromptContext", () => {
     ]);
   });
 
+  test("attaches each suggested edit to its reply, out of date once the document moved on", async () => {
+    const { t, leaf } = await setupTree();
+    await t.run(async (ctx) => {
+      await ctx.db.patch(leaf, { contentVersion: 2 });
+      const chatId = await ctx.db.insert("chats", { nodeId: leaf });
+      const edits = [{ type: "delete" as const, block: 1 }];
+      const reply = (index: number) =>
+        ctx.db.insert("messages", { chatId, role: "assistant", content: `r${index}`, index });
+      const add = async (index: number, baseVersion: number, status: "pending" | "rejected") =>
+        ctx.db.insert("proposals", { nodeId: leaf, messageId: await reply(index), baseVersion, reason: `p${index}`, edits, status });
+      await add(0, 1, "rejected");
+      await add(1, 1, "pending");
+      await add(2, 2, "pending");
+      await reply(3);
+    });
+
+    const context = await build(t, leaf);
+    expect(context?.contentVersion).toBe(2);
+    expect(context?.messages.map((m) => m.proposal?.state)).toEqual(["rejected", "out_of_date", "pending", undefined]);
+  });
+
   test("a node without a chat has no messages", async () => {
     const { t, leaf } = await setupTree();
     expect((await build(t, leaf))?.messages).toEqual([]);
@@ -105,6 +126,7 @@ describe("toModelInput", () => {
       { nodeId, title: "Usage-based", markdown: "" },
     ],
     current: { nodeId, title: "Per API call", markdown: "$0.002 per call." },
+    contentVersion: 0,
     messages: [{ role: "user", content: "Too cheap?" }],
     ...overrides,
   });
@@ -129,7 +151,7 @@ describe("toModelInput", () => {
     const instructions = system.indexOf("You are a research assistant");
     // The instructions mention <ancestors> too; the section tag sits on its own line.
     const ancestors = system.indexOf("\n<ancestors>\n");
-    const current = system.indexOf('<current_node title="Per API call">\n$0.002 per call.\n</current_node>');
+    const current = system.indexOf('<current_node title="Per API call">\n<block n="1">\n$0.002 per call.\n</block>\n</current_node>');
     expect(instructions).toBe(0);
     expect(ancestors).toBeGreaterThan(instructions);
     expect(current).toBeGreaterThan(ancestors);
@@ -156,5 +178,32 @@ describe("toModelInput", () => {
   test("messages carry only the chat turns", () => {
     const { messages } = toModelInput(context());
     expect(messages).toEqual([{ role: "user", content: "Too cheap?" }]);
+  });
+
+  test("numbers the current node's blocks, but not the ancestors'", () => {
+    const { system } = toModelInput(
+      context({ current: { nodeId, title: "Per API call", markdown: "# Price\n\n- a\n- b" } }),
+    );
+    expect(system).toContain('<block n="1">\n# Price\n</block>\n<block n="2">\n- a\n- b\n</block>');
+    expect(system).toContain('<node relation="root" title="Pricing">\nSmall teams.\n</node>');
+  });
+
+  test("an empty current node has no blocks", () => {
+    const { system } = toModelInput(context({ current: { nodeId, title: "New", markdown: "" } }));
+    expect(system).toContain('<current_node title="New">\n(empty)\n</current_node>');
+  });
+
+  test("notes what became of a suggested edit at the end of its reply", () => {
+    const { messages } = toModelInput(
+      context({
+        messages: [
+          { role: "user", content: "Switch to usage?" },
+          { role: "assistant", content: "Yes.", proposal: { reason: "Record the switch", state: "rejected" } },
+          { role: "assistant", content: "Again.", proposal: { reason: "Retry", state: "out_of_date" } },
+        ],
+      }),
+    );
+    expect(messages[1].content).toBe('Yes.\n\n<document_edit outcome="rejected">Record the switch</document_edit>');
+    expect(messages[2].content).toContain('outcome="out of date: the document changed before the user answered"');
   });
 });

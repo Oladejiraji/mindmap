@@ -1,10 +1,12 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText, streamText } from "ai";
+import { generateText, streamText, type TypedToolCall } from "ai";
 import type { ActionCtx } from "../_generated/server";
 import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { toModelInput, type PromptContext } from "./context";
 import { CHAT_MODEL, TITLE_MODEL } from "./models";
+import { applyEdits, DocumentEditError, type DocumentEdit } from "./document";
+import { chatTools, PROPOSE_EDIT_TOOL } from "./tools";
 
 const PATCH_INTERVAL_MS = 100;
 const UNTITLED = "Untitled";
@@ -32,14 +34,18 @@ export async function streamAssistantResponse(
     { nodeId },
   );
 
+  // The edit tool has no execute function, so a tool call ends the reply
+  // (one step) and comes back in `toolCalls` for the user to answer.
   const result = streamText({
     model: anthropic(CHAT_MODEL),
     system,
     messages,
+    tools: chatTools,
   });
 
   let buffer = "";
   let lastPatch = Date.now();
+  let proposal: Proposal | undefined;
 
   // The streaming message row is already marked `isStreaming: true`. If the
   // stream throws mid-flight, finalize in `finally` so it never stays orphaned.
@@ -54,12 +60,41 @@ export async function streamAssistantResponse(
         lastPatch = Date.now();
       }
     }
+    proposal = readProposal(await result.toolCalls, context);
   } finally {
     await ctx.runMutation(internal.messages.finishStreamingMessage, {
       messageId,
       content: buffer,
+      proposal,
     });
   }
+}
+
+type Proposal = { baseVersion: number; reason: string; edits: DocumentEdit[] };
+
+/**
+ * The model's suggested edit, if it made a valid one. Edits are checked
+ * against the document the model saw; an edit that doesn't fit (a block
+ * that isn't there, the same block changed twice) is dropped and logged,
+ * so a bad suggestion never breaks the reply.
+ */
+function readProposal(
+  toolCalls: TypedToolCall<typeof chatTools>[],
+  context: PromptContext,
+): Proposal | undefined {
+  const call = toolCalls.find((c) => c.toolName === PROPOSE_EDIT_TOOL && !c.dynamic);
+  if (!call || call.toolName !== PROPOSE_EDIT_TOOL) return undefined;
+  const { reason, edits } = call.input;
+  try {
+    applyEdits(context.current.markdown, edits);
+  } catch (err) {
+    if (err instanceof DocumentEditError) {
+      console.warn("Dropped an invalid document edit:", err.message, JSON.stringify(edits));
+      return undefined;
+    }
+    throw err;
+  }
+  return { baseVersion: context.contentVersion, reason: reason.trim().slice(0, 300), edits };
 }
 
 /**
