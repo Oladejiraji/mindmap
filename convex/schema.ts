@@ -87,7 +87,8 @@ export default defineSchema({
     threadId: v.id("threads"),
     parentId: v.union(v.id("nodes"), v.null()),
     title: v.string(),
-    content: v.optional(v.any()),
+    /** The node's document, as markdown. */
+    content: v.optional(v.string()),
     summary: v.optional(v.string()),
     position: v.optional(
       v.object({

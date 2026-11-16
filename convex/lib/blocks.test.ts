@@ -1,9 +1,5 @@
 import { describe, expect, test } from "vitest";
-import {
-  contentToMarkdown,
-  contentToPlainText,
-  toStorableContent,
-} from "./blocks";
+import { contentToMarkdown } from "./blocks";
 
 // Builders for BlockNote 0.55 JSON, shaped like what the editor emits.
 const text = (t: string, styles: Record<string, boolean> = {}) => ({
@@ -216,35 +212,3 @@ describe("contentToMarkdown: inline styles", () => {
   });
 });
 
-describe("contentToPlainText", () => {
-  test("joins all text into one line, including tables and captions", () => {
-    expect(
-      contentToPlainText([
-        block("heading", [text("Goals")], { level: 1 }),
-        block("bulletListItem", [text("Small "), text("teams", { bold: true })], {}, [
-          block("bulletListItem", [link("Docs", "https://x.io")]),
-        ]),
-        table([["Tier"], ["Free"]], 1),
-        block("image", [], { url: "https://x.io/a.png", caption: "Chart" }),
-      ]),
-    ).toBe("Goals Small teams Docs Tier Free Chart");
-  });
-
-  test("empty content gives an empty string", () => {
-    expect(contentToPlainText(undefined)).toBe("");
-    expect(contentToPlainText([block("paragraph")])).toBe("");
-  });
-});
-
-describe("toStorableContent", () => {
-  test("turns undefined inside lists into null and drops undefined fields", () => {
-    const stored = toStorableContent([table([["A", "B"]])]);
-    expect(stored[0].content.columnWidths).toEqual([null, null]);
-    expect("headerRows" in stored[0].content).toBe(false);
-  });
-
-  test("leaves the converted markdown unchanged", () => {
-    const doc = [table([["Tier", "Price"], ["Free", "$0"]], 1)];
-    expect(contentToMarkdown(toStorableContent(doc))).toBe(contentToMarkdown(doc));
-  });
-});

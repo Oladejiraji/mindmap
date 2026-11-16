@@ -4,7 +4,7 @@ import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useThreads } from "@/services/threads/queries";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
-import { contentToPlainText } from "@convex-lib/blocks";
+import { markdownToPlainText } from "@/lib/markdown";
 import { formatRelativeTime } from "@/lib/format-time";
 import type { OpenTab } from "@/lib/tabs";
 
@@ -26,7 +26,7 @@ export function TabPreview({ tab }: { tab: OpenTab }) {
   let snippet = "Start a project from a question.";
   if (threadId) {
     const root = nodes?.find((n) => n.parentId === null);
-    const notes = contentToPlainText(root?.content);
+    const notes = markdownToPlainText(root?.content);
     snippet = notes || (nodes ? `${nodes.length} ${nodes.length === 1 ? "node" : "nodes"}, no notes yet.` : "Loading…");
   }
 

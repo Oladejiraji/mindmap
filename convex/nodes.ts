@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 import { internalQuery } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { normalizeTitle } from "./lib/validation";
+import { MAX_NODE_CONTENT, normalizeTitle } from "./lib/validation";
 import { requireNode, requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
 
@@ -72,11 +72,16 @@ export const createEmptyBranch = userMutation({
 export const updateContent = userMutation({
   args: {
     nodeId: v.id("nodes"),
-    content: v.any(),
+    /** Markdown. */
+    content: v.string(),
   },
   handler: async (ctx, args) => {
     await requireNode(ctx, args.nodeId);
-    await ctx.db.patch(args.nodeId, { content: args.content });
+    if (args.content.length > MAX_NODE_CONTENT) {
+      throw new ConvexError(`Node content exceeds ${MAX_NODE_CONTENT} characters`);
+    }
+    // An empty document is stored as no content.
+    await ctx.db.patch(args.nodeId, { content: args.content.trim() ? args.content : undefined });
     return null;
   },
 });

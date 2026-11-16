@@ -1,33 +1,30 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type { Block } from "@blocknote/core";
-import { contentToMarkdown } from "@convex-lib/blocks";
 import { InlineNodeEditor } from "./inline-node-editor";
 
+/** A node's document on its canvas card: a markdown preview that turns into an editor on click. */
 export function NodeContent({
   nodeId,
   content,
   editorTheme = "light",
 }: {
   nodeId?: string;
-  content?: unknown;
+  /** Markdown. */
+  content?: string;
   editorTheme?: "light" | "dark";
 }) {
   const [isEditing, setIsEditing] = useState(false);
-
-  const markdown = useMemo(() => contentToMarkdown(content), [content]);
+  const markdown = content?.trim() ?? "";
 
   if (nodeId && isEditing) {
     return (
       <div className="p-2">
         <InlineNodeEditor
           nodeId={nodeId}
-          initialContent={
-            Array.isArray(content) ? (content as Block[]) : undefined
-          }
+          initialMarkdown={markdown}
           onBlur={() => setIsEditing(false)}
           theme={editorTheme}
         />

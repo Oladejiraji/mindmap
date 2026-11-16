@@ -15,7 +15,6 @@ import { popupSurface } from "@/components/layout/sidebar/popover-styles";
 import { ContentIcon } from "@/components/icons/content-icon";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { authClient } from "@/lib/auth-client";
-import type { Block } from "@blocknote/core";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useNode, useNodesByThread } from "@/services/nodes/queries";
@@ -24,11 +23,10 @@ import { handleError } from "@/lib/handle-error";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { BlockEditor } from "./block-editor";
+import { NodeDocumentEditor } from "./node-document-editor";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
-import { toStorableContent } from "@convex-lib/blocks";
 
 /*
  * Node view, shown as a side panel over its project (?panel=<nodeId>)
@@ -59,15 +57,7 @@ export function NodeEditorView({
   const updateContent = useMutation(api.nodes.updateContent);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const hasContent =
-    node?.content &&
-    Array.isArray(node.content) &&
-    node.content.length > 0 &&
-    !(
-      node.content.length === 1 &&
-      node.content[0].type === "paragraph" &&
-      (!node.content[0].content || node.content[0].content.length === 0)
-    );
+  const hasContent = Boolean(node?.content?.trim());
 
   // ?tab=chat wins; otherwise an empty node opens on the chat. Re-picked
   // whenever the panel switches node or ?tab changes (e.g. docking a
@@ -98,10 +88,10 @@ export function NodeEditorView({
   }, []);
 
   const handleContentChange = useCallback(
-    (blocks: Block[]) => {
+    (markdown: string) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
-        updateContent({ nodeId, content: toStorableContent(blocks) }).catch((err) =>
+        updateContent({ nodeId, content: markdown }).catch((err) =>
           handleError(err, "Failed to save content"),
         );
       }, 500);
@@ -283,9 +273,9 @@ export function NodeEditorView({
             {tab === "content" ? (
               <div className="h-full overflow-y-auto overscroll-contain">
                 <div className="px-5 py-5">
-                  <BlockEditor
+                  <NodeDocumentEditor
                     key={nodeId}
-                    initialContent={Array.isArray(node.content) ? (node.content as Block[]) : undefined}
+                    initialMarkdown={node.content ?? ""}
                     onChange={handleContentChange}
                   />
                 </div>
