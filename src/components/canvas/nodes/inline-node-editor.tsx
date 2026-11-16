@@ -5,7 +5,6 @@ import { EditorContent } from "@tiptap/react";
 import { useMutation } from "convex/react";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
-import { handleError } from "@/lib/handle-error";
 import { useNodeDocumentEditor } from "@/components/editor/use-node-document-editor";
 import { cn } from "@/lib/utils";
 
@@ -16,46 +15,31 @@ import { cn } from "@/lib/utils";
  */
 export function InlineNodeEditor({
   nodeId,
-  initialMarkdown,
+  markdown,
   onBlur,
   theme = "light",
 }: {
   nodeId: string;
-  initialMarkdown: string;
+  /** The saved markdown, live from the database. */
+  markdown: string;
   onBlur: () => void;
   theme?: "light" | "dark";
 }) {
   const updateContent = useMutation(api.nodes.updateContent);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const latestRef = useRef(initialMarkdown);
 
-  const save = useCallback(() => {
-    updateContent({ nodeId: nodeId as Id<"nodes">, content: latestRef.current }).catch((err) =>
-      handleError(err, "Failed to save content"),
-    );
-  }, [nodeId, updateContent]);
-
-  const editor = useNodeDocumentEditor({
-    markdown: initialMarkdown,
+  const { editor, flush } = useNodeDocumentEditor({
+    markdown,
     placeholder: "Start writing…",
     autofocus: "end",
     className: "outline-none",
-    onChange: (markdown) => {
-      latestRef.current = markdown;
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(save, 500);
-    },
+    onSave: (content) => updateContent({ nodeId: nodeId as Id<"nodes">, content }),
   });
 
   const flushAndClose = useCallback(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-      save();
-    }
+    flush();
     onBlur();
-  }, [onBlur, save]);
+  }, [flush, onBlur]);
 
   // Clicking anywhere outside the card closes the editor (a browser event, not React state).
   useEffect(() => {
@@ -67,12 +51,6 @@ export function InlineNodeEditor({
     document.addEventListener("mousedown", handleClickOutside, true);
     return () => document.removeEventListener("mousedown", handleClickOutside, true);
   }, [flushAndClose]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

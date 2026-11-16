@@ -6,16 +6,17 @@ import { SelectionToolbar } from "./selection-toolbar";
 
 /** The node's document in the side panel: full editor with a selection toolbar. */
 export function NodeDocumentEditor({
-  initialMarkdown,
-  onChange,
+  markdown,
+  onSave,
 }: {
-  initialMarkdown: string;
-  onChange: (markdown: string) => void;
+  /** The saved markdown, live from the database. */
+  markdown: string;
+  onSave: (markdown: string) => Promise<unknown>;
 }) {
-  const editor = useNodeDocumentEditor({
-    markdown: initialMarkdown,
+  const { editor } = useNodeDocumentEditor({
+    markdown,
     placeholder: "Write, or paste notes…",
-    onChange,
+    onSave,
     // Same typography as chat messages, so the document reads like the rest of the panel.
     className: "markdown-body min-h-40 outline-none",
   });

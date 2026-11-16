@@ -24,7 +24,7 @@ export function NodeContent({
       <div className="p-2">
         <InlineNodeEditor
           nodeId={nodeId}
-          initialMarkdown={markdown}
+          markdown={markdown}
           onBlur={() => setIsEditing(false)}
           theme={editorTheme}
         />
