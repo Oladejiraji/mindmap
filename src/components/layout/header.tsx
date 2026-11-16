@@ -7,9 +7,9 @@ import {
   ChevronRightIcon,
 } from "@/components/icons/sidebar-toggle";
 import { CanvasToggle } from "@/components/layout/canvas-toggle";
-import { useThread } from "@/services/threads/queries";
-import { useNode } from "@/services/nodes/queries";
 import type { Id } from "@convex/dataModel";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 function useRouteIds() {
   const pathname = usePathname();
@@ -23,8 +23,8 @@ function useRouteIds() {
 
 function useBreadcrumb() {
   const { threadId, nodeId } = useRouteIds();
-  const threadQuery = useThread(threadId);
-  const nodeQuery = useNode(nodeId);
+  const threadQuery = useAuthedConvexQuery(api.threads.get, threadId ? { threadId } : "skip");
+  const nodeQuery = useAuthedConvexQuery(api.nodes.get, nodeId ? { nodeId } : "skip");
   return {
     threadName: threadQuery.data?.name,
     nodeName: nodeQuery.data?.title,

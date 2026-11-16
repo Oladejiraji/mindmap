@@ -5,11 +5,12 @@ import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useThread } from "@/services/threads/queries";
 import type { Id } from "@convex/dataModel";
 import { ThreadItem } from "./thread-item";
 import { capitalizeFirst } from "@/lib/helpers";
 import { formatRelativeTime } from "@/lib/format-time";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 function useThreadIdFromRoute() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ function useThreadIdFromRoute() {
 export function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
   const threadId = useThreadIdFromRoute();
-  const { data: thread, isPending } = useThread(threadId);
+  const { data: thread, isPending } = useAuthedConvexQuery(api.threads.get, threadId ? { threadId } : "skip");
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col ">

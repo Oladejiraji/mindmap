@@ -1,5 +1,5 @@
 import dagre from "@dagrejs/dagre";
-import type { Node } from "@/services/nodes/queries";
+import type { Doc } from "@convex/dataModel";
 
 const NODE_WIDTH = 360;
 const NODE_HEIGHT = 120;
@@ -14,7 +14,7 @@ export interface LayoutPosition {
  * any stored position overrides (the hybrid model from the spec).
  */
 export function layoutNodes(
-  nodes: Node[]
+  nodes: Doc<"nodes">[]
 ): Map<string, LayoutPosition> {
   const g = new dagre.graphlib.Graph();
 

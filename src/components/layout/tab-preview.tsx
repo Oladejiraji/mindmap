@@ -2,7 +2,6 @@
 
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
-import { useThreads } from "@/services/threads/queries";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { markdownToPlainText } from "@/lib/markdown";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -16,7 +15,7 @@ import type { OpenTab } from "@/lib/tabs";
  */
 export function TabPreview({ tab }: { tab: OpenTab }) {
   const threadId = tab.href.match(/^\/t\/([^/?]+)/)?.[1] as Id<"threads"> | undefined;
-  const { data: threads } = useThreads();
+  const { data: threads } = useAuthedConvexQuery(api.threads.list, {});
   const { data: nodes } = useAuthedConvexQuery(
     api.nodes.listByThread,
     (threadId ? { threadId } : "skip") as { threadId: Id<"threads"> },

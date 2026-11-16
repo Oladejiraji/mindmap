@@ -7,20 +7,20 @@ import { cn } from "@/lib/utils";
 import { navRowActiveOnCard } from "./nav-row";
 import { RootNodeIcon, BranchNodeIcon, LeafNodeIcon } from "@/components/icons/node-icons";
 import { RenderIf } from "@/components/shared/render-if";
-import { useNodesByThread } from "@/services/nodes/queries";
 import { ChevronDownIcon } from "@/components/icons/chevron-down";
-import type { Thread } from "@/services/threads/queries";
-import type { Id } from "@convex/dataModel";
+import type { Id, Doc } from "@convex/dataModel";
 import { flattenTree, type FlatNode } from "@/lib/tree";
 import { routes } from "@/lib/routes";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 interface ThreadItemProps {
-  thread: Thread;
+  thread: Doc<"threads">;
   hideRoot?: boolean;
 }
 
 export function ThreadItem({ thread, hideRoot }: ThreadItemProps) {
-  const { data: nodes } = useNodesByThread(thread._id);
+  const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, { threadId: thread._id });
   const [collapsed, setCollapsed] = useState<Set<Id<"nodes">>>(new Set());
 
   const toggleCollapse = useCallback((nodeId: Id<"nodes">) => {

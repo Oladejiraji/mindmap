@@ -19,8 +19,9 @@ import { ProfileMenu } from "@/components/layout/sidebar/profile-menu";
 import { SidebarToggleButton } from "@/components/layout/sidebar/sidebar-toggle-button";
 import { CreateMenu } from "@/components/layout/sidebar/create-menu";
 import { ProjectRow } from "@/components/layout/sidebar/project-row";
-import { useThreads } from "@/services/threads/queries";
 import { routes } from "@/lib/routes";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 /*
  * App sidebar, structured like Pond's:
@@ -40,7 +41,7 @@ const iconButton =
 
 export function HomeSidebar() {
   const pathname = usePathname();
-  const { data: threads } = useThreads();
+  const { data: threads } = useAuthedConvexQuery(api.threads.list, {});
   const projects = threads?.slice(0, 12) ?? [];
 
   return (

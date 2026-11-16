@@ -9,7 +9,6 @@ import { api } from "@convex/api";
 import { FolderPlusIcon } from "@/components/icons/folder-icons";
 import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { BranchNodeIcon } from "@/components/icons/node-icons";
-import { useThreads } from "@/services/threads/queries";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -44,7 +43,7 @@ export function CreateMenu({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: threads } = useThreads();
+  const { data: threads } = useAuthedConvexQuery(api.threads.list, {});
   const threadId = pathname.match(/^\/t\/([^/?]+)/)?.[1] as Id<"threads"> | undefined;
   // "skip" outside a project page (the hook passes args straight to Convex).
   const { data: nodes } = useAuthedConvexQuery(

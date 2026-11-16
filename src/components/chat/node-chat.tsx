@@ -1,34 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useAction } from "convex/react";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
-import { useNodeContextMessages } from "@/services/messages/queries";
-import { useSendMessage } from "@/services/chat/actions";
 import { handleError } from "@/lib/handle-error";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 
-export function NodeChat({
-  threadId,
-  nodeId,
-}: {
-  threadId: Id<"threads">;
-  nodeId: Id<"nodes">;
-}) {
-  const { items, targetMessages, isLoading, error, retry } =
-    useNodeContextMessages(threadId, nodeId);
+export function NodeChat({ nodeId }: { nodeId: Id<"nodes"> }) {
+  const { data: messages, isLoading, error, refetch } = useAuthedConvexQuery(api.messages.listByNode, { nodeId });
   const { data: proposalList } = useAuthedConvexQuery(api.proposals.listByNode, { nodeId });
   const proposals = useMemo(
     () => new Map((proposalList ?? []).map((p) => [p.messageId as string, p])),
     [proposalList],
   );
-  const sendMessage = useSendMessage();
+  const sendMessage = useAction(api.chat.sendMessage);
   const [isSending, setIsSending] = useState(false);
 
-  const isStreaming = targetMessages.some((m) => m.isStreaming) ?? false;
+  const isStreaming = messages?.some((m) => m.isStreaming) ?? false;
   const isBusy = isSending || isStreaming;
 
   const handleSend = async (content: string) => {
@@ -53,14 +45,14 @@ export function NodeChat({
               Couldn&apos;t load this conversation.
             </p>
             <button
-              onClick={retry}
+              onClick={() => void refetch()}
               className="text-body-base font-medium text-fg-primary underline-offset-4 hover:underline"
             >
               Try again
             </button>
           </div>
         ) : (
-          <MessageList items={items} isLoading={isLoading} isStreaming={isStreaming} proposals={proposals} />
+          <MessageList messages={messages ?? []} isLoading={isLoading} isStreaming={isStreaming} proposals={proposals} />
         )}
         <div className="sticky bottom-0 bg-background">
           <ChatInput onSend={handleSend} disabled={isBusy || !!error} className="px-2 pt-3 pb-2" />

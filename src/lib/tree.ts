@@ -1,20 +1,19 @@
-import type { Id } from "@convex/dataModel";
-import type { Node } from "@/services/nodes/queries";
+import type { Id, Doc } from "@convex/dataModel";
 
-export type FlatNode = Node & { depth: number; isLeaf: boolean };
+export type FlatNode = Doc<"nodes"> & { depth: number; isLeaf: boolean };
 
 const MAX_DEPTH = 100;
 
-export function buildNodeMap(nodes: Node[]): Map<Id<"nodes">, Node> {
+export function buildNodeMap(nodes: Doc<"nodes">[]): Map<Id<"nodes">, Doc<"nodes">> {
   return new Map(nodes.map((n) => [n._id, n]));
 }
 
 // Root → target. Empty array if the node isn't in the map.
 export function walkAncestors(
-  nodeMap: Map<Id<"nodes">, Node>,
+  nodeMap: Map<Id<"nodes">, Doc<"nodes">>,
   nodeId: Id<"nodes">,
-): Node[] {
-  const chain: Node[] = [];
+): Doc<"nodes">[] {
+  const chain: Doc<"nodes">[] = [];
   let current = nodeMap.get(nodeId);
   let depth = 0;
   while (current && depth < MAX_DEPTH) {
@@ -27,7 +26,7 @@ export function walkAncestors(
 }
 
 export function collectSubtree(
-  nodes: Node[],
+  nodes: Doc<"nodes">[],
   rootId: Id<"nodes">,
 ): Set<Id<"nodes">> {
   const childrenByParent = new Map<Id<"nodes">, Id<"nodes">[]>();
@@ -51,8 +50,8 @@ export function collectSubtree(
   return result;
 }
 
-export function flattenTree(nodes: Node[]): FlatNode[] {
-  const byParent = new Map<Id<"nodes"> | null, Node[]>();
+export function flattenTree(nodes: Doc<"nodes">[]): FlatNode[] {
+  const byParent = new Map<Id<"nodes"> | null, Doc<"nodes">[]>();
   for (const node of nodes) {
     const key = node.parentId;
     const list = byParent.get(key) ?? [];

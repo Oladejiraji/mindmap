@@ -11,7 +11,6 @@ import type { Doc } from "@convex/dataModel";
 import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { useRenameThread } from "@/services/threads/mutations";
 import { closeTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
@@ -19,6 +18,7 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
 import { popupDivider, popupRow, popupSurface, SIDEBAR_INSET } from "./popover-styles";
+import { renameThreadOptimistic } from "@/lib/optimistic";
 
 /*
  * A project in the sidebar. On hover (or while its menu is open) two
@@ -35,7 +35,7 @@ export function ProjectRow({ thread, rowClassName }: { thread: Doc<"threads">; r
   const pathname = usePathname();
   const router = useRouter();
   const convex = useConvex();
-  const renameThread = useRenameThread();
+  const renameThread = useMutation(api.threads.rename).withOptimisticUpdate(renameThreadOptimistic);
   const removeThread = useMutation(api.threads.remove);
   const createBranch = useMutation(api.nodes.createEmptyBranch);
   const [menuOpen, setMenuOpen] = useState(false);

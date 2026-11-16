@@ -1,18 +1,18 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import type { ChatItem } from "@/services/messages/queries";
+import type { Doc } from "@convex/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "./message-bubble";
 import { ProposalCard, type Proposal } from "./proposal-card";
 
 export function MessageList({
-  items,
+  messages,
   isLoading,
   isStreaming,
   proposals,
 }: {
-  items: ChatItem[];
+  messages: Doc<"messages">[];
   isLoading: boolean;
   isStreaming: boolean;
   /** Suggested document edits, by the message that made them. */
@@ -46,7 +46,7 @@ export function MessageList({
     );
   }
 
-  if (items.length === 0) {
+  if (messages.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="text-body-base text-fg-secondary">
@@ -57,48 +57,20 @@ export function MessageList({
   }
 
   return (
-    // Aligned with the composer: bubbles to its edge (8px in), plain text
-    // (replies, branch markers) to its text (20px in, like the panel's
-    // details and content)
+    // Aligned with the composer: your bubbles to its edge (8px in), replies
+    // (plain text) to its text (20px in, like the panel's details and content)
     <div className={`flex flex-1 flex-col gap-6 px-2 py-6 ${isStreaming ? "pb-[60vh]" : ""}`}>
-      {items.map((item, i) => {
-        const isLast = i === items.length - 1;
-        const key = item.kind === "message" ? item.message._id : item.id;
-        const plainText = item.kind !== "message" || item.message.role !== "user";
-        const proposal = item.kind === "message" ? proposals?.get(item.message._id) : undefined;
+      {messages.map((message, i) => {
+        const isLast = i === messages.length - 1;
+        const proposal = proposals?.get(message._id);
         return (
-          <div key={key} ref={isLast ? lastItemRef : undefined} className={plainText ? "px-3" : undefined}>
-            {item.kind === "message" ? (
-              <>
-                <MessageBubble message={item.message} />
-                {proposal && <ProposalCard proposal={proposal} />}
-              </>
-            ) : (
-              <BranchMarker fromTitle={item.fromTitle} intoTitle={item.intoTitle} />
-            )}
+          <div key={message._id} ref={isLast ? lastItemRef : undefined} className={message.role === "user" ? undefined : "px-3"}>
+            <MessageBubble message={message} />
+            {proposal && <ProposalCard proposal={proposal} />}
           </div>
         );
       })}
       <div ref={bottomRef} />
-    </div>
-  );
-}
-
-function BranchMarker({
-  fromTitle,
-  intoTitle,
-}: {
-  fromTitle: string;
-  intoTitle: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 py-1 text-caption-lg text-fg-secondary">
-      <div className="h-px flex-1 bg-border" />
-      <span>
-        Branched from <span className="text-fg-primary">{fromTitle}</span> into{" "}
-        <span className="text-fg-primary">{intoTitle}</span>
-      </span>
-      <div className="h-px flex-1 bg-border" />
     </div>
   );
 }
