@@ -1,6 +1,5 @@
 "use client";
 import React, { Fragment, useEffect, useRef } from "react";
-import { useControls } from "leva";
 import { cn } from "@/lib/utils";
 
 export function Debug() {

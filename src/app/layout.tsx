@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import {
   Bricolage_Grotesque,
   Exo_2,
-  Geist,
   Geist_Mono,
   Google_Sans,
   Inter,

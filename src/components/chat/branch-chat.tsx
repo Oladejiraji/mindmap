@@ -32,12 +32,10 @@ import { useAuthedConvexQuery } from "@/lib/use-authed-query";
  * mutations only (messages.listByNode, nodes.createEmptyBranch, chat.sendMessage).
  */
 export function BranchChat({
-  threadId,
   nodes,
   activeNodeId,
   onActiveNodeChange,
 }: {
-  threadId: Id<"threads">;
   nodes: Doc<"nodes">[];
   activeNodeId: Id<"nodes">;
   onActiveNodeChange: (id: Id<"nodes">) => void;
