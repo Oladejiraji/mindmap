@@ -108,6 +108,8 @@ export function NodeEditorView({
   }
 
   const parent = ancestors.at(-1);
+  // Undefined on the root's own panel: it has no ancestors.
+  const root = ancestors.at(0);
   const kind = !node.parentId ? "root" : children > 0 ? "branch" : "leaf";
   const kindLabel = kind === "root" ? "Root node" : kind === "branch" ? "Branch" : "Leaf";
 
@@ -117,26 +119,33 @@ export function NodeEditorView({
       <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border-default pr-2 pl-3">
         <nav aria-label="Breadcrumb" className="min-w-0">
           <ol className="flex min-w-0 items-center text-body-sm font-medium text-fg-secondary">
-            <li className="min-w-0">
-              <Crumb href={routes.thread(threadId)}>{thread?.name ?? "Project"}</Crumb>
-            </li>
-            {ancestors.length > 1 && (
+            {/* The project crumb stands for the root node (the root's title
+                is the project's name), so it opens the root's panel. On the
+                root's own panel it's the current page, shown once below. */}
+            {root && (
               <>
+                <li className="min-w-0">
+                  <Crumb href={routes.node(threadId, root._id)}>{thread?.name ?? root.title}</Crumb>
+                </li>
                 <Separator />
-                <li className="px-1 text-fg-tertiary" title={ancestors.slice(0, -1).map((a) => a.title).join(" › ")}>
+              </>
+            )}
+            {ancestors.length > 2 && (
+              <>
+                <li className="px-1 text-fg-tertiary" title={ancestors.slice(1, -1).map((a) => a.title).join(" › ")}>
                   …
                 </li>
+                <Separator />
               </>
             )}
             {parent && parent.parentId && (
               <>
-                <Separator />
                 <li className="min-w-0">
                   <Crumb href={routes.node(threadId, parent._id)}>{parent.title}</Crumb>
                 </li>
+                <Separator />
               </>
             )}
-            <Separator />
             <li className="min-w-0">
               <span aria-current="page" className="block truncate px-2 py-1 text-fg-primary">
                 {node.title}
@@ -227,13 +236,9 @@ export function NodeEditorView({
                         </Property>
                         <Property label="Parent">
                           {parent ? (
-                            parent.parentId ? (
-                              <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
-                                {parent.title}
-                              </Link>
-                            ) : (
-                              <span className="truncate">{parent.title}</span>
-                            )
+                            <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
+                              {parent.title}
+                            </Link>
                           ) : (
                             <span className="text-fg-tertiary">None</span>
                           )}

@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { navRowActiveOnCard } from "./nav-row";
 import { RootNodeIcon, BranchNodeIcon, LeafNodeIcon } from "@/components/icons/node-icons";
@@ -81,20 +81,17 @@ interface INodeItemProps {
 }
 
 function NodeItem({ threadId, node, isCollapsed, onToggleCollapse }: INodeItemProps) {
-  const pathname = usePathname();
   const panelId = useSearchParams().get("panel");
 
   const isRoot = node.parentId === null;
-  const nodeRoute = isRoot
-    ? routes.thread(threadId)
-    : routes.node(threadId, node._id);
-  const isActive = isRoot ? pathname === nodeRoute && !panelId : panelId === node._id;
+  // Every node, the root included, opens in the side panel.
+  const isActive = panelId === node._id;
 
   const paddingLeft = `${node.depth * 12 + 8}px`;
 
   return (
     <Link
-      href={nodeRoute}
+      href={routes.node(threadId, node._id)}
       className={cn(
         // Shared nav row; the tree sits on a white card, so its active pill
         // uses the card variant. Inactive titles stay light (28%).
