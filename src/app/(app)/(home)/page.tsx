@@ -6,89 +6,82 @@ import { GridIcon } from "@/components/icons/grid-icon";
 import { MotionConfig, motion } from "motion/react";
 import { api } from "@convex/api";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useConvexMutation } from "@/lib/use-convex-mutation";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 import { useHomeLayout } from "@/lib/preferences";
-import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { ProjectCard } from "@/components/project/project-card";
 import { ProjectRow } from "@/components/project/project-row";
-import { useRouter } from "next/navigation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
-
 export default function Home() {
-  const router = useRouter();
-  const { data: threads, isPending } = useAuthedConvexQuery(api.threads.list, {});
-  const { mutate: createThread, isPending: isCreating } = useConvexMutation(
-    api.threads.create,
+  const { data: threads, isPending } = useAuthedConvexQuery(
+    api.threads.list,
+    {},
   );
   // Shared with the account menu's Preferences and the Settings page.
   const [layout, updateLayout] = useHomeLayout();
 
-  const handleCreate = async () => {
-    try {
-      const { threadId } = await createThread({ name: "Untitled" });
-      router.push(routes.thread(threadId));
-    } catch (err) {
-      handleError(err, "Failed to create project");
-    }
-  };
-
   return (
     <div className="flex min-h-full flex-col">
-      <main className="mx-auto w-full max-w-[808px] flex-1 px-6 pt-14 pb-16">
+      <main className="mx-auto w-full max-w-202 flex-1 px-6 pt-14 pb-16">
         <div className="flex items-center justify-between">
-          <h1 className="text-heading-6 font-medium text-fg-primary">Recents</h1>
+          <h1 className="text-heading-6 font-medium text-fg-primary">
+            Recents
+          </h1>
           <div className="flex items-center gap-2">
-            <Button
-              onClick={() => void handleCreate()}
-              isLoading={isCreating}
-              size="sm"
-            >
+            <Link href={routes.newProject} className={buttonVariants({ size: "sm" })}>
               <Plus className="size-3.5" />
               New
-            </Button>
+            </Link>
             <MotionConfig reducedMotion="user">
-            <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
-              <button
-                onClick={() => updateLayout("grid")}
-                className={cn(
-                  "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
-                  layout === "grid"
-                    ? "text-fg-secondary"
-                    : "text-fg-disabled hover:text-fg-tertiary",
-                )}
-              >
-                <GridIcon className="size-3.5" />
-                {layout === "grid" && (
-                  <motion.div
-                    layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-lg bg-foreground/6"
-                    transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
-                  />
-                )}
-              </button>
-              <button
-                onClick={() => updateLayout("list")}
-                className={cn(
-                  "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
-                  layout === "list"
-                    ? "text-fg-secondary"
-                    : "text-fg-disabled hover:text-fg-tertiary",
-                )}
-              >
-                <ListIcon className="size-3.5" />
-                {layout === "list" && (
-                  <motion.div
-                    layoutId="layout-toggle"
-                    className="absolute inset-0.5 rounded-lg bg-foreground/6"
-                    transition={{ type: "spring", duration: 0.3, bounce: 0.15 }}
-                  />
-                )}
-              </button>
-            </div>
+              <div className="relative flex h-8 items-center rounded-xl border border-foreground/8">
+                <button
+                  onClick={() => updateLayout("grid")}
+                  className={cn(
+                    "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
+                    layout === "grid"
+                      ? "text-fg-secondary"
+                      : "text-fg-disabled hover:text-fg-tertiary",
+                  )}
+                >
+                  <GridIcon className="size-3.5" />
+                  {layout === "grid" && (
+                    <motion.div
+                      layoutId="layout-toggle"
+                      className="absolute inset-0.5 rounded-lg bg-foreground/6"
+                      transition={{
+                        type: "spring",
+                        duration: 0.3,
+                        bounce: 0.15,
+                      }}
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={() => updateLayout("list")}
+                  className={cn(
+                    "relative z-10 flex w-8 h-full items-center justify-center transition-colors",
+                    layout === "list"
+                      ? "text-fg-secondary"
+                      : "text-fg-disabled hover:text-fg-tertiary",
+                  )}
+                >
+                  <ListIcon className="size-3.5" />
+                  {layout === "list" && (
+                    <motion.div
+                      layoutId="layout-toggle"
+                      className="absolute inset-0.5 rounded-lg bg-foreground/6"
+                      transition={{
+                        type: "spring",
+                        duration: 0.3,
+                        bounce: 0.15,
+                      }}
+                    />
+                  )}
+                </button>
+              </div>
             </MotionConfig>
           </div>
         </div>
@@ -153,16 +146,13 @@ export default function Home() {
         {!isPending && threads?.length === 0 && (
           <div className="flex flex-col items-center pt-24 text-center">
             <CanvasIcon className="size-10 text-fg-disabled" />
-            <p className="mt-3 text-body-base text-fg-tertiary">No projects yet</p>
-            <Button
-              onClick={() => void handleCreate()}
-              isLoading={isCreating}
-              size="sm"
-              className="mt-4"
-            >
+            <p className="mt-3 text-body-base text-fg-tertiary">
+              No projects yet
+            </p>
+            <Link href={routes.newProject} className={buttonVariants({ size: "sm", className: "mt-4" })}>
               <Plus className="size-3.5" />
               Create your first project
-            </Button>
+            </Link>
           </div>
         )}
       </main>
