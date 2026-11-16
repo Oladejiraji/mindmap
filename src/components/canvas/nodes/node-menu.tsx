@@ -2,14 +2,20 @@
 
 import { useState } from "react";
 import { Menu } from "@base-ui/react/menu";
-import { Ellipsis, Trash2 } from "lucide-react";
+import { Ellipsis, PanelRightOpen, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const item =
+  "corner-squircle flex cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 outline-none hover:bg-background-4";
+
+/** A card's … menu. Delete only shows when the card can be deleted. */
 export function NodeMenu({
   id,
+  onOpen,
   onDelete,
 }: {
   id: string;
+  onOpen?: (nodeId: string) => void;
   onDelete?: (nodeId: string) => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,13 +36,18 @@ export function NodeMenu({
           <Menu.Popup
             className="corner-squircle w-44 rounded-4xl bg-white p-1.5 text-body-sm text-fg-primary shadow-large outline-none"
           >
-            <Menu.Item
-              className="corner-squircle flex cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-destructive outline-none hover:bg-background-4"
-              onClick={() => onDelete?.(id)}
-            >
-              <Trash2 className="size-3" />
-              Delete node
-            </Menu.Item>
+            {onOpen && (
+              <Menu.Item className={item} onClick={() => onOpen(id)}>
+                <PanelRightOpen className="size-3" />
+                Open panel
+              </Menu.Item>
+            )}
+            {onDelete && (
+              <Menu.Item className={cn(item, "text-destructive")} onClick={() => onDelete(id)}>
+                <Trash2 className="size-3" />
+                Delete node
+              </Menu.Item>
+            )}
           </Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>

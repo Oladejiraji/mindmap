@@ -4,6 +4,8 @@ export interface MindMapNodeData {
   isParent: boolean;
   /** Markdown. */
   content?: string;
+  /** Opens the node in the side panel. */
+  onOpen?: (nodeId: string) => void;
   onDelete?: (nodeId: string) => void;
   onRename?: (nodeId: string, title: string) => void;
   [key: string]: unknown;

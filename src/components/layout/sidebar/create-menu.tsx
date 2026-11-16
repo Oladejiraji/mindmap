@@ -8,7 +8,7 @@ import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { FolderPlusIcon } from "@/components/icons/folder-icons";
 import { NodeTabIcon } from "@/components/icons/node-tab-icon";
-import { BranchNodeIcon } from "@/components/icons/node-icons";
+import { BranchNodeIcon, RootNodeIcon } from "@/components/icons/node-icons";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -83,11 +83,11 @@ export function CreateMenu({
   const nodeEntries: Entry[] =
     nodes && nodeMap && threadId
       ? nodes
-          .filter((n) => n.parentId !== null && matches(n.title))
+          .filter((n) => matches(n.title))
           .slice(0, q ? 8 : 5)
           .map((n) => ({
             key: n._id,
-            icon: <BranchNodeIcon />,
+            icon: n.parentId === null ? <RootNodeIcon /> : <BranchNodeIcon />,
             title: n.title,
             subtitle: [currentThread?.name ?? "Project", ...walkAncestors(nodeMap, n._id).slice(1, -1).map((a) => a.title)].join(" / "),
             run: () => go(routes.node(threadId, n._id)),

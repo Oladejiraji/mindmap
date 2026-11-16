@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PartyPopper, Plus, Search, Star } from "lucide-react";
+import { PartyPopper, Search, Star } from "lucide-react";
 import { HomeIcon, LogoIcon } from "@/components/icons/sidebar-toggle";
 import {
   Sidebar,
@@ -18,17 +18,14 @@ import {
 import { ProfileMenu } from "@/components/layout/sidebar/profile-menu";
 import { SidebarToggleButton } from "@/components/layout/sidebar/sidebar-toggle-button";
 import { CreateMenu } from "@/components/layout/sidebar/create-menu";
-import { ProjectRow } from "@/components/layout/sidebar/project-row";
 import { routes } from "@/lib/routes";
-import { api } from "@convex/api";
-import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 /*
  * App sidebar, structured like Pond's:
  *   header   logo tile + name · collapse toggle, new project (on the tab row);
  *            the 24px brand tile (14px m) centres over the nav icons
  *   nav      32px rows, 16px icon, 10px to the label, 13px text
- *   sections muted label with a trailing +, then its rows (Projects)
+ *   no project list: Home's grid and the tab strip handle projects
  *   footer   account, pinned bottom-left (no divider)
  * Collapses to a 48px icon rail; there the logo tile swaps to the toggle
  * on hover, and sections hide.
@@ -36,13 +33,9 @@ import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 // Rows use the shared nav row (nav-row.ts); SidebarMenuButton supplies the
 // rest of the layout, so only the size, corners, type and active pill go here.
 const row = "h-8 gap-2.5 rounded-2xl text-body-sm font-semimedium data-active:bg-white/50 data-active:shadow-border data-active:hover:bg-white/50";
-const iconButton =
-  "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-secondary focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export function HomeSidebar() {
   const pathname = usePathname();
-  const { data: threads } = useAuthedConvexQuery(api.threads.list, {});
-  const projects = threads?.slice(0, 12) ?? [];
 
   return (
     <Sidebar collapsible="icon" className="border-none">
@@ -76,23 +69,6 @@ export function HomeSidebar() {
                 <span>Starred</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup className="px-3 py-0 group-data-[collapsible=icon]:hidden">
-          <div className="mb-1.5 flex h-6 items-center justify-between pl-2">
-            <span className="text-body-sm text-fg-tertiary">Projects</span>
-            <span className="group/count flex items-center">
-              <span className="pr-1.5 text-caption-lg text-fg-tertiary tabular-nums group-hover/count:hidden">{threads?.length ?? ""}</span>
-              <Link href={routes.newProject} aria-label="New project" className={`${iconButton} hidden size-6 group-hover/count:flex`}>
-                <Plus className="size-4" />
-              </Link>
-            </span>
-          </div>
-          <SidebarMenu className="gap-0.5">
-            {projects.map((t) => (
-              <ProjectRow key={t._id} thread={t} rowClassName={row} />
-            ))}
           </SidebarMenu>
         </SidebarGroup>
 

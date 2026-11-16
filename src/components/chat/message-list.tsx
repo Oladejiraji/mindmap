@@ -4,7 +4,7 @@ import { useRef, useCallback } from "react";
 import type { Doc } from "@convex/dataModel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "./message-bubble";
-import { ProposalCard, type Proposal } from "./proposal-card";
+import { ProposalCard, ProposalPlaceholder, type Proposal } from "./proposal-card";
 
 export function MessageList({
   messages,
@@ -67,6 +67,7 @@ export function MessageList({
           <div key={message._id} ref={isLast ? lastItemRef : undefined} className={message.role === "user" ? undefined : "px-3"}>
             <MessageBubble message={message} />
             {proposal && <ProposalCard proposal={proposal} />}
+            {!proposal && message.isStreaming && message.draftingEdit && <ProposalPlaceholder />}
           </div>
         );
       })}

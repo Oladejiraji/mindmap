@@ -10,7 +10,7 @@ import { NodeMenu } from "./node-menu";
 import { NodeContent } from "./node-content";
 
 export function ParentNode({ id, data, selected }: NodeProps) {
-  const { title, isRoot, content, onDelete, onRename } =
+  const { title, isRoot, content, onOpen, onDelete, onRename } =
     data as MindMapNodeData;
   const isLeaf = !(data as MindMapNodeData).isParent && !isRoot;
 
@@ -38,7 +38,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
               className="text-background/87 focus-visible:ring-1 focus-visible:ring-white/30"
             />
           </div>
-          {isLeaf && <NodeMenu id={id} onDelete={onDelete} />}
+          <NodeMenu id={id} onOpen={onOpen} onDelete={isLeaf ? onDelete : undefined} />
         </div>
 
         <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-ring p-2 text-background shadow-node-inset [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

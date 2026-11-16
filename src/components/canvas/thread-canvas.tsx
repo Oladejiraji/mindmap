@@ -80,6 +80,11 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     [renameNode],
   );
 
+  const handleOpenNode = useCallback(
+    (nodeId: string) => router.push(routes.node(threadId, nodeId as Id<"nodes">)),
+    [router, threadId],
+  );
+
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const ancestorEdgeIds = useMemo(() => {
@@ -124,13 +129,14 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           isRoot,
           isParent,
           content: node.content,
+          onOpen: handleOpenNode,
           onDelete: handleDeleteNode,
           onRename: handleRenameNode,
         },
         width: CANVAS_NODE_WIDTH,
       };
     });
-  }, [nodes, handleDeleteNode, handleRenameNode]);
+  }, [nodes, handleOpenNode, handleDeleteNode, handleRenameNode]);
 
   const rfEdges: RFEdge[] = useMemo(() => {
     if (!nodes) return [];
@@ -178,12 +184,6 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     [updatePosition],
   );
 
-  const onNodeDoubleClick = useCallback(
-    (_event: React.MouseEvent, node: RFNode) => {
-      router.push(routes.node(threadId, node.id as Id<"nodes">));
-    },
-    [router, threadId],
-  );
 
   const onConnectStart = useCallback(
     (_event: unknown, params: { nodeId: string | null }) => {
@@ -274,7 +274,6 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           edges={rfEdges}
           onNodesChange={onNodesChange}
           onNodeDragStop={onNodeDragStop}
-          // onNodeDoubleClick={onNodeDoubleClick}
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
           onSelectionChange={onSelectionChange}

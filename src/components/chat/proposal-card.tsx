@@ -6,6 +6,7 @@ import { EditDocumentIcon } from "@/components/icons/edit-document-icon";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/api";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RenderIf } from "@/components/shared/render-if";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { handleError } from "@/lib/handle-error";
@@ -23,7 +24,7 @@ function ChangedBlock({
     <div
       aria-label={kind === "removed" ? "Removed" : "Added"}
       className={cn(
-        "markdown-body rounded-md px-2 py-0 text-body-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
+        "markdown-body rounded-md px-2 py-1 text-body-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
         kind === "removed"
           ? "bg-danger-subtle text-on-danger-subtle"
           : "bg-positive-subtle text-on-positive-subtle",
@@ -120,12 +121,35 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
         <Button
           size="xs"
           variant="ghost"
-          className="underline-offset-4 hover:bg-transparent hover:underline aria-expanded:bg-transparent"
           disabled={busy}
           onClick={answer(reject, "Failed to reject the edit")}
         >
           Reject
         </Button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Stands in for a suggested edit while the model is still writing it (a
+ * few seconds after the reply text ends). Same shape as the card, so the
+ * real one replaces it without a jump.
+ */
+export function ProposalPlaceholder() {
+  return (
+    <section
+      aria-label="Drafting an edit"
+      role="status"
+      className="mt-3 rounded-xl bg-component px-3 py-2.5"
+    >
+      <header className="flex items-center gap-2 text-caption-lg text-fg-secondary">
+        <EditDocumentIcon className="size-3.5 shrink-0" aria-hidden />
+        <span className="gradient-text-shimmer font-medium">Drafting an edit…</span>
+      </header>
+      <div className="mt-2 flex flex-col gap-1.5" aria-hidden>
+        <Skeleton className="h-3 w-3/4 rounded" />
+        <Skeleton className="h-3 w-1/2 rounded" />
       </div>
     </section>
   );

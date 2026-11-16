@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useAction } from "convex/react";
 import { api } from "@convex/api";
-import { closeTab, useRegisterTab } from "@/lib/tabs";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
 import { ChatInput } from "@/components/chat/chat-input";
@@ -13,9 +12,9 @@ import { ChatInput } from "@/components/chat/chat-input";
  * New-tab empty state: a chat, ChatGPT-style. There is no project form —
  * the first message starts the project. Sending creates the thread (and
  * its root node) via threads.create, sends the message to the root node
- * via chat.sendMessage, and lands in the project's chat view, where
- * branches become nodes. The composer sits where the chat view's does,
- * so the switch is seamless.
+ * via chat.sendMessage, and lands on the canvas with the root's side panel
+ * open on its chat. The reply streams in there and suggests the root's
+ * first document, which is the core loop: ask, accept, and the node grows.
  */
 
 export function NewProjectComposer() {
@@ -26,15 +25,14 @@ export function NewProjectComposer() {
   // The + menu can hand over text typed into its search (?name=).
   const initial = useSearchParams().get("name") ?? "";
 
-  useRegisterTab({ href: routes.newProject, kind: "new", title: "New project" });
-
   const start = async (content: string) => {
     setStarting(true);
     try {
       const { threadId, rootNodeId } = await createThread({});
-      closeTab(routes.newProject, routes.newProject);
-      router.replace(`${routes.thread(threadId)}?view=chat&node=${rootNodeId}`);
-      // The reply streams into the chat view; this tab's page is gone by then.
+      // Land on the canvas with the root's panel open on its chat: the reply
+      // streams in there, and its suggested first document shows under it.
+      router.replace(`${routes.node(threadId, rootNodeId)}&tab=chat`);
+      // This tab's page is gone by the time the reply streams in.
       sendMessage({ nodeId: rootNodeId, content }).catch((err) => handleError(err, "Failed to send message"));
     } catch (err) {
       handleError(err, "Failed to start chat");
