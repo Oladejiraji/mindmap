@@ -4,6 +4,7 @@ import { internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { normalizeMessageContent } from "./lib/validation";
+import { documentEditValidator } from "./lib/document";
 import { requireNode } from "./lib/auth";
 import { userQuery } from "./lib/functions";
 
@@ -107,10 +108,22 @@ export const patchStreamingContent = internalMutation({
   },
 });
 
+/**
+ * Finalizes an assistant reply, with the document edit it suggested, if any.
+ * A new suggestion replaces any unanswered one for the same node: only one
+ * can apply cleanly, and the newest reflects the conversation.
+ */
 export const finishStreamingMessage = internalMutation({
   args: {
     messageId: v.id("messages"),
     content: v.string(),
+    proposal: v.optional(
+      v.object({
+        baseVersion: v.number(),
+        reason: v.string(),
+        edits: v.array(documentEditValidator),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.messageId);
@@ -123,7 +136,25 @@ export const finishStreamingMessage = internalMutation({
       isStreaming: false,
     });
 
-    await ctx.db.patch(message.chatId, { isStreaming: false });
+    const chat = await ctx.db.get(message.chatId);
+    if (!chat) throw new ConvexError("Chat not found");
+    await ctx.db.patch(chat._id, { isStreaming: false });
+
+    if (args.proposal) {
+      const pending = await ctx.db
+        .query("proposals")
+        .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", chat.nodeId).eq("status", "pending"))
+        .take(100);
+      for (const older of pending) {
+        await ctx.db.patch(older._id, { status: "superseded" });
+      }
+      await ctx.db.insert("proposals", {
+        ...args.proposal,
+        nodeId: chat.nodeId,
+        messageId: args.messageId,
+        status: "pending",
+      });
+    }
 
     return null;
   },
