@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ChevronRightIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +19,6 @@ import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useNode, useNodesByThread } from "@/services/nodes/queries";
 import { useThread } from "@/services/threads/queries";
-import { handleError } from "@/lib/handle-error";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
@@ -55,7 +54,6 @@ export function NodeEditorView({
   const { data: thread } = useThread(threadId);
   const { data: nodes } = useNodesByThread(threadId);
   const updateContent = useMutation(api.nodes.updateContent);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const hasContent = Boolean(node?.content?.trim());
 
@@ -81,21 +79,8 @@ export function NodeEditorView({
     };
   }, [nodes, nodeId]);
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
-
-  const handleContentChange = useCallback(
-    (markdown: string) => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        updateContent({ nodeId, content: markdown }).catch((err) =>
-          handleError(err, "Failed to save content"),
-        );
-      }, 500);
-    },
+  const saveContent = useCallback(
+    (markdown: string) => updateContent({ nodeId, content: markdown }),
     [nodeId, updateContent],
   );
 
@@ -275,8 +260,8 @@ export function NodeEditorView({
                 <div className="px-5 py-5">
                   <NodeDocumentEditor
                     key={nodeId}
-                    initialMarkdown={node.content ?? ""}
-                    onChange={handleContentChange}
+                    markdown={node.content ?? ""}
+                    onSave={saveContent}
                   />
                 </div>
               </div>
