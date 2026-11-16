@@ -1,5 +1,14 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { documentEditValidator } from "./lib/document";
+
+export const proposalStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("accepted"),
+  v.literal("rejected"),
+  /** A newer suggestion for the same node replaced it before it was answered. */
+  v.literal("superseded"),
+);
 
 export const teamSizeValidator = v.union(
   v.literal("1-10"),
@@ -89,6 +98,8 @@ export default defineSchema({
     title: v.string(),
     /** The node's document, as markdown. */
     content: v.optional(v.string()),
+    /** Goes up by one on every content save. Missing means 0. */
+    contentVersion: v.optional(v.number()),
     summary: v.optional(v.string()),
     position: v.optional(
       v.object({
@@ -113,4 +124,23 @@ export default defineSchema({
     index: v.number(),
     isStreaming: v.optional(v.boolean()),
   }).index("by_chatId_and_index", ["chatId", "index"]),
+
+  /**
+   * An edit to a node's document that the AI suggested in a reply. The user
+   * accepts or rejects it. It only applies to the document version it was
+   * made against: if the document changed since, it's out of date.
+   */
+  proposals: defineTable({
+    nodeId: v.id("nodes"),
+    /** The assistant message that made the suggestion. */
+    messageId: v.id("messages"),
+    /** The node's contentVersion when the AI read the document. */
+    baseVersion: v.number(),
+    /** One line on why, shown to the user. */
+    reason: v.string(),
+    edits: v.array(documentEditValidator),
+    status: proposalStatusValidator,
+  })
+    .index("by_nodeId_and_status", ["nodeId", "status"])
+    .index("by_messageId", ["messageId"]),
 });

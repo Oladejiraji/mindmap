@@ -1,8 +1,9 @@
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
-import { internalQuery } from "./_generated/server";
+import { internalQuery, type MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { MAX_NODE_CONTENT, normalizeTitle } from "./lib/validation";
+import { normalizeTitle } from "./lib/validation";
+import { saveContent } from "./lib/nodeContent";
 import { requireNode, requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
 
@@ -76,12 +77,8 @@ export const updateContent = userMutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireNode(ctx, args.nodeId);
-    if (args.content.length > MAX_NODE_CONTENT) {
-      throw new ConvexError(`Node content exceeds ${MAX_NODE_CONTENT} characters`);
-    }
-    // An empty document is stored as no content.
-    await ctx.db.patch(args.nodeId, { content: args.content.trim() ? args.content : undefined });
+    const node = await requireNode(ctx, args.nodeId);
+    await saveContent(ctx, node, args.content);
     return null;
   },
 });
@@ -97,22 +94,7 @@ export const deleteLeafNode = userMutation({
       .first();
     if (children) throw new ConvexError("Cannot delete a node with children");
 
-    const chat = await ctx.db
-      .query("chats")
-      .withIndex("by_nodeId", (q) => q.eq("nodeId", args.nodeId))
-      .first();
-    if (chat) {
-      const messages = await ctx.db
-        .query("messages")
-        .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
-        .take(500);
-      for (const msg of messages) {
-        await ctx.db.delete(msg._id);
-      }
-      await ctx.db.delete(chat._id);
-    }
-
-    await ctx.db.delete(args.nodeId);
+    await deleteNodeAndChat(ctx, args.nodeId);
     return null;
   },
 });
@@ -140,26 +122,40 @@ export const deleteSubtree = userMutation({
     }
 
     for (const id of toDelete) {
-      const chat = await ctx.db
-        .query("chats")
-        .withIndex("by_nodeId", (q) => q.eq("nodeId", id))
-        .first();
-      if (chat) {
-        const messages = await ctx.db
-          .query("messages")
-          .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
-          .take(500);
-        for (const msg of messages) {
-          await ctx.db.delete(msg._id);
-        }
-        await ctx.db.delete(chat._id);
-      }
-      await ctx.db.delete(id);
+      await deleteNodeAndChat(ctx, id);
     }
 
     return { deletedCount: toDelete.length };
   },
 });
+
+/** Deletes a node with its chat, messages and suggested edits. */
+async function deleteNodeAndChat(ctx: MutationCtx, nodeId: Id<"nodes">) {
+  const proposals = await ctx.db
+    .query("proposals")
+    .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", nodeId))
+    .take(500);
+  for (const proposal of proposals) {
+    await ctx.db.delete(proposal._id);
+  }
+
+  const chat = await ctx.db
+    .query("chats")
+    .withIndex("by_nodeId", (q) => q.eq("nodeId", nodeId))
+    .first();
+  if (chat) {
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
+      .take(500);
+    for (const msg of messages) {
+      await ctx.db.delete(msg._id);
+    }
+    await ctx.db.delete(chat._id);
+  }
+
+  await ctx.db.delete(nodeId);
+}
 
 export const assertOwned = internalQuery({
   args: { nodeId: v.id("nodes") },
