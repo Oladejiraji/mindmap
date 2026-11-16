@@ -314,7 +314,6 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
         {chatNode && nodes && view === "chat" && (
           <div className="h-full w-full">
             <BranchChat
-              threadId={threadId}
               nodes={nodes}
               activeNodeId={chatNode._id}
               onActiveNodeChange={(id) => router.replace(`${pathname}?view=chat&node=${id}`, { scroll: false })}

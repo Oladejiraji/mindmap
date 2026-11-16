@@ -3,7 +3,6 @@ import { Content } from "@/components/landing-page/content";
 import { Debug } from "@/components/landing-page/debug";
 import { Header } from "@/components/landing-page/header";
 import GridLines from "@/components/landing-page/grid-lines";
-import { MobileMenu } from "@/components/landing-page/mobile-menu";
 
 export default function Page() {
   return (
