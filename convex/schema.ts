@@ -89,7 +89,24 @@ export default defineSchema({
     name: v.string(),
     updatedAt: v.optional(v.number()),
     orgId: v.optional(v.id("organizations")),
+    /** How many AI replies are being written in this project right now (its tab shows a spinner). */
+    replying: v.optional(v.number()),
   }).index("by_userId", ["userId"]),
+
+  /**
+   * The projects a user has open as tabs, left to right by `order`.
+   * Opening a project adds its tab; closing the tab keeps the project.
+   */
+  tabs: defineTable({
+    userId: v.string(),
+    threadId: v.id("threads"),
+    order: v.number(),
+    /** Pinned tabs come first and show only their icon. */
+    pinned: v.optional(v.boolean()),
+  })
+    .index("by_userId_and_order", ["userId", "order"])
+    .index("by_userId_and_threadId", ["userId", "threadId"])
+    .index("by_threadId", ["threadId"]),
 
   nodes: defineTable({
     userId: v.string(),

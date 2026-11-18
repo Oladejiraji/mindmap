@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { normalizeTitle, UNTITLED } from "./lib/validation";
 import { requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
+import { deleteTabsFor, openTab } from "./lib/tabs";
 
 export const list = userQuery({
   args: {},
@@ -32,6 +33,7 @@ export const create = userMutation({
       parentId: null,
       title: name,
     });
+    await openTab(ctx, ctx.userId, threadId);
 
     return { threadId, rootNodeId };
   },
@@ -77,6 +79,7 @@ export const remove = userMutation({
       await ctx.db.delete(node._id);
     }
 
+    await deleteTabsFor(ctx, args.threadId);
     await ctx.db.delete(args.threadId);
     return null;
   },
