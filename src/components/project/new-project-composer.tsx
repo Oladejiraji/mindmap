@@ -2,17 +2,15 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useMutation, type Preloaded } from "convex/react";
+import { usePreloadedAuthQuery } from "@convex-dev/better-auth/nextjs/client";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { handleError } from "@/lib/handle-error";
 import { routes } from "@/lib/routes";
-import { authClient } from "@/lib/auth-client";
 import { ChatInput } from "@/components/chat/chat-input";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
-import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { RenderIf } from "@/components/shared/render-if";
-import { Skeleton } from "@/components/ui/skeleton";
 import { startersFor } from "./starter-prompts";
 
 /*
@@ -20,7 +18,12 @@ import { startersFor } from "./starter-prompts";
  * and opens the canvas, where the reply streams into the root's chat.
  */
 
-export function NewProjectComposer() {
+export function NewProjectComposer({
+  preloadedOrg,
+}: {
+  /** The viewer and their org, fetched by the page on the server. */
+  preloadedOrg: Preloaded<typeof api.organizations.current>;
+}) {
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
   const sendMessage = useMutation(api.chat.send);
@@ -35,19 +38,13 @@ export function NewProjectComposer() {
   // Sent: the box waits, busy, until the canvas opens.
   const [leaving, setLeaving] = useState(false);
 
-  // Starters follow the onboarding use cases; none until those load, so
-  // the list doesn't swap under you.
-  const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
-  const starters = useMemo(
-    () =>
-      orgData === undefined
-        ? undefined
-        : startersFor(orgData?.org?.useCases ?? []),
-    [orgData],
-  );
+  // Starters follow the onboarding use cases.
+  // Shows the server's result until the signed-in subscription takes over.
+  const orgData = usePreloadedAuthQuery(preloadedOrg);
+  const useCases = orgData?.org?.useCases;
+  const starters = useMemo(() => startersFor(useCases ?? []), [useCases]);
 
-  const { data: session, isPending } = authClient.useSession();
-  const firstName = session?.user?.name?.trim().split(/\s+/)[0];
+  const firstName = orgData?.user.name?.trim().split(/\s+/)[0];
 
   // Rejecting keeps the text in the box for another try.
   const start = async (content: string) => {
@@ -66,7 +63,7 @@ export function NewProjectComposer() {
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-6 pb-[12vh]">
+    <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-6 pb-[6vh]">
       <div className="flex w-full max-w-180 flex-col gap-6">
         <div className="flex flex-col items-center gap-4">
           {/* The app mark, as in the sidebar */}
@@ -78,10 +75,6 @@ export function NewProjectComposer() {
           </span>
           <h1 className="text-center text-heading-6 font-medium text-balance text-fg-primary">
             What are you trying to figure out
-            <RenderIf condition={isPending}>
-              ,{" "}
-              <Skeleton className="inline-block h-[0.8em] w-20 rounded align-middle bg-component-hover" />
-            </RenderIf>
             <RenderIf condition={!!firstName}>, {firstName}</RenderIf>?
           </h1>
         </div>
@@ -91,7 +84,6 @@ export function NewProjectComposer() {
           onSend={start}
           busy={leaving}
           starters={starters}
-          startersLoading={orgData === undefined}
           size="large"
           placeholder="Describe a question, a problem or an idea…"
         />

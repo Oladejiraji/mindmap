@@ -94,7 +94,11 @@ export const current = userQuery({
     const org = membership ? await ctx.db.get(membership.orgId) : null;
 
     return {
-      user: { onboardedAt: user.onboardedAt, jobRole: user.jobRole },
+      user: {
+        name: user.name,
+        onboardedAt: user.onboardedAt,
+        jobRole: user.jobRole,
+      },
       org,
       membership: membership
         ? { _id: membership._id, role: membership.role }
