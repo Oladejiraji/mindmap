@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { decodeHtmlEntities, type Editor } from "@tiptap/core";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -13,6 +19,7 @@ import { SendIcon } from "@/components/icons/send-icon";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RenderIf } from "@/components/shared/render-if";
 import { PasteMarkdown } from "@/components/editor/paste-markdown";
 import { SubmitOnEnter } from "./submit-on-enter";
@@ -21,33 +28,33 @@ import { SubmitOnEnter } from "./submit-on-enter";
 const MAX_MESSAGE_CONTENT = 32_000;
 const COUNTER_THRESHOLD = MAX_MESSAGE_CONTENT * 0.8;
 
-/*
- * Card composer (modelled on Vercel's assistant):
- *   ┌───────────────────────────────────────────────┐
- *   │ (●) Project   (●) Branch        ← context      │
- *   │ Send a message…                                │
- *   │ (+) (mic)                                (↑)   │
- *   └───────────────────────────────────────────────┘
- * Context chips show what the reply draws on (the project and the branch
- * you're in). "+" opens a menu (New branch). The mic is a placeholder
- * until voice input is supported. Send is a grey
- * disc that turns ink once there's text; while a reply is being written
- * it becomes Stop.
- *
- * Two sizes: default for conversations (panel, chat view) and large for
- * starting one (/new), where the box is the page's focus. Only the card
- * and the text box change; the controls stay the same.
- *
- * The text clears only once onSend resolves: if sending fails, it stays
- * so nothing typed is lost. You can keep typing while a reply is written.
- *
- * The box is a Tiptap editor that writes markdown, the format replies are
- * shown in: bold, italic, lists, inline code and code blocks, typed or
- * pasted. No headings or rules, which don't belong in a chat message.
- * Uses the hook API (useEditor): the editor lives in this one component.
- */
+/** A chip above the composer naming something the reply draws on. */
+type ContextChip = {
+  icon: ReactNode;
+  label: string;
+};
 
-export type ContextChip = { icon: ReactNode; label: string };
+export type Starter = {
+  /** The start of a sentence for the user to finish, e.g. "Plan the launch of ". */
+  text: string;
+  icon: ReactNode;
+};
+
+/* A plain-text document (no markdown parsing, which would trim a
+ * trailing space). */
+const textDoc = (text: string) => ({
+  type: "doc",
+  content: [
+    { type: "paragraph", content: text ? [{ type: "text", text }] : [] },
+  ],
+});
+
+// A picked starter types itself in at this pace: fast enough to feel like
+// the box filled itself, not a typewriter.
+const MS_PER_CHAR = 12;
+
+// One per starter row (there are always four), in varied lengths.
+const STARTER_SKELETON_WIDTHS = ["w-40", "w-48", "w-36", "w-44"];
 
 const card = cva(
   "flex flex-col gap-2 bg-surface-container inset-ring-[0.5px] inset-ring-border-strong transition-shadow focus-within:shadow-default",
@@ -61,14 +68,9 @@ const card = cva(
   },
 );
 
-/**
- * The message as markdown. The serializer also writes text's < > & as HTML
- * entities; those are put back, so the AI and the record see "<div>", not
- * "&lt;div&gt;" (the chat shows raw HTML as text, so it's safe). Its
- * backslash escapes stay: they keep a typed 5*3 from turning italic.
- * Caveat: an entity typed literally inside code is decoded too.
- */
-const toMessage = (editor: Editor | null) => (editor ? decodeHtmlEntities(editor.getMarkdown()).trim() : "");
+/** The box's text as markdown, with "&lt;" turned back into "<". */
+const toMessage = (editor: Editor | null) =>
+  editor ? decodeHtmlEntities(editor.getMarkdown()).trim() : "";
 
 /* The scrolling frame around the editor. Its min height also holds the
  * space while the editor starts (it renders nothing on the server). */
@@ -93,11 +95,44 @@ const editorText = cva("markdown-body text-fg-primary outline-none", {
 });
 
 const sendButton =
-  "ml-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-solid text-on-brand-solid outline-none transition-colors hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary";
+  "ml-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand-solid text-on-brand-solid shadow-button-primary outline-none transition-[color,background-color,box-shadow] hover:bg-brand-solid-hover focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:bg-component disabled:text-fg-tertiary disabled:shadow-none";
 
 const roundButton =
   "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-fg-secondary inset-ring-[0.5px] inset-ring-border-strong outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-default disabled:text-fg-disabled disabled:hover:bg-transparent [&_svg]:size-4.5";
 
+export type ChatInputProps = {
+  /** Called with the message when the user sends. If it throws, the text stays in the box. */
+  onSend: (content: string) => Promise<unknown>;
+  /** True while a reply is being written. The user can type but not send. */
+  busy?: boolean;
+  /** Called when the user stops the reply. */
+  onStop?: () => void;
+  /** Turns the whole box off. */
+  disabled?: boolean;
+  placeholder?: string;
+  /** Chips shown above the box. */
+  context?: ContextChip[];
+  /** Adds a "New branch" option to the + button. */
+  onNewBranch?: () => void;
+  /** Text already in the box when it first shows. */
+  defaultValue?: string;
+  /** Suggested prompts shown under the box while it's empty. */
+  starters?: Starter[];
+  /** Shows placeholder rows while the starters load. */
+  startersLoading?: boolean;
+  /** Use "large" when the box is the main thing on the page. */
+  size?: "default" | "large";
+  className?: string;
+};
+
+/**
+ * The chat composer: a markdown text box (Tiptap) with Send/Stop, a +
+ * button, and optional context chips and starters.
+ *
+ * Enter sends, Shift+Enter breaks the line; inside a list or code block,
+ * Enter edits and Cmd/Ctrl+Enter sends. The text clears only once
+ * `onSend` resolves. You can keep typing while a reply is written.
+ */
 export function ChatInput({
   onSend,
   busy = false,
@@ -107,31 +142,19 @@ export function ChatInput({
   context,
   onNewBranch,
   defaultValue = "",
+  starters,
+  startersLoading = false,
   size = "default",
   className,
-}: {
-  /** Sends the message. Rejects if it wasn't sent, which keeps the text in the box. */
-  onSend: (content: string) => Promise<unknown>;
-  /** Something is under way (a reply being written, or the page moving on after a send): no sending, but typing is fine. Without onStop, Send shows a spinner. */
-  busy?: boolean;
-  /** Stops the reply being written. Shown in place of Send while busy. */
-  onStop?: () => void;
-  /** No typing or sending at all (e.g. the chat didn't load). */
-  disabled?: boolean;
-  placeholder?: string;
-  /** Chips shown above the box: what the reply draws on. */
-  context?: ContextChip[];
-  /** Adds "New branch" to the + menu. */
-  onNewBranch?: () => void;
-  /** Starting text, plain (e.g. handed over from the + menu, or a starter). */
-  defaultValue?: string;
-  size?: "default" | "large";
-  className?: string;
-}) {
+}: ChatInputProps) {
   const [sending, setSending] = useState(false);
-  // The editor's Enter handler is created once, so it sends through a ref.
+  // The editor's handlers are created once, so they call through refs.
   const submitRef = useRef<() => void>(() => {});
-
+  const finishFillRef = useRef<() => void>(() => {});
+  // The starter being hovered, shown as the placeholder.
+  const previewRef = useRef<string | null>(null);
+  // A starter typing itself in.
+  const fillRef = useRef<{ frame: number; text: string } | null>(null);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -140,14 +163,17 @@ export function ChatInput({
         underline: false,
         link: { openOnClick: false, autolink: true },
       }),
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({
+        placeholder: () =>
+          previewRef.current ? `${previewRef.current.trim()}…` : placeholder,
+      }),
       Markdown.configure({ markedOptions: { gfm: true } }),
       PasteMarkdown,
       SubmitOnEnter.configure({ onSubmit: () => submitRef.current() }),
     ],
     // Plain text, not markdown: parsing would trim a starter's trailing
     // space ("Plan the launch of "), and the caret would land against it.
-    content: defaultValue ? { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: defaultValue }] }] } : "",
+    content: defaultValue ? textDoc(defaultValue) : "",
     // After any starting text, so you can finish it.
     autofocus: "end",
     // Next.js renders on the server first; the editor must start on the client.
@@ -159,10 +185,25 @@ export function ChatInput({
         "aria-multiline": "true",
         role: "textbox",
       },
+      // Typing or clicking while a starter fills in completes it first,
+      // so the key lands after the whole starter. Returning false lets the
+      // event carry on as usual.
+      handleKeyDown: () => {
+        finishFillRef.current();
+        return false;
+      },
+      handleDOMEvents: {
+        mousedown: () => {
+          finishFillRef.current();
+          return false;
+        },
+      },
     },
   });
 
-  const message = useEditorState({ editor, selector: ({ editor }) => toMessage(editor) }) ?? "";
+  const message =
+    useEditorState({ editor, selector: ({ editor }) => toMessage(editor) }) ??
+    "";
 
   // The editor isn't React state: keep its editable flag in step with the prop.
   useEffect(() => {
@@ -176,12 +217,15 @@ export function ChatInput({
   const showCounter = length >= COUNTER_THRESHOLD;
 
   const handleSend = async () => {
-    if (!canSend) return;
+    // Read the box itself: Enter mid-fill completes the starter just before.
+    const text = toMessage(editor);
+    if (!canSend || !text || text.length > MAX_MESSAGE_CONTENT) return;
     setSending(true);
     try {
-      await onSend(message);
+      await onSend(text);
       // Only what was sent: anything typed meanwhile stays.
-      if (editor && toMessage(editor) === message) editor.commands.clearContent(true);
+      if (editor && toMessage(editor) === text)
+        editor.commands.clearContent(true);
     } catch {
       // The caller reported the error; the text stays for another try.
     } finally {
@@ -189,9 +233,66 @@ export function ChatInput({
     }
   };
 
+  // The placeholder reads previewRef; an empty transaction redraws it.
+  const preview = (text: string | null) => {
+    previewRef.current = text;
+    if (editor && !editor.isDestroyed) editor.view.dispatch(editor.state.tr);
+  };
+
+  // Replaces the box's text without an undo step per character.
+  const showText = (text: string) =>
+    editor
+      ?.chain()
+      .command(({ tr }) => {
+        tr.setMeta("addToHistory", false);
+        return true;
+      })
+      .setContent(textDoc(text))
+      .focus("end")
+      .run();
+
+  const finishFill = () => {
+    const fill = fillRef.current;
+    if (!fill) return;
+    cancelAnimationFrame(fill.frame);
+    fillRef.current = null;
+    showText(fill.text);
+  };
+
+  // Types the starter in, caret at the end so you can finish the sentence.
+  // With reduced motion it just appears.
+  const pick = (text: string) => {
+    preview(null);
+    finishFill();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      showText(text);
+      return;
+    }
+    const start = performance.now();
+    const step = (now: number) => {
+      const count = Math.max(1, Math.ceil((now - start) / MS_PER_CHAR));
+      showText(text.slice(0, count));
+      if (count < text.length && fillRef.current)
+        fillRef.current.frame = requestAnimationFrame(step);
+      else fillRef.current = null;
+    };
+    fillRef.current = { frame: requestAnimationFrame(step), text };
+  };
+
   useLayoutEffect(() => {
     submitRef.current = () => void handleSend();
+    finishFillRef.current = finishFill;
   });
+
+  // Unmounting mid-fill: stop the frames, which would write to a gone editor.
+  useEffect(
+    () => () => {
+      if (fillRef.current) cancelAnimationFrame(fillRef.current.frame);
+    },
+    [],
+  );
+
+  const showStarters = !!starters?.length && length === 0 && !disabled;
 
   return (
     <div className={className}>
@@ -217,12 +318,18 @@ export function ChatInput({
 
         <EditorContent
           editor={editor}
-          className={cn(textBox({ size }), disabled && "cursor-default opacity-50")}
+          className={cn(
+            textBox({ size }),
+            disabled && "cursor-default opacity-50",
+          )}
         />
 
         <div className="flex items-center gap-1.5">
           <RenderIf condition={!onNewBranch}>
-            <ComingSoonButton label="Attachments" tip="Attachments are coming soon">
+            <ComingSoonButton
+              label="Attachments"
+              tip="Attachments are coming soon"
+            >
               <Plus strokeWidth={1.75} />
             </ComingSoonButton>
           </RenderIf>
@@ -251,17 +358,35 @@ export function ChatInput({
               </Menu.Portal>
             </Menu.Root>
           )}
-          <ComingSoonButton label="Voice input" tip="Voice input is coming soon">
+          <ComingSoonButton
+            label="Voice input"
+            tip="Voice input is coming soon"
+          >
             <Mic strokeWidth={1.75} />
           </ComingSoonButton>
           <RenderIf condition={showStop}>
-            <button type="button" onClick={onStop} aria-label="Stop reply" className={sendButton}>
+            <button
+              type="button"
+              onClick={onStop}
+              aria-label="Stop reply"
+              className={sendButton}
+            >
               <Square className="size-3.5 fill-current" />
             </button>
           </RenderIf>
           <RenderIf condition={!showStop}>
-            <button type="button" onClick={() => void handleSend()} disabled={!canSend} aria-label="Send" className={sendButton}>
-              {sending || busy ? <Spinner className="size-4" /> : <SendIcon className="size-5" />}
+            <button
+              type="button"
+              onClick={() => void handleSend()}
+              disabled={!canSend}
+              aria-label="Send"
+              className={sendButton}
+            >
+              {sending || busy ? (
+                <Spinner className="size-4" />
+              ) : (
+                <SendIcon className="size-5" />
+              )}
             </button>
           </RenderIf>
         </div>
@@ -276,6 +401,40 @@ export function ChatInput({
           {length.toLocaleString()} / {MAX_MESSAGE_CONTENT.toLocaleString()}
         </div>
       )}
+      <RenderIf condition={startersLoading && length === 0}>
+        <div aria-hidden className="mt-3 flex flex-col">
+          {STARTER_SKELETON_WIDTHS.map((width) => (
+            <div key={width} className="flex h-9 items-center gap-2.5 px-3">
+              <Skeleton className="size-4 shrink-0 rounded bg-component-hover" />
+              <Skeleton className={cn("h-3 rounded bg-component-hover", width)} />
+            </div>
+          ))}
+        </div>
+      </RenderIf>
+      <RenderIf condition={showStarters}>
+        {/* Plain rows, not chips: things you could say, not buttons */}
+        <ul
+          aria-label="Ways to start"
+          className="mt-3 flex flex-col motion-safe:animate-fade-up"
+        >
+          {starters?.map((s) => (
+            <li key={s.text}>
+              <button
+                type="button"
+                onClick={() => pick(s.text)}
+                onMouseEnter={() => preview(s.text)}
+                onMouseLeave={() => preview(null)}
+                onFocus={() => preview(s.text)}
+                onBlur={() => preview(null)}
+                className="flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 text-left text-body-sm text-fg-secondary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:bg-transparent-hover focus-visible:text-fg-primary [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-fg-tertiary"
+              >
+                {s.icon}
+                <span className="truncate">{s.text.trim()}…</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </RenderIf>
     </div>
   );
 }
@@ -283,14 +442,25 @@ export function ChatInput({
 /* A control for something not built yet: it looks disabled and says so on
  * hover or focus. aria-disabled, not disabled, so it can still show its
  * tooltip. */
-function ComingSoonButton({ label, tip, children }: { label: string; tip: string; children: ReactNode }) {
+function ComingSoonButton({
+  label,
+  tip,
+  children,
+}: {
+  label: string;
+  tip: string;
+  children: ReactNode;
+}) {
   return (
     <Tip label={tip} side="top">
       <button
         type="button"
         aria-disabled="true"
         aria-label={`${label} (coming soon)`}
-        className={cn(roundButton, "cursor-default text-fg-disabled hover:bg-transparent hover:text-fg-disabled")}
+        className={cn(
+          roundButton,
+          "cursor-default text-fg-disabled hover:bg-transparent hover:text-fg-disabled",
+        )}
       >
         {children}
       </button>

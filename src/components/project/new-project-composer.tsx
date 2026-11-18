@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import type { Id } from "@convex/dataModel";
@@ -10,17 +10,14 @@ import { routes } from "@/lib/routes";
 import { authClient } from "@/lib/auth-client";
 import { ChatInput } from "@/components/chat/chat-input";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+import { RenderIf } from "@/components/shared/render-if";
+import { Skeleton } from "@/components/ui/skeleton";
+import { startersFor } from "./starter-prompts";
 
 /*
- * New-tab empty state: a chat, ChatGPT-style. There is no project form —
- * the first message starts the project. Sending creates the thread (and
- * its root node) via threads.create, sends the message to the root node
- * via chat.send, and lands on the canvas with the root's side panel
- * open on its chat. The reply streams in there and suggests the root's
- * first document, which is the core loop: ask, accept, and the node grows.
- *
- * Layout: the heading and a large composer, centred together. Nothing streams here, so the composer isn't docked at
- * the bottom the way it is in a conversation.
+ * The /new page: your first message starts a project. Sending creates it
+ * and opens the canvas, where the reply streams into the root's chat.
  */
 
 export function NewProjectComposer() {
@@ -29,13 +26,27 @@ export function NewProjectComposer() {
   const sendMessage = useMutation(api.chat.send);
   // If the project was made but the message didn't send, the next try
   // sends into that project rather than making another.
-  const created = useRef<{ threadId: Id<"threads">; rootNodeId: Id<"nodes"> } | null>(null);
+  const created = useRef<{
+    threadId: Id<"threads">;
+    rootNodeId: Id<"nodes">;
+  } | null>(null);
   // The + menu can hand over text typed into its search (?name=).
   const initial = useSearchParams().get("name") ?? "";
   // Sent: the box waits, busy, until the canvas opens.
   const [leaving, setLeaving] = useState(false);
 
-  const { data: session } = authClient.useSession();
+  // Starters follow the onboarding use cases; none until those load, so
+  // the list doesn't swap under you.
+  const { data: orgData } = useAuthedConvexQuery(api.organizations.current, {});
+  const starters = useMemo(
+    () =>
+      orgData === undefined
+        ? undefined
+        : startersFor(orgData?.org?.useCases ?? []),
+    [orgData],
+  );
+
+  const { data: session, isPending } = authClient.useSession();
   const firstName = session?.user?.name?.trim().split(/\s+/)[0];
 
   // Rejecting keeps the text in the box for another try.
@@ -56,14 +67,22 @@ export function NewProjectComposer() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-6 pb-[12vh]">
-      <div className="flex w-full max-w-[720px] flex-col gap-6">
+      <div className="flex w-full max-w-180 flex-col gap-6">
         <div className="flex flex-col items-center gap-4">
           {/* The app mark, as in the sidebar */}
-          <span aria-hidden className="flex size-10 items-center justify-center rounded-xl bg-brand-solid text-on-brand-solid">
+          <span
+            aria-hidden
+            className="flex size-10 items-center justify-center rounded-xl bg-brand-solid text-on-brand-solid"
+          >
             <LogoIcon className="h-auto w-5" />
           </span>
           <h1 className="text-center text-heading-6 font-medium text-balance text-fg-primary">
-            {firstName ? `What are you trying to figure out, ${firstName}?` : "What are you trying to figure out?"}
+            What are you trying to figure out
+            <RenderIf condition={isPending}>
+              ,{" "}
+              <Skeleton className="inline-block h-[0.8em] w-20 rounded align-middle bg-component-hover" />
+            </RenderIf>
+            <RenderIf condition={!!firstName}>, {firstName}</RenderIf>?
           </h1>
         </div>
         <ChatInput
@@ -71,6 +90,8 @@ export function NewProjectComposer() {
           defaultValue={initial}
           onSend={start}
           busy={leaving}
+          starters={starters}
+          startersLoading={orgData === undefined}
           size="large"
           placeholder="Describe a question, a problem or an idea…"
         />
