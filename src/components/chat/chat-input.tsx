@@ -40,13 +40,14 @@ export type Starter = {
   icon: ReactNode;
 };
 
-/* A plain-text document (no markdown parsing, which would trim a
- * trailing space). */
+/* A plain-text document, one paragraph per line (no markdown parsing,
+ * which would trim a trailing space). */
 const textDoc = (text: string) => ({
   type: "doc",
-  content: [
-    { type: "paragraph", content: text ? [{ type: "text", text }] : [] },
-  ],
+  content: text.split("\n").map((line) => ({
+    type: "paragraph",
+    content: line ? [{ type: "text", text: line }] : [],
+  })),
 });
 
 // A picked starter types itself in at this pace: fast enough to feel like
@@ -155,6 +156,10 @@ export function ChatInput({
   const previewRef = useRef<string | null>(null);
   // A starter typing itself in.
   const fillRef = useRef<{ frame: number; text: string } | null>(null);
+  // What was typed into the plain box shown until the editor starts.
+  // Saved as the box goes, since the editor's onCreate fires after that.
+  const typedRef = useRef<string | null>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -178,6 +183,13 @@ export function ChatInput({
     autofocus: "end",
     // Next.js renders on the server first; the editor must start on the client.
     immediatelyRender: false,
+    // Carry over anything typed into the plain box before the editor started.
+    onCreate: ({ editor }) => {
+      const typed = typedRef.current;
+      if (typed === null || typed === defaultValue) return;
+      editor.commands.setContent(textDoc(typed));
+      editor.commands.focus("end");
+    },
     editorProps: {
       attributes: {
         class: editorText({ size }),
@@ -318,13 +330,42 @@ export function ChatInput({
           </div>
         )}
 
-        <EditorContent
-          editor={editor}
-          className={cn(
-            textBox({ size }),
-            disabled && "cursor-default opacity-50",
-          )}
-        />
+        <RenderIf condition={!editor}>
+          {/* Uncontrolled, so hydration keeps what's been typed */}
+          <div
+            className={cn(
+              textBox({ size }),
+              disabled && "cursor-default opacity-50",
+            )}
+          >
+            <textarea
+              ref={(el) => {
+                if (!el) return;
+                return () => {
+                  typedRef.current = el.value;
+                };
+              }}
+              defaultValue={defaultValue}
+              placeholder={placeholder}
+              readOnly={disabled}
+              aria-label="Message"
+              className={cn(
+                editorText({ size }),
+                "block w-full resize-none bg-transparent field-sizing-content placeholder:text-muted-foreground",
+                size === "large" ? "min-h-22" : "min-h-12",
+              )}
+            />
+          </div>
+        </RenderIf>
+        <RenderIf condition={!!editor}>
+          <EditorContent
+            editor={editor}
+            className={cn(
+              textBox({ size }),
+              disabled && "cursor-default opacity-50",
+            )}
+          />
+        </RenderIf>
 
         <div className="flex items-center gap-1.5">
           <RenderIf condition={!onNewBranch}>
