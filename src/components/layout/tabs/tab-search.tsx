@@ -21,21 +21,33 @@ type SearchTab = {
 /*
  * The chevron left of the tabs (after rndr-ai-demo): a list of your open
  * tabs, filtered as you type. ↑/↓ move the highlight, Enter opens it,
- * Esc closes. × on a row closes that tab (not pinned ones).
+ * Esc closes. × on a row closes that tab (not pinned ones). Opens with ⌥K.
  */
 export function TabSearch({
   tabs,
   activeHref,
   onClose,
+  open,
+  onOpenChange,
 }: {
   tabs: SearchTab[];
   activeHref: string;
   onClose: (thread: Doc<"threads">) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(0);
+  // Start fresh each time it opens (by click or ⌥K), on the tab you're on.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setQuery("");
+      setHighlight(Math.max(tabs.findIndex((t) => t.href === activeHref), 0));
+    }
+  }
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
 
@@ -46,29 +58,18 @@ export function TabSearch({
   const current = Math.min(highlight, Math.max(results.length - 1, 0));
 
   const openTab = (tab: SearchTab) => {
-    setOpen(false);
+    onOpenChange(false);
     router.push(tab.href);
   };
 
   return (
     <Popover.Root
       open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        // Start fresh each time, on the tab you're on.
-        if (next) {
-          setQuery("");
-          setHighlight(
-            Math.max(
-              tabs.findIndex((t) => t.href === activeHref),
-              0,
-            ),
-          );
-        }
-      }}
+      onOpenChange={onOpenChange}
     >
       <Popover.Trigger
         aria-label="Search tabs"
+        aria-keyshortcuts="Alt+K"
         className="relative  mb-1 flex size-8 shrink-0 cursor-pointer items-center justify-center self-end rounded-xl bg-component text-fg-tertiary outline-none transition-colors hover:bg-component-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-component-active data-popup-open:text-fg-primary"
       >
         <ChevronDown className="size-4" />

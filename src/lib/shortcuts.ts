@@ -21,6 +21,21 @@ export const SHORTCUTS: ShortcutGroup[] = [
     ],
   },
   {
+    group: "Tabs",
+    shortcuts: [
+      { combo: ["⌥", "1–8"], label: "Go to tab", hint: "Go to the tab at that position." },
+      { combo: ["⌥", "9"], label: "Last tab", hint: "Go to the last tab." },
+      { combo: ["⌥", "[", "]"], label: "Previous / next tab", hint: "Move one tab left or right." },
+      { combo: ["⌥", "T"], label: "New project", hint: "Open a new project tab." },
+      { combo: ["⌥", "W"], label: "Close tab", hint: "Close the tab you're on (not pinned tabs)." },
+      { combo: ["⌥", "⇧", "T"], label: "Reopen closed tab", hint: "Bring back the last tab you closed." },
+      { combo: ["⌥", "K"], label: "Search tabs", hint: "Find an open tab by name." },
+      { combo: ["←", "→"], label: "Move between tabs", hint: "With a tab focused. Home and End jump to the ends." },
+      { combo: ["F2"], label: "Rename tab", hint: "With a tab focused, rename its project." },
+      { combo: ["Delete"], label: "Close focused tab", hint: "With a tab focused, close it." },
+    ],
+  },
+  {
     group: "Canvas",
     shortcuts: [
       {

@@ -44,6 +44,7 @@ export function Tab({
   replying = false,
   unread = false,
   dragging = false,
+  focusable = true,
 }: {
   tab: TabData;
   active: boolean;
@@ -66,6 +67,8 @@ export function Tab({
   unread?: boolean;
   /** Being dragged: no hover tint, divider or focus ring. */
   dragging?: boolean;
+  /** In the Tab order. Only one tab is; arrow keys move between the rest. */
+  focusable?: boolean;
 }) {
   const Icon = tab.thread ? NodeTabIcon : NewTabIcon;
   // Double-clicking an inactive tab opens it; only a tab that was already
@@ -114,6 +117,7 @@ export function Tab({
                 aria-selected={active}
                 // The tab is dragged, not the link.
                 draggable={false}
+                tabIndex={focusable ? 0 : -1}
                 onClick={onClick}
                 onPointerDown={(e) => {
                   if (e.detail <= 1) activeAtPress.current = active;

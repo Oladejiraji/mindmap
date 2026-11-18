@@ -4,9 +4,10 @@ import Link from "next/link";
 import { MotionConfig, Reorder, motion } from "motion/react";
 import { useCallback, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import { Plus } from "lucide-react";
 import type { Doc, Id } from "@convex/dataModel";
+import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/api";
 import { handleError } from "@/lib/handle-error";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
@@ -17,6 +18,8 @@ import { renameThreadOptimistic } from "@/lib/optimistic";
 import { Tab, pinnedTabBox, tabBox, type TabData } from "./tab";
 import { TabSurface, useTabSurface } from "./tab-surface";
 import { TabSearch } from "./tab-search";
+import { EarlyTabClicksScript, useEarlyTabClicks } from "./early-tab-clicks";
+import { useTabShortcuts } from "./use-tab-shortcuts";
 
 /*
  * Browser-style tabs (after define.app): one per open project
@@ -24,15 +27,23 @@ import { TabSearch } from "./tab-search";
  * × closes a tab (the project stays on Home); drag to reorder; double-click
  * the active tab to rename its project; right-click to rename or pin;
  * double-click empty space for a new project; the chevron on the left
- * searches open tabs. Tabs show a spinner while a
+ * searches open tabs (⌥ shortcuts in use-tab-shortcuts.ts; ←/→ move
+ * between focused tabs). Tabs show a spinner while a
  * reply is written and a dot when one finished while you were away. On /new, a
  * temporary "New project" tab sits at the end.
  */
 
-export function TabStrip() {
+export type OpenTabs = FunctionReturnType<typeof api.tabs.list>;
+
+export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: openTabs } = useAuthedConvexQuery(api.tabs.list, {});
+  // A tab clicked while the page was still hydrating opens now.
+  useEarlyTabClicks();
+  // The server's list until the live query arrives, so the strip (and the
+  // surface on the active tab) is there on first paint.
+  const { data: liveTabs } = useAuthedConvexQuery(api.tabs.list, {});
+  const openTabs = liveTabs ?? initialTabs;
   const closeTab = useMutation(api.tabs.close).withOptimisticUpdate(
     (store, { threadId }) => {
       const open = store.getQuery(api.tabs.list, {});
@@ -147,8 +158,12 @@ export function TabStrip() {
     router.push(back?.href ?? routes.home);
   };
 
+  // Closed this session, newest last, for ⌥⇧T.
+  const closedTabs = useRef<Id<"threads">[]>([]);
+
   const close = async (thread: Doc<"threads">) => {
     const href = routes.thread(thread._id);
+    closedTabs.current = [...closedTabs.current.filter((id) => id !== thread._id), thread._id].slice(-20);
     // Closing the tab you're on: go to the next tab (or the previous one
     // at the end), like a browser; with none left, Home.
     if (pathname === href) {
@@ -160,6 +175,60 @@ export function TabStrip() {
     } catch (err) {
       handleError(err, "Couldn't close the tab");
     }
+  };
+
+  // Reopens the most recently closed tab that isn't open again and whose
+  // project still exists; visiting it opens its tab.
+  const convex = useConvex();
+  const reopenClosed = async () => {
+    while (closedTabs.current.length) {
+      const id = closedTabs.current.pop()!;
+      if (byId.has(id)) continue;
+      const exists = await convex.query(api.threads.get, { threadId: id }).then(Boolean, () => false);
+      if (exists) return router.push(routes.thread(id));
+    }
+  };
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const goTo = (i: number) => {
+    const tab = i < 0 ? tabs.at(-1) : tabs[i];
+    if (tab) router.push(tab.href);
+  };
+  useTabShortcuts({
+    goTo,
+    step: (direction) => {
+      if (!tabs.length) return;
+      // From "New project" (or a page without a tab), step from the ends.
+      const from = activeIndex < 0 ? (direction > 0 ? -1 : tabs.length) : activeIndex;
+      goTo((from + direction + tabs.length) % tabs.length);
+    },
+    newProject: () => router.push(newProjectHref),
+    closeCurrent: () => {
+      if (onNewProject) closeNewProject();
+      else if (activeThread && !tabs[activeIndex]?.pinned) void close(activeThread);
+    },
+    reopenClosed: () => void reopenClosed(),
+    openSearch: () => setSearchOpen(true),
+  });
+
+  // Keyboard focus inside the strip: only one tab is in the Tab order (the
+  // active one); arrows move between tabs, F2 renames, Delete closes.
+  const onStripKeyDown = (e: React.KeyboardEvent) => {
+    const links = [...(scrollerRef.current?.querySelectorAll<HTMLElement>('a[role="tab"]') ?? [])];
+    const i = links.indexOf(document.activeElement as HTMLElement);
+    if (i < 0) return;
+    const focusAt = (n: number) => links[(n + links.length) % links.length]?.focus();
+    const tab = tabs.find((t) => t.href === links[i].getAttribute("href"));
+    if (e.key === "ArrowRight") focusAt(i + 1);
+    else if (e.key === "ArrowLeft") focusAt(i - 1);
+    else if (e.key === "Home") focusAt(0);
+    else if (e.key === "End") focusAt(links.length - 1);
+    else if (e.key === "F2" && tab) setEditingId(tab.thread._id);
+    else if ((e.key === "Delete" || e.key === "Backspace") && tab && !tab.pinned) {
+      void close(tab.thread);
+      focusAt(i < links.length - 1 ? i + 1 : i - 1);
+    } else return;
+    e.preventDefault();
   };
 
   const saveOrder = () => {
@@ -185,16 +254,20 @@ export function TabStrip() {
   }, []);
 
   return (
+    <>
     <MotionConfig reducedMotion="user">
       <div
         ref={stripRef}
-        className="relative flex h-11 shrink-0 items-end gap-1"
+        // pl-2: the chevron and tabs start a little in from the panel's left edge.
+        className="relative flex h-11 shrink-0 items-end gap-1 pl-2"
       >
         <TabSurface {...surface} />
         <TabSearch
           tabs={tabs}
           activeHref={pathname}
           onClose={(thread) => void close(thread)}
+          open={searchOpen}
+          onOpenChange={setSearchOpen}
         />
         <motion.div
           ref={scrollerRef}
@@ -202,6 +275,7 @@ export function TabStrip() {
           role="tablist"
           aria-label="Open tabs"
           onScroll={() => place("jump")}
+          onKeyDown={onStripKeyDown}
           // Double-click empty strip space for a new project, like a browser.
           onDoubleClick={(e) =>
             e.target === e.currentTarget && router.push(newProjectHref)
@@ -276,6 +350,7 @@ export function TabStrip() {
                   <Tab
                     tab={tab}
                     active={active}
+                    focusable={active || (activeIndex < 0 && !onNewProject && i === 0)}
                     divider={i > 0 && !active && i - 1 !== activeIndex}
                     onClose={() => void close(tab.thread)}
                     onClick={(e) => dragged.current && e.preventDefault()}
@@ -312,6 +387,7 @@ export function TabStrip() {
               <Tab
                 tab={{ href: routes.newProject, title: "New project" }}
                 active
+                focusable
                 divider={false}
                 onClose={closeNewProject}
               />
@@ -327,5 +403,8 @@ export function TabStrip() {
         </motion.div>
       </div>
     </MotionConfig>
+    {/* Right after the strip, so it can find it and runs before hydration. */}
+    <EarlyTabClicksScript />
+    </>
   );
 }
