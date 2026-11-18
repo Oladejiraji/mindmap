@@ -2,11 +2,25 @@ import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
-import { normalizeMessageContent } from "./lib/validation";
+import type { Doc } from "./_generated/dataModel";
 import { documentEditValidator } from "./lib/document";
 import { requireNode } from "./lib/auth";
 import { userQuery } from "./lib/functions";
+
+/*
+ * Messages are written by chat.ts (send, retry, stop) and by the reply
+ * job (internal.chat.respond) through the internal mutations below. The
+ * browser has no direct way to write one.
+ *
+ * A reply's life: chat.send inserts it empty with isStreaming, the job
+ * patches its text as it streams, and it's closed exactly once, by
+ * whichever comes first:
+ *   - the job finishing (finishStreamingMessage), possibly as failed
+ *   - the user stopping it (chat.stop)
+ *   - the timeout (expireReply), if the job died without closing it
+ * Once closed, later writes from the job are ignored: the patch mutations
+ * tell it the reply is closed, so it stops streaming.
+ */
 
 export const listByNode = userQuery({
   args: { nodeId: v.id("nodes") },
@@ -24,87 +38,17 @@ export const listByNode = userQuery({
   },
 });
 
-/**
- * Saves the user's chat message. Internal so the browser can't write to the
- * chat directly: only `chat.sendMessage` calls it, and assistant replies have
- * their own path (startAssistantMessage → finishStreamingMessage). That keeps
- * every assistant message in the record a real model reply.
- *
- * The ownership check stays as a second guard; the caller's identity carries
- * over from the action.
- */
-export const appendUserMessage = internalMutation({
-  args: {
-    nodeId: v.id("nodes"),
-    content: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await requireNode(ctx, args.nodeId);
-    const content = normalizeMessageContent(args.content);
-
-    const chatId = await getOrCreateChat(ctx, args.nodeId);
-
-    const last = await ctx.db
-      .query("messages")
-      .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chatId))
-      .order("desc")
-      .first();
-    const nextIndex = (last?.index ?? -1) + 1;
-
-    const messageId = await ctx.db.insert("messages", {
-      chatId,
-      role: "user",
-      content,
-      index: nextIndex,
-    });
-
-    return { messageId, index: nextIndex };
-  },
-});
-
-export const startAssistantMessage = internalMutation({
-  args: { nodeId: v.id("nodes") },
-  handler: async (ctx, args) => {
-    const chat = await ctx.db
-      .query("chats")
-      .withIndex("by_nodeId", (q) => q.eq("nodeId", args.nodeId))
-      .first();
-    if (!chat) throw new ConvexError("Chat not found for node");
-
-    const last = await ctx.db
-      .query("messages")
-      .withIndex("by_chatId_and_index", (q) => q.eq("chatId", chat._id))
-      .order("desc")
-      .first();
-    const nextIndex = (last?.index ?? -1) + 1;
-
-    const messageId = await ctx.db.insert("messages", {
-      chatId: chat._id,
-      role: "assistant",
-      content: "",
-      index: nextIndex,
-      isStreaming: true,
-    });
-
-    await ctx.db.patch(chat._id, { isStreaming: true });
-
-    return { messageId };
-  },
-});
-
+/** Saves the reply text so far. `closed` means the reply was stopped or timed out: stop streaming. */
 export const patchStreamingContent = internalMutation({
   args: {
     messageId: v.id("messages"),
     content: v.string(),
   },
-  handler: async (ctx, args) => {
-    const message = await ctx.db.get(args.messageId);
-    if (!message) throw new ConvexError("Message not found");
-    if (!message.isStreaming) {
-      throw new ConvexError("Cannot patch a finalized message");
-    }
+  handler: async (ctx, args): Promise<{ closed: boolean }> => {
+    const message = await getMessage(ctx, args.messageId);
+    if (!message.isStreaming) return { closed: true };
     await ctx.db.patch(args.messageId, { content: args.content });
-    return null;
+    return { closed: false };
   },
 });
 
@@ -118,26 +62,26 @@ export const startDraftingEdit = internalMutation({
     messageId: v.id("messages"),
     content: v.string(),
   },
-  handler: async (ctx, args) => {
-    const message = await ctx.db.get(args.messageId);
-    if (!message) throw new ConvexError("Message not found");
-    if (!message.isStreaming) {
-      throw new ConvexError("Cannot patch a finalized message");
-    }
+  handler: async (ctx, args): Promise<{ closed: boolean }> => {
+    const message = await getMessage(ctx, args.messageId);
+    if (!message.isStreaming) return { closed: true };
     await ctx.db.patch(args.messageId, { content: args.content, draftingEdit: true });
-    return null;
+    return { closed: false };
   },
 });
 
 /**
- * Finalizes an assistant reply, with the document edit it suggested, if any.
- * A new suggestion replaces any unanswered one for the same node: only one
- * can apply cleanly, and the newest reflects the conversation.
+ * Closes a reply with its final text and the document edit it suggested,
+ * if any. A new suggestion replaces any unanswered one for the same node:
+ * only one can apply cleanly, and the newest reflects the conversation.
+ * Does nothing if the reply was already closed (stopped or timed out).
  */
 export const finishStreamingMessage = internalMutation({
   args: {
     messageId: v.id("messages"),
     content: v.string(),
+    /** The model call failed. The text so far is kept. */
+    failed: v.optional(v.boolean()),
     proposal: v.optional(
       v.object({
         baseVersion: v.number(),
@@ -147,32 +91,24 @@ export const finishStreamingMessage = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    const message = await ctx.db.get(args.messageId);
-    if (!message) throw new ConvexError("Message not found");
-    if (!message.isStreaming) {
-      throw new ConvexError("Message is already finalized");
-    }
-    await ctx.db.patch(args.messageId, {
+    const message = await getMessage(ctx, args.messageId);
+    if (!message.isStreaming) return null;
+    const nodeId = await closeReply(ctx, message, {
       content: args.content,
-      isStreaming: false,
-      draftingEdit: undefined,
+      ...(args.failed && { interrupted: "failed" as const }),
     });
 
-    const chat = await ctx.db.get(message.chatId);
-    if (!chat) throw new ConvexError("Chat not found");
-    await ctx.db.patch(chat._id, { isStreaming: false });
-
-    if (args.proposal) {
+    if (args.proposal && !args.failed) {
       const pending = await ctx.db
         .query("proposals")
-        .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", chat.nodeId).eq("status", "pending"))
+        .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", nodeId).eq("status", "pending"))
         .take(100);
       for (const older of pending) {
         await ctx.db.patch(older._id, { status: "superseded" });
       }
       await ctx.db.insert("proposals", {
         ...args.proposal,
-        nodeId: chat.nodeId,
+        nodeId,
         messageId: args.messageId,
         status: "pending",
       });
@@ -182,14 +118,36 @@ export const finishStreamingMessage = internalMutation({
   },
 });
 
-async function getOrCreateChat(
+/**
+ * Scheduled when a reply starts, for longer than the reply job can run.
+ * If the reply is still open by then, the job died without closing it:
+ * mark it failed so the chat isn't stuck waiting on it.
+ */
+export const expireReply = internalMutation({
+  args: { messageId: v.id("messages") },
+  handler: async (ctx, args) => {
+    const message = await ctx.db.get(args.messageId);
+    if (!message?.isStreaming) return null;
+    await closeReply(ctx, message, { interrupted: "failed" });
+    return null;
+  },
+});
+
+/** Ends a streaming reply and frees its chat for the next message. Returns the chat's node. */
+export async function closeReply(
   ctx: MutationCtx,
-  nodeId: Id<"nodes">,
-): Promise<Id<"chats">> {
-  const existing = await ctx.db
-    .query("chats")
-    .withIndex("by_nodeId", (q) => q.eq("nodeId", nodeId))
-    .first();
-  if (existing) return existing._id;
-  return await ctx.db.insert("chats", { nodeId });
+  message: Doc<"messages">,
+  fields: { content?: string; interrupted?: "failed" | "stopped" },
+) {
+  await ctx.db.patch(message._id, { ...fields, isStreaming: false, draftingEdit: undefined });
+  const chat = await ctx.db.get(message.chatId);
+  if (!chat) throw new ConvexError("Chat not found");
+  await ctx.db.patch(chat._id, { isStreaming: false });
+  return chat.nodeId;
+}
+
+async function getMessage(ctx: MutationCtx, messageId: Doc<"messages">["_id"]) {
+  const message = await ctx.db.get(messageId);
+  if (!message) throw new ConvexError("Message not found");
+  return message;
 }

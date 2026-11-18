@@ -16,7 +16,7 @@ const DOC = "# Pricing\n\nSeat-based.\n\nOpen questions.";
 async function setup() {
   const t = convexTest(schema, modules);
   rateLimiter.register(t);
-  const nodeId = await t.run(async (ctx) => {
+  const { nodeId, chatId } = await t.run(async (ctx) => {
     const threadId = await ctx.db.insert("threads", { userId: "alice", name: "Pricing" });
     const nodeId = await ctx.db.insert("nodes", {
       userId: "alice",
@@ -26,15 +26,22 @@ async function setup() {
       content: DOC,
       contentVersion: 3,
     });
-    await ctx.db.insert("chats", { nodeId });
-    return nodeId;
+    const chatId = await ctx.db.insert("chats", { nodeId });
+    return { nodeId, chatId };
   });
+
+  /** An empty reply being written, as chat.send leaves it for the reply job. */
+  let index = 0;
+  const startReply = () =>
+    t.run((ctx) =>
+      ctx.db.insert("messages", { chatId, role: "assistant", content: "", index: index++, isStreaming: true }),
+    );
 
   const alice = t.withIdentity({ subject: "alice" });
 
   /** An assistant reply that suggests the given edits, as the chat action records it. */
   const suggest = async (edits: DocumentEdit[], baseVersion = 3) => {
-    const { messageId } = await t.mutation(internal.messages.startAssistantMessage, { nodeId });
+    const messageId = await startReply();
     await t.mutation(internal.messages.finishStreamingMessage, {
       messageId,
       content: "Reply",
@@ -49,7 +56,7 @@ async function setup() {
   const node = () => t.run((ctx) => ctx.db.get(nodeId));
   const status = (id: Id<"proposals">) => t.run(async (ctx) => (await ctx.db.get(id))?.status);
 
-  return { t, nodeId, alice, bob: t.withIdentity({ subject: "bob" }), suggest, node, status };
+  return { t, nodeId, startReply, alice, bob: t.withIdentity({ subject: "bob" }), suggest, node, status };
 }
 
 const SWITCH: DocumentEdit[] = [{ type: "replace", block: 2, markdown: "Usage-based." }];
@@ -69,8 +76,8 @@ describe("suggesting", () => {
   });
 
   test("a reply is marked while it writes an edit, and the mark clears when it finishes", async () => {
-    const { t, nodeId } = await setup();
-    const { messageId } = await t.mutation(internal.messages.startAssistantMessage, { nodeId });
+    const { t, startReply } = await setup();
+    const messageId = await startReply();
     await t.mutation(internal.messages.startDraftingEdit, { messageId, content: "Reply" });
     expect(await t.run((ctx) => ctx.db.get(messageId))).toMatchObject({ content: "Reply", draftingEdit: true });
 
@@ -91,9 +98,9 @@ describe("suggesting", () => {
   });
 
   test("a reply without a suggestion leaves the pending one alone", async () => {
-    const { t, nodeId, suggest, status } = await setup();
+    const { t, startReply, suggest, status } = await setup();
     const id = await suggest(SWITCH);
-    const { messageId } = await t.mutation(internal.messages.startAssistantMessage, { nodeId });
+    const messageId = await startReply();
     await t.mutation(internal.messages.finishStreamingMessage, { messageId, content: "Just chatting" });
     expect(await status(id)).toBe("pending");
   });

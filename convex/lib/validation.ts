@@ -3,6 +3,8 @@
 // Until then, 32k chars keeps Convex doc size + LLM context bounded.
 export const MAX_MESSAGE_CONTENT = 32_000;
 export const MAX_TITLE = 120;
+/** A new node's title until the AI names it from the first message. */
+export const UNTITLED = "Untitled";
 // A node document is markdown in a single field; stay well under Convex's 1 MB document limit.
 export const MAX_NODE_CONTENT = 200_000;
 

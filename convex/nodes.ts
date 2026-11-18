@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
-import { internalQuery, type MutationCtx } from "./_generated/server";
+import { internalMutation, type MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { normalizeTitle } from "./lib/validation";
+import { normalizeTitle, UNTITLED } from "./lib/validation";
 import { saveContent } from "./lib/nodeContent";
 import { requireNode, requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
@@ -38,6 +38,24 @@ export const rename = userMutation({
   },
 });
 
+/**
+ * Names an untitled node from the AI's suggestion, and its project too
+ * when it's the root. Leaves it alone if the user named it meanwhile.
+ */
+export const setGeneratedTitle = internalMutation({
+  args: { nodeId: v.id("nodes"), title: v.string() },
+  handler: async (ctx, args) => {
+    const node = await ctx.db.get(args.nodeId);
+    if (!node || node.title !== UNTITLED) return null;
+    const title = normalizeTitle(args.title, "Node title");
+    await ctx.db.patch(node._id, { title });
+    if (node.parentId === null) {
+      await ctx.db.patch(node.threadId, { name: title, updatedAt: Date.now() });
+    }
+    return null;
+  },
+});
+
 export const updatePosition = userMutation({
   args: {
     nodeId: v.id("nodes"),
@@ -62,7 +80,7 @@ export const createEmptyBranch = userMutation({
       userId: parent.userId,
       threadId: parent.threadId,
       parentId: args.parentId,
-      title: "Untitled",
+      title: UNTITLED,
       position: args.position,
     });
 
@@ -156,10 +174,3 @@ async function deleteNodeAndChat(ctx: MutationCtx, nodeId: Id<"nodes">) {
 
   await ctx.db.delete(nodeId);
 }
-
-export const assertOwned = internalQuery({
-  args: { nodeId: v.id("nodes") },
-  handler: async (ctx, args) => {
-    return await requireNode(ctx, args.nodeId);
-  },
-});

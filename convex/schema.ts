@@ -125,6 +125,12 @@ export default defineSchema({
     isStreaming: v.optional(v.boolean()),
     /** While streaming: the model has started writing a document edit. Cleared when the reply finishes. */
     draftingEdit: v.optional(v.boolean()),
+    /**
+     * A reply that ended early: the model call failed, or the user stopped
+     * it. The text written so far is kept. Failed replies are left out of
+     * what the AI reads; stopped ones stay in.
+     */
+    interrupted: v.optional(v.union(v.literal("failed"), v.literal("stopped"))),
   }).index("by_chatId_and_index", ["chatId", "index"]),
 
   /**

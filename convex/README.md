@@ -22,10 +22,10 @@ See [schema.ts](./schema.ts) for the full definition.
 | `threads.ts` | CRUD for workspaces |
 | `nodes.ts` | Node tree operations: create, rename, reposition, branch, delete (leaf & subtree) |
 | `messages.ts` | Append messages, list by node, `getOrCreateChat` |
-| `chat.ts` | LLM actions: `sendMessage`, `distillContent` |
+| `chat.ts` | Chat: `send`, `retry`, `stop` (mutations), and `respond`, the scheduled action that runs the model |
 | `lib/context.ts` | `buildPromptContext` — walks ancestor nodes to assemble LLM prompt with inherited content |
 | `lib/llm.ts` | Anthropic streaming, title generation, distillation |
-| `lib/functions.ts` | Authenticated wrappers: `userQuery`, `userMutation`, `llmAction` |
+| `lib/functions.ts` | Authenticated wrappers: `userQuery`, `userMutation`, `llmMutation` |
 | `lib/auth.ts` | Ownership checks: `requireThread`, `requireNode` |
 | `lib/rateLimiter.ts` | Per-user rate limits on LLM calls |
 | `lib/validation.ts` | Input normalization (e.g. `normalizeTitle`) |
