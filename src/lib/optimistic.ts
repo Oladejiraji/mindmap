@@ -25,4 +25,12 @@ export function renameThreadOptimistic(
       threads.map((t) => (t._id === args.threadId ? { ...t, name: args.name } : t)),
     );
   }
+  const tabs = localStore.getQuery(api.tabs.list, {});
+  if (tabs) {
+    localStore.setQuery(
+      api.tabs.list,
+      {},
+      tabs.map((t) => (t.thread._id === args.threadId ? { ...t, thread: { ...t.thread, name: args.name } } : t)),
+    );
+  }
 }
