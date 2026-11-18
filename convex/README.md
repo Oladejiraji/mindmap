@@ -19,7 +19,9 @@ See [schema.ts](./schema.ts) for the full definition.
 
 | File | Role |
 | --- | --- |
-| `threads.ts` | CRUD for workspaces |
+| `threads.ts` | CRUD for projects |
+| `tabs.ts` | The projects a user has open as tabs: list, open, close |
+| `seed.ts` | Internal: demo projects for an account (`seed:demo`, `seed:clearDemo`) |
 | `nodes.ts` | Node tree operations: create, rename, reposition, branch, delete (leaf & subtree) |
 | `messages.ts` | Append messages, list by node, `getOrCreateChat` |
 | `chat.ts` | Chat: `send`, `retry`, `stop` (mutations), and `respond`, the scheduled action that runs the model |
