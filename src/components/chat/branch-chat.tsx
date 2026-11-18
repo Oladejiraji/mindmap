@@ -94,7 +94,9 @@ export function BranchChat({
     }
   };
   const stop = () => {
-    stopReply({ nodeId: activeNodeId }).catch((err) => handleError(err, "Couldn't stop the reply"));
+    stopReply({ nodeId: activeNodeId }).catch((err) =>
+      handleError(err, "Couldn't stop the reply"),
+    );
   };
 
   const branchFrom = async (nodeId: Id<"nodes">) => {
@@ -219,10 +221,7 @@ export function BranchChat({
         >
           <ArrowDown className="size-4.5" />
         </button>
-        <div
-          ref={composerRef}
-          className="relative mx-auto w-full max-w-[720px]"
-        >
+        <div ref={composerRef} className="relative mx-auto w-full max-w-180">
           <CanvasPanel variant="docked" />
           <ChatInput
             onSend={send}
