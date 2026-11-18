@@ -292,7 +292,9 @@ export function ChatInput({
     [],
   );
 
-  const showStarters = !!starters?.length && length === 0 && !disabled;
+  const hasStarters = !!starters?.length && !disabled;
+  // Typing hides the starters but keeps their space, so the box doesn't move.
+  const startersHidden = length > 0;
 
   return (
     <div className={className}>
@@ -411,11 +413,15 @@ export function ChatInput({
           ))}
         </div>
       </RenderIf>
-      <RenderIf condition={showStarters}>
+      <RenderIf condition={hasStarters}>
         {/* Plain rows, not chips: things you could say, not buttons */}
         <ul
           aria-label="Ways to start"
-          className="mt-3 flex flex-col motion-safe:animate-fade-up"
+          inert={startersHidden}
+          className={cn(
+            "mt-3 flex flex-col transition-[opacity,visibility] duration-200 motion-safe:animate-fade-up",
+            startersHidden && "invisible opacity-0",
+          )}
         >
           {starters?.map((s) => (
             <li key={s.text}>
