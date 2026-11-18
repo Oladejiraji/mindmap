@@ -8,6 +8,7 @@ import { llmMutation, userMutation } from "./lib/functions";
 import { requireNode } from "./lib/auth";
 import { normalizeMessageContent, UNTITLED } from "./lib/validation";
 import { closeReply } from "./messages";
+import { countReply } from "./lib/replying";
 
 /*
  * Sending is a mutation that saves the user's message, creates the empty
@@ -112,6 +113,7 @@ async function startReply(
     isStreaming: true,
   });
   await ctx.db.patch(chatId, { isStreaming: true });
+  await countReply(ctx, node.threadId, +1);
   await ctx.scheduler.runAfter(0, internal.chat.respond, { nodeId: node._id, messageId, titleFrom });
   await ctx.scheduler.runAfter(REPLY_TIMEOUT_MS, internal.messages.expireReply, { messageId });
 }

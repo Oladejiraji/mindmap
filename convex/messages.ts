@@ -6,6 +6,7 @@ import type { Doc } from "./_generated/dataModel";
 import { documentEditValidator } from "./lib/document";
 import { requireNode } from "./lib/auth";
 import { userQuery } from "./lib/functions";
+import { countReply } from "./lib/replying";
 
 /*
  * Messages are written by chat.ts (send, retry, stop) and by the reply
@@ -143,6 +144,8 @@ export async function closeReply(
   const chat = await ctx.db.get(message.chatId);
   if (!chat) throw new ConvexError("Chat not found");
   await ctx.db.patch(chat._id, { isStreaming: false });
+  const node = await ctx.db.get(chat.nodeId);
+  if (node) await countReply(ctx, node.threadId, -1);
   return chat.nodeId;
 }
 

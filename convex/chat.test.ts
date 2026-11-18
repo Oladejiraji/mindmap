@@ -226,3 +226,41 @@ describe("stop", () => {
     await expect(alice.mutation(api.chat.stop, { nodeId })).resolves.toBeNull();
   });
 });
+
+describe("the project's reply count (its tab's spinner)", () => {
+  test("goes up while a reply is written and back to 0 however it ends", async () => {
+    vi.useFakeTimers();
+    const { t, alice, nodeId, messages, runReply } = await setup({ title: "Pricing" });
+    const replyingNow = async () => {
+      const node = await t.run((ctx) => ctx.db.get(nodeId));
+      return (await t.run((ctx) => ctx.db.get(node!.threadId)))?.replying ?? 0;
+    };
+
+    // Finished
+    model = replying(["Sure."]);
+    await alice.mutation(api.chat.send, { nodeId, content: "Hi" });
+    expect(await replyingNow()).toBe(1);
+    await runReply();
+    expect(await replyingNow()).toBe(0);
+
+    // Failed, then retried
+    model = failing();
+    await alice.mutation(api.chat.send, { nodeId, content: "Again" });
+    await runReply();
+    expect(await replyingNow()).toBe(0);
+
+    // Stopped: the job finding it closed doesn't count it down twice
+    await alice.mutation(api.chat.retry, { nodeId });
+    await alice.mutation(api.chat.stop, { nodeId });
+    expect(await replyingNow()).toBe(0);
+    model = replying(["Late."]);
+    await runReply();
+    expect(await replyingNow()).toBe(0);
+
+    // Timed out
+    await alice.mutation(api.chat.send, { nodeId, content: "Once more" });
+    const reply = (await messages()).at(-1)!;
+    await t.mutation(internal.messages.expireReply, { messageId: reply._id });
+    expect(await replyingNow()).toBe(0);
+  });
+});
