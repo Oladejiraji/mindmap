@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MotionConfig, Reorder, motion } from "motion/react";
 import { useCallback, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useConvex, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { Plus } from "lucide-react";
 import type { Doc, Id } from "@convex/dataModel";
 import type { FunctionReturnType } from "convex/server";
@@ -14,7 +14,7 @@ import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { RenderIf } from "@/components/shared/render-if";
-import { renameThreadOptimistic } from "@/lib/optimistic";
+import { renameThreadOptimistic, reorderTabsOptimistic } from "@/lib/optimistic";
 import { Tab, pinnedTabBox, tabBox, type TabData } from "./tab";
 import { TabSurface, useTabSurface } from "./tab-surface";
 import { TabSearch } from "./tab-search";
@@ -22,6 +22,7 @@ import { EarlyTabClicksScript, useEarlyTabClicks } from "./early-tab-clicks";
 import { useTabShortcuts } from "./use-tab-shortcuts";
 import { useUnreadTabs } from "./use-unread-tabs";
 import { tabHref } from "./tab-href";
+import { useCloseTab } from "./use-close-tab";
 
 /*
  * Browser-style tabs (after define.app): one per open project
@@ -46,35 +47,9 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
   // surface on the active tab) is there on first paint.
   const { data: liveTabs } = useAuthedConvexQuery(api.tabs.list, {});
   const openTabs = liveTabs ?? initialTabs;
-  const closeTab = useMutation(api.tabs.close).withOptimisticUpdate(
-    (store, { threadId }) => {
-      const open = store.getQuery(api.tabs.list, {});
-      if (open)
-        store.setQuery(
-          api.tabs.list,
-          {},
-          open.filter((t) => t.thread._id !== threadId),
-        );
-    },
-  );
-  // Same ordering as the server: listed tabs first, the rest after in their old order.
-  const reorderTabs = useMutation(api.tabs.reorder).withOptimisticUpdate(
-    (store, { threadIds }) => {
-      const open = store.getQuery(api.tabs.list, {});
-      if (!open) return;
-      const rank = new Map(threadIds.map((id, i) => [id as string, i]));
-      const at = (t: (typeof open)[number], i: number) =>
-        rank.get(t.thread._id) ?? threadIds.length + i;
-      store.setQuery(
-        api.tabs.list,
-        {},
-        open
-          .map((t, i) => [at(t, i), t] as const)
-          .sort(([a], [b]) => a - b)
-          .map(([, t]) => t),
-      );
-    },
-  );
+  const reorderTabs = useMutation(api.tabs.reorder).withOptimisticUpdate(reorderTabsOptimistic);
+  const { close: closeById, reopenLast } = useCloseTab(openTabs);
+  const close = (thread: Doc<"threads">) => closeById(thread._id);
 
   // Same as the server: the tab lands between the other pinned tabs and the rest.
   const togglePin = useMutation(api.tabs.togglePin).withOptimisticUpdate(
@@ -145,38 +120,6 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
     router.push(back?.href ?? routes.home);
   };
 
-  // Closed this session, newest last, for ⌥⇧T.
-  const closedTabs = useRef<Id<"threads">[]>([]);
-
-  const close = async (thread: Doc<"threads">) => {
-    const href = routes.thread(thread._id);
-    closedTabs.current = [...closedTabs.current.filter((id) => id !== thread._id), thread._id].slice(-20);
-    // Closing the tab you're on: go to the next tab (or the previous one
-    // at the end), like a browser; with none left, Home.
-    if (pathname === href) {
-      const i = tabs.findIndex((t) => t.path === href);
-      router.push((tabs[i + 1] ?? tabs[i - 1])?.href ?? routes.home);
-    }
-    try {
-      await closeTab({ threadId: thread._id });
-    } catch (err) {
-      handleError(err, "Couldn't close the tab");
-    }
-  };
-
-  // Reopens the most recently closed tab that isn't open again and whose
-  // project still exists; visiting it opens its tab.
-  const convex = useConvex();
-  const reopenClosed = async () => {
-    while (closedTabs.current.length) {
-      const id = closedTabs.current.pop()!;
-      if (byId.has(id)) continue;
-      // Fails if the project was deleted since; then try the next one.
-      const search = await convex.query(api.projectViews.get, { threadId: id }).catch(() => null);
-      if (search !== null) return router.push(search ? `${routes.thread(id)}?${search}` : routes.thread(id));
-    }
-  };
-
   const [searchOpen, setSearchOpen] = useState(false);
   const goTo = (i: number) => {
     const tab = i < 0 ? tabs.at(-1) : tabs[i];
@@ -195,7 +138,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
       if (onNewProject) closeNewProject();
       else if (activeThread && !tabs[activeIndex]?.pinned) void close(activeThread);
     },
-    reopenClosed: () => void reopenClosed(),
+    reopenClosed: () => void reopenLast(),
     openSearch: () => setSearchOpen(true),
   });
 

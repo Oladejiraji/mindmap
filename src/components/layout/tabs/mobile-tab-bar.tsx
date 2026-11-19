@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
@@ -12,6 +13,7 @@ import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import type { OpenTabs } from "./tab-strip";
 import { TabSwitcher } from "./tab-switcher";
 import { useUnreadTabs } from "./use-unread-tabs";
+import { useCloseTab } from "./use-close-tab";
 
 /*
  * The tab strip on phones: the sidebar button, the project you're on and
@@ -29,6 +31,15 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
   const title = onNewProject ? "New project" : activeTab?.thread.name || undefined;
   const unread = useUnreadTabs(tabs ?? [], activeId);
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const { close, restore } = useCloseTab(tabs);
+  // Closing from the switcher offers Undo, which puts the tab back in its place.
+  const closeWithUndo = (tab: OpenTabs[number]) => {
+    const order = (tabs ?? []).map((t) => t.thread._id);
+    void close(tab.thread._id);
+    toast(`Closed ${tab.thread.name || "Untitled"}`, {
+      action: { label: "Undo", onClick: () => restore(tab, order) },
+    });
+  };
   // The New project page counts as a tab, as it does in the strip.
   const count = (tabs?.length ?? 0) + (onNewProject ? 1 : 0);
 
@@ -67,6 +78,7 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
         activeId={activeId}
         onNewProject={onNewProject}
         unread={unread}
+        onClose={closeWithUndo}
       />
     </div>
   );
