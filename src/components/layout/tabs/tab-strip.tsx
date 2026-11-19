@@ -20,6 +20,8 @@ import { TabSurface, useTabSurface } from "./tab-surface";
 import { TabSearch } from "./tab-search";
 import { EarlyTabClicksScript, useEarlyTabClicks } from "./early-tab-clicks";
 import { useTabShortcuts } from "./use-tab-shortcuts";
+import { useUnreadTabs } from "./use-unread-tabs";
+import { tabHref } from "./tab-href";
 
 /*
  * Browser-style tabs (after define.app): one per open project
@@ -110,7 +112,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
             {
               // The tab links back to where you last were in the project;
               // `path` (no query) is what's matched against the page.
-              href: open.search ? `${routes.thread(id)}?${open.search}` : routes.thread(id),
+              href: tabHref(open),
               path: routes.thread(id),
               title: open.thread.name || "Untitled",
               thread: open.thread,
@@ -128,25 +130,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
   const activeIndex = tabs.findIndex((t) => t.path === pathname);
   const activeId = tabs[activeIndex]?.thread._id as string | undefined;
 
-  // Unread: a reply finished in a project while you were on another tab.
-  // Worked out during render from each project's reply count; kept for
-  // this session only.
-  const replyingNow = tabs
-    .filter((t) => (t.thread.replying ?? 0) > 0)
-    .map((t) => t.thread._id as string);
-  const [wasReplying, setWasReplying] = useState<string[]>([]);
-  const [unread, setUnread] = useState<ReadonlySet<string>>(new Set());
-  if (replyingNow.join() !== wasReplying.join()) {
-    const finished = wasReplying.filter(
-      (id) => !replyingNow.includes(id) && id !== activeId && byId.has(id),
-    );
-    setWasReplying(replyingNow);
-    if (finished.length) setUnread((prev) => new Set([...prev, ...finished]));
-  }
-  // Opening the tab reads it.
-  if (activeId && unread.has(activeId)) {
-    setUnread((prev) => new Set([...prev].filter((id) => id !== activeId)));
-  }
+  const unread = useUnreadTabs(tabs, activeId);
   const onNewProject = pathname === routes.newProject;
   // + remembers the tab it was opened from (?from=), so closing "New
   // project" goes back there, like a browser.

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, type ComponentType } from "react";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import { ContextMenu } from "@base-ui/react/context-menu";
 import { Pencil, Pin, PinOff } from "lucide-react";
@@ -140,25 +140,12 @@ export function Tab({
                   active ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
                 )}
               >
-                <span className={cn("relative flex size-4 shrink-0 transition-colors duration-200", active ? "text-fg-secondary" : "text-fg-tertiary")}>
-                  <RenderIf condition={replying}>
-                    <Spinner className="size-3.5 m-px border-[1.5px]" />
-                  </RenderIf>
-                  <RenderIf condition={!replying}>
-                    {/* With a dot, the icon's corner is scooped out around it
-                        (corner-shape: scoop, Chromium for now). */}
-                    <span className={cn("flex", unread && "overflow-hidden rounded-tr-[6px] [corner-shape:scoop]")}>
-                      <Icon className="size-4" />
-                    </span>
-                  </RenderIf>
-                  {/* Without corner-shape support, a ring in the strip's colour fakes the cut. */}
-                  <RenderIf condition={unread && !replying}>
-                    <span
-                      aria-label="New reply"
-                      className="absolute -top-[2.2px] -right-[2.2px] size-1.5 rounded-full bg-brand-solid ring-2 ring-sidebar supports-[corner-shape:scoop]:ring-0 motion-safe:animate-in motion-safe:zoom-in-50"
-                    />
-                  </RenderIf>
-                </span>
+                <TabStatusIcon
+                  icon={Icon}
+                  replying={replying}
+                  unread={unread}
+                  className={active ? "text-fg-secondary" : "text-fg-tertiary"}
+                />
                 <RenderIf condition={!iconOnly}>
                   <span className="min-w-0 flex-1 overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,black_calc(100%-16px),transparent)]">
                     {tab.title}
@@ -266,5 +253,48 @@ function TitleField({ title, onDone }: { title: string; onDone: (title: string |
       }}
       className="min-w-0 flex-1 bg-transparent outline-none"
     />
+  );
+}
+
+/**
+ * A tab's icon: a spinner while a reply is written, a dot when one
+ * finished while you were away.
+ */
+export function TabStatusIcon({
+  icon: Icon,
+  replying,
+  unread,
+  ringClassName = "ring-sidebar",
+  className,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  replying?: boolean;
+  unread?: boolean;
+  /** Colour behind the dot, faking the cut where corner-shape isn't supported. */
+  ringClassName?: string;
+  className?: string;
+}) {
+  return (
+    <span className={cn("relative flex size-4 shrink-0 transition-colors duration-200", className)}>
+      <RenderIf condition={!!replying}>
+        <Spinner className="size-3.5 m-px border-[1.5px]" />
+      </RenderIf>
+      <RenderIf condition={!replying}>
+        {/* With a dot, the icon's corner is scooped out around it
+            (corner-shape: scoop, Chromium for now). */}
+        <span className={cn("flex", unread && "overflow-hidden rounded-tr-[6px] [corner-shape:scoop]")}>
+          <Icon className="size-4" />
+        </span>
+      </RenderIf>
+      <RenderIf condition={!!unread && !replying}>
+        <span
+          aria-label="New reply"
+          className={cn(
+            "absolute -top-[2.2px] -right-[2.2px] size-1.5 rounded-full bg-brand-solid ring-2 supports-[corner-shape:scoop]:ring-0 motion-safe:animate-in motion-safe:zoom-in-50",
+            ringClassName,
+          )}
+        />
+      </RenderIf>
+    </span>
   );
 }

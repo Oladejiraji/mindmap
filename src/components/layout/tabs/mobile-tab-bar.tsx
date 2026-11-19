@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
@@ -9,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RenderIf } from "@/components/shared/render-if";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import type { OpenTabs } from "./tab-strip";
+import { TabSwitcher } from "./tab-switcher";
+import { useUnreadTabs } from "./use-unread-tabs";
 
 /*
  * The tab strip on phones: the sidebar button, the project you're on and
@@ -21,9 +24,11 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
   const { data: liveTabs } = useAuthedConvexQuery(api.tabs.list, {});
   const tabs = liveTabs ?? initialTabs;
   const onNewProject = pathname === routes.newProject;
-  const title = onNewProject
-    ? "New project"
-    : tabs?.find((t) => routes.thread(t.thread._id) === pathname)?.thread.name || undefined;
+  const activeTab = tabs?.find((t) => routes.thread(t.thread._id) === pathname);
+  const activeId = activeTab?.thread._id;
+  const title = onNewProject ? "New project" : activeTab?.thread.name || undefined;
+  const unread = useUnreadTabs(tabs ?? [], activeId);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
   // The New project page counts as a tab, as it does in the strip.
   const count = (tabs?.length ?? 0) + (onNewProject ? 1 : 0);
 
@@ -46,6 +51,7 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
         </RenderIf>
       </div>
       <button
+        onClick={() => setSwitcherOpen(true)}
         aria-label={`Open tabs (${count})`}
         className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-fg-secondary outline-none transition-colors active:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50"
       >
@@ -54,6 +60,14 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
           {count > 99 ? "99+" : count}
         </span>
       </button>
+      <TabSwitcher
+        open={switcherOpen}
+        onOpenChange={setSwitcherOpen}
+        tabs={tabs ?? []}
+        activeId={activeId}
+        onNewProject={onNewProject}
+        unread={unread}
+      />
     </div>
   );
 }
