@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Pin, Plus } from "lucide-react";
@@ -14,6 +14,7 @@ import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { TabStatusIcon } from "./tab";
 import { tabHref } from "./tab-href";
+import { TabMiniMap } from "./tab-mini-map";
 import type { OpenTabs } from "./tab-strip";
 
 /*
@@ -70,6 +71,7 @@ export function TabSwitcher({
                 <li key={tab.thread._id}>
                   <TabCard
                     href={tabHref(tab)}
+                    preview={<TabMiniMap threadId={tab.thread._id} />}
                     title={tab.thread.name || "Untitled"}
                     meta={formatRelativeTime(tab.thread.updatedAt ?? tab.thread._creationTime)}
                     active={tab.thread._id === activeId}
@@ -83,7 +85,15 @@ export function TabSwitcher({
               ))}
               <RenderIf condition={onNewProject}>
                 <li>
-                  <TabCard href={routes.newProject} title="New project" meta="Not started" active newProject onOpen={close} />
+                  <TabCard
+                    href={routes.newProject}
+                    preview={<div className="aspect-4/3 rounded-xl bg-background-2" />}
+                    title="New project"
+                    meta="Not started"
+                    active
+                    newProject
+                    onOpen={close}
+                  />
                 </li>
               </RenderIf>
               {/* On the New project page its card is there already. */}
@@ -136,6 +146,7 @@ const SWIPE_SPEED = 500;
 
 function TabCard({
   href,
+  preview,
   title,
   meta,
   active,
@@ -147,6 +158,8 @@ function TabCard({
   onClose,
 }: {
   href: string;
+  /** What the project looks like, above its title. */
+  preview: ReactNode;
   title: string;
   /** When it was last active. */
   meta: string;
@@ -194,12 +207,10 @@ function TabCard({
         draggable={false}
         onClick={(e) => (swiped.current ? e.preventDefault() : onOpen())}
         aria-current={active ? "page" : undefined}
-        className={cn(
-          "flex flex-col gap-1 rounded-2xl p-3 outline-none transition-[scale] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50",
-          onClose && "pr-10",
-        )}
+        className="flex flex-col gap-1 rounded-2xl p-2 pb-2.5 outline-none transition-[scale] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <div className="flex items-center gap-2">
+        <div className="mb-1">{preview}</div>
+        <div className="flex items-center gap-2 px-1">
           <TabStatusIcon
             icon={newProject ? NewTabIcon : NodeTabIcon}
             replying={replying}
@@ -212,13 +223,14 @@ function TabCard({
             <Pin aria-label="Pinned" className="size-3 shrink-0 text-fg-tertiary" />
           </RenderIf>
         </div>
-        <span className="pl-6 text-caption-lg text-fg-tertiary">{meta}</span>
+        <span className="pl-7 text-caption-lg text-fg-tertiary">{meta}</span>
       </Link>
       <RenderIf condition={!!onClose}>
         <button
           onClick={onClose}
           aria-label={`Close ${title}`}
-          className="absolute top-2 right-2 flex size-7 cursor-pointer items-center justify-center rounded-lg text-fg-tertiary outline-none active:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50"
+          // Over the preview's corner.
+          className="absolute top-3 right-3 flex size-6 cursor-pointer items-center justify-center rounded-full bg-background/90 text-fg-secondary shadow-default outline-none active:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <CloseIcon className="size-3" />
         </button>
