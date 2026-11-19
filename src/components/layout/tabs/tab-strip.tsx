@@ -265,7 +265,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
       <div
         ref={stripRef}
         // pl-2: the chevron and tabs start a little in from the panel's left edge.
-        className="relative flex h-11 shrink-0 items-end gap-1 pl-2"
+        className="relative flex h-11 shrink-0 items-end gap-1 pl-2 max-md:hidden"
       >
         <TabSurface {...surface} />
         <TabSearch

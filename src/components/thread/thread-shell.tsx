@@ -7,6 +7,7 @@ import { CanvasPanel } from "@/components/thread/canvas-panel";
 import { NodePanel } from "@/components/thread/node-panel";
 import { FloatingChat } from "@/components/thread/floating-chat";
 import { TabStrip, type OpenTabs } from "@/components/layout/tabs/tab-strip";
+import { MobileTabBar } from "@/components/layout/tabs/mobile-tab-bar";
 
 /*
  * Shell for project pages: the collapsible app sidebar, the tab strip and
@@ -34,6 +35,8 @@ export function ThreadShell({
         {/* Tabs + canvas form one column; the node panel runs the full
             height beside it, its top level with the top of the tabs. */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {/* Phones get a bar with a tab switcher instead of the strip. */}
+          <MobileTabBar initialTabs={initialTabs} />
           <TabStrip initialTabs={initialTabs} />
           {/* The strip draws this card's surface (with the active tab, its
               outline and shadow) behind it. The card paints the same
