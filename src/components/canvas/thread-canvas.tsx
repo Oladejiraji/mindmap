@@ -13,6 +13,7 @@ import {
   type NodeTypes,
   type OnNodeDrag,
   type OnSelectionChangeFunc,
+  type Viewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -28,6 +29,7 @@ import { useMutation } from "convex/react";
 import { layoutNodes } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
+import { getStorageItem, setStorageItem } from "@/lib/storage";
 import { routes } from "@/lib/routes";
 import {
   ParentNode,
@@ -55,6 +57,11 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { data: nodes, isLoading } = useAuthedConvexQuery(api.nodes.listByThread, { threadId });
+  // Zoom and pan per project, in this browser (they depend on screen
+  // size). Without one, the map fits the screen. React Flow only mounts
+  // once nodes load, on the client, so reading storage here is safe.
+  const viewportKey = `viewport:${threadId}`;
+  const [savedViewport] = useState(() => getStorageItem<Viewport>(viewportKey));
   const updatePosition = useMutation(api.nodes.updatePosition);
   const createEmptyBranch = useMutation(api.nodes.createEmptyBranch);
   const deleteLeafNode = useMutation(api.nodes.deleteLeafNode);
@@ -278,8 +285,10 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           onConnectEnd={onConnectEnd}
           onSelectionChange={onSelectionChange}
           nodeTypes={nodeTypes}
-          fitView
+          fitView={!savedViewport}
           fitViewOptions={{ padding: 0.4 }}
+          defaultViewport={savedViewport ?? undefined}
+          onMoveEnd={(_, viewport) => setStorageItem(viewportKey, viewport)}
           proOptions={{ hideAttribution: true }}
         >
           <ZoomControls />

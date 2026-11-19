@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { userMutation, userQuery } from "./lib/functions";
 import { requireThread } from "./lib/auth";
 import { openTab } from "./lib/tabs";
+import { readView } from "./lib/projectViews";
 
 /*
  * Tabs are the projects you have open. Opening a project (from Home, a
@@ -9,7 +10,7 @@ import { openTab } from "./lib/tabs";
  * it, the project stays on Home.
  */
 
-/** Your open tabs, left to right (pinned first), each with its project. */
+/** Your open tabs, left to right (pinned first), each with its project and where you last were in it. */
 export const list = userQuery({
   args: {},
   handler: async (ctx) => {
@@ -18,10 +19,14 @@ export const list = userQuery({
       .withIndex("by_userId_and_order", (q) => q.eq("userId", ctx.userId))
       .take(100);
     const rows = await Promise.all(
-      tabs.map(async (tab) => ({ tab, thread: await ctx.db.get(tab.threadId) })),
+      tabs.map(async (tab) => ({
+        tab,
+        thread: await ctx.db.get(tab.threadId),
+        search: await readView(ctx, ctx.userId, tab.threadId),
+      })),
     );
-    const open = rows.flatMap(({ tab, thread }) =>
-      thread && thread.userId === ctx.userId ? [{ _id: tab._id, pinned: tab.pinned ?? false, thread }] : [],
+    const open = rows.flatMap(({ tab, thread, search }) =>
+      thread && thread.userId === ctx.userId ? [{ _id: tab._id, pinned: tab.pinned ?? false, thread, search }] : [],
     );
     // Stable: pinned and unpinned each keep their order.
     return [...open.filter((t) => t.pinned), ...open.filter((t) => !t.pinned)];

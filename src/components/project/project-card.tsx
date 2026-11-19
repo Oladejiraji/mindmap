@@ -21,10 +21,13 @@ const itemClass =
 export function ProjectCard({
   name,
   threadId,
+  search,
   createdAt,
 }: {
   name: string;
   threadId: string;
+  /** Where you last were in the project, so the link brings you back there. */
+  search?: string;
   createdAt: number;
 }) {
   const router = useRouter();
@@ -34,7 +37,7 @@ export function ProjectCard({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
-  const href = routes.thread(threadId);
+  const href = search ? `${routes.thread(threadId)}?${search}` : routes.thread(threadId);
 
   const handleDelete = async () => {
     try {

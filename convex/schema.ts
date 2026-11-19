@@ -108,6 +108,19 @@ export default defineSchema({
     .index("by_userId_and_threadId", ["userId", "threadId"])
     .index("by_threadId", ["threadId"]),
 
+  /**
+   * Where each person last was in a project, so coming back (from a tab,
+   * Home or a link) restores it. Kept after the tab closes.
+   */
+  projectViews: defineTable({
+    userId: v.string(),
+    threadId: v.id("threads"),
+    /** The project URL's query: "view=chat&node=…", "panel=…&tab=chat", or "" for the canvas. */
+    search: v.string(),
+  })
+    .index("by_userId_and_threadId", ["userId", "threadId"])
+    .index("by_threadId", ["threadId"]),
+
   nodes: defineTable({
     userId: v.string(),
     threadId: v.id("threads"),

@@ -3,6 +3,7 @@ import { normalizeTitle, UNTITLED } from "./lib/validation";
 import { requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
 import { deleteTabsFor, openTab } from "./lib/tabs";
+import { deleteViewsFor } from "./lib/projectViews";
 
 export const list = userQuery({
   args: {},
@@ -80,6 +81,7 @@ export const remove = userMutation({
     }
 
     await deleteTabsFor(ctx, args.threadId);
+    await deleteViewsFor(ctx, args.threadId);
     await ctx.db.delete(args.threadId);
     return null;
   },

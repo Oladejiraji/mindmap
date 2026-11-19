@@ -26,6 +26,9 @@ export function FloatingChat() {
     | undefined;
   const nodeId = searchParams.get("float") as Id<"nodes"> | null;
   const inChatView = searchParams.get("view") === "chat";
+  // A stale link (the node was deleted since) shows nothing.
+  const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, threadId ? { threadId } : "skip");
+  const nodeGone = !!nodes && !!nodeId && !nodes.some((n) => n._id === nodeId);
 
   const setQuery = (edit: (q: URLSearchParams) => void) => {
     const next = new URLSearchParams(searchParams);
@@ -41,7 +44,7 @@ export function FloatingChat() {
       q.set("tab", "chat");
     });
 
-  if (!threadId || !nodeId || inChatView) return null;
+  if (!threadId || !nodeId || inChatView || nodeGone) return null;
   return (
     <FloatingCard
       key={nodeId}

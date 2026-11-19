@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Id } from "@convex/dataModel";
+import { api } from "@convex/api";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { NodeEditorView } from "@/components/editor/node-editor-view";
 import { cn } from "@/lib/utils";
 
@@ -22,10 +24,14 @@ export function NodePanel() {
   const searchParams = useSearchParams();
   const threadId = pathname.match(/^\/t\/([^/]+)$/)?.[1] as Id<"threads"> | undefined;
   const nodeId = searchParams.get("panel") as Id<"nodes"> | null;
-  const open = !!(threadId && nodeId);
+  // A stale link (the node was deleted since) just leaves the panel shut.
+  // The canvas has this list cached already.
+  const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, threadId ? { threadId } : "skip");
+  const nodeGone = !!nodes && !!nodeId && !nodes.some((n) => n._id === nodeId);
+  const open = !!(threadId && nodeId) && !nodeGone;
   // Keep showing the last node while the slot animates closed.
-  const [shownId, setShownId] = useState(nodeId);
-  if (nodeId && nodeId !== shownId) setShownId(nodeId);
+  const [shownId, setShownId] = useState(nodeGone ? null : nodeId);
+  if (nodeId && !nodeGone && nodeId !== shownId) setShownId(nodeId);
 
   const close = useCallback(() => {
     const next = new URLSearchParams(searchParams);

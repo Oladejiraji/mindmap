@@ -103,12 +103,15 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
     (openTabs ?? []).map((t) => [t.thread._id as string, t]),
   );
   const tabs = order.flatMap(
-    (id): (TabData & { thread: Doc<"threads">; pinned: boolean })[] => {
+    (id): (TabData & { path: string; thread: Doc<"threads">; pinned: boolean })[] => {
       const open = byId.get(id);
       return open
         ? [
             {
-              href: routes.thread(id),
+              // The tab links back to where you last were in the project;
+              // `path` (no query) is what's matched against the page.
+              href: open.search ? `${routes.thread(id)}?${open.search}` : routes.thread(id),
+              path: routes.thread(id),
               title: open.thread.name || "Untitled",
               thread: open.thread,
               pinned: open.pinned,
@@ -122,7 +125,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
     ...ids.filter((id) => byId.get(id)?.pinned),
     ...ids.filter((id) => !byId.get(id)?.pinned),
   ];
-  const activeIndex = tabs.findIndex((t) => t.href === pathname);
+  const activeIndex = tabs.findIndex((t) => t.path === pathname);
   const activeId = tabs[activeIndex]?.thread._id as string | undefined;
 
   // Unread: a reply finished in a project while you were on another tab.
@@ -167,7 +170,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
     // Closing the tab you're on: go to the next tab (or the previous one
     // at the end), like a browser; with none left, Home.
     if (pathname === href) {
-      const i = tabs.findIndex((t) => t.href === href);
+      const i = tabs.findIndex((t) => t.path === href);
       router.push((tabs[i + 1] ?? tabs[i - 1])?.href ?? routes.home);
     }
     try {
@@ -184,8 +187,9 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
     while (closedTabs.current.length) {
       const id = closedTabs.current.pop()!;
       if (byId.has(id)) continue;
-      const exists = await convex.query(api.threads.get, { threadId: id }).then(Boolean, () => false);
-      if (exists) return router.push(routes.thread(id));
+      // Fails if the project was deleted since; then try the next one.
+      const search = await convex.query(api.projectViews.get, { threadId: id }).catch(() => null);
+      if (search !== null) return router.push(search ? `${routes.thread(id)}?${search}` : routes.thread(id));
     }
   };
 
@@ -297,7 +301,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
               return (
                 <Reorder.Item
                   as="div"
-                  key={tab.href}
+                  key={tab.path}
                   value={tab.thread._id}
                   // No dragging while typing a new name.
                   dragListener={!editing}

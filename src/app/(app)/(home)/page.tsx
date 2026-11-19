@@ -20,6 +20,8 @@ export default function Home() {
     api.threads.list,
     {},
   );
+  // Where you last were in each project; cards link back there.
+  const { data: views } = useAuthedConvexQuery(api.projectViews.mine, {});
   // Shared with the account menu's Preferences and the Settings page.
   const [layout, updateLayout] = useHomeLayout();
 
@@ -104,6 +106,7 @@ export default function Home() {
                     key={thread._id}
                     name={thread.name}
                     threadId={thread._id}
+                    search={views?.[thread._id]}
                     createdAt={thread._creationTime}
                   />
                 ))}
@@ -136,6 +139,7 @@ export default function Home() {
                     key={thread._id}
                     name={thread.name}
                     threadId={thread._id}
+                    search={views?.[thread._id]}
                     createdAt={thread._creationTime}
                     updatedAt={thread.updatedAt}
                   />

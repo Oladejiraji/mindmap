@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 
 type SearchTab = {
   href: string;
+  /** The project's path without the saved query, matched against the page. */
+  path: string;
   title: string;
   thread: Doc<"threads">;
   pinned: boolean;
@@ -45,7 +47,7 @@ export function TabSearch({
     setWasOpen(open);
     if (open) {
       setQuery("");
-      setHighlight(Math.max(tabs.findIndex((t) => t.href === activeHref), 0));
+      setHighlight(Math.max(tabs.findIndex((t) => t.path === activeHref), 0));
     }
   }
   const inputRef = useRef<HTMLInputElement>(null);
@@ -134,7 +136,7 @@ export function TabSearch({
             >
               {results.map((tab, i) => (
                 <li
-                  key={tab.href}
+                  key={tab.path}
                   id={`${listId}-${i}`}
                   role="option"
                   aria-selected={i === current}
@@ -154,7 +156,7 @@ export function TabSearch({
                     <span
                       className={cn(
                         "block truncate text-body-sm",
-                        tab.href === activeHref &&
+                        tab.path === activeHref &&
                           "font-medium text-fg-primary",
                       )}
                     >
