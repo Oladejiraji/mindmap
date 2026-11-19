@@ -19,8 +19,8 @@ const MAX_TITLE = 120;
 
 export type TabData = { href: string; title: string; thread?: Doc<"threads"> };
 
-/** The box every tab sits in: grows to 168px, shrinks to 112px. */
-export const tabBox = "group/tab relative flex h-9 max-w-42 min-w-28 flex-1 basis-42 items-center";
+/** The box every tab sits in: 168px, shrinking to 112px when the strip is full. */
+export const tabBox = "group/tab relative flex h-9 w-42 min-w-28 shrink items-center";
 /** A pinned tab's box: just the icon. */
 export const pinnedTabBox = "w-10 min-w-10 max-w-10 flex-none basis-auto";
 

@@ -251,6 +251,8 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
   const dragged = useRef(false);
   const draggedBox = useRef<HTMLElement | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  /** The tab under the pointer, which may be about to be dragged. */
+  const [pressedId, setPressedId] = useState<string | null>(null);
 
   // Keeps the active tab visible when the strip scrolls sideways.
   const revealActive = useCallback((el: HTMLDivElement | null) => {
@@ -275,25 +277,27 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
         />
         <motion.div
           ref={scrollerRef}
-          layoutScroll
           role="tablist"
           aria-label="Open tabs"
           onScroll={() => place("jump")}
           onKeyDown={onStripKeyDown}
           // Double-click empty strip space for a new project, like a browser.
           onDoubleClick={(e) =>
-            e.target === e.currentTarget && router.push(newProjectHref)
+            (e.target === e.currentTarget ||
+              e.target === e.currentTarget.firstElementChild) &&
+            router.push(newProjectHref)
           }
           className="relative flex h-full min-w-0 flex-1 items-end overflow-x-auto [scrollbar-width:none]"
         >
-          {/* Only as wide as its tabs (shrinking with them), so + follows the last tab. */}
+          {/* Fills the strip. Tabs shrink to fit it and overflow it (the
+              strip scrolls) at their minimum; + sits right after the last tab. */}
           <Reorder.Group
             as="div"
             role="presentation"
             axis="x"
             values={order}
             onReorder={(ids) => setDragOrder(keepPinnedFirst(ids))}
-            className="flex h-full items-end"
+            className="flex h-full min-w-0 flex-1 items-end"
           >
             {tabs.map((tab, i) => {
               const active = i === activeIndex;
@@ -308,7 +312,11 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
                   ref={active ? revealActive : undefined}
                   data-tab-box
                   data-tab-active={active || undefined}
-                  onPointerDown={() => (dragged.current = false)}
+                  onPointerDown={() => {
+                    dragged.current = false;
+                    setPressedId(tab.thread._id);
+                  }}
+                  onPointerUp={() => !draggingId && setPressedId(null)}
                   onDragStart={(e) => {
                     dragged.current = true;
                     // Dragging a tab opens it, so the surface follows it too.
@@ -325,6 +333,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
                   onDragEnd={() => {
                     if (draggedBox.current) stopFollowing(draggedBox.current);
                     setDraggingId(null);
+                    setPressedId(null);
                     saveOrder();
                   }}
                   whileDrag={{ zIndex: 20 }}
@@ -333,8 +342,11 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
                   dragMomentum={false}
                   // Stay inside the scroller: past its edge (e.g. over the
                   // search button) the tab's contents would be clipped while
-                  // its surface isn't.
-                  dragConstraints={scrollerRef}
+                  // its surface isn't. Only for the tab being pressed: with a
+                  // ref here from the start, Motion watches the strip's size
+                  // and shifts every tab when it changes (e.g. the side panel
+                  // opening), leaving them squished.
+                  dragConstraints={pressedId === tab.thread._id ? scrollerRef : undefined}
                   dragElastic={0}
                   dragTransition={{ bounceStiffness: 500, bounceDamping: 40 }}
                   // Tabs making room move with the same spring.
@@ -381,7 +393,6 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
                 </Reorder.Item>
               );
             })}
-          </Reorder.Group>
           <RenderIf condition={onNewProject}>
             <div
               ref={revealActive}
@@ -404,6 +415,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
           >
             <Plus className="size-4" />
           </Link>
+          </Reorder.Group>
         </motion.div>
       </div>
     </MotionConfig>

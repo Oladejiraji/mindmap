@@ -46,6 +46,18 @@ export function useTabSurface(scrollerRef: RefObject<HTMLElement | null>) {
     maxCornerRight: maxCornerRight.get(),
   });
   const d = useTransform(() => surfacePath(geometry()));
+  const svgRef = useRef<SVGSVGElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+  /**
+   * Draws the shape now. Motion draws on the next frame, which is a frame
+   * late when called from a ResizeObserver (it runs just before paint): while
+   * the panel slides open, the shape would trail the tabs it wraps.
+   */
+  const paint = () => {
+    svgRef.current?.style.setProperty("width", `${width.get()}px`);
+    svgRef.current?.style.setProperty("height", `${height.get()}px`);
+    pathRef.current?.setAttribute("d", surfacePath(geometry()));
+  };
 
   // Positions are relative to the strip (the SVG's origin), which may hold
   // more than the scroller (e.g. the tab search button on its left).
@@ -98,10 +110,11 @@ export function useTabSurface(scrollerRef: RefObject<HTMLElement | null>) {
         height.jump(column.clientHeight);
         top.jump(strip.offsetHeight);
         place("jump");
-      });
+        paint();      });
       observer.observe(column);
       return () => observer.disconnect();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- paint only reads refs and motion values
     [width, height, top, place],
   );
 
@@ -148,16 +161,28 @@ export function useTabSurface(scrollerRef: RefObject<HTMLElement | null>) {
     if (!following.current) place("glide");
   });
 
-  return { stripRef, place, following, startFollowing, stopFollowing, surface: { d, width, height } };
+  return { stripRef, place, following, startFollowing, stopFollowing, surface: { d, width, height, svgRef, pathRef } };
 }
 
-export function TabSurface({ d, width, height }: { d: MotionValue<string>; width: MotionValue<number>; height: MotionValue<number> }) {
+export function TabSurface({
+  d,
+  width,
+  height,
+  svgRef,
+  pathRef,
+}: {
+  d: MotionValue<string>;
+  width: MotionValue<number>;
+  height: MotionValue<number>;
+  svgRef: RefObject<SVGSVGElement | null>;
+  pathRef: RefObject<SVGPathElement | null>;
+}) {
   const gradientId = useId();
   return (
     // z-1: above the inactive tabs (z auto), below the active tab (z-10) and
     // the panel's content (z-2). So the active tab is the surface itself and
     // covers what it passes over, dragged or not.
-    <motion.svg aria-hidden style={{ width, height }} className="pointer-events-none absolute top-0 left-0 z-1 overflow-visible">
+    <motion.svg ref={svgRef} aria-hidden style={{ width, height }} className="pointer-events-none absolute top-0 left-0 z-1 overflow-visible">
       <defs>
         {/* The panel's gradient (--gradient-panel), relative to the shape so it needs no size. */}
         <radialGradient id={gradientId} cx={0} cy={0} r={1} gradientTransform="translate(0.5 0) scale(1.2 0.95)">
@@ -167,6 +192,7 @@ export function TabSurface({ d, width, height }: { d: MotionValue<string>; width
       </defs>
       {/* Outline and shadow to match the panel's shadow-default. */}
       <motion.path
+        ref={pathRef}
         d={d}
         fill={`url(#${gradientId})`}
         strokeWidth={1}
