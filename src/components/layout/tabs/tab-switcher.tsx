@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
-import { Pin } from "lucide-react";
+import { Pin, Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { NodeTabIcon } from "@/components/icons/node-tab-icon";
 import { NewTabIcon } from "@/components/icons/new-tab-icon";
@@ -29,6 +29,9 @@ export function TabSwitcher({
   onNewProject,
   unread,
   onClose,
+  closed,
+  onReopen,
+  newProjectHref,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -39,6 +42,10 @@ export function TabSwitcher({
   onNewProject: boolean;
   unread: ReadonlySet<string>;
   onClose: (tab: OpenTabs[number]) => void;
+  /** Tabs closed this session and not open again, newest first. */
+  closed: readonly OpenTabs[number][];
+  onReopen: (tab: OpenTabs[number]) => void;
+  newProjectHref: string;
 }) {
   const count = tabs.length + (onNewProject ? 1 : 0);
   const close = () => onOpenChange(false);
@@ -79,7 +86,43 @@ export function TabSwitcher({
                   <TabCard href={routes.newProject} title="New project" meta="Not started" active newProject onOpen={close} />
                 </li>
               </RenderIf>
+              {/* On the New project page its card is there already. */}
+              <RenderIf condition={!onNewProject}>
+                <li>
+                  <Link
+                    href={newProjectHref}
+                    onClick={close}
+                    className="flex h-full min-h-16 items-center justify-center gap-1.5 rounded-2xl bg-component p-3 text-body-sm font-medium text-fg-secondary outline-none transition-[scale] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    <Plus className="size-4" />
+                    New project
+                  </Link>
+                </li>
+              </RenderIf>
             </ul>
+            <RenderIf condition={closed.length > 0}>
+              <section aria-labelledby="recently-closed" className="mt-6">
+                <h2 id="recently-closed" className="px-1 pb-1 text-caption-lg text-fg-tertiary">
+                  Recently closed
+                </h2>
+                <ul>
+                  {closed.map((tab) => (
+                    <li key={tab.thread._id}>
+                      <button
+                        onClick={() => {
+                          close();
+                          onReopen(tab);
+                        }}
+                        className="flex h-10 w-full cursor-pointer items-center gap-2 rounded-xl px-1 text-left text-body-sm text-fg-secondary outline-none active:bg-transparent-hover focus-visible:ring-3 focus-visible:ring-ring/50"
+                      >
+                        <NodeTabIcon className="size-4 shrink-0 text-fg-tertiary" />
+                        <span className="min-w-0 flex-1 truncate">{tab.thread.name || "Untitled"}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </RenderIf>
           </div>
         </Dialog.Popup>
       </Dialog.Portal>

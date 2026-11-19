@@ -79,17 +79,29 @@ export function useCloseTab(tabs: OpenTabs | undefined) {
     reorderTabs({ threadIds: order }).catch(() => {});
   };
 
-  /** Reopens the most recently closed tab that isn't open again and whose project still exists. Visiting it opens its tab. */
+  /**
+   * Goes to a closed tab, where you last were in it (visiting it opens its
+   * tab). False if its project was deleted since.
+   */
+  const reopen = async (tab: ClosedTab) => {
+    setClosed(forget(tab.thread._id));
+    const search = await convex.query(api.projectViews.get, { threadId: tab.thread._id }).catch(() => null);
+    if (search === null) return false;
+    router.push(tabHref({ ...tab, search }));
+    return true;
+  };
+
+  /** Reopens the most recently closed tab that isn't open again and whose project still exists. */
   const reopenLast = async () => {
     while (closed.length) {
       const tab = closed.at(-1)!;
-      setClosed(closed.slice(0, -1));
-      if (list.some((t) => t.thread._id === tab.thread._id)) continue;
-      // Fails if the project was deleted since; then try the next one.
-      const search = await convex.query(api.projectViews.get, { threadId: tab.thread._id }).catch(() => null);
-      if (search !== null) return router.push(tabHref({ ...tab, search }));
+      if (list.some((t) => t.thread._id === tab.thread._id)) {
+        setClosed(forget(tab.thread._id));
+        continue;
+      }
+      if (await reopen(tab)) return;
     }
   };
 
-  return { close, restore, reopenLast };
+  return { close, restore, reopen, reopenLast };
 }

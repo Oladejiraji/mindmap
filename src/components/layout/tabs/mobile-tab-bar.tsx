@@ -13,7 +13,7 @@ import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import type { OpenTabs } from "./tab-strip";
 import { TabSwitcher } from "./tab-switcher";
 import { useUnreadTabs } from "./use-unread-tabs";
-import { useCloseTab } from "./use-close-tab";
+import { useCloseTab, useClosedTabs } from "./use-close-tab";
 
 /*
  * The tab strip on phones: the sidebar button, the project you're on and
@@ -31,7 +31,13 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
   const title = onNewProject ? "New project" : activeTab?.thread.name || undefined;
   const unread = useUnreadTabs(tabs ?? [], activeId);
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const { close, restore } = useCloseTab(tabs);
+  const { close, restore, reopen } = useCloseTab(tabs);
+  const closedTabs = useClosedTabs()
+    .filter((c) => !tabs?.some((t) => t.thread._id === c.thread._id))
+    .toReversed()
+    .slice(0, 5);
+  // Remembers the tab it was opened from, so closing New project goes back there.
+  const newProjectHref = activeId ? `${routes.newProject}?from=${activeId}` : routes.newProject;
   // Closing from the switcher offers Undo, which puts the tab back in its place.
   const closeWithUndo = (tab: OpenTabs[number]) => {
     const order = (tabs ?? []).map((t) => t.thread._id);
@@ -79,6 +85,13 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
         onNewProject={onNewProject}
         unread={unread}
         onClose={closeWithUndo}
+        closed={closedTabs}
+        onReopen={(tab) =>
+          void reopen(tab).then((ok) => {
+            if (!ok) toast("That project was deleted");
+          })
+        }
+        newProjectHref={newProjectHref}
       />
     </div>
   );
