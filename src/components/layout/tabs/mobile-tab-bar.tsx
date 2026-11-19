@@ -28,7 +28,15 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
   const onNewProject = pathname === routes.newProject;
   const activeTab = tabs?.find((t) => routes.thread(t.thread._id) === pathname);
   const activeId = activeTab?.thread._id;
-  const title = onNewProject ? "New project" : activeTab?.thread.name || undefined;
+  // The page a switcher card is taking you to, until the address gets
+  // there: the title shows it from the tap, not the old page's.
+  const [goingTo, setGoingTo] = useState<string | null>(null);
+  if (goingTo === pathname) setGoingTo(null);
+  const shownPath = goingTo ?? pathname;
+  const title =
+    shownPath === routes.newProject
+      ? "New project"
+      : tabs?.find((t) => routes.thread(t.thread._id) === shownPath)?.thread.name || undefined;
   const unread = useUnreadTabs(tabs ?? [], activeId);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const { close, restore, reopen } = useCloseTab(tabs);
@@ -92,6 +100,7 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
           })
         }
         newProjectHref={newProjectHref}
+        onNavigate={(path) => setGoingTo(path === pathname ? null : path)}
       />
     </div>
   );

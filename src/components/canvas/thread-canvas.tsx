@@ -256,7 +256,9 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     router.replace(next === "chat" && chatNode ? `${pathname}?view=chat&node=${chatNode._id}` : pathname, { scroll: false });
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    // data-ready-thread: the project has drawn; the phone's tab switcher
+    // waits for it before revealing the page.
+    <div data-ready-thread={threadId} className="relative h-full w-full overflow-hidden">
       {chatNode && (
         <ViewToggle
           active={view}

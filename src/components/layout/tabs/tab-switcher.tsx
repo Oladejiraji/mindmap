@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Pin, Plus } from "lucide-react";
@@ -21,7 +21,77 @@ import type { OpenTabs } from "./tab-strip";
  * The phone's tab switcher: every open tab as a card in a two-column grid,
  * pinned first. Tapping a card opens that project where you left it; ×
  * or a sideways swipe closes it (pinned tabs stay, as in the strip).
+ *
+ * Opening and leaving it, a stand-in for the page (a surface painted like
+ * the page's card) shrinks from the page into the current tab's card, and
+ * grows from a tapped card into the page. Navigation starts on the tap, so
+ * by the time it has grown the page is there (or blank while it loads).
  */
+
+const SURFACE_DURATION = 0.24;
+const SURFACE_EASE = [0.2, 0.8, 0.2, 1] as const;
+
+/** The page's card, which the surface grows into and shrinks from. */
+const pageCard = () => document.querySelector<HTMLElement>("[data-page-card]");
+
+/** How blurred the map is at the page's size, where it hands over to the page. */
+const MAP_BLUR = "blur(12px)";
+
+/**
+ * A copy of the card's mini map inside the surface, placed over the
+ * card's preview, so it can grow to the page (or shrink from it) with the
+ * surface. Null if the card has no map.
+ */
+function mapCopy(surface: HTMLElement, card: HTMLElement) {
+  const box = card.querySelector<HTMLElement>("[data-card-preview]");
+  const svg = box?.querySelector("svg");
+  if (!box || !svg) return null;
+  const layer = document.createElement("div");
+  layer.style.cssText = "position:fixed;pointer-events:none";
+  const copy = svg.cloneNode(true) as SVGSVGElement;
+  copy.style.cssText = "width:100%;height:100%";
+  layer.append(copy);
+  surface.append(layer);
+  return { layer, from: box.getBoundingClientRect() };
+}
+
+/** Position keyframes for a fixed element, from one box to another. */
+const between = (a: DOMRect, b: DOMRect) => ({
+  left: [a.left, b.left],
+  top: [a.top, b.top],
+  width: [a.width, b.width],
+  height: [a.height, b.height],
+});
+
+/** How long to wait for the project to draw before revealing the page anyway. */
+const DRAW_TIMEOUT = 500;
+
+/** Resolves once the project's page has drawn (or after DRAW_TIMEOUT). Right away without a project. */
+function whenDrawn(threadId: string | undefined) {
+  return new Promise<void>((resolve) => {
+    if (!threadId) return resolve();
+    const until = performance.now() + DRAW_TIMEOUT;
+    const check = () => {
+      const drawn = document.querySelector(`[data-page-card] [data-ready-thread="${CSS.escape(threadId)}"]`);
+      if (drawn || performance.now() > until) resolve();
+      else requestAnimationFrame(check);
+    };
+    check();
+  });
+}
+
+/** The page's box, inset a little so the map doesn't touch its edges. */
+function pageBox(page: HTMLElement) {
+  const r = page.getBoundingClientRect();
+  return new DOMRect(r.left + 24, r.top + 24, r.width - 48, r.height - 48);
+}
+
+/** A clip-path showing only `el`'s box (the surface covers the whole screen), with its rounded corners. */
+function clipTo(el: HTMLElement) {
+  const r = el.getBoundingClientRect();
+  const radius = getComputedStyle(el).borderTopLeftRadius;
+  return `inset(${r.top}px ${window.innerWidth - r.right}px ${window.innerHeight - r.bottom}px ${r.left}px round ${radius})`;
+}
 export function TabSwitcher({
   open,
   onOpenChange,
@@ -33,6 +103,7 @@ export function TabSwitcher({
   closed,
   onReopen,
   newProjectHref,
+  onNavigate,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,17 +118,63 @@ export function TabSwitcher({
   closed: readonly OpenTabs[number][];
   onReopen: (tab: OpenTabs[number]) => void;
   newProjectHref: string;
+  /** A card was tapped: the page (path) it's going to. */
+  onNavigate: (path: string) => void;
 }) {
   const count = tabs.length + (onNewProject ? 1 : 0);
   const close = () => onOpenChange(false);
+  const reduceMotion = useReducedMotion();
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Grows the surface from a tapped card into the page, then closes once
+   * the project (`threadId`) has drawn, so the switcher fades straight onto
+   * it. The tap's link navigates meanwhile.
+   */
+  const growFrom = (card: HTMLElement, threadId?: string) => {
+    const page = pageCard();
+    const surface = surfaceRef.current;
+    if (reduceMotion || !page || !surface) return close();
+    // The header goes first, showing the page's own bar; the grid's
+    // background stays, so nothing else shows through until the page is there.
+    void animate(headerRef.current!, { opacity: 0 }, { duration: 0.1 });
+    void animate(contentRef.current!, { opacity: 0 }, { duration: 0.15 });
+    // Opacity goes through Motion too: it remembers values it set and
+    // writes them back when an animation ends, so an inline write is lost.
+    const grow = animate(
+      surface,
+      { clipPath: [clipTo(card), clipTo(page)], opacity: [1, 1] },
+      { duration: SURFACE_DURATION, ease: SURFACE_EASE },
+    );
+    // The card's map grows with it and blurs; it stays (blurred) until the
+    // switcher fades, so it dissolves into the page's own content.
+    const map = mapCopy(surface, card);
+    if (map) {
+      void animate(
+        map.layer,
+        { ...between(map.from, pageBox(page)), filter: ["blur(0px)", MAP_BLUR] },
+        { duration: SURFACE_DURATION, ease: SURFACE_EASE },
+      );
+    }
+    void grow.then(() => whenDrawn(threadId)).then(close);
+  };
 
   return (
     // Focus stays inside, but taps outside the grid (the Undo toast) work
     // and don't close it.
     <Dialog.Root open={open} onOpenChange={onOpenChange} modal="trap-focus" disablePointerDismissal>
       <Dialog.Portal>
-        <Dialog.Popup className="fixed inset-0 z-50 flex flex-col bg-sidebar pt-[env(safe-area-inset-top)] outline-none transition-opacity duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0">
-          <div className="flex h-12 shrink-0 items-center justify-between pr-1 pl-4">
+        <Dialog.Popup // Fades out on close. Fades in only with reduced motion; otherwise
+          // the surface shrinking from the page is the way in.
+          className="fixed inset-0 z-50 flex flex-col outline-none transition-opacity duration-150 data-ending-style:opacity-0 motion-reduce:data-starting-style:opacity-0"
+        >
+          {/* The header and the grid have their own backgrounds, so the header can fade on its own. */}
+          <div
+            ref={headerRef}
+            className="flex h-[calc(48px+env(safe-area-inset-top))] shrink-0 items-center justify-between bg-sidebar pt-[env(safe-area-inset-top)] pr-1 pl-4"
+          >
             <Dialog.Title className="text-body-sm font-medium text-fg-primary">
               {count} {count === 1 ? "tab" : "tabs"}
             </Dialog.Title>
@@ -65,7 +182,8 @@ export function TabSwitcher({
               Done
             </Dialog.Close>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+          <div className="min-h-0 flex-1 bg-sidebar">
+          <div ref={contentRef} className="h-full overflow-y-auto px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
             <ul className="grid grid-cols-2 gap-3">
               {tabs.map((tab) => (
                 <li key={tab.thread._id}>
@@ -78,7 +196,10 @@ export function TabSwitcher({
                     pinned={tab.pinned}
                     replying={(tab.thread.replying ?? 0) > 0}
                     unread={unread.has(tab.thread._id)}
-                    onOpen={close}
+                    onOpen={(card) => {
+                      onNavigate(routes.thread(tab.thread._id));
+                      growFrom(card, tab.thread._id);
+                    }}
                     onClose={tab.pinned ? undefined : () => onClose(tab)}
                   />
                 </li>
@@ -92,7 +213,7 @@ export function TabSwitcher({
                     meta="Not started"
                     active
                     newProject
-                    onOpen={close}
+                    onOpen={growFrom}
                   />
                 </li>
               </RenderIf>
@@ -101,7 +222,10 @@ export function TabSwitcher({
                 <li>
                   <Link
                     href={newProjectHref}
-                    onClick={close}
+                    onClick={(e) => {
+                      onNavigate(routes.newProject);
+                      growFrom(e.currentTarget);
+                    }}
                     className="flex h-full min-h-16 items-center justify-center gap-1.5 rounded-2xl bg-component p-3 text-body-sm font-medium text-fg-secondary outline-none transition-[scale] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50"
                   >
                     <Plus className="size-4" />
@@ -134,6 +258,14 @@ export function TabSwitcher({
               </section>
             </RenderIf>
           </div>
+          </div>
+          {/* The page's stand-in: painted like the page's card, clipped to it or a card. */}
+          <div
+            ref={surfaceRef}
+            aria-hidden
+            className="pointer-events-none fixed inset-0 bg-background bg-(image:--gradient-panel) opacity-0"
+          />
+          <ShrinkIn surfaceRef={surfaceRef} headerRef={headerRef} contentRef={contentRef} />
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
@@ -168,7 +300,8 @@ function TabCard({
   replying?: boolean;
   unread?: boolean;
   newProject?: boolean;
-  onOpen: () => void;
+  /** Called with the card, which the page grows from. */
+  onOpen: (card: HTMLElement) => void;
   /** Without it, the card can't be closed. */
   onClose?: () => void;
 }) {
@@ -178,9 +311,12 @@ function TabCard({
   const opacity = useTransform(x, [-200, 0, 200], [0, 1, 0]);
   // A swipe ends with a click on the card; that shouldn't open it.
   const swiped = useRef(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   return (
     <motion.div
+      ref={cardRef}
+      data-active-card={active || undefined}
       drag={onClose ? "x" : false}
       dragDirectionLock
       dragMomentum={false}
@@ -205,11 +341,13 @@ function TabCard({
       <Link
         href={href}
         draggable={false}
-        onClick={(e) => (swiped.current ? e.preventDefault() : onOpen())}
+        onClick={(e) => (swiped.current ? e.preventDefault() : onOpen(cardRef.current!))}
         aria-current={active ? "page" : undefined}
         className="flex flex-col gap-1 rounded-2xl p-2 pb-2.5 outline-none transition-[scale] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <div className="mb-1">{preview}</div>
+        <div data-card-preview className="mb-1">
+          {preview}
+        </div>
         <div className="flex items-center gap-2 px-1">
           <TabStatusIcon
             icon={newProject ? NewTabIcon : NodeTabIcon}
@@ -237,4 +375,57 @@ function TabCard({
       </RenderIf>
     </motion.div>
   );
+}
+
+/**
+ * On opening, shrinks the surface from the page into the current tab's
+ * card while the grid fades in. Runs once the switcher's DOM is there, as
+ * it's measured.
+ */
+function ShrinkIn({
+  surfaceRef,
+  headerRef,
+  contentRef,
+}: {
+  surfaceRef: RefObject<HTMLDivElement | null>;
+  headerRef: RefObject<HTMLDivElement | null>;
+  contentRef: RefObject<HTMLDivElement | null>;
+}) {
+  const reduceMotion = useReducedMotion();
+  useLayoutEffect(() => {
+    const surface = surfaceRef.current;
+    const content = contentRef.current;
+    const card = content?.querySelector<HTMLElement>("[data-active-card]");
+    const page = pageCard();
+    if (reduceMotion || !surface || !content || !card || !page) return;
+    card.scrollIntoView({ block: "nearest" });
+    // Opacity through Motion only (see growFrom).
+    const shrink = animate(
+      surface,
+      { clipPath: [clipTo(page), clipTo(card)], opacity: [1, 1] },
+      { duration: SURFACE_DURATION, ease: SURFACE_EASE },
+    );
+    const fadeIn = animate(content, { opacity: [0, 0, 1] }, { duration: 0.26, times: [0, 0.25, 1] });
+    // The page's bar shows until the header fades in over it.
+    const headerIn = animate(headerRef.current!, { opacity: [0, 1] }, { duration: 0.15 });
+    // Then hand over to the card itself.
+    // The card's map comes into focus as it shrinks into the card.
+    const map = mapCopy(surface, card);
+    const mapIn = map
+      ? animate(
+          map.layer,
+          { ...between(pageBox(page), map.from), filter: [MAP_BLUR, "blur(0px)"], opacity: [0, 1, 1] },
+          { duration: SURFACE_DURATION, ease: SURFACE_EASE },
+        )
+      : null;
+    void shrink.then(() => animate(surface, { opacity: 0 }, { duration: 0.12 })).then(() => map?.layer.remove());
+    return () => {
+      shrink.stop();
+      mapIn?.stop();
+      map?.layer.remove();
+      fadeIn.stop();
+      headerIn.stop();
+    };
+  }, [surfaceRef, headerRef, contentRef, reduceMotion]);
+  return null;
 }

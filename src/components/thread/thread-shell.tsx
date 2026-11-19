@@ -41,7 +41,11 @@ export function ThreadShell({
           {/* The strip draws this card's surface (with the active tab, its
               outline and shadow) behind it. The card paints the same
               background too, so it's there before the surface is measured. */}
-          <div className="relative z-2 min-h-0 min-w-0 flex-1 overflow-hidden rounded-3xl bg-background bg-(image:--gradient-panel)">
+          {/* data-page-card: the phone's tab switcher grows a card into it. */}
+          <div
+            data-page-card
+            className="relative z-2 min-h-0 min-w-0 flex-1 overflow-hidden rounded-3xl bg-background bg-(image:--gradient-panel)"
+          >
             {children}
             {/* CanvasPanel and NodePanel read the query, so they need Suspense */}
             <Suspense>
