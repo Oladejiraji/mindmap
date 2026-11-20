@@ -20,14 +20,16 @@ const MAX_TITLE = 120;
 export type TabData = { href: string; title: string; thread?: Doc<"threads"> };
 
 /** The box every tab sits in: 168px, shrinking to 112px when the strip is full. */
-export const tabBox = "group/tab relative flex h-9 w-42 min-w-28 shrink items-center";
+export const tabBox =
+  "group/tab relative flex h-9 w-42 min-w-28 shrink items-center";
 /** A pinned tab's box: just the icon. */
 export const pinnedTabBox = "w-10 min-w-10 max-w-10 flex-none basis-auto";
 
 const menuItem =
   "corner-squircle flex w-full cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-caption-lg text-fg-secondary outline-none transition-colors data-highlighted:bg-foreground/6 data-highlighted:text-fg-primary [&_svg]:size-3.5";
 
-const content = "relative flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pl-4 text-body-sm";
+const content =
+  "relative flex h-full min-w-0 flex-1 items-center gap-2 rounded-t-xl pl-4 text-body-sm";
 
 /** One tab's contents: hover tint, divider, link (with a hover preview), × and a right-click menu. */
 export function Tab({
@@ -137,7 +139,9 @@ export function Tab({
                   "outline-none transition-colors duration-200 focus-visible:ring-3 focus-visible:ring-ring/50",
                   // The press that starts a drag can leave the link focused; no ring while dragging.
                   dragging && "focus-visible:ring-0",
-                  active ? "text-fg-primary" : "text-fg-secondary hover:text-fg-primary",
+                  active
+                    ? "text-fg-primary"
+                    : "text-fg-secondary hover:text-fg-primary",
                 )}
               >
                 <TabStatusIcon
@@ -156,7 +160,12 @@ export function Tab({
           />
           {!active && tab.thread && (
             <PreviewCard.Portal>
-              <PreviewCard.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
+              <PreviewCard.Positioner
+                side="bottom"
+                align="start"
+                sideOffset={8}
+                className="z-50"
+              >
                 <PreviewCard.Popup className="corner-squircle origin-(--transform-origin) rounded-4xl bg-surface-modal shadow-large outline-none transition-[opacity,scale] duration-150 ease-out data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-reduce:transition-opacity">
                   <TabPreview thread={tab.thread} />
                 </PreviewCard.Popup>
@@ -193,7 +202,10 @@ export function Tab({
             className="corner-squircle min-w-36 rounded-4xl border border-foreground/8 bg-background p-1.5 shadow-large outline-none"
           >
             <RenderIf condition={!!onRename}>
-              <ContextMenu.Item className={menuItem} onClick={() => onEditingChange?.(true)}>
+              <ContextMenu.Item
+                className={menuItem}
+                onClick={() => onEditingChange?.(true)}
+              >
                 <Pencil />
                 Rename
               </ContextMenu.Item>
@@ -233,7 +245,13 @@ function focusAtStart(input: HTMLInputElement | null) {
  * Esc cancels. Calls onDone once: with the trimmed title, or null when
  * cancelled or left empty.
  */
-function TitleField({ title, onDone }: { title: string; onDone: (title: string | null) => void }) {
+function TitleField({
+  title,
+  onDone,
+}: {
+  title: string;
+  onDone: (title: string | null) => void;
+}) {
   const done = useRef(false);
   const finish = (value: string | null) => {
     if (done.current) return;
@@ -264,35 +282,43 @@ export function TabStatusIcon({
   icon: Icon,
   replying,
   unread,
-  ringClassName = "ring-sidebar",
   className,
 }: {
   icon: ComponentType<{ className?: string }>;
   replying?: boolean;
   unread?: boolean;
-  /** Colour behind the dot, faking the cut where corner-shape isn't supported. */
-  ringClassName?: string;
   className?: string;
 }) {
   return (
-    <span className={cn("relative flex size-4 shrink-0 transition-colors duration-200", className)}>
+    <span
+      className={cn(
+        "relative flex size-4 shrink-0 transition-colors duration-200",
+        className,
+      )}
+    >
       <RenderIf condition={!!replying}>
         <Spinner className="size-3.5 m-px border-[1.5px]" />
       </RenderIf>
       <RenderIf condition={!replying}>
-        {/* With a dot, the icon's corner is scooped out around it
-            (corner-shape: scoop, Chromium for now). */}
-        <span className={cn("flex", unread && "overflow-hidden rounded-tr-[6px] [corner-shape:scoop]")}>
+        {/* With a dot, a circle around it is cut out of the icon. The
+            dot sits on the icon's upper-right arc, not the box's corner
+            (the drawing doesn't reach the corner), so the cut is a mask
+            centred on the dot. */}
+        <span
+          className={cn(
+            "flex",
+            unread &&
+              "[mask-image:radial-gradient(circle_at_12.5px_3.5px,transparent_4.5px,black_5px)]",
+          )}
+        >
           <Icon className="size-4" />
         </span>
       </RenderIf>
       <RenderIf condition={!!unread && !replying}>
+        {/* Centred at (12.5px, 3.5px), the mask's centre. */}
         <span
           aria-label="New reply"
-          className={cn(
-            "absolute -top-[2.2px] -right-[2.2px] size-1.5 rounded-full bg-brand-solid ring-2 supports-[corner-shape:scoop]:ring-0 motion-safe:animate-in motion-safe:zoom-in-50",
-            ringClassName,
-          )}
+          className="absolute top-[0.5px] right-[0.5px] size-1.5 rounded-full bg-brand-solid motion-safe:animate-in motion-safe:zoom-in-50"
         />
       </RenderIf>
     </span>
