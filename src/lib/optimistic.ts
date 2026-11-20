@@ -56,3 +56,16 @@ export function reorderTabsOptimistic(localStore: OptimisticLocalStore, args: { 
       .map(([, t]) => t),
   );
 }
+
+/** Same as the server: the tab lands between the other pinned tabs and the rest. */
+export function togglePinOptimistic(localStore: OptimisticLocalStore, args: { threadId: Id<"threads"> }) {
+  const open = localStore.getQuery(api.tabs.list, {});
+  const tab = open?.find((t) => t.thread._id === args.threadId);
+  if (!open || !tab) return;
+  const others = open.filter((t) => t !== tab);
+  localStore.setQuery(api.tabs.list, {}, [
+    ...others.filter((t) => t.pinned),
+    { ...tab, pinned: !tab.pinned },
+    ...others.filter((t) => !t.pinned),
+  ]);
+}

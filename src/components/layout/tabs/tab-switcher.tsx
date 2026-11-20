@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useRef, type ReactNode, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Dialog } from "@base-ui/react/dialog";
+import { ContextMenu } from "@base-ui/react/context-menu";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import { Pin, Plus } from "lucide-react";
 import { CloseIcon } from "@/components/icons/close-icon";
@@ -28,6 +29,9 @@ import type { OpenTabs } from "./tab-strip";
  * by the time it has grown the page is there (or blank while it loads).
  */
 
+// Must match MAX_TITLE in convex/lib/validation.ts.
+const MAX_TITLE = 120;
+
 const SURFACE_DURATION = 0.24;
 const SURFACE_EASE = [0.2, 0.8, 0.2, 1] as const;
 
@@ -38,29 +42,47 @@ const pageCard = () => document.querySelector<HTMLElement>("[data-page-card]");
 const MAP_BLUR = "blur(12px)";
 
 /**
- * A copy of the card's mini map inside the surface, placed over the
- * card's preview, so it can grow to the page (or shrink from it) with the
- * surface. Null if the card has no map.
+ * A copy of the card's mini map inside the surface, so it can grow to the
+ * page (or shrink from it) with the surface. `inCard` is where the
+ * card's preview sits within the card. Null if the card has no map.
  */
 function mapCopy(surface: HTMLElement, card: HTMLElement) {
   const box = card.querySelector<HTMLElement>("[data-card-preview]");
   const svg = box?.querySelector("svg");
   if (!box || !svg) return null;
   const layer = document.createElement("div");
-  layer.style.cssText = "position:fixed;pointer-events:none";
+  layer.style.cssText = "position:absolute;pointer-events:none";
   const copy = svg.cloneNode(true) as SVGSVGElement;
   copy.style.cssText = "width:100%;height:100%";
   layer.append(copy);
   surface.append(layer);
-  return { layer, from: box.getBoundingClientRect() };
+  const b = box.getBoundingClientRect();
+  const c = card.getBoundingClientRect();
+  return { layer, inCard: new DOMRect(b.left - c.left, b.top - c.top, b.width, b.height) };
 }
 
-/** Position keyframes for a fixed element, from one box to another. */
+/** Where the map sits within the page: inset a little so it doesn't touch the edges. */
+function inPage(page: HTMLElement) {
+  const r = page.getBoundingClientRect();
+  return new DOMRect(24, 24, r.width - 48, r.height - 48);
+}
+
+/** Position keyframes, from one box to another. */
 const between = (a: DOMRect, b: DOMRect) => ({
   left: [a.left, b.left],
   top: [a.top, b.top],
   width: [a.width, b.width],
   height: [a.height, b.height],
+});
+
+/**
+ * Keyframes moving the surface from one element's box to another's, with
+ * their corner radius. It's a real box rather than a clip-path, so its
+ * corners get the same smoothing (corner-shape) as the page's and cards'.
+ */
+const surfaceBetween = (from: HTMLElement, to: HTMLElement) => ({
+  ...between(from.getBoundingClientRect(), to.getBoundingClientRect()),
+  borderRadius: [getComputedStyle(from).borderTopLeftRadius, getComputedStyle(to).borderTopLeftRadius],
 });
 
 /** How long to wait for the project to draw before revealing the page anyway. */
@@ -80,18 +102,6 @@ function whenDrawn(threadId: string | undefined) {
   });
 }
 
-/** The page's box, inset a little so the map doesn't touch its edges. */
-function pageBox(page: HTMLElement) {
-  const r = page.getBoundingClientRect();
-  return new DOMRect(r.left + 24, r.top + 24, r.width - 48, r.height - 48);
-}
-
-/** A clip-path showing only `el`'s box (the surface covers the whole screen), with its rounded corners. */
-function clipTo(el: HTMLElement) {
-  const r = el.getBoundingClientRect();
-  const radius = getComputedStyle(el).borderTopLeftRadius;
-  return `inset(${r.top}px ${window.innerWidth - r.right}px ${window.innerHeight - r.bottom}px ${r.left}px round ${radius})`;
-}
 export function TabSwitcher({
   open,
   onOpenChange,
@@ -104,6 +114,8 @@ export function TabSwitcher({
   onReopen,
   newProjectHref,
   onNavigate,
+  onRename,
+  onTogglePin,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -120,6 +132,8 @@ export function TabSwitcher({
   newProjectHref: string;
   /** A card was tapped: the page (path) it's going to. */
   onNavigate: (path: string) => void;
+  onRename: (tab: OpenTabs[number], name: string) => void;
+  onTogglePin: (tab: OpenTabs[number]) => void;
 }) {
   const count = tabs.length + (onNewProject ? 1 : 0);
   const close = () => onOpenChange(false);
@@ -145,7 +159,7 @@ export function TabSwitcher({
     // writes them back when an animation ends, so an inline write is lost.
     const grow = animate(
       surface,
-      { clipPath: [clipTo(card), clipTo(page)], opacity: [1, 1] },
+      { ...surfaceBetween(card, page), opacity: [1, 1] },
       { duration: SURFACE_DURATION, ease: SURFACE_EASE },
     );
     // The card's map grows with it and blurs; it stays (blurred) until the
@@ -154,7 +168,7 @@ export function TabSwitcher({
     if (map) {
       void animate(
         map.layer,
-        { ...between(map.from, pageBox(page)), filter: ["blur(0px)", MAP_BLUR] },
+        { ...between(map.inCard, inPage(page)), filter: ["blur(0px)", MAP_BLUR] },
         { duration: SURFACE_DURATION, ease: SURFACE_EASE },
       );
     }
@@ -183,7 +197,7 @@ export function TabSwitcher({
             </Dialog.Close>
           </div>
           <div className="min-h-0 flex-1 bg-sidebar">
-          <div ref={contentRef} className="h-full overflow-y-auto px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+          <div ref={contentRef} className="h-full scroll-py-1 overflow-y-auto px-3 pt-1 pb-[max(12px,env(safe-area-inset-bottom))]">
             <ul className="grid grid-cols-2 gap-3">
               {tabs.map((tab) => (
                 <li key={tab.thread._id}>
@@ -201,6 +215,8 @@ export function TabSwitcher({
                       growFrom(card, tab.thread._id);
                     }}
                     onClose={tab.pinned ? undefined : () => onClose(tab)}
+                    onRename={(name) => onRename(tab, name)}
+                    onTogglePin={() => onTogglePin(tab)}
                   />
                 </li>
               ))}
@@ -259,11 +275,11 @@ export function TabSwitcher({
             </RenderIf>
           </div>
           </div>
-          {/* The page's stand-in: painted like the page's card, clipped to it or a card. */}
+          {/* The page's stand-in: painted like the page's card, sized to it or a card. */}
           <div
             ref={surfaceRef}
             aria-hidden
-            className="pointer-events-none fixed inset-0 bg-background bg-(image:--gradient-panel) opacity-0"
+            className="pointer-events-none fixed top-0 left-0 overflow-hidden bg-background bg-(image:--gradient-panel) opacity-0"
           />
           <ShrinkIn surfaceRef={surfaceRef} headerRef={headerRef} contentRef={contentRef} />
         </Dialog.Popup>
@@ -271,6 +287,10 @@ export function TabSwitcher({
     </Dialog.Root>
   );
 }
+
+/** A row in a card's menu, as in Home's project card menu. */
+const menuItem =
+  "corner-squircle flex w-full cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-caption-lg text-fg-secondary transition-colors data-[highlighted]:bg-foreground/6 data-[highlighted]:text-fg-primary outline-none";
 
 /** How far (px) or fast (px/s) a swipe has to go to close the card. */
 const SWIPE_DISTANCE = 80;
@@ -288,6 +308,8 @@ function TabCard({
   newProject,
   onOpen,
   onClose,
+  onRename,
+  onTogglePin,
 }: {
   href: string;
   /** What the project looks like, above its title. */
@@ -304,76 +326,167 @@ function TabCard({
   onOpen: (card: HTMLElement) => void;
   /** Without it, the card can't be closed. */
   onClose?: () => void;
+  /** Without it, the card can't be renamed. */
+  onRename?: (name: string) => void;
+  /** Without it, the card can't be pinned. */
+  onTogglePin?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const x = useMotionValue(0);
   // Fades as it's swiped away.
   const opacity = useTransform(x, [-200, 0, 200], [0, 1, 0]);
-  // A swipe ends with a click on the card; that shouldn't open it.
+  // A swipe, or the press that opened the menu, ends with a click on the
+  // card; that shouldn't open it.
   const swiped = useRef(false);
+  const menuOpened = useRef(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [renaming, setRenaming] = useState(false);
+  // Cancelling with Esc mustn't also save on the blur that follows.
+  const cancelled = useRef(false);
+  const hasMenu = !!(onRename || onTogglePin || onClose);
+
+  const body = (
+    <>
+      <div data-card-preview className="mb-1">
+        {preview}
+      </div>
+      <div className="flex items-center gap-2 px-1">
+        <TabStatusIcon
+          icon={newProject ? NewTabIcon : NodeTabIcon}
+          replying={replying}
+          unread={unread}
+          className="text-fg-tertiary"
+        />
+        <RenderIf condition={renaming}>
+          <input
+            autoFocus
+            defaultValue={title}
+            maxLength={MAX_TITLE}
+            aria-label="Project name"
+            onFocus={(e) => {
+              cancelled.current = false;
+              e.currentTarget.select();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              if (e.key === "Escape") {
+                // Not the switcher's Esc: just this field's.
+                e.stopPropagation();
+                cancelled.current = true;
+                setRenaming(false);
+              }
+            }}
+            onBlur={(e) => {
+              setRenaming(false);
+              const name = e.currentTarget.value.trim();
+              if (!cancelled.current && name && name !== title) onRename?.(name);
+            }}
+            className="-mx-1 h-6 min-w-0 flex-1 rounded-md bg-component px-1 text-body-sm font-medium text-fg-primary outline-none"
+          />
+        </RenderIf>
+        <RenderIf condition={!renaming}>
+          <span className="min-w-0 flex-1 truncate text-body-sm font-medium text-fg-primary">{title}</span>
+        </RenderIf>
+        <RenderIf condition={!!pinned}>
+          <Pin aria-label="Pinned" className="size-3 shrink-0 text-fg-tertiary" />
+        </RenderIf>
+      </div>
+      <span className="pl-7 text-caption-lg text-fg-tertiary">{meta}</span>
+    </>
+  );
+  const bodyClass = "flex flex-col gap-1 rounded-2xl p-2 pb-2.5 outline-none";
 
   return (
-    <motion.div
-      ref={cardRef}
-      data-active-card={active || undefined}
-      drag={onClose ? "x" : false}
-      dragDirectionLock
-      dragMomentum={false}
-      onPointerDown={() => (swiped.current = false)}
-      onDragStart={() => (swiped.current = true)}
-      onDragEnd={(_, { offset, velocity }) => {
-        const far = Math.abs(offset.x) > SWIPE_DISTANCE || Math.abs(velocity.x) > SWIPE_SPEED;
-        if (!far || !onClose) {
-          animate(x, 0, { type: "spring", stiffness: 500, damping: 40 });
-          return;
-        }
-        const away = Math.sign(offset.x || velocity.x) * 400;
-        animate(x, away, { duration: reduceMotion ? 0 : 0.15, ease: "easeOut" }).then(onClose);
-      }}
-      style={{ x, opacity }}
-      className={cn(
-        "relative touch-pan-y rounded-2xl bg-background shadow-default",
-        // The tab you're on.
-        active && "ring-2 ring-brand-solid",
-      )}
-    >
-      <Link
-        href={href}
-        draggable={false}
-        onClick={(e) => (swiped.current ? e.preventDefault() : onOpen(cardRef.current!))}
-        aria-current={active ? "page" : undefined}
-        className="flex flex-col gap-1 rounded-2xl p-2 pb-2.5 outline-none transition-[scale] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <div data-card-preview className="mb-1">
-          {preview}
-        </div>
-        <div className="flex items-center gap-2 px-1">
-          <TabStatusIcon
-            icon={newProject ? NewTabIcon : NodeTabIcon}
-            replying={replying}
-            unread={unread}
-            ringClassName="ring-background"
-            className="text-fg-tertiary"
-          />
-          <span className="min-w-0 flex-1 truncate text-body-sm font-medium text-fg-primary">{title}</span>
-          <RenderIf condition={!!pinned}>
-            <Pin aria-label="Pinned" className="size-3 shrink-0 text-fg-tertiary" />
-          </RenderIf>
-        </div>
-        <span className="pl-7 text-caption-lg text-fg-tertiary">{meta}</span>
-      </Link>
-      <RenderIf condition={!!onClose}>
-        <button
-          onClick={onClose}
-          aria-label={`Close ${title}`}
-          // Over the preview's corner.
-          className="absolute top-3 right-3 flex size-6 cursor-pointer items-center justify-center rounded-full bg-background/90 text-fg-secondary shadow-default outline-none active:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
+    // Press and hold (or right-click) for Rename, Pin and Close.
+    <ContextMenu.Root disabled={!hasMenu || renaming} onOpenChange={(open) => open && (menuOpened.current = true)}>
+      <ContextMenu.Trigger>
+        <motion.div
+          ref={cardRef}
+          data-active-card={active || undefined}
+          drag={onClose && !renaming ? "x" : false}
+          dragDirectionLock
+          dragMomentum={false}
+          onPointerDown={() => {
+            swiped.current = false;
+            menuOpened.current = false;
+          }}
+          onDragStart={() => (swiped.current = true)}
+          onDragEnd={(_, { offset, velocity }) => {
+            const far = Math.abs(offset.x) > SWIPE_DISTANCE || Math.abs(velocity.x) > SWIPE_SPEED;
+            if (!far || !onClose) {
+              animate(x, 0, { type: "spring", stiffness: 500, damping: 40 });
+              return;
+            }
+            const away = Math.sign(offset.x || velocity.x) * 400;
+            animate(x, away, { duration: reduceMotion ? 0 : 0.15, ease: "easeOut" }).then(onClose);
+          }}
+          style={{ x, opacity }}
+          className={cn(
+            "relative touch-pan-y rounded-2xl bg-background shadow-default",
+            // The tab you're on.
+            active && "ring-2 ring-brand-solid",
+          )}
         >
-          <CloseIcon className="size-3" />
-        </button>
-      </RenderIf>
-    </motion.div>
+          <RenderIf condition={renaming}>
+            <div className={bodyClass}>{body}</div>
+          </RenderIf>
+          <RenderIf condition={!renaming}>
+            <Link
+              href={href}
+              draggable={false}
+              onClick={(e) =>
+                swiped.current || menuOpened.current ? e.preventDefault() : onOpen(cardRef.current!)
+              }
+              aria-current={active ? "page" : undefined}
+              // No text selection or iOS link preview on press and hold: that opens the menu.
+              className={cn(
+                bodyClass,
+                "transition-[scale] select-none [-webkit-touch-callout:none] active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50",
+              )}
+            >
+              {body}
+            </Link>
+          </RenderIf>
+          <RenderIf condition={!!onClose}>
+            <button
+              onClick={onClose}
+              aria-label={`Close ${title}`}
+              // Over the preview's corner.
+              className="absolute top-3 right-3 flex size-6 cursor-pointer items-center justify-center rounded-full bg-background/90 text-fg-secondary outline-none active:bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <CloseIcon className="size-3" />
+            </button>
+          </RenderIf>
+        </motion.div>
+      </ContextMenu.Trigger>
+      <ContextMenu.Portal>
+        {/* Styled like Home's project card menu. Above the switcher (z-50). */}
+        <ContextMenu.Positioner sideOffset={4} className="z-60">
+          {/* Focus stays put on close, so Rename's field keeps it. */}
+          <ContextMenu.Popup
+            finalFocus={false}
+            className="corner-squircle min-w-40 rounded-4xl border border-foreground/8 bg-background p-1.5 shadow-large outline-none"
+          >
+            <RenderIf condition={!!onRename}>
+              <ContextMenu.Item className={menuItem} onClick={() => setRenaming(true)}>
+                Rename
+              </ContextMenu.Item>
+            </RenderIf>
+            <RenderIf condition={!!onTogglePin}>
+              <ContextMenu.Item className={menuItem} onClick={onTogglePin}>
+                {pinned ? "Unpin" : "Pin"}
+              </ContextMenu.Item>
+            </RenderIf>
+            <RenderIf condition={!!onClose}>
+              <ContextMenu.Separator className="my-1 h-px bg-foreground/8" />
+              <ContextMenu.Item className={menuItem} onClick={onClose}>
+                Close
+              </ContextMenu.Item>
+            </RenderIf>
+          </ContextMenu.Popup>
+        </ContextMenu.Positioner>
+      </ContextMenu.Portal>
+    </ContextMenu.Root>
   );
 }
 
@@ -402,7 +515,7 @@ function ShrinkIn({
     // Opacity through Motion only (see growFrom).
     const shrink = animate(
       surface,
-      { clipPath: [clipTo(page), clipTo(card)], opacity: [1, 1] },
+      { ...surfaceBetween(page, card), opacity: [1, 1] },
       { duration: SURFACE_DURATION, ease: SURFACE_EASE },
     );
     const fadeIn = animate(content, { opacity: [0, 0, 1] }, { duration: 0.26, times: [0, 0.25, 1] });
@@ -414,7 +527,7 @@ function ShrinkIn({
     const mapIn = map
       ? animate(
           map.layer,
-          { ...between(pageBox(page), map.from), filter: [MAP_BLUR, "blur(0px)"], opacity: [0, 1, 1] },
+          { ...between(inPage(page), map.inCard), filter: [MAP_BLUR, "blur(0px)"], opacity: [0, 1, 1] },
           { duration: SURFACE_DURATION, ease: SURFACE_EASE },
         )
       : null;

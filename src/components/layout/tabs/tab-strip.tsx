@@ -14,7 +14,7 @@ import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { RenderIf } from "@/components/shared/render-if";
-import { renameThreadOptimistic, reorderTabsOptimistic } from "@/lib/optimistic";
+import { renameThreadOptimistic, reorderTabsOptimistic, togglePinOptimistic } from "@/lib/optimistic";
 import { Tab, pinnedTabBox, tabBox, type TabData } from "./tab";
 import { TabSurface, useTabSurface } from "./tab-surface";
 import { TabSearch } from "./tab-search";
@@ -51,20 +51,7 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
   const { close: closeById, reopenLast } = useCloseTab(openTabs);
   const close = (thread: Doc<"threads">) => closeById(thread._id);
 
-  // Same as the server: the tab lands between the other pinned tabs and the rest.
-  const togglePin = useMutation(api.tabs.togglePin).withOptimisticUpdate(
-    (store, { threadId }) => {
-      const open = store.getQuery(api.tabs.list, {});
-      const tab = open?.find((t) => t.thread._id === threadId);
-      if (!open || !tab) return;
-      const others = open.filter((t) => t !== tab);
-      store.setQuery(api.tabs.list, {}, [
-        ...others.filter((t) => t.pinned),
-        { ...tab, pinned: !tab.pinned },
-        ...others.filter((t) => !t.pinned),
-      ]);
-    },
-  );
+  const togglePin = useMutation(api.tabs.togglePin).withOptimisticUpdate(togglePinOptimistic);
   const renameThread = useMutation(api.threads.rename).withOptimisticUpdate(
     renameThreadOptimistic,
   );

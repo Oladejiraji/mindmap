@@ -6,11 +6,12 @@ import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { api } from "@convex/api";
 import { handleError } from "@/lib/handle-error";
-import { renameThreadOptimistic } from "@/lib/optimistic";
+import { renameThreadOptimistic, togglePinOptimistic } from "@/lib/optimistic";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { RenderIf } from "@/components/shared/render-if";
 import { SidebarToggleIcon } from "@/components/icons/sidebar-toggle";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
   }, [switcherOpen]);
 
   const renameThread = useMutation(api.threads.rename).withOptimisticUpdate(renameThreadOptimistic);
+  const togglePin = useMutation(api.tabs.togglePin).withOptimisticUpdate(togglePinOptimistic);
   const [renaming, setRenaming] = useState(false);
   const canRename = !!activeTab && !goingTo;
   const rename = (name: string) => {
@@ -94,8 +96,21 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
   const closeWithUndo = (tab: OpenTabs[number]) => {
     const order = (tabs ?? []).map((t) => t.thread._id);
     void close(tab.thread._id);
-    toast(`Closed ${tab.thread.name || "Untitled"}`, {
-      action: { label: "Undo", onClick: () => restore(tab, order) },
+    // Our primary button rather than Sonner's own, which then doesn't
+    // dismiss the toast itself.
+    const id = toast(`Closed ${tab.thread.name || "Untitled"}`, {
+      action: (
+        <Button
+          size="sm"
+          className="ml-auto"
+          onClick={() => {
+            restore(tab, order);
+            toast.dismiss(id);
+          }}
+        >
+          Undo
+        </Button>
+      ),
     });
   };
   // The New project page counts as a tab, as it does in the strip.
@@ -185,6 +200,14 @@ export function MobileTabBar({ initialTabs }: { initialTabs?: OpenTabs }) {
         }
         newProjectHref={newProjectHref}
         onNavigate={(path) => setGoingTo(path === pathname ? null : path)}
+        onRename={(tab, name) =>
+          renameThread({ threadId: tab.thread._id, name }).catch((err) =>
+            handleError(err, "Couldn't rename the project"),
+          )
+        }
+        onTogglePin={(tab) =>
+          togglePin({ threadId: tab.thread._id }).catch((err) => handleError(err, "Couldn't pin the tab"))
+        }
       />
     </div>
   );
