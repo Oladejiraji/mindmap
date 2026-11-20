@@ -2,7 +2,7 @@ import { convexTest } from "convex-test";
 import rateLimiter from "@convex-dev/rate-limiter/test";
 import { describe, expect, test } from "vitest";
 import schema from "./schema";
-import { api, internal } from "./_generated/api";
+import { api } from "./_generated/api";
 import { modules } from "./test.setup";
 import * as messagesModule from "./messages";
 
@@ -180,13 +180,6 @@ describe("nodes", () => {
 
     await expect(alice.mutation(api.nodes.deleteSubtree, { nodeId: rootId })).resolves.toEqual({ deletedCount: 2 });
   });
-
-  test("assertOwned, the check the chat action runs before calling the AI", async () => {
-    const { t, alice, bob, childId } = await setup();
-    await expect(alice.query(internal.nodes.assertOwned, { nodeId: childId })).resolves.toMatchObject({ _id: childId });
-    await expect(bob.query(internal.nodes.assertOwned, { nodeId: childId })).rejects.toMatchObject(NOT_FOUND);
-    await expect(t.query(internal.nodes.assertOwned, { nodeId: childId })).rejects.toMatchObject(UNAUTHORIZED);
-  });
 });
 
 describe("messages", () => {
@@ -199,23 +192,12 @@ describe("messages", () => {
   });
 
   test("the browser has no way to write messages directly", () => {
-    // Only chat.sendMessage (an action, which runs the AI) can add to a chat.
+    // Only chat.send and chat.retry add to a chat: the user's message, and an
+    // empty reply that the AI writes.
     const publicMutations = Object.entries(messagesModule)
       .filter(([, fn]) => (fn as { isMutation?: boolean; isPublic?: boolean }).isMutation)
       .filter(([, fn]) => (fn as { isPublic?: boolean }).isPublic)
       .map(([name]) => name);
     expect(publicMutations).toEqual([]);
-  });
-
-  test("appendUserMessage saves a user message and still checks ownership", async () => {
-    const { t, alice, bob, childId } = await setup();
-    const msg = { nodeId: childId, content: "Injected" };
-    await expect(bob.mutation(internal.messages.appendUserMessage, msg)).rejects.toMatchObject(NOT_FOUND);
-    await expect(t.mutation(internal.messages.appendUserMessage, msg)).rejects.toMatchObject(UNAUTHORIZED);
-    expect(await t.run((ctx) => ctx.db.query("messages").collect())).toHaveLength(1);
-
-    await alice.mutation(internal.messages.appendUserMessage, { nodeId: childId, content: "Mine" });
-    const messages = await t.run((ctx) => ctx.db.query("messages").collect());
-    expect(messages.at(-1)).toMatchObject({ role: "user", content: "Mine", index: 1 });
   });
 });

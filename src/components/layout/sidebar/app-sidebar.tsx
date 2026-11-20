@@ -21,7 +21,10 @@ function useThreadIdFromRoute() {
 export function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
   const threadId = useThreadIdFromRoute();
-  const { data: thread, isPending } = useAuthedConvexQuery(api.threads.get, threadId ? { threadId } : "skip");
+  const { data: thread, isPending } = useAuthedConvexQuery(
+    api.threads.get,
+    threadId ? { threadId } : "skip",
+  );
 
   return (
     <aside className="flex h-full w-60 shrink-0 flex-col ">

@@ -89,7 +89,37 @@ export default defineSchema({
     name: v.string(),
     updatedAt: v.optional(v.number()),
     orgId: v.optional(v.id("organizations")),
+    /** How many AI replies are being written in this project right now (its tab shows a spinner). */
+    replying: v.optional(v.number()),
   }).index("by_userId", ["userId"]),
+
+  /**
+   * The projects a user has open as tabs, left to right by `order`.
+   * Opening a project adds its tab; closing the tab keeps the project.
+   */
+  tabs: defineTable({
+    userId: v.string(),
+    threadId: v.id("threads"),
+    order: v.number(),
+    /** Pinned tabs come first and show only their icon. */
+    pinned: v.optional(v.boolean()),
+  })
+    .index("by_userId_and_order", ["userId", "order"])
+    .index("by_userId_and_threadId", ["userId", "threadId"])
+    .index("by_threadId", ["threadId"]),
+
+  /**
+   * Where each person last was in a project, so coming back (from a tab,
+   * Home or a link) restores it. Kept after the tab closes.
+   */
+  projectViews: defineTable({
+    userId: v.string(),
+    threadId: v.id("threads"),
+    /** The project URL's query: "view=chat&node=…", "panel=…&tab=chat", or "" for the canvas. */
+    search: v.string(),
+  })
+    .index("by_userId_and_threadId", ["userId", "threadId"])
+    .index("by_threadId", ["threadId"]),
 
   nodes: defineTable({
     userId: v.string(),
@@ -125,6 +155,12 @@ export default defineSchema({
     isStreaming: v.optional(v.boolean()),
     /** While streaming: the model has started writing a document edit. Cleared when the reply finishes. */
     draftingEdit: v.optional(v.boolean()),
+    /**
+     * A reply that ended early: the model call failed, or the user stopped
+     * it. The text written so far is kept. Failed replies are left out of
+     * what the AI reads; stopped ones stay in.
+     */
+    interrupted: v.optional(v.union(v.literal("failed"), v.literal("stopped"))),
   }).index("by_chatId_and_index", ["chatId", "index"]),
 
   /**

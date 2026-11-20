@@ -105,7 +105,12 @@ async function getChatTurns(
     .take(MAX_MESSAGES);
   const byMessage = new Map(proposals.map((p) => [p.messageId, p]));
 
-  return messages.map((m) => {
+  // Left out: the reply being written (the one this context is for), failed
+  // replies (an error isn't something the AI said), and empty ones (a reply
+  // stopped before its first word).
+  const said = messages.filter((m) => !m.isStreaming && m.interrupted !== "failed" && m.content.trim());
+
+  return said.map((m) => {
     const proposal = byMessage.get(m._id);
     return {
       role: m.role,
@@ -160,11 +165,28 @@ export function toModelInput(context: PromptContext): ModelInput {
 
   return {
     system: sections.join("\n\n"),
-    messages: context.messages.map((turn) => ({
-      role: turn.role,
-      content: turn.proposal ? `${turn.content}\n\n${editNote(turn.proposal)}` : turn.content,
-    })),
+    messages: mergeTurns(
+      context.messages.map((turn) => ({
+        role: turn.role,
+        content: turn.proposal ? `${turn.content}\n\n${editNote(turn.proposal)}` : turn.content,
+      })),
+    ),
   };
+}
+
+/**
+ * Joins back-to-back turns from the same side into one, so turns alternate.
+ * That happens when a reply is left out: the user's message before a failed
+ * reply and the one they sent after it.
+ */
+function mergeTurns(turns: ModelInput["messages"]): ModelInput["messages"] {
+  const merged: ModelInput["messages"] = [];
+  for (const turn of turns) {
+    const prev = merged.at(-1);
+    if (prev?.role === turn.role) prev.content = `${prev.content}\n\n${turn.content}`;
+    else merged.push({ ...turn });
+  }
+  return merged;
 }
 
 const EDIT_OUTCOMES: Record<ProposalState, string> = {

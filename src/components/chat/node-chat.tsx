@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useAction } from "convex/react";
+import { useMemo } from "react";
+import { useMutation } from "convex/react";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
@@ -17,23 +17,27 @@ export function NodeChat({ nodeId }: { nodeId: Id<"nodes"> }) {
     () => new Map((proposalList ?? []).map((p) => [p.messageId as string, p])),
     [proposalList],
   );
-  const sendMessage = useAction(api.chat.sendMessage);
-  const [isSending, setIsSending] = useState(false);
+  const sendMessage = useMutation(api.chat.send);
+  const retryReply = useMutation(api.chat.retry);
+  const stopReply = useMutation(api.chat.stop);
 
   const isStreaming = messages?.some((m) => m.isStreaming) ?? false;
-  const isBusy = isSending || isStreaming;
 
+  // Resolves once the message is saved (the reply streams in after);
+  // rejecting keeps the text in the box.
   const handleSend = async (content: string) => {
-    setIsSending(true);
     try {
       await sendMessage({ nodeId, content });
-      setIsSending(false);
     } catch (err) {
       handleError(err, "Failed to send message");
-      // Keep the input disabled briefly so the user can read the toast
-      // before the send button becomes mashable again.
-      setTimeout(() => setIsSending(false), 600);
+      throw err;
     }
+  };
+  const handleRetry = () => {
+    retryReply({ nodeId }).catch((err) => handleError(err, "Couldn't try again"));
+  };
+  const handleStop = () => {
+    stopReply({ nodeId }).catch((err) => handleError(err, "Couldn't stop the reply"));
   };
 
   return (
@@ -52,10 +56,22 @@ export function NodeChat({ nodeId }: { nodeId: Id<"nodes"> }) {
             </button>
           </div>
         ) : (
-          <MessageList messages={messages ?? []} isLoading={isLoading} isStreaming={isStreaming} proposals={proposals} />
+          <MessageList
+            messages={messages ?? []}
+            isLoading={isLoading}
+            isStreaming={isStreaming}
+            proposals={proposals}
+            onRetry={handleRetry}
+          />
         )}
         <div className="sticky bottom-0 bg-background">
-          <ChatInput onSend={handleSend} disabled={isBusy || !!error} className="px-2 pt-3 pb-2" />
+          <ChatInput
+            onSend={handleSend}
+            busy={isStreaming}
+            onStop={handleStop}
+            disabled={!!error}
+            className="px-2 pt-3 pb-2"
+          />
         </div>
       </div>
     </div>

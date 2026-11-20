@@ -1,10 +1,9 @@
 import {
-  customAction,
   customCtx,
   customMutation,
   customQuery,
 } from "convex-helpers/server/customFunctions";
-import { action, mutation, query } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { requireUserId } from "./auth";
 import { enforceLimit } from "./rateLimiter";
 
@@ -61,30 +60,27 @@ export const userMutation = customMutation(
 );
 
 /**
- * Public action that calls the LLM on our Anthropic key. Rate-limited.
+ * Public mutation that starts an AI reply on our Anthropic key. Rate-limited.
  *
  * Rejects with `UNAUTHORIZED` if the caller has no session, or `RateLimited`
  * if they've exhausted either the `llmRequest` bucket (20/min, burst 5) or
  * the `llmRequestDaily` ceiling (300/day). Exposes `ctx.userId: string`.
  *
- * Use this for any action that spends Anthropic budget. For internal
- * server-to-server actions that don't hit the LLM, use `internalAction`.
- *
- * Note: rate limits are consumed before the handler runs, so an action that
- * fails its own ownership check still spends a token (self-harm only — the
- * bucket is per-user).
+ * The model call itself runs in a scheduled internal action. Because this
+ * is a mutation, a refused request (ownership, a reply already running)
+ * rolls back and spends no tokens.
  *
  * @example
- * export const sendMessage = llmAction({
+ * export const send = llmMutation({
  *   args: { nodeId: v.id("nodes"), content: v.string() },
  *   handler: async (ctx, args) => {
- *     await ctx.runQuery(internal.nodes.assertOwned, { nodeId: args.nodeId });
- *     // ...stream LLM response...
+ *     await requireNode(ctx, args.nodeId);
+ *     // ...save the message, schedule internal.chat.respond...
  *   },
  * });
  */
-export const llmAction = customAction(
-  action,
+export const llmMutation = customMutation(
+  mutation,
   customCtx(async (ctx) => {
     const userId = await requireUserId(ctx);
     await enforceLimit(ctx, "llmRequest", userId);

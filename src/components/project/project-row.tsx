@@ -21,11 +21,14 @@ const menuItemClass =
 export function ProjectRow({
   name,
   threadId,
+  search,
   createdAt,
   updatedAt,
 }: {
   name: string;
   threadId: string;
+  /** Where you last were in the project, so the link brings you back there. */
+  search?: string;
   createdAt: number;
   updatedAt?: number;
 }) {
@@ -36,7 +39,7 @@ export function ProjectRow({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
-  const href = routes.thread(threadId);
+  const href = search ? `${routes.thread(threadId)}?${search}` : routes.thread(threadId);
 
   const handleDelete = async () => {
     try {

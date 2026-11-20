@@ -105,6 +105,26 @@ describe("buildPromptContext", () => {
     expect(context?.messages.map((m) => m.proposal?.state)).toEqual(["rejected", "out_of_date", "pending", undefined]);
   });
 
+  test("leaves out the reply being written, failed replies and empty ones, but keeps stopped ones", async () => {
+    const { t, leaf } = await setupTree();
+    await t.run(async (ctx) => {
+      const chatId = await ctx.db.insert("chats", { nodeId: leaf });
+      const add = (index: number, role: "user" | "assistant", content: string, extra = {}) =>
+        ctx.db.insert("messages", { chatId, role, content, index, ...extra });
+      await add(0, "user", "Q1");
+      await add(1, "assistant", "Half an ans", { interrupted: "failed" });
+      await add(2, "user", "Q2");
+      await add(3, "assistant", "Cut sh", { interrupted: "stopped" });
+      await add(4, "user", "Q3");
+      await add(5, "assistant", "", { interrupted: "stopped" });
+      await add(6, "user", "Q4");
+      await add(7, "assistant", "Writing", { isStreaming: true });
+    });
+
+    const context = await build(t, leaf);
+    expect(context?.messages.map((m) => m.content)).toEqual(["Q1", "Q2", "Cut sh", "Q3", "Q4"]);
+  });
+
   test("a node without a chat has no messages", async () => {
     const { t, leaf } = await setupTree();
     expect((await build(t, leaf))?.messages).toEqual([]);
@@ -201,17 +221,37 @@ describe("toModelInput", () => {
     expect(written).not.toContain("The document in <current_node> is empty");
   });
 
+  test("joins back-to-back turns from the same side, so turns alternate", () => {
+    const { messages } = toModelInput(
+      context({
+        messages: [
+          { role: "user", content: "Q1" },
+          { role: "user", content: "Q2" },
+          { role: "assistant", content: "A" },
+          { role: "user", content: "Q3" },
+          { role: "user", content: "Q4" },
+        ],
+      }),
+    );
+    expect(messages).toEqual([
+      { role: "user", content: "Q1\n\nQ2" },
+      { role: "assistant", content: "A" },
+      { role: "user", content: "Q3\n\nQ4" },
+    ]);
+  });
+
   test("notes what became of a suggested edit at the end of its reply", () => {
     const { messages } = toModelInput(
       context({
         messages: [
           { role: "user", content: "Switch to usage?" },
           { role: "assistant", content: "Yes.", proposal: { reason: "Record the switch", state: "rejected" } },
+          { role: "user", content: "Try again" },
           { role: "assistant", content: "Again.", proposal: { reason: "Retry", state: "out_of_date" } },
         ],
       }),
     );
     expect(messages[1].content).toBe('Yes.\n\n<document_edit outcome="rejected">Record the switch</document_edit>');
-    expect(messages[2].content).toContain('outcome="out of date: the document changed before the user answered"');
+    expect(messages[3].content).toContain('outcome="out of date: the document changed before the user answered"');
   });
 });

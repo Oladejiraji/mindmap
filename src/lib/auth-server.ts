@@ -8,7 +8,7 @@ import { isAuthError } from "@/lib/auth-errors";
 // when the JWT naturally expires or when a downstream Convex call throws an
 // auth error matched by `isAuthError`. The flag is experimental upstream
 // (labs.convex.dev/better-auth/experimental) — package version is pinned.
-export const { handler, isAuthenticated, getToken } = convexBetterAuthNextJs({
+export const { handler, isAuthenticated, getToken, preloadAuthQuery, fetchAuthQuery } = convexBetterAuthNextJs({
   convexUrl: process.env.NEXT_PUBLIC_CONVEX_URL!,
   convexSiteUrl: process.env.NEXT_PUBLIC_CONVEX_SITE_URL!,
   jwtCache: {

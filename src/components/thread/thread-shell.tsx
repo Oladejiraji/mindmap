@@ -6,7 +6,8 @@ import { HomeSidebar } from "@/components/layout/sidebar/home-sidebar";
 import { CanvasPanel } from "@/components/thread/canvas-panel";
 import { NodePanel } from "@/components/thread/node-panel";
 import { FloatingChat } from "@/components/thread/floating-chat";
-import { TabStrip } from "@/components/layout/tab-strip";
+import { TabStrip, type OpenTabs } from "@/components/layout/tabs/tab-strip";
+import { MobileTabBar } from "@/components/layout/tabs/mobile-tab-bar";
 
 /*
  * Shell for project pages: the collapsible app sidebar, the tab strip and
@@ -16,9 +17,12 @@ import { TabStrip } from "@/components/layout/tab-strip";
  */
 export function ThreadShell({
   defaultOpen,
+  initialTabs,
   children,
 }: {
   defaultOpen: boolean;
+  /** The open tabs, fetched on the server. */
+  initialTabs?: OpenTabs;
   children: ReactNode;
 }) {
   return (
@@ -31,8 +35,17 @@ export function ThreadShell({
         {/* Tabs + canvas form one column; the node panel runs the full
             height beside it, its top level with the top of the tabs. */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <TabStrip className="px-0" />
-          <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-3xl [[data-first-active]+&]:rounded-tl-none bg-background bg-(image:--gradient-panel) shadow-default">
+          {/* Phones get a bar with a tab switcher instead of the strip. */}
+          <MobileTabBar initialTabs={initialTabs} />
+          <TabStrip initialTabs={initialTabs} />
+          {/* The strip draws this card's surface (with the active tab, its
+              outline and shadow) behind it. The card paints the same
+              background too, so it's there before the surface is measured. */}
+          {/* data-page-card: the phone's tab switcher grows a card into it. */}
+          <div
+            data-page-card
+            className="relative z-2 min-h-0 min-w-0 flex-1 overflow-hidden rounded-3xl bg-background bg-(image:--gradient-panel)"
+          >
             {children}
             {/* CanvasPanel and NodePanel read the query, so they need Suspense */}
             <Suspense>
