@@ -8,7 +8,7 @@ The canvas renders a thread's node tree as a draggable mindmap using React Flow.
 
 1. **Query.** `useNodesByThread(threadId)` subscribes to all nodes in the thread via Convex. This is reactive — any mutation (new branch, position update, title rename, content change, deletion) triggers a re-delivery.
 
-2. **Layout.** The node list is passed to `layoutNodes()` (`src/lib/layout.ts`), which runs dagre in top-to-bottom mode over the parent-child topology. Every node gets a computed `(x, y)`. If a node has a stored `position`, the stored value wins — this is the hybrid model described in [SPEC.md](../../../../doc/SPEC.md).
+2. **Layout.** The node list is passed to `layoutNodes()` (`src/lib/layout.ts`), which runs dagre in top-to-bottom mode over the parent-child topology. Every node gets a computed `(x, y)`. If a node has a stored `position`, the stored value wins — this is the hybrid model described in [SPEC.md](../../../../doc/SPEC.md). Heights are estimated (empty or full) until nodes are measured, and nodes in a row share a top edge.
 
 3. **React Flow state.** `useNodesState` gives React Flow ownership of the node array. This is critical — React Flow tracks internal state per node (measured dimensions, drag position, selection) that gets destroyed if you replace the array externally mid-interaction. Edges are derived directly via `useMemo` and passed as a prop — they have no internal drag state, so there's no need for `useEdgesState`.
 
@@ -25,6 +25,8 @@ The first implementation passed computed nodes directly to `<ReactFlow nodes={..
 - **Selection highlighting.** When a single node is selected, `walkAncestors` traces the path to root. Edges along that path are animated and styled with the ring color.
 - **Double-click to open.** Double-clicking a node navigates to its detail page (`/t/[threadId]/[nodeId]`).
 - **Connection drag to branch.** Dragging from a handle into empty canvas space creates a new child node at the drop position via `createEmptyBranch`.
+- **Tab / Enter to branch.** `createBranch` places the new node from the nodes' on-screen positions and measured sizes (`placeBranch`): under the parent, right of its other children, clear of everything else. It's stored with that position, so nothing else moves.
+- **Tidy up (L, or the button under the zoom controls).** `tidyLayout` lays the whole tree out from measured sizes, keeping the root in place. Nodes glide there, every position is saved in one `setPositions` call, and the toast's Undo puts them all back.
 
 ## Node callbacks and the `useMemo` dependency
 

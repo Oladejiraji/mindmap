@@ -131,6 +131,33 @@ describe("nodes", () => {
     expect((await t.run((ctx) => ctx.db.get(childId)))?.position).toEqual(position);
   });
 
+  test("setPositions", async () => {
+    const { t, alice, bob, threadId, rootId, childId } = await setup();
+    const positions = [
+      { nodeId: rootId, position: { x: 0, y: 0 } },
+      { nodeId: childId, position: { x: 10, y: 300 } },
+    ];
+    await expect(bob.mutation(api.nodes.setPositions, { threadId, positions })).rejects.toMatchObject(NOT_FOUND);
+    await expect(t.mutation(api.nodes.setPositions, { threadId, positions })).rejects.toMatchObject(UNAUTHORIZED);
+    expect((await t.run((ctx) => ctx.db.get(childId)))?.position).toBeUndefined();
+
+    // A node from another of Alice's projects is refused, and nothing moves.
+    const otherNodeId = await t.run(async (ctx) => {
+      const otherThreadId = await ctx.db.insert("threads", { userId: "alice", name: "Other" });
+      return ctx.db.insert("nodes", { userId: "alice", threadId: otherThreadId, parentId: null, title: "Root" });
+    });
+    await expect(
+      alice.mutation(api.nodes.setPositions, {
+        threadId,
+        positions: [...positions, { nodeId: otherNodeId, position: { x: 1, y: 1 } }],
+      }),
+    ).rejects.toMatchObject(NOT_FOUND);
+    expect((await t.run((ctx) => ctx.db.get(childId)))?.position).toBeUndefined();
+
+    await alice.mutation(api.nodes.setPositions, { threadId, positions });
+    expect((await t.run((ctx) => ctx.db.get(childId)))?.position).toEqual({ x: 10, y: 300 });
+  });
+
   test("updateContent", async () => {
     const { t, alice, bob, childId } = await setup();
     const content = "Hi **there**";

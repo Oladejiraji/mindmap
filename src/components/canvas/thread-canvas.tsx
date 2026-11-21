@@ -17,6 +17,9 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useReducedMotion } from "motion/react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { BranchChat } from "@/components/chat/branch-chat";
 import { ZoomControls } from "./zoom-controls";
 import { CanvasShortcuts } from "./canvas-shortcuts";
@@ -26,7 +29,16 @@ import type { Id } from "@convex/dataModel";
 
 import { api } from "@convex/api";
 import { useMutation } from "convex/react";
-import { layoutNodes } from "@/lib/layout";
+import {
+  NODE_HEIGHT,
+  NODE_WIDTH,
+  estimatedHeight,
+  layoutNodes,
+  placeBranch,
+  tidyLayout,
+  type LayoutPosition,
+  type NodeBox,
+} from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { getStorageItem, setStorageItem } from "@/lib/storage";
@@ -38,6 +50,9 @@ import {
   type MindMapNodeData,
 } from "./nodes";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+
+/** How long Tidy up takes to move the nodes (ms). */
+const TIDY_DURATION = 300;
 
 const nodeTypes: NodeTypes = {
   parent: ParentNode,
@@ -63,10 +78,12 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const viewportKey = `viewport:${threadId}`;
   const [savedViewport] = useState(() => getStorageItem<Viewport>(viewportKey));
   const updatePosition = useMutation(api.nodes.updatePosition);
+  const setPositions = useMutation(api.nodes.setPositions);
   const createEmptyBranch = useMutation(api.nodes.createEmptyBranch);
   const deleteLeafNode = useMutation(api.nodes.deleteLeafNode);
   const renameNode = useMutation(api.nodes.rename);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, getNodes, fitView } = useReactFlow();
+  const reduceMotion = useReducedMotion();
   const router = useRouter();
 
   const handleDeleteNode = useCallback(
@@ -93,6 +110,31 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   );
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  /**
+   * Adds a branch under `parentId`, placed from where the nodes are on
+   * screen (with their measured sizes): under the parent, right of its
+   * other children, clear of everything else.
+   */
+  const createBranch = useCallback(
+    (parentId: Id<"nodes">) => {
+      const parentOf = new Map(nodes?.map((n) => [n._id as string, n.parentId]));
+      const boxes: NodeBox[] = getNodes().map((n) => ({
+        id: n.id,
+        x: n.position.x,
+        y: n.position.y,
+        width: n.measured?.width ?? NODE_WIDTH,
+        height: n.measured?.height ?? NODE_HEIGHT,
+      }));
+      const parent = boxes.find((b) => b.id === parentId);
+      if (!parent) return;
+      const siblings = boxes.filter((b) => parentOf.get(b.id) === parentId);
+      createEmptyBranch({ parentId, position: placeBranch(parent, siblings, boxes) }).catch((err) =>
+        handleError(err, "Failed to create branch"),
+      );
+    },
+    [nodes, getNodes, createEmptyBranch],
+  );
 
   const ancestorEdgeIds = useMemo(() => {
     if (!selectedNodeId || !nodes) return new Set<string>();
@@ -168,6 +210,81 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
 
   useSyncConvexToFlow(rfNodes, setFlowNodes, nodes);
+
+  /** Glides the nodes to `targets` (instantly with reduced motion), then fits the view. */
+  const moveNodes = useCallback(
+    (targets: Map<string, LayoutPosition>) => {
+      const from = new Map(getNodes().map((n) => [n.id, n.position]));
+      const at = (k: number) =>
+        setFlowNodes((ns) =>
+          ns.map((n) => {
+            const a = from.get(n.id);
+            const b = targets.get(n.id);
+            if (!a || !b) return n;
+            return { ...n, position: { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k } };
+          }),
+        );
+      const fit = () => void fitView({ padding: 0.4, duration: reduceMotion ? 0 : 300 });
+      if (reduceMotion) {
+        at(1);
+        requestAnimationFrame(fit);
+        return;
+      }
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / TIDY_DURATION);
+        at(1 - (1 - t) ** 3);
+        if (t < 1) requestAnimationFrame(step);
+        else fit();
+      };
+      requestAnimationFrame(step);
+    },
+    [getNodes, setFlowNodes, fitView, reduceMotion],
+  );
+
+  /**
+   * Lays the whole map out neatly from the nodes' measured sizes, keeping
+   * the root where it is, and saves it. Undo puts every node back.
+   */
+  const tidyUp = useCallback(() => {
+    if (!nodes?.length) return;
+    const onScreen = new Map(getNodes().map((n) => [n.id, n]));
+    const laidOut = tidyLayout(
+      nodes,
+      (node) => onScreen.get(node._id)?.measured?.height ?? estimatedHeight(node),
+    );
+    const root = nodes.find((n) => n.parentId === null);
+    const rootNow = root && onScreen.get(root._id)?.position;
+    const rootLaidOut = root && laidOut.get(root._id);
+    const dx = rootNow && rootLaidOut ? rootNow.x - rootLaidOut.x : 0;
+    const dy = rootNow && rootLaidOut ? rootNow.y - rootLaidOut.y : 0;
+    const after = new Map([...laidOut].map(([id, p]) => [id, { x: p.x + dx, y: p.y + dy }]));
+    const before = new Map([...onScreen].map(([id, n]) => [id, n.position]));
+
+    const save = (positions: Map<string, LayoutPosition>) =>
+      setPositions({
+        threadId,
+        positions: [...positions].map(([nodeId, position]) => ({ nodeId: nodeId as Id<"nodes">, position })),
+      }).catch((err) => handleError(err, "Couldn't save the layout"));
+
+    moveNodes(after);
+    void save(after);
+    const id = toast("Tidied up", {
+      action: (
+        <Button
+          size="sm"
+          className="ml-auto"
+          onClick={() => {
+            moveNodes(before);
+            void save(before);
+            toast.dismiss(id);
+          }}
+        >
+          Undo
+        </Button>
+      ),
+    });
+  }, [nodes, getNodes, moveNodes, setPositions, threadId]);
 
   // Track which node a connection drag started from
   const connectSourceRef = useRef<string | null>(null);
@@ -293,7 +410,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           onMoveEnd={(_, viewport) => setStorageItem(viewportKey, viewport)}
           proOptions={{ hideAttribution: true }}
         >
-          <ZoomControls />
+          <ZoomControls onTidy={tidyUp} />
           <MiniMap
             nodeStrokeWidth={3}
             zoomable
@@ -305,7 +422,8 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           <CanvasShortcuts
             nodes={nodes}
             selectedNodeId={selectedNodeId}
-            createEmptyBranch={createEmptyBranch}
+            createBranch={createBranch}
+            onTidy={tidyUp}
             enabled={view !== "chat"}
             expanded={shortcutsOpen}
             onExpandedChange={setShortcutsOpen}

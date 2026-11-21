@@ -15,8 +15,8 @@ import { RenderIf } from "@/components/shared/render-if";
  * so opening the project is quicker.
  */
 
-// Blocks are drawn shorter than a node's layout box, so the lines show.
-const BLOCK_HEIGHT = NODE_HEIGHT * 0.6;
+// Blocks are drawn shorter than a node's full height, so the lines show.
+const BLOCK_HEIGHT = NODE_HEIGHT * 0.35;
 // Space around the map, in canvas units.
 const PADDING = 80;
 

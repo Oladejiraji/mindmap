@@ -47,14 +47,16 @@ const ALL: { keys: React.ReactNode; label: string }[] = [
 export function CanvasShortcuts({
   nodes,
   selectedNodeId,
-  createEmptyBranch,
+  createBranch,
+  onTidy,
   enabled,
   expanded,
   onExpandedChange,
 }: {
   nodes: Doc<"nodes">[];
   selectedNodeId: string | null;
-  createEmptyBranch: (args: { parentId: Id<"nodes">; position?: { x: number; y: number } }) => Promise<unknown>;
+  createBranch: (parentId: Id<"nodes">) => void;
+  onTidy: () => void;
   enabled: boolean;
   expanded: boolean;
   onExpandedChange: (open: boolean) => void;
@@ -62,7 +64,7 @@ export function CanvasShortcuts({
   const [visible, setVisible] = useStoredBoolean("mindmap:canvas-hints", true);
   const onToggleHelp = useCallback(() => onExpandedChange(!expanded), [onExpandedChange, expanded]);
 
-  useCanvasShortcuts({ nodes, selectedNodeId, createEmptyBranch, onToggleHelp, enabled });
+  useCanvasShortcuts({ nodes, selectedNodeId, createBranch, onTidy, onToggleHelp, enabled });
 
   const hasSelection = !!selectedNodeId;
   const isRootSelected = hasSelection && nodes.find((n) => n._id === selectedNodeId)?.parentId === null;

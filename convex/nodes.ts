@@ -68,6 +68,31 @@ export const updatePosition = userMutation({
   },
 });
 
+/** Moves several of a project's nodes at once: Tidy up, and its Undo. */
+export const setPositions = userMutation({
+  args: {
+    threadId: v.id("threads"),
+    positions: v.array(
+      v.object({
+        nodeId: v.id("nodes"),
+        position: v.object({ x: v.number(), y: v.number() }),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await requireThread(ctx, args.threadId);
+    for (const { nodeId, position } of args.positions) {
+      const node = await requireNode(ctx, nodeId);
+      // Only this project's nodes.
+      if (node.threadId !== args.threadId) {
+        throw new ConvexError({ code: "NOT_FOUND", message: "Not found" });
+      }
+      await ctx.db.patch(nodeId, { position });
+    }
+    return null;
+  },
+});
+
 export const createEmptyBranch = userMutation({
   args: {
     parentId: v.id("nodes"),
