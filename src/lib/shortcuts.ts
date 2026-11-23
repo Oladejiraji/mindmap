@@ -49,6 +49,11 @@ export const SHORTCUTS: ShortcutGroup[] = [
         hint: "Add a sibling next to the selected node.",
       },
       {
+        combo: ["Space"],
+        label: "Open in panel",
+        hint: "Open the selected node in the side panel, or close it.",
+      },
+      {
         combo: ["L"],
         label: "Tidy up",
         hint: "Lay the map out neatly. Undo from the toast.",

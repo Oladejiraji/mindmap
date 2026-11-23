@@ -9,6 +9,7 @@ export function useCanvasShortcuts({
   selectedNodeId,
   createBranch,
   onTidy,
+  onTogglePanel,
   onToggleHelp,
   enabled,
 }: {
@@ -16,6 +17,8 @@ export function useCanvasShortcuts({
   selectedNodeId: string | null;
   createBranch: (parentId: Id<"nodes">) => void;
   onTidy: () => void;
+  /** Opens the node in the side panel, or closes it if it's already open. */
+  onTogglePanel: (nodeId: Id<"nodes">) => void;
   onToggleHelp: () => void;
   enabled: boolean;
 }) {
@@ -45,6 +48,11 @@ export function useCanvasShortcuts({
       if (e.key === "?") {
         e.preventDefault();
         onToggleHelp();
+      } else if (e.key === " " && selected) {
+        // A focused button in a node (its menu) keeps Space for itself.
+        if (el?.tagName === "BUTTON" || e.repeat) return;
+        e.preventDefault();
+        onTogglePanel(selected._id);
       } else if (e.key === "l" || e.key === "L") {
         e.preventDefault();
         onTidy();
@@ -60,5 +68,5 @@ export function useCanvasShortcuts({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enabled, nodes, selectedNodeId, createBranch, onTidy, onToggleHelp]);
+  }, [enabled, nodes, selectedNodeId, createBranch, onTidy, onTogglePanel, onToggleHelp]);
 }

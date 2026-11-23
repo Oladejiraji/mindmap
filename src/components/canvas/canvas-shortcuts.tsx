@@ -49,6 +49,7 @@ export function CanvasShortcuts({
   selectedNodeId,
   createBranch,
   onTidy,
+  onTogglePanel,
   enabled,
   expanded,
   onExpandedChange,
@@ -57,6 +58,7 @@ export function CanvasShortcuts({
   selectedNodeId: string | null;
   createBranch: (parentId: Id<"nodes">) => void;
   onTidy: () => void;
+  onTogglePanel: (nodeId: Id<"nodes">) => void;
   enabled: boolean;
   expanded: boolean;
   onExpandedChange: (open: boolean) => void;
@@ -64,7 +66,7 @@ export function CanvasShortcuts({
   const [visible, setVisible] = useStoredBoolean("mindmap:canvas-hints", true);
   const onToggleHelp = useCallback(() => onExpandedChange(!expanded), [onExpandedChange, expanded]);
 
-  useCanvasShortcuts({ nodes, selectedNodeId, createBranch, onTidy, onToggleHelp, enabled });
+  useCanvasShortcuts({ nodes, selectedNodeId, createBranch, onTidy, onTogglePanel, onToggleHelp, enabled });
 
   const hasSelection = !!selectedNodeId;
   const isRootSelected = hasSelection && nodes.find((n) => n._id === selectedNodeId)?.parentId === null;

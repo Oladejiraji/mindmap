@@ -111,6 +111,20 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
+  // Space: the selected node in the side panel, or closed if it's showing.
+  const panelNodeId = searchParams.get("panel");
+  const togglePanel = useCallback(
+    (nodeId: Id<"nodes">) => {
+      if (panelNodeId !== nodeId) return handleOpenNode(nodeId);
+      const next = new URLSearchParams(searchParams);
+      next.delete("panel");
+      next.delete("tab");
+      const qs = next.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [panelNodeId, handleOpenNode, searchParams, pathname, router],
+  );
+
   /**
    * Adds a branch under `parentId`, placed from where the nodes are on
    * screen (with their measured sizes): under the parent, right of its
@@ -409,6 +423,9 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           defaultViewport={savedViewport ?? undefined}
           onMoveEnd={(_, viewport) => setStorageItem(viewportKey, viewport)}
           proOptions={{ hideAttribution: true }}
+          // Space opens the side panel (see useCanvasShortcuts), so it
+          // doesn't pan; dragging the canvas does.
+          panActivationKeyCode={null}
         >
           <ZoomControls onTidy={tidyUp} />
           <MiniMap
@@ -424,6 +441,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
             selectedNodeId={selectedNodeId}
             createBranch={createBranch}
             onTidy={tidyUp}
+            onTogglePanel={togglePanel}
             enabled={view !== "chat"}
             expanded={shortcutsOpen}
             onExpandedChange={setShortcutsOpen}
