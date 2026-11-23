@@ -19,7 +19,9 @@ export function ParentNode({ id, data, selected }: NodeProps) {
       <div
         className={cn(
           "relative rounded-3xl bg-primary p-2 text-white shadow-node-primary",
-          selected && "ring-2 ring-white/30",
+          // The leaf's blue ring, set off by a gap so it doesn't merge into
+          // the blue node.
+          selected && "ring-2 ring-ring ring-offset-2 ring-offset-background",
         )}
       >
         {!isRoot && (
