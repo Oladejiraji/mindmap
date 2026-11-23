@@ -28,6 +28,15 @@ export type DocumentChange = {
   after: string | null;
 };
 
+/**
+ * One block of the document after the edits, for previewing them: kept as
+ * it was, new, a new version of an old block, or an old block that goes.
+ */
+export type PreviewBlock =
+  | { kind: "same" | "added"; markdown: string }
+  | { kind: "rewritten"; markdown: string; before: string }
+  | { kind: "removed"; markdown: string };
+
 export class DocumentEditError extends Error {}
 
 /** The document's top-level blocks, in order. Block n is at index n - 1. */
@@ -62,6 +71,28 @@ export function applyEdits(markdown: string, edits: DocumentEdit[]): string {
     out.push(...plan.insertsAfter[n]);
   });
   return joinBlocks(out);
+}
+
+/**
+ * The whole document after the edits, block by block, each marked with
+ * what happened to it. Removed blocks stay in place, so a preview can show
+ * them going. Throws DocumentEditError like applyEdits.
+ */
+export function previewEdits(markdown: string, edits: DocumentEdit[]): PreviewBlock[] {
+  const blocks = splitBlocks(markdown);
+  const plan = planEdits(blocks, edits);
+  const added = (md: string): PreviewBlock => ({ kind: "added", markdown: md });
+
+  const out: PreviewBlock[] = plan.insertsAfter[0].map(added);
+  blocks.forEach((block, i) => {
+    const n = i + 1;
+    const change = plan.changes.get(n);
+    if (change === undefined) out.push({ kind: "same", markdown: block });
+    else if (change === null) out.push({ kind: "removed", markdown: block });
+    else out.push({ kind: "rewritten", markdown: change, before: block });
+    out.push(...plan.insertsAfter[n].map(added));
+  });
+  return out;
 }
 
 /** The edits as before/after pairs, in document order, for showing the user. */

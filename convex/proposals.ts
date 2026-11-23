@@ -1,9 +1,9 @@
 import { v, ConvexError } from "convex/values";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { requireNode } from "./lib/auth";
+import { requireNode, requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
-import { applyEdits, describeEdits, type DocumentChange } from "./lib/document";
+import { applyEdits, describeEdits, previewEdits, type DocumentChange, type PreviewBlock } from "./lib/document";
 import { saveContent } from "./lib/nodeContent";
 import { proposalState, type ProposalState } from "./lib/proposals";
 
@@ -42,6 +42,44 @@ export const listByNode = userQuery({
         changes: state === "pending" ? describeEdits(node.content ?? "", proposal.edits) : null,
       };
     });
+  },
+});
+
+/**
+ * The suggested edits still waiting for an answer across a project, one
+ * per node at most (a newer one replaces the older), so the canvas can
+ * mark those nodes and preview them: `preview` is the node's document
+ * after the edit, block by block. Out-of-date ones are left out: they
+ * can't be accepted.
+ */
+export const pendingByThread = userQuery({
+  args: { threadId: v.id("threads") },
+  handler: async (
+    ctx,
+    args,
+  ): Promise<{ nodeId: Id<"nodes">; proposalId: Id<"proposals">; reason: string; preview: PreviewBlock[] }[]> => {
+    await requireThread(ctx, args.threadId);
+    const nodes = await ctx.db
+      .query("nodes")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .take(1000);
+    const pending = [];
+    for (const node of nodes) {
+      const proposal = await ctx.db
+        .query("proposals")
+        .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", node._id).eq("status", "pending"))
+        .order("desc")
+        .first();
+      if (proposal && proposalState(proposal, node) === "pending") {
+        pending.push({
+          nodeId: node._id,
+          proposalId: proposal._id,
+          reason: proposal.reason,
+          preview: previewEdits(node.content ?? "", proposal.edits),
+        });
+      }
+    }
+    return pending;
   },
 });
 

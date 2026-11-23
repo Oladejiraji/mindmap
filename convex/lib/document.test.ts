@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEdits, describeEdits, DocumentEditError, joinBlocks, splitBlocks } from "./document";
+import { applyEdits, describeEdits, DocumentEditError, joinBlocks, previewEdits, splitBlocks } from "./document";
 
 const DOC = [
   "# Pricing",
@@ -97,5 +97,36 @@ describe("describeEdits", () => {
       { type: "delete", before: "B", after: null },
       { type: "insert", before: null, after: "End" },
     ]);
+  });
+});
+
+describe("previewEdits", () => {
+  const doc = "# Pricing\n\nSeat-based.\n\nOpen questions.";
+
+  it("marks every block of the result with what happened to it", () => {
+    expect(
+      previewEdits(doc, [
+        { type: "replace", block: 2, markdown: "Usage-based." },
+        { type: "insert", after: 2, markdown: "- Per seat\n- Per call" },
+        { type: "delete", block: 3 },
+      ]),
+    ).toEqual([
+      { kind: "same", markdown: "# Pricing" },
+      { kind: "rewritten", markdown: "Usage-based.", before: "Seat-based." },
+      { kind: "added", markdown: "- Per seat\n- Per call" },
+      { kind: "removed", markdown: "Open questions." },
+    ]);
+  });
+
+  it("adds at the top, and agrees with applyEdits on what stays", () => {
+    const edits = [{ type: "insert" as const, after: 0, markdown: "Summary." }];
+    const preview = previewEdits(doc, edits);
+    expect(preview[0]).toEqual({ kind: "added", markdown: "Summary." });
+    const kept = preview.filter((b) => b.kind !== "removed").map((b) => b.markdown);
+    expect(joinBlocks(kept)).toBe(applyEdits(doc, edits));
+  });
+
+  it("rejects edits that don't fit, like applyEdits", () => {
+    expect(() => previewEdits(doc, [{ type: "delete", block: 9 }])).toThrow(DocumentEditError);
   });
 });

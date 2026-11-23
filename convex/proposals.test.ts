@@ -16,7 +16,7 @@ const DOC = "# Pricing\n\nSeat-based.\n\nOpen questions.";
 async function setup() {
   const t = convexTest(schema, modules);
   rateLimiter.register(t);
-  const { nodeId, chatId } = await t.run(async (ctx) => {
+  const { threadId, nodeId, chatId } = await t.run(async (ctx) => {
     const threadId = await ctx.db.insert("threads", { userId: "alice", name: "Pricing" });
     const nodeId = await ctx.db.insert("nodes", {
       userId: "alice",
@@ -27,7 +27,7 @@ async function setup() {
       contentVersion: 3,
     });
     const chatId = await ctx.db.insert("chats", { nodeId });
-    return { nodeId, chatId };
+    return { threadId, nodeId, chatId };
   });
 
   /** An empty reply being written, as chat.send leaves it for the reply job. */
@@ -56,7 +56,7 @@ async function setup() {
   const node = () => t.run((ctx) => ctx.db.get(nodeId));
   const status = (id: Id<"proposals">) => t.run(async (ctx) => (await ctx.db.get(id))?.status);
 
-  return { t, nodeId, startReply, alice, bob: t.withIdentity({ subject: "bob" }), suggest, node, status };
+  return { t, threadId, nodeId, startReply, alice, bob: t.withIdentity({ subject: "bob" }), suggest, node, status };
 }
 
 const SWITCH: DocumentEdit[] = [{ type: "replace", block: 2, markdown: "Usage-based." }];
@@ -196,5 +196,38 @@ describe("node content", () => {
     await suggest(SWITCH);
     await alice.mutation(api.nodes.deleteLeafNode, { nodeId });
     expect(await t.run((ctx) => ctx.db.query("proposals").collect())).toEqual([]);
+  });
+});
+
+describe("pendingByThread", () => {
+  test("lists the edit waiting on each node, and only the caller's", async () => {
+    const { t, alice, bob, threadId, nodeId, suggest } = await setup();
+    expect(await alice.query(api.proposals.pendingByThread, { threadId })).toEqual([]);
+
+    const proposalId = await suggest([{ type: "delete", block: 3 }]);
+    expect(await alice.query(api.proposals.pendingByThread, { threadId })).toEqual([
+      {
+        nodeId,
+        proposalId,
+        reason: "Record the switch",
+        preview: [
+          { kind: "same", markdown: "# Pricing" },
+          { kind: "same", markdown: "Seat-based." },
+          { kind: "removed", markdown: "Open questions." },
+        ],
+      },
+    ]);
+
+    await expect(bob.query(api.proposals.pendingByThread, { threadId })).rejects.toMatchObject(NOT_FOUND);
+    await expect(t.query(api.proposals.pendingByThread, { threadId })).rejects.toMatchObject(UNAUTHORIZED);
+  });
+
+  test("leaves out answered and out-of-date edits", async () => {
+    const { alice, threadId, suggest } = await setup();
+    const answered = await suggest([{ type: "delete", block: 3 }]);
+    await alice.mutation(api.proposals.reject, { proposalId: answered });
+    // Made against an older version of the document.
+    await suggest([{ type: "delete", block: 3 }], 2);
+    expect(await alice.query(api.proposals.pendingByThread, { threadId })).toEqual([]);
   });
 });
