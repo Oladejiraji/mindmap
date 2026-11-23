@@ -48,19 +48,33 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
 
 export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
 
+/**
+ * Every address the app is served from: SITE_URL, then any others in
+ * TRUSTED_ORIGINS (comma-separated, e.g. a custom domain as well as the
+ * Vercel one).
+ */
+function siteUrls() {
+  return [process.env.SITE_URL, ...(process.env.TRUSTED_ORIGINS ?? "").split(",")]
+    .map((url) => url?.trim())
+    .filter((url): url is string => !!url);
+}
+
 export const createAuth = (ctx: GenericCtx<DataModel>) =>
   betterAuth({
     database: authComponent.adapter(ctx),
     baseURL: process.env.SITE_URL,
+    // Sign-ins are accepted from the site's hostname (any port, so a dev
+    // server behind a proxy works) and from any listed in TRUSTED_ORIGINS.
     trustedOrigins: (request) => {
-      const siteUrl = process.env.SITE_URL ?? "";
+      const sites = siteUrls();
       const origin = request?.headers.get("origin") ?? "";
       try {
-        if (new URL(origin).hostname === new URL(siteUrl).hostname) {
+        const hostname = new URL(origin).hostname;
+        if (sites.some((site) => new URL(site).hostname === hostname)) {
           return [origin];
         }
       } catch {}
-      return [siteUrl];
+      return sites;
     },
     emailAndPassword: {
       enabled: true,
