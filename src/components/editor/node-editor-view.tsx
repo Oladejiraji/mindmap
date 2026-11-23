@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { CloseIcon } from "@/components/icons/close-icon";
-import { Maximize2, Plus as PlusIcon } from "lucide-react";
+import { Plus as PlusIcon } from "lucide-react";
+import { MaximizeIcon } from "@/components/icons/maximize-icons";
 import { InfoIcon } from "@/components/icons/info-icon";
 import { META_BLUE, MetaIcon } from "@/components/icons/meta-icon";
 import { Popover } from "@base-ui/react/popover";
@@ -176,7 +177,7 @@ export function NodeEditorView({
                 aria-label="Open chat full screen"
                 className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <Maximize2 className="size-3.5" />
+                <MaximizeIcon className="size-4" />
               </button>
             </Tip>
           </RenderIf>

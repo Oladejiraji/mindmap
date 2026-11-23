@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useMutation } from "convex/react";
-import { GitBranch, Minimize2 } from "lucide-react";
+import { GitBranch } from "lucide-react";
+import { MinimizeIcon } from "@/components/icons/maximize-icons";
 import type { Doc, Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
@@ -87,7 +88,7 @@ export function FullNodeChat({
       <header className="flex h-12 shrink-0 items-center gap-1 px-3">
         <Tip label={<>Back to panel <span className="text-white/50">Esc</span></>}>
           <button type="button" onClick={onCollapse} aria-label="Back to panel" className={headerButton}>
-            <Minimize2 className="size-3.5" />
+            <MinimizeIcon className="size-4" />
           </button>
         </Tip>
         <h2 className="min-w-0 flex-1 truncate px-1 text-body-sm font-medium text-fg-primary">{node.title}</h2>
