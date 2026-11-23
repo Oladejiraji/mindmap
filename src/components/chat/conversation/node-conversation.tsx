@@ -62,6 +62,7 @@ export function NodeConversation({
   const item = (message: (typeof messages)[number], i: number) => (
     <MessageItem
       key={message._id}
+      nodeId={nodeId}
       message={message}
       proposal={proposals.get(message._id)}
       priorMessages={i}

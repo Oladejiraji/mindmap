@@ -1,6 +1,6 @@
 "use client";
 
-import type { Doc } from "@convex/dataModel";
+import type { Doc, Id } from "@convex/dataModel";
 import { RenderIf } from "@/components/shared/render-if";
 import { MessageBubble } from "../message-bubble";
 import { ProposalCard, ProposalPlaceholder, type Proposal } from "../proposal-card";
@@ -10,6 +10,7 @@ import { ReplySteps } from "./reply-steps";
 
 /** One message, with what came with it: context steps, a suggested edit, Try again, actions. */
 export function MessageItem({
+  nodeId,
   message,
   proposal,
   priorMessages,
@@ -17,6 +18,8 @@ export function MessageItem({
   onRetry,
   onBranch,
 }: {
+  /** The node whose conversation it's in: a suggested edit is to it. */
+  nodeId: Id<"nodes">;
   message: Doc<"messages">;
   /** The edit this reply suggested, if any. */
   proposal?: Proposal;
@@ -38,9 +41,9 @@ export function MessageItem({
         <ReplySteps parentNotes={parentNotes ?? []} priorMessages={priorMessages} />
       </RenderIf>
       <MessageBubble message={message} />
-      {proposal && <ProposalCard proposal={proposal} />}
+      {proposal && <ProposalCard proposal={proposal} nodeId={nodeId} />}
       <RenderIf condition={!proposal && !!message.isStreaming && !!message.draftingEdit}>
-        <ProposalPlaceholder />
+        <ProposalPlaceholder nodeId={nodeId} />
       </RenderIf>
       <RenderIf condition={message.interrupted !== undefined}>
         <ReplyInterrupted failed={message.interrupted === "failed"} onRetry={onRetry} />
