@@ -3,18 +3,19 @@
 import { useEffect } from "react";
 import type { Id } from "@convex/dataModel";
 import type { Doc } from "@convex/dataModel";
-import { handleError } from "@/lib/handle-error";
 
 export function useCanvasShortcuts({
   nodes,
   selectedNodeId,
-  createEmptyBranch,
+  createBranch,
+  onTidy,
   onToggleHelp,
   enabled,
 }: {
   nodes: Doc<"nodes">[] | undefined;
   selectedNodeId: string | null;
-  createEmptyBranch: (args: { parentId: Id<"nodes">; position?: { x: number; y: number } }) => Promise<unknown>;
+  createBranch: (parentId: Id<"nodes">) => void;
+  onTidy: () => void;
   onToggleHelp: () => void;
   enabled: boolean;
 }) {
@@ -44,21 +45,20 @@ export function useCanvasShortcuts({
       if (e.key === "?") {
         e.preventDefault();
         onToggleHelp();
+      } else if (e.key === "l" || e.key === "L") {
+        e.preventDefault();
+        onTidy();
       } else if (e.key === "Tab" && !e.shiftKey) {
         const parent = selected ?? root;
         if (!parent) return;
         e.preventDefault();
-        createEmptyBranch({ parentId: parent._id }).catch((err) =>
-          handleError(err, "Failed to create branch"),
-        );
+        createBranch(parent._id);
       } else if (e.key === "Enter" && selected?.parentId) {
         e.preventDefault();
-        createEmptyBranch({ parentId: selected.parentId }).catch((err) =>
-          handleError(err, "Failed to create branch"),
-        );
+        createBranch(selected.parentId);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enabled, nodes, selectedNodeId, createEmptyBranch, onToggleHelp]);
+  }, [enabled, nodes, selectedNodeId, createBranch, onTidy, onToggleHelp]);
 }

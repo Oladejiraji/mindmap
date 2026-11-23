@@ -49,6 +49,11 @@ export const SHORTCUTS: ShortcutGroup[] = [
         hint: "Add a sibling next to the selected node.",
       },
       {
+        combo: ["L"],
+        label: "Tidy up",
+        hint: "Lay the map out neatly. Undo from the toast.",
+      },
+      {
         combo: ["+", "−"],
         label: "Zoom",
         hint: "Zoom in or out, or pinch and ⌘-scroll.",
