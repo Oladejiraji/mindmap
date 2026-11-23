@@ -5,7 +5,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { HomeSidebar } from "@/components/layout/sidebar/home-sidebar";
 import { CanvasPanel } from "@/components/thread/canvas-panel";
 import { NodePanel } from "@/components/thread/node-panel";
-import { FloatingChat } from "@/components/thread/floating-chat";
 import { TabStrip, type OpenTabs } from "@/components/layout/tabs/tab-strip";
 import { MobileTabBar } from "@/components/layout/tabs/mobile-tab-bar";
 
@@ -50,7 +49,6 @@ export function ThreadShell({
             {/* CanvasPanel and NodePanel read the query, so they need Suspense */}
             <Suspense>
               <CanvasPanel />
-              <FloatingChat />
             </Suspense>
           </div>
         </div>

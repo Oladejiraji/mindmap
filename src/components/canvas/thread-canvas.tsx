@@ -21,10 +21,12 @@ import { useReducedMotion } from "motion/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BranchChat } from "@/components/chat/branch-chat";
+import { FullNodeChat } from "@/components/chat/full-node-chat";
 import { ZoomControls } from "./zoom-controls";
 import { CanvasShortcuts } from "./canvas-shortcuts";
 import { useSyncConvexToFlow } from "@/hooks/use-sync-convex-to-flow";
 import { cn } from "@/lib/utils";
+import { RenderIf } from "@/components/shared/render-if";
 import type { Id } from "@convex/dataModel";
 
 import { api } from "@convex/api";
@@ -376,6 +378,15 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   }
 
   const view = searchParams.get("view") === "chat" ? "chat" : "canvas";
+  // A node's chat full screen (?chat=), over either view. A stale id shows nothing.
+  const fullChatId = searchParams.get("chat");
+  const fullChatNode = fullChatId ? nodes.find((n) => n._id === fullChatId) : undefined;
+  const replaceQuery = (edit: (q: URLSearchParams) => void) => {
+    const next = new URLSearchParams(searchParams);
+    edit(next);
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
   const chatNodeParam = searchParams.get("node");
   const chatNode =
     (chatNodeParam && nodes?.find((n) => n._id === chatNodeParam)) ||
@@ -390,7 +401,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     // data-ready-thread: the project has drawn; the phone's tab switcher
     // waits for it before revealing the page.
     <div data-ready-thread={threadId} className="relative h-full w-full overflow-hidden">
-      {chatNode && (
+      {chatNode && !fullChatNode && (
         <ViewToggle
           active={view}
           canvasHref={pathname}
@@ -403,7 +414,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
       {/* Canvas layer stays mounted so zoom and position survive the switch. */}
       <div
-        inert={view === "chat"}
+        inert={view === "chat" || !!fullChatNode}
         className={cn(
           "@container absolute inset-0 transition-[opacity,transform,filter] duration-300 ease-out motion-reduce:transition-none",
           view === "chat" && "pointer-events-none scale-[0.98] opacity-0 blur-[2px]",
@@ -442,7 +453,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
             createBranch={createBranch}
             onTidy={tidyUp}
             onTogglePanel={togglePanel}
-            enabled={view !== "chat"}
+            enabled={view !== "chat" && !fullChatNode}
             expanded={shortcutsOpen}
             onExpandedChange={setShortcutsOpen}
           />
@@ -451,7 +462,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
 
       {/* Chat layer: same tab, rises in over the canvas. */}
       <div
-        inert={view !== "chat"}
+        inert={view !== "chat" || !!fullChatNode}
         className={cn(
           "absolute inset-0 flex justify-center transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
           view === "chat" ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
@@ -467,6 +478,25 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           </div>
         )}
       </div>
+
+      {/* A node's chat full screen, over both views. */}
+      <RenderIf condition={!!fullChatNode}>
+        <div className="absolute inset-0 z-30 bg-background bg-(image:--gradient-panel) motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2">
+          <FullNodeChat
+            nodeId={fullChatNode?._id as Id<"nodes">}
+            nodes={nodes}
+            onCollapse={() =>
+              replaceQuery((q) => {
+                q.delete("chat");
+                q.set("panel", fullChatId!);
+                q.set("tab", "chat");
+              })
+            }
+            onClose={() => replaceQuery((q) => q.delete("chat"))}
+            onNodeChange={(id) => replaceQuery((q) => q.set("chat", id))}
+          />
+        </div>
+      </RenderIf>
     </div>
   );
 }

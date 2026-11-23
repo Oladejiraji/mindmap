@@ -41,14 +41,14 @@ export function NodePanel() {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }, [searchParams, pathname, router]);
 
-  // Pop the node's chat out to float over the canvas (canvas mode only)
-  const inChatView = searchParams.get("view") === "chat";
-  const popOut = useCallback(() => {
+  // The node's chat full screen (?chat=), in place of the panel. Its
+  // collapse button comes back here.
+  const openFullScreen = useCallback(() => {
     if (!shownId) return;
     const next = new URLSearchParams(searchParams);
     next.delete("panel");
     next.delete("tab");
-    next.set("float", shownId);
+    next.set("chat", shownId);
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   }, [searchParams, pathname, router, shownId]);
 
@@ -87,7 +87,7 @@ export function NodePanel() {
             threadId={threadId}
             nodeId={shownId as Id<"nodes">}
             onClose={close}
-            onPopOut={inChatView ? undefined : popOut}
+            onFullScreen={openFullScreen}
           />
         </aside>
       )}

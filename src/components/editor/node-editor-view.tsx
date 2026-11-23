@@ -6,8 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { CloseIcon } from "@/components/icons/close-icon";
-import { FloatIcon } from "@/components/icons/float-icon";
-import { Plus as PlusIcon } from "lucide-react";
+import { Maximize2, Plus as PlusIcon } from "lucide-react";
 import { InfoIcon } from "@/components/icons/info-icon";
 import { META_BLUE, MetaIcon } from "@/components/icons/meta-icon";
 import { Popover } from "@base-ui/react/popover";
@@ -25,6 +24,7 @@ import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+import { RenderIf } from "@/components/shared/render-if";
 
 /*
  * Node view, shown as a side panel over its project (?panel=<nodeId>)
@@ -41,13 +41,13 @@ export function NodeEditorView({
   threadId,
   nodeId,
   onClose,
-  onPopOut,
+  onFullScreen,
 }: {
   threadId: Id<"threads">;
   nodeId: Id<"nodes">;
   onClose: () => void;
-  /** Pop this node's chat out to float over the canvas. */
-  onPopOut?: () => void;
+  /** Opens this node's chat full screen (the project's Chat view). */
+  onFullScreen?: () => void;
 }) {
   const { data: node, isPending } = useAuthedConvexQuery(api.nodes.get, { nodeId });
   const { data: thread } = useAuthedConvexQuery(api.threads.get, { threadId });
@@ -57,8 +57,7 @@ export function NodeEditorView({
   const hasContent = Boolean(node?.content?.trim());
 
   // ?tab=chat wins; otherwise an empty node opens on the chat. Re-picked
-  // whenever the panel switches node or ?tab changes (e.g. docking a
-  // floating chat back opens the same node on its chat).
+  // whenever the panel switches node or ?tab changes.
   const requestedTab = useSearchParams().get("tab");
   const [tab, setTab] = useState<Tab>("content");
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
@@ -169,18 +168,18 @@ export function NodeEditorView({
               <ContentIcon className="size-4" />
             </button>
           </Tip>
-          {onPopOut && (
-            <Tip label="Float chat">
+          <RenderIf condition={!!onFullScreen}>
+            <Tip label="Open chat full screen">
               <button
                 type="button"
-                onClick={onPopOut}
-                aria-label="Float chat over the canvas"
+                onClick={onFullScreen}
+                aria-label="Open chat full screen"
                 className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-fg-tertiary outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                <FloatIcon className="size-4" />
+                <Maximize2 className="size-3.5" />
               </button>
             </Tip>
-          )}
+          </RenderIf>
           {closeButton}
         </div>
       </header>

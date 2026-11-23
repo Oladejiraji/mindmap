@@ -11,12 +11,17 @@ import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 
 /*
+ * DEPRECATED: replaced by opening the node's chat full screen
+ * (?chat=<nodeId>, FullNodeChat) from the side panel. Not rendered anywhere and
+ * nothing links to ?float= any more; kept for reference for now.
+ *
  * A node's chat popped out of the side panel (?float=<nodeId>): a card
  * floating over the canvas, bottom-right, that you can drag by its
  * header. The float icon docks it back into the side panel on its chat
  * tab; × closes it. Canvas mode only: in chat view the conversation is
  * already the page.
  */
+/** @deprecated Use the full-screen node chat (?chat=<nodeId>, FullNodeChat) instead. */
 export function FloatingChat() {
   const pathname = usePathname();
   const router = useRouter();
