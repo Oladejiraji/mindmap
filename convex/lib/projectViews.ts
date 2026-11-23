@@ -7,8 +7,9 @@ import type { Id } from "../_generated/dataModel";
  * since a node may have been deleted since.
  */
 
-const KEYS = ["view", "node", "panel", "tab", "float"] as const;
-const NODE_KEYS = new Set(["node", "panel", "float"]);
+// chat: a node's chat full screen.
+const KEYS = ["view", "node", "panel", "tab", "chat"] as const;
+const NODE_KEYS = new Set(["node", "panel", "chat"]);
 const MAX_SEARCH = 300;
 
 /** Keeps only the keys we restore, in a fixed order. */

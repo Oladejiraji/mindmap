@@ -46,7 +46,7 @@ export default function CanvasPage({
 
 /**
  * Saves where you are in the project (the URL's query: view, panel,
- * floating chat) whenever it changes, so its tab, Home and a later visit
+ * full-screen chat) whenever it changes, so its tab, Home and a later visit
  * bring you back here. The tab's link updates at once.
  */
 function SaveProjectView({ threadId }: { threadId: Id<"threads"> }) {

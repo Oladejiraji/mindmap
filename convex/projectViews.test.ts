@@ -35,16 +35,16 @@ describe("projectViews", () => {
 
   test("drops a node that's gone, and what depended on it", async () => {
     const { t, alice, threadId, rootNodeId, childId } = await setup();
-    await alice.mutation(api.projectViews.save, { threadId, search: `view=chat&node=${childId}&panel=${childId}&tab=chat&float=${rootNodeId}` });
+    await alice.mutation(api.projectViews.save, { threadId, search: `view=chat&node=${childId}&panel=${childId}&tab=chat&chat=${rootNodeId}` });
     await t.run((ctx) => ctx.db.delete(childId));
-    // The chat view needs its node, the tab needs its panel; the float stays.
-    expect(await alice.query(api.projectViews.get, { threadId })).toBe(`float=${rootNodeId}`);
+    // The chat view needs its node, the tab needs its panel; the full-screen chat stays.
+    expect(await alice.query(api.projectViews.get, { threadId })).toBe(`chat=${rootNodeId}`);
   });
 
   test("drops a node from another project, and junk ids", async () => {
     const { alice, threadId } = await setup();
     const other = await alice.mutation(api.threads.create, { name: "Other" });
-    await alice.mutation(api.projectViews.save, { threadId, search: `panel=${other.rootNodeId}&float=not-an-id` });
+    await alice.mutation(api.projectViews.save, { threadId, search: `panel=${other.rootNodeId}&chat=not-an-id` });
     expect(await alice.query(api.projectViews.get, { threadId })).toBe("");
   });
 

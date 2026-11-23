@@ -5,7 +5,7 @@ import { cleanSearch, readView } from "./lib/projectViews";
 
 /*
  * Where you last were in each project (canvas or chat view, the open
- * panel, a floating chat), so a tab, Home or a link brings you back
+ * panel, a node's chat full screen), so a tab, Home or a link brings you back
  * there. Zoom and pan are kept in the browser instead.
  */
 
