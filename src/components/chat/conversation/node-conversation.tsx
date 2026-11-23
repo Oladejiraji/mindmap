@@ -6,6 +6,7 @@ import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { handleError } from "@/lib/handle-error";
+import { markdownToPlainText } from "@/lib/markdown";
 import { RenderIf } from "@/components/shared/render-if";
 import { ConversationSkeleton } from "./conversation-skeleton";
 import { MessageItem } from "./message-item";
@@ -74,6 +75,12 @@ export function NodeConversation({
   const turnStart = live ? messages.findLastIndex((m) => m.role === "user") : -1;
   const before = turnStart < 0 ? messages : messages.slice(0, turnStart);
   const turn = turnStart < 0 ? [] : messages.slice(turnStart);
+  // For screen readers: the latest finished reply, read once when it
+  // finishes rather than word by word as it streams. Present from the
+  // start, so opening a conversation doesn't read anything out.
+  const lastReply = live
+    ? messages.findLast((m) => m.role === "assistant" && !m.isStreaming && m.interrupted === undefined)
+    : undefined;
 
   return (
     <>
@@ -88,6 +95,11 @@ export function NodeConversation({
           </div>
         </RenderIf>
       </div>
+      <RenderIf condition={live}>
+        <p aria-live="polite" className="sr-only">
+          {lastReply ? markdownToPlainText(lastReply.content) : ""}
+        </p>
+      </RenderIf>
     </>
   );
 }
