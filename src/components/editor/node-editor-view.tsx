@@ -21,6 +21,7 @@ import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
 import { NodeDocumentEditor } from "./node-document-editor";
+import { SuggestionBar } from "./suggestion-bar";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
@@ -50,9 +51,13 @@ export function NodeEditorView({
   /** Opens this node's chat full screen (the project's Chat view). */
   onFullScreen?: () => void;
 }) {
-  const { data: node, isPending } = useAuthedConvexQuery(api.nodes.get, { nodeId });
+  const { data: node, isPending } = useAuthedConvexQuery(api.nodes.get, {
+    nodeId,
+  });
   const { data: thread } = useAuthedConvexQuery(api.threads.get, { threadId });
-  const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, { threadId });
+  const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, {
+    threadId,
+  });
   const updateContent = useMutation(api.nodes.updateContent);
 
   const hasContent = Boolean(node?.content?.trim());
@@ -64,7 +69,13 @@ export function NodeEditorView({
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
   const pickKey = `${nodeId}:${requestedTab ?? ""}`;
   if (initializedFor !== pickKey && node) {
-    setTab(requestedTab === "chat" || requestedTab === "content" ? requestedTab : hasContent ? "content" : "chat");
+    setTab(
+      requestedTab === "chat" || requestedTab === "content"
+        ? requestedTab
+        : hasContent
+          ? "content"
+          : "chat",
+    );
     setInitializedFor(pickKey);
   }
 
@@ -84,7 +95,13 @@ export function NodeEditorView({
   );
 
   const closeButton = (
-    <Tip label={<>Close <span className="text-white/50">Esc</span></>}>
+    <Tip
+      label={
+        <>
+          Close <span className="text-white/50">Esc</span>
+        </>
+      }
+    >
       <button
         type="button"
         onClick={onClose}
@@ -99,9 +116,13 @@ export function NodeEditorView({
   if (isPending || !node) {
     return (
       <div className="flex h-full flex-col">
-        <header className="flex h-12 shrink-0 items-center justify-end px-3">{closeButton}</header>
+        <header className="flex h-12 shrink-0 items-center justify-end px-3">
+          {closeButton}
+        </header>
         <div className="flex flex-1 items-center justify-center">
-          <p className="text-body-base text-fg-tertiary">{isPending ? "Loading…" : "Node not found"}</p>
+          <p className="text-body-base text-fg-tertiary">
+            {isPending ? "Loading…" : "Node not found"}
+          </p>
         </div>
       </div>
     );
@@ -111,7 +132,8 @@ export function NodeEditorView({
   // Undefined on the root's own panel: it has no ancestors.
   const root = ancestors.at(0);
   const kind = !node.parentId ? "root" : children > 0 ? "branch" : "leaf";
-  const kindLabel = kind === "root" ? "Root node" : kind === "branch" ? "Branch" : "Leaf";
+  const kindLabel =
+    kind === "root" ? "Root node" : kind === "branch" ? "Branch" : "Leaf";
 
   return (
     <div className="flex h-full flex-col">
@@ -125,14 +147,22 @@ export function NodeEditorView({
             {root && (
               <>
                 <li className="min-w-0">
-                  <Crumb href={routes.node(threadId, root._id)}>{thread?.name ?? root.title}</Crumb>
+                  <Crumb href={routes.node(threadId, root._id)}>
+                    {thread?.name ?? root.title}
+                  </Crumb>
                 </li>
                 <Separator />
               </>
             )}
             {ancestors.length > 2 && (
               <>
-                <li className="px-1 text-fg-tertiary" title={ancestors.slice(1, -1).map((a) => a.title).join(" › ")}>
+                <li
+                  className="px-1 text-fg-tertiary"
+                  title={ancestors
+                    .slice(1, -1)
+                    .map((a) => a.title)
+                    .join(" › ")}
+                >
                   …
                 </li>
                 <Separator />
@@ -141,13 +171,18 @@ export function NodeEditorView({
             {parent && parent.parentId && (
               <>
                 <li className="min-w-0">
-                  <Crumb href={routes.node(threadId, parent._id)}>{parent.title}</Crumb>
+                  <Crumb href={routes.node(threadId, parent._id)}>
+                    {parent.title}
+                  </Crumb>
                 </li>
                 <Separator />
               </>
             )}
             <li className="min-w-0">
-              <span aria-current="page" className="block truncate px-2 py-1 text-fg-primary">
+              <span
+                aria-current="page"
+                className="block truncate px-2 py-1 text-fg-primary"
+              >
                 {node.title}
               </span>
             </li>
@@ -163,7 +198,9 @@ export function NodeEditorView({
               aria-label="Content"
               className={cn(
                 "flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md outline-none transition-colors hover:bg-transparent-hover hover:text-fg-primary focus-visible:ring-3 focus-visible:ring-ring/50",
-                tab === "content" ? "bg-transparent-hover text-fg-primary" : "text-fg-tertiary",
+                tab === "content"
+                  ? "bg-transparent-hover text-fg-primary"
+                  : "text-fg-tertiary",
               )}
             >
               <ContentIcon className="size-4" />
@@ -226,33 +263,56 @@ export function NodeEditorView({
                   </Popover.Trigger>
                 </Tip>
                 <Popover.Portal>
-                  <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-50">
-                    <Popover.Popup className={cn(popupSurface, "w-72 px-4 py-3")}>
-                      <p className="mb-2 text-caption-lg text-fg-tertiary">{kindLabel}</p>
-                      {node.summary && <p className="mb-3 text-body-sm text-fg-secondary">{node.summary}</p>}
+                  <Popover.Positioner
+                    side="bottom"
+                    align="end"
+                    sideOffset={6}
+                    className="z-50"
+                  >
+                    <Popover.Popup
+                      className={cn(popupSurface, "w-72 px-4 py-3")}
+                    >
+                      <p className="mb-2 text-caption-lg text-fg-tertiary">
+                        {kindLabel}
+                      </p>
+                      {node.summary && (
+                        <p className="mb-3 text-body-sm text-fg-secondary">
+                          {node.summary}
+                        </p>
+                      )}
                       <dl className="grid grid-cols-[88px_minmax(0,1fr)] text-body-sm">
                         <Property label="Project">
-                          <span className="truncate">{thread?.name ?? "—"}</span>
+                          <span className="truncate">
+                            {thread?.name ?? "—"}
+                          </span>
                         </Property>
                         <Property label="Parent">
                           {parent ? (
-                            <Link href={routes.node(threadId, parent._id)} className="truncate hover:underline">
+                            <Link
+                              href={routes.node(threadId, parent._id)}
+                              className="truncate hover:underline"
+                            >
                               {parent.title}
                             </Link>
                           ) : (
                             <span className="text-fg-tertiary">None</span>
                           )}
                         </Property>
-                        <Property label="Children">{children === 1 ? "1 node" : `${children} nodes`}</Property>
-                        <Property label="Depth">{depth === 0 ? "Root" : `Level ${depth}`}</Property>
-                        <Property label="Created">{formatRelativeTime(node._creationTime)}</Property>
+                        <Property label="Children">
+                          {children === 1 ? "1 node" : `${children} nodes`}
+                        </Property>
+                        <Property label="Depth">
+                          {depth === 0 ? "Root" : `Level ${depth}`}
+                        </Property>
+                        <Property label="Created">
+                          {formatRelativeTime(node._creationTime)}
+                        </Property>
                       </dl>
                     </Popover.Popup>
                   </Popover.Positioner>
                 </Popover.Portal>
               </Popover.Root>
             </div>
-
           </div>
         </aside>
 
@@ -261,6 +321,10 @@ export function NodeEditorView({
           <div className="min-h-0 flex-1">
             {tab === "content" ? (
               <div className="h-full overflow-y-auto overscroll-contain">
+                {/* Stays in view as the document scrolls. */}
+                <div className="sticky top-0 z-10 bg-background px-3 pt-3 empty:hidden">
+                  <SuggestionBar nodeId={nodeId} />
+                </div>
                 <div className="px-5 py-5">
                   <NodeDocumentEditor
                     key={nodeId}
@@ -302,8 +366,13 @@ function CollaboratorAvatars({ size = 24 }: { size?: number }) {
   );
 }
 
-
-function Crumb({ href, children }: { href: string; children: React.ReactNode }) {
+function Crumb({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
@@ -316,17 +385,29 @@ function Crumb({ href, children }: { href: string; children: React.ReactNode }) 
 
 function Separator() {
   return (
-    <li role="presentation" aria-hidden className="flex w-3 shrink-0 items-center justify-center text-fg-disabled">
+    <li
+      role="presentation"
+      aria-hidden
+      className="flex w-3 shrink-0 items-center justify-center text-fg-disabled"
+    >
       <ChevronRightIcon className="size-4" />
     </li>
   );
 }
 
-function Property({ label, children }: { label: string; children: React.ReactNode }) {
+function Property({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <>
       <dt className="flex h-8 items-center text-fg-secondary">{label}</dt>
-      <dd className="flex h-8 min-w-0 items-center text-fg-primary">{children}</dd>
+      <dd className="flex h-8 min-w-0 items-center text-fg-primary">
+        {children}
+      </dd>
     </>
   );
 }

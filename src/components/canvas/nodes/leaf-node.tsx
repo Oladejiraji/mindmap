@@ -6,12 +6,15 @@ import { BranchIcon } from "@/lib/svg";
 import { CustomHandle } from "@/components/auth-canvas/custom-handle";
 import { type MindMapNodeData, CANVAS_NODE_WIDTH } from "./types";
 import { NodeTitle } from "./node-title";
+import { RenderIf } from "@/components/shared/render-if";
+import { EditPreviewButton } from "@/components/shared/edit-preview-button";
+import { NodePreview } from "./node-preview";
 import { NodeMenu } from "./node-menu";
 import { BorderBeam } from "border-beam";
 import { NodeContent } from "./node-content";
 
 export function LeafNode({ id, data, selected }: NodeProps) {
-  const { title, content, onOpen, onDelete, onRename } = data as MindMapNodeData;
+  const { title, content, onOpen, onDelete, onRename, hasSuggestion, preview } = data as MindMapNodeData;
 
   return (
     <div className="group" style={{ width: CANVAS_NODE_WIDTH }}>
@@ -35,7 +38,12 @@ export function LeafNode({ id, data, selected }: NodeProps) {
               className="text-fg-primary focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
-          <NodeMenu id={id} onOpen={onOpen} onDelete={onDelete} />
+          <div className="flex shrink-0 items-center gap-1 pl-2">
+            <RenderIf condition={!!hasSuggestion}>
+              <EditPreviewButton nodeId={id} />
+            </RenderIf>
+            <NodeMenu id={id} onOpen={onOpen} onDelete={onDelete} />
+          </div>
         </div>
 
         {/* Antalik's border beam at 20% strength around the writing area
@@ -43,7 +51,13 @@ export function LeafNode({ id, data, selected }: NodeProps) {
         <div className="mt-3">
           <BorderBeam theme="light" strength={0.2}>
             <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-background-2 text-fg-primary shadow-default [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <NodeContent nodeId={id} content={content} />
+              {/* While previewing a suggested edit: the node as it would be. */}
+              <RenderIf condition={!!preview}>
+                <NodePreview blocks={preview ?? []} />
+              </RenderIf>
+              <RenderIf condition={!preview}>
+                <NodeContent nodeId={id} content={content} />
+              </RenderIf>
             </div>
           </BorderBeam>
         </div>

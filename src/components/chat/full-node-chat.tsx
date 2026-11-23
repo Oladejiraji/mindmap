@@ -26,7 +26,7 @@ const headerButton =
  * One node's chat, full screen (?chat=<nodeId>): the side panel's chat
  * given the whole page. Just this node's messages, not the path from the
  * root (that's the project's Chat view). Collapse (or Esc) goes back to
- * the panel; × to the canvas.
+ * the panel's chat; × closes the chat, leaving the node open in the panel.
  */
 export function FullNodeChat({
   nodeId,
@@ -40,7 +40,7 @@ export function FullNodeChat({
   nodes: Doc<"nodes">[];
   /** Back to the side panel on this node's chat. */
   onCollapse: () => void;
-  /** Back to the canvas. */
+  /** Closes the chat: back to the canvas, with the node in the side panel. */
   onClose: () => void;
   /** Shows another node's chat here: a branch just made from this one. */
   onNodeChange: (nodeId: Id<"nodes">) => void;

@@ -13,6 +13,7 @@ import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
+import { clearEditPreview, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
 
 /*
  * A document edit the AI suggested, under the reply that made it, shaped
@@ -72,9 +73,14 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
   const accept = useConvexMutation(api.proposals.accept);
   const reject = useConvexMutation(api.proposals.reject);
   const busy = accept.isPending || reject.isPending;
+  const previewing = useEditPreview() === nodeId;
 
+  // Answering ends any preview of it on the canvas.
   const answer = (action: typeof accept, message: string) => () =>
-    action.mutate({ proposalId: proposal._id }).catch((err) => handleError(err, message));
+    action
+      .mutate({ proposalId: proposal._id })
+      .then(() => clearEditPreview(nodeId))
+      .catch((err) => handleError(err, message));
 
   // Answered: one line, so the chat stays a conversation.
   if (proposal.state !== "pending") {
@@ -149,6 +155,16 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
         </Button>
         <Button size="xs" variant="ghost" disabled={busy} onClick={answer(reject, "Failed to reject the edit")}>
           Reject
+        </Button>
+        {/* Shows the edit on the canvas node, until pressed again. */}
+        <Button
+          size="xs"
+          variant="outline"
+          aria-pressed={previewing}
+          onClick={() => toggleEditPreview(nodeId)}
+          className={cn("ml-auto", previewing && "bg-muted text-fg-primary")}
+        >
+          {previewing ? "Exit preview" : "Preview"}
         </Button>
       </div>
     </section>

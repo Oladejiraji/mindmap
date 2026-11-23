@@ -8,6 +8,8 @@ export function useSyncConvexToFlow(
   rfNodes: RFNode<MindMapNodeData>[],
   setFlowNodes: React.Dispatch<React.SetStateAction<RFNode<MindMapNodeData>[]>>,
   nodes: { _id: string; parentId: string | null; title: string; position?: { x: number; y: number } | null; content?: unknown }[] | undefined,
+  /** Changes when node data from elsewhere changes (which nodes have a suggested edit). */
+  extraKey = "",
 ) {
   const fingerprint = useMemo(
     () =>
@@ -17,8 +19,9 @@ export function useSyncConvexToFlow(
           (n) =>
             `${n._id}:${n.parentId}:${n.title}:${n.position?.x ?? ""}:${n.position?.y ?? ""}:${JSON.stringify(n.content ?? null)}`,
         )
-        .join("|") ?? "",
-    [nodes],
+        .join("|")
+        .concat(`#${extraKey}`) ?? "",
+    [nodes, extraKey],
   );
   const lastSyncedRef = useRef(fingerprint);
 
