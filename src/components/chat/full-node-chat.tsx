@@ -52,7 +52,7 @@ export function FullNodeChat({
     .map((n) => n.title);
 
   const { data: messages } = useAuthedConvexQuery(api.messages.listByNode, { nodeId });
-  const isStreaming = messages?.some((m) => m.isStreaming) ?? false;
+  const turnKey = messages ? (messages.findLast((m) => m.role === "user")?._id ?? "none") : undefined;
 
   const createBranch = useMutation(api.nodes.createEmptyBranch);
   const branch = async () => {
@@ -99,8 +99,8 @@ export function FullNodeChat({
       </header>
       <div className="min-h-0 flex-1">
         <ChatScroller
-          latestKey={`${nodeId}:${messages?.length ?? 0}`}
-          streaming={isStreaming}
+          conversationKey={nodeId}
+          turnKey={turnKey}
           footer={
             <div className="px-6 pb-6">
               <div ref={composerRef} className="mx-auto w-full max-w-180">
@@ -116,9 +116,11 @@ export function FullNodeChat({
             </div>
           }
         >
-          <div className="mx-auto flex w-full max-w-[720px] flex-1 flex-col px-6 pt-6 pb-10">
+          {/* --turn-offset: the 24px above and 40px below the messages. */}
+          <div className="mx-auto flex w-full max-w-[720px] flex-1 flex-col px-6 pt-6 pb-10 [--turn-offset:64px]">
             <NodeConversation
               nodeId={nodeId}
+              live
               parentNotes={parentNotes}
               onBranch={() => void branch()}
               empty={

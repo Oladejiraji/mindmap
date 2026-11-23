@@ -75,13 +75,14 @@ export function BranchChat({
     return current;
   };
 
-  // New messages arrive in the active node; switching branch counts too.
+  // You write in the active node: your latest message there is the turn.
   const { data: activeMessages } = useAuthedConvexQuery(
     api.messages.listByNode,
     { nodeId: activeNodeId },
   );
-  const latestKey = `${activeNodeId}:${activeMessages?.length ?? 0}`;
-  const isStreaming = activeMessages?.some((m) => m.isStreaming) ?? false;
+  const turnKey = activeMessages
+    ? (activeMessages.findLast((m) => m.role === "user")?._id ?? "none")
+    : undefined;
   const createBranch = useMutation(api.nodes.createEmptyBranch);
 
   const branchFrom = async (nodeId: Id<"nodes">) => {
@@ -100,8 +101,8 @@ export function BranchChat({
 
   return (
     <ChatScroller
-      latestKey={latestKey}
-      streaming={isStreaming}
+      conversationKey={activeNodeId}
+      turnKey={turnKey}
       footer={
         <div className="px-6 pb-6">
           <div ref={composerRef} className="relative mx-auto w-full max-w-180">
@@ -120,9 +121,11 @@ export function BranchChat({
     >
       {/* Sections with messages (or still loading) carry data-filled; when
           none do, the whole branch is empty and shows one empty state */}
-      {/* The top 80px is under the Canvas/Chat toggle: messages scrolled
-          to the top stop below it. */}
-      <div className="mx-auto flex w-full max-w-[720px] flex-col px-6 pt-20 pb-10 [&_[data-message]]:scroll-mt-20">
+      {/* pt-20 keeps the start of the conversation clear of the Canvas/Chat
+          toggle. A pinned message sits higher, 24px from the top
+          (--turn-offset: that and the 40px below the messages); the toggle
+          is at the card's edge, outside this column. */}
+      <div className="mx-auto flex w-full max-w-[720px] flex-col px-6 pt-20 pb-10 [--turn-offset:64px]">
         <div className="flex flex-col items-center gap-3 pt-16 text-center [:has([data-filled])>&]:hidden">
           <p className="text-body-sm text-fg-tertiary">No messages in this branch</p>
           <p className="flex items-center gap-1.5 text-caption-lg text-fg-tertiary">
@@ -143,6 +146,8 @@ export function BranchChat({
                 .filter((n) => hasNotes(n.content))
                 .map((n) => n.title)}
               showDivider={i > 0}
+              // You write in the last one, the active node.
+              live={i === path.length - 1}
               onBranch={() => void branchFrom(node._id)}
               header={
                 <ForkHeader
@@ -231,10 +236,12 @@ function NodeSection({
   header,
   onBranch,
   parentNotes,
+  live,
 }: {
   nodeId: Id<"nodes">;
   title: string;
   showDivider: boolean;
+  live: boolean;
   header: React.ReactNode;
   onBranch: () => void;
   parentNotes: string[];
@@ -254,6 +261,7 @@ function NodeSection({
         }
         parentNotes={parentNotes}
         onBranch={onBranch}
+        live={live}
       />
     </section>
   );
