@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { MotionConfig, Reorder, motion } from "motion/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { Plus } from "lucide-react";
@@ -12,6 +12,7 @@ import { api } from "@convex/api";
 import { handleError } from "@/lib/handle-error";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
+import { prefetchPage } from "@/lib/prefetch";
 import { cn } from "@/lib/utils";
 import { RenderIf } from "@/components/shared/render-if";
 import { renameThreadOptimistic, reorderTabsOptimistic, togglePinOptimistic } from "@/lib/optimistic";
@@ -100,6 +101,9 @@ export function TabStrip({ initialTabs }: { initialTabs?: OpenTabs }) {
   const newProjectHref = activeThread
     ? `${routes.newProject}?from=${activeThread._id}`
     : routes.newProject;
+  // New project is ready before +, ⌥T or a double-click opens it, so its
+  // skeleton doesn't show on the way. Syncing with the router's cache.
+  useEffect(() => prefetchPage(router, newProjectHref), [router, newProjectHref]);
   // Back to the tab it was opened from, else the last tab, else Home.
   const closeNewProject = () => {
     const from = new URLSearchParams(window.location.search).get("from");

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { ListIcon } from "@/components/icons/list-icon";
 import { GridIcon } from "@/components/icons/grid-icon";
@@ -10,6 +12,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { useHomeLayout } from "@/lib/preferences";
 import { routes } from "@/lib/routes";
+import { prefetchPage } from "@/lib/prefetch";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { ProjectCard } from "@/components/project/project-card";
 import { ProjectRow } from "@/components/project/project-row";
@@ -24,6 +27,10 @@ export default function Home() {
   const { data: views } = useAuthedConvexQuery(api.projectViews.mine, {});
   // Shared with the account menu's Preferences and the Settings page.
   const [layout, updateLayout] = useHomeLayout();
+  // New project is ready before New is pressed, so its skeleton doesn't
+  // show on the way. Syncing with the router's cache.
+  const router = useRouter();
+  useEffect(() => prefetchPage(router, routes.newProject), [router]);
 
   return (
     <div className="flex min-h-full flex-col">

@@ -2,28 +2,24 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation, type Preloaded } from "convex/react";
-import { usePreloadedAuthQuery } from "@convex-dev/better-auth/nextjs/client";
+import { useMutation } from "convex/react";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
 import { handleError } from "@/lib/handle-error";
+import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { routes } from "@/lib/routes";
 import { ChatInput } from "@/components/chat/chat-input";
 import { LogoIcon } from "@/components/icons/sidebar-toggle";
 import { RenderIf } from "@/components/shared/render-if";
 import { startersFor } from "./starter-prompts";
+import { useInitialOrg } from "./initial-org";
 
 /*
  * The /new page: your first message starts a project. Sending creates it
  * and opens the canvas, where the reply streams into the root's chat.
  */
 
-export function NewProjectComposer({
-  preloadedOrg,
-}: {
-  /** The viewer and their org, fetched by the page on the server. */
-  preloadedOrg: Preloaded<typeof api.organizations.current>;
-}) {
+export function NewProjectComposer() {
   const router = useRouter();
   const createThread = useMutation(api.threads.create);
   const sendMessage = useMutation(api.chat.send);
@@ -38,9 +34,11 @@ export function NewProjectComposer({
   // Sent: the box waits, busy, until the canvas opens.
   const [leaving, setLeaving] = useState(false);
 
-  // Starters follow the onboarding use cases.
-  // Shows the server's result until the signed-in subscription takes over.
-  const orgData = usePreloadedAuthQuery(preloadedOrg);
+  // Starters follow the onboarding use cases. The layout's copy shows
+  // until the live query arrives (null is a real answer: no org).
+  const initialOrg = useInitialOrg();
+  const { data: liveOrg } = useAuthedConvexQuery(api.organizations.current, {});
+  const orgData = liveOrg === undefined ? initialOrg : liveOrg;
   const useCases = orgData?.org?.useCases;
   const starters = useMemo(() => startersFor(useCases ?? []), [useCases]);
 

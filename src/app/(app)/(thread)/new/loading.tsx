@@ -4,8 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 // One per starter row, in varied lengths, as in ChatInput.
 const STARTER_WIDTHS = ["w-40", "w-48", "w-36", "w-44"];
 
-// Shown while the page fetches the greeting and starters. Mirrors the
-// composer's layout so nothing jumps when it arrives.
+// Rarely seen: the page is prefetched whole from the tab strip and Home.
+// Shown if it's opened before that lands. Mirrors the composer's layout so nothing jumps when it arrives.
 export default function NewProjectLoading() {
   return (
     <div className="flex h-full flex-col items-center justify-center overflow-y-auto px-6 pb-[6vh]">
