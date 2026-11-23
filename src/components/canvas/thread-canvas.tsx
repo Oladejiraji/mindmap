@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ViewToggle } from "@/components/canvas/view-toggle";
 import {
   ReactFlow,
@@ -8,6 +8,7 @@ import {
   MiniMap,
   useNodesState,
   useReactFlow,
+  useStoreApi,
   type Node as RFNode,
   type Edge as RFEdge,
   type NodeTypes,
@@ -84,7 +85,8 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const createEmptyBranch = useMutation(api.nodes.createEmptyBranch);
   const deleteLeafNode = useMutation(api.nodes.deleteLeafNode);
   const renameNode = useMutation(api.nodes.rename);
-  const { screenToFlowPosition, getNodes, fitView } = useReactFlow();
+  const { screenToFlowPosition, getNodes, fitView, getInternalNode, getViewport, setCenter } = useReactFlow();
+  const flowStore = useStoreApi();
   const reduceMotion = useReducedMotion();
   const router = useRouter();
 
@@ -126,6 +128,20 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     },
     [panelNodeId, handleOpenNode, searchParams, pathname, router],
   );
+
+  // With the side panel open, clicking another node shows that node in
+  // it, on the same tab. A click, not a selection: dragging a node also
+  // selects it, and moving one shouldn't swap the chat.
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: RFNode) => {
+      if (!panelNodeId || node.id === panelNodeId) return;
+      const next = new URLSearchParams(searchParams);
+      next.set("panel", node.id);
+      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    },
+    [panelNodeId, searchParams, pathname, router],
+  );
+
 
   /**
    * Adds a branch under `parentId`, placed from where the nodes are on
@@ -226,6 +242,30 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
 
   useSyncConvexToFlow(rfNodes, setFlowNodes, nodes);
+
+  // The panel's node is the selected one, and in view: however the panel
+  // was opened (a click, its menu, Space, a link, a restored tab), the
+  // canvas shows which node you're looking at. Syncing React Flow's store
+  // (outside React state) to the URL.
+  const hasFlowNodes = flowNodes.length > 0;
+  useEffect(() => {
+    if (!panelNodeId || !hasFlowNodes) return;
+    const store = flowStore.getState();
+    if (!store.nodeLookup.has(panelNodeId)) return;
+    store.addSelectedNodes([panelNodeId]);
+    // Off screen (even partly): centre it, at the same zoom.
+    const node = getInternalNode(panelNodeId);
+    const pane = store.domNode?.getBoundingClientRect();
+    if (!node || !pane) return;
+    const { x, y, zoom } = getViewport();
+    const { x: nx, y: ny } = node.internals.positionAbsolute;
+    const width = node.measured.width ?? CANVAS_NODE_WIDTH;
+    const height = node.measured.height ?? 0;
+    const left = nx * zoom + x;
+    const top = ny * zoom + y;
+    const visible = left >= 0 && top >= 0 && left + width * zoom <= pane.width && top + height * zoom <= pane.height;
+    if (!visible) void setCenter(nx + width / 2, ny + height / 2, { zoom, duration: 300 });
+  }, [panelNodeId, hasFlowNodes, flowStore, getInternalNode, getViewport, setCenter]);
 
   /** Glides the nodes to `targets` (instantly with reduced motion), then fits the view. */
   const moveNodes = useCallback(
@@ -425,6 +465,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           edges={rfEdges}
           onNodesChange={onNodesChange}
           onNodeDragStop={onNodeDragStop}
+          onNodeClick={onNodeClick}
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
           onSelectionChange={onSelectionChange}
