@@ -110,6 +110,57 @@ export function describeEdits(markdown: string, edits: DocumentEdit[]): Document
     }));
 }
 
+/**
+ * The edits that turn one document into another, block by block: blocks
+ * in both stay, the rest are replaced (pairing old and new blocks in
+ * order), deleted or inserted. Applying them to `before` gives `after`.
+ * Used to turn an edit made on a draft into one on the real document.
+ */
+export function diffBlocks(before: string, after: string): DocumentEdit[] {
+  const a = splitBlocks(before);
+  const b = splitBlocks(after);
+  // Longest common run of blocks, from each pair of positions to the end.
+  const common = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--) {
+    for (let j = b.length - 1; j >= 0; j--) {
+      common[i][j] = a[i] === b[j] ? common[i + 1][j + 1] + 1 : Math.max(common[i + 1][j], common[i][j + 1]);
+    }
+  }
+
+  const edits: DocumentEdit[] = [];
+  // A stretch between kept blocks: the old blocks that go, the new that come.
+  let removed: number[] = [];
+  let added: string[] = [];
+  // The last old block passed (its number), where new blocks are inserted.
+  let lastOld = 0;
+  const flush = () => {
+    const paired = Math.min(removed.length, added.length);
+    for (let k = 0; k < paired; k++) edits.push({ type: "replace", block: removed[k], markdown: added[k] });
+    for (const block of removed.slice(paired)) edits.push({ type: "delete", block });
+    if (added.length > paired) edits.push({ type: "insert", after: lastOld, markdown: joinBlocks(added.slice(paired)) });
+    removed = [];
+    added = [];
+  };
+
+  let i = 0;
+  let j = 0;
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && a[i] === b[j]) {
+      flush();
+      i++;
+      j++;
+      lastOld = i;
+    } else if (j < b.length && (i >= a.length || common[i][j + 1] >= common[i + 1][j])) {
+      added.push(b[j++]);
+    } else {
+      removed.push(++i);
+      lastOld = i;
+    }
+  }
+  flush();
+  return edits;
+}
+
 function planEdits(blocks: string[], edits: DocumentEdit[]) {
   if (edits.length === 0) throw new DocumentEditError("No edits");
 

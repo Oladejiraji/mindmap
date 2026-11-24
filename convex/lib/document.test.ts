@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEdits, describeEdits, DocumentEditError, joinBlocks, previewEdits, splitBlocks } from "./document";
+import { applyEdits, describeEdits, diffBlocks, DocumentEditError, joinBlocks, previewEdits, splitBlocks } from "./document";
 
 const DOC = [
   "# Pricing",
@@ -128,5 +128,36 @@ describe("previewEdits", () => {
 
   it("rejects edits that don't fit, like applyEdits", () => {
     expect(() => previewEdits(doc, [{ type: "delete", block: 9 }])).toThrow(DocumentEditError);
+  });
+});
+
+describe("diffBlocks", () => {
+  const doc = (...blocks: string[]) => joinBlocks(blocks);
+
+  it("turns one document into the other", () => {
+    const cases: [string, string][] = [
+      [doc("A", "B", "C"), doc("A", "B2", "C")],
+      [doc("A", "B", "C"), doc("A", "C")],
+      [doc("A", "B"), doc("Z", "A", "B", "Y")],
+      [doc("A", "B", "C"), doc("A", "X", "Y", "Z", "C")],
+      [doc("A", "B", "C", "D"), doc("D", "C")],
+      ["", doc("# New", "Text")],
+      [DOC, doc("# Pricing", "We compare **four** models.", "> a quote")],
+    ];
+    for (const [before, after] of cases) {
+      expect(applyEdits(before, diffBlocks(before, after))).toBe(joinBlocks(splitBlocks(after)));
+    }
+  });
+
+  it("pairs old and new blocks as rewrites, then inserts or deletes the rest", () => {
+    expect(diffBlocks(doc("A", "B", "C"), doc("A", "B2", "B3", "C"))).toEqual([
+      { type: "replace", block: 2, markdown: "B2" },
+      { type: "insert", after: 2, markdown: "B3" },
+    ]);
+    expect(diffBlocks(doc("A", "B", "C"), doc("A", "C"))).toEqual([{ type: "delete", block: 2 }]);
+  });
+
+  it("has no edits for the same document", () => {
+    expect(diffBlocks(DOC, DOC)).toEqual([]);
   });
 });

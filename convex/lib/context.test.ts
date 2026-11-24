@@ -125,6 +125,27 @@ describe("buildPromptContext", () => {
     expect(context?.messages.map((m) => m.content)).toEqual(["Q1", "Q2", "Cut sh", "Q3", "Q4"]);
   });
 
+  test("with an edit waiting, includes the document as a draft with it applied", async () => {
+    const { t, leaf } = await setupTree();
+    await t.run(async (ctx) => {
+      const chatId = await ctx.db.insert("chats", { nodeId: leaf });
+      const messageId = await ctx.db.insert("messages", { chatId, role: "assistant", content: "r", index: 0 });
+      await ctx.db.insert("proposals", {
+        nodeId: leaf,
+        messageId,
+        baseVersion: 0,
+        reason: "Adds a budget",
+        edits: [{ type: "insert", after: 1, markdown: "Budget: $500." }],
+        status: "pending",
+      });
+    });
+    expect((await build(t, leaf))?.draft).toEqual({ markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget" });
+
+    // Out of date (the document moved on): no draft.
+    await t.run((ctx) => ctx.db.patch(leaf, { contentVersion: 2 }));
+    expect((await build(t, leaf))?.draft).toBeUndefined();
+  });
+
   test("a node without a chat has no messages", async () => {
     const { t, leaf } = await setupTree();
     expect((await build(t, leaf))?.messages).toEqual([]);
@@ -253,5 +274,17 @@ describe("toModelInput", () => {
     );
     expect(messages[1].content).toBe('Yes.\n\n<document_edit outcome="rejected">Record the switch</document_edit>');
     expect(messages[3].content).toContain('outcome="out of date: the document changed before the user answered"');
+  });
+
+  test("with an edit waiting, shows and numbers the draft, and says so", () => {
+    const { system } = toModelInput(
+      context({ draft: { markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget" } }),
+    );
+    expect(system).toContain('<block n="2">\nBudget: $500.\n</block>');
+    expect(system).toContain('<waiting_edit reason="Adds a budget" />');
+  });
+
+  test("without an edit waiting, has no waiting edit section", () => {
+    expect(toModelInput(context()).system).not.toContain("<waiting_edit");
   });
 });

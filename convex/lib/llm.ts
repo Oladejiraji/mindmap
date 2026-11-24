@@ -5,7 +5,7 @@ import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { toModelInput, type PromptContext } from "./context";
 import { CHAT_MODEL, TITLE_MODEL } from "./models";
-import { applyEdits, DocumentEditError, type DocumentEdit } from "./document";
+import { applyEdits, diffBlocks, DocumentEditError, type DocumentEdit } from "./document";
 import { chatTools, PROPOSE_EDIT_TOOL } from "./tools";
 
 const PATCH_INTERVAL_MS = 100;
@@ -84,23 +84,28 @@ export async function streamAssistantResponse(
   });
 }
 
-type Proposal = { baseVersion: number; reason: string; edits: DocumentEdit[] };
+export type Proposal = { baseVersion: number; reason: string; edits: DocumentEdit[] };
 
 /**
  * The model's suggested edit, if it made a valid one. Edits are checked
  * against the document the model saw; an edit that doesn't fit (a block
  * that isn't there, the same block changed twice) is dropped and logged,
  * so a bad suggestion never breaks the reply.
+ *
+ * With an edit waiting, the model saw (and edited) the draft. The result
+ * is turned back into edits on the real document, so the new suggestion
+ * carries the waiting changes it kept, and is saved like any other.
  */
-function readProposal(
+export function readProposal(
   toolCalls: TypedToolCall<typeof chatTools>[],
   context: PromptContext,
 ): Proposal | undefined {
   const call = toolCalls.find((c) => c.toolName === PROPOSE_EDIT_TOOL && !c.dynamic);
   if (!call || call.toolName !== PROPOSE_EDIT_TOOL) return undefined;
   const { reason, edits } = call.input;
+  let result: string;
   try {
-    applyEdits(context.current.markdown, edits);
+    result = applyEdits(context.draft?.markdown ?? context.current.markdown, edits);
   } catch (err) {
     if (err instanceof DocumentEditError) {
       console.warn("Dropped an invalid document edit:", err.message, JSON.stringify(edits));
@@ -108,7 +113,11 @@ function readProposal(
     }
     throw err;
   }
-  return { baseVersion: context.contentVersion, reason: reason.trim().slice(0, 300), edits };
+  const onDocument = context.draft ? diffBlocks(context.current.markdown, result) : edits;
+  // The edits only undid the waiting ones: nothing left to suggest. (The
+  // waiting one stays; the user can reject it.)
+  if (onDocument.length === 0) return undefined;
+  return { baseVersion: context.contentVersion, reason: reason.trim().slice(0, 300), edits: onDocument };
 }
 
 /**

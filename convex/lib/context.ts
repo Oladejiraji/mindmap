@@ -1,6 +1,6 @@
 import type { QueryCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
-import { splitBlocks } from "./document";
+import { applyEdits, splitBlocks } from "./document";
 import { contentVersion } from "./nodeContent";
 import { proposalState, type ProposalState } from "./proposals";
 import { PROPOSE_EDIT_TOOL } from "./tools";
@@ -36,6 +36,12 @@ export type PromptContext = {
   current: NodeContext;
   /** The current node's document version, for suggested edits. */
   contentVersion: number;
+  /**
+   * The current node's document with the edit waiting for an answer
+   * applied, if there is one. The model works on this draft, so a new
+   * suggestion builds on the waiting one instead of dropping it.
+   */
+  draft?: { markdown: string; reason: string };
   /** This node's chat, oldest first. */
   messages: ChatTurn[];
 };
@@ -64,6 +70,10 @@ const EMPTY_DOCUMENT = `The document in <current_node> is empty: this is where t
 - the few key points established so far
 - the open questions worth exploring next
 Insert it with after: 0.`;
+
+const WAITING_EDIT = `The document in <current_node> includes an edit you suggested earlier that the user hasn't accepted or rejected yet (see <waiting_edit>). Block numbers refer to the document as shown, with that edit in.
+- A new suggestion replaces the waiting one. It's applied to the document as shown, so the waiting changes are kept unless your edits change them. If the user asks to drop or change any of them, edit those blocks.
+- Your reason describes the whole suggestion, including the waiting changes you keep.`;
 
 // ---------------------------------------------------------------------------
 // Gathering
@@ -136,12 +146,35 @@ export async function buildPromptContext(
   const current = chain.at(-1);
   if (!current) return null;
 
+  const node = toNodeContext(current);
   return {
     ancestors: chain.slice(0, -1).map(toNodeContext),
-    current: toNodeContext(current),
+    current: node,
     contentVersion: contentVersion(current),
     messages: await getChatTurns(ctx, current),
+    ...(await waitingDraft(ctx, current, node.markdown)),
   };
+}
+
+/** The document with the edit waiting for an answer applied, if any. */
+async function waitingDraft(
+  ctx: QueryCtx,
+  node: Doc<"nodes">,
+  markdown: string,
+): Promise<Pick<PromptContext, "draft">> {
+  const waiting = await ctx.db
+    .query("proposals")
+    .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", node._id).eq("status", "pending"))
+    .order("desc")
+    .first();
+  // Out of date: its edits were made on an older document.
+  if (!waiting || proposalState(waiting, node) !== "pending") return {};
+  try {
+    return { draft: { markdown: applyEdits(markdown, waiting.edits), reason: waiting.reason } };
+  } catch {
+    // Its edits no longer fit: show the document as it is.
+    return {};
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -158,10 +191,15 @@ export function toModelInput(context: PromptContext): ModelInput {
     sections.push(`<ancestors>\n${nodes.join("\n")}\n</ancestors>`);
   }
 
-  sections.push(nodeTag("current_node", context.current, {}, numberBlocks(context.current.markdown)));
+  // With an edit waiting, the model sees (and edits) the draft.
+  const shown = context.draft?.markdown ?? context.current.markdown;
+  sections.push(nodeTag("current_node", context.current, {}, numberBlocks(shown)));
+  if (context.draft) {
+    sections.push(`<waiting_edit reason="${escapeAttribute(context.draft.reason)}" />\n${WAITING_EDIT}`);
+  }
   // Only for an empty document: there the usual restraint ("most replies
   // need no edit") would leave a new node blank.
-  if (!context.current.markdown) sections.push(EMPTY_DOCUMENT);
+  if (!shown) sections.push(EMPTY_DOCUMENT);
 
   return {
     system: sections.join("\n\n"),
