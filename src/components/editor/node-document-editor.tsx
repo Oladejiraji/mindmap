@@ -18,7 +18,7 @@ export function NodeDocumentEditor({
     placeholder: "Write, or paste notes…",
     onSave,
     // Same typography as chat messages, so the document reads like the rest of the panel.
-    className: "markdown-body min-h-40 outline-none",
+    className: "markdown-body node-document min-h-40 outline-none",
   });
 
   if (!editor) return null;
