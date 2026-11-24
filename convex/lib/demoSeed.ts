@@ -465,3 +465,38 @@ Three columns: Free, Pro, Teams. Teams highlights shared projects and free viewe
     ],
   },
 ];
+
+/**
+ * One project for recording the chat: a node with a few turns of history
+ * (some short, some long), so there's something to scroll back through.
+ */
+export const RECORDING_PROJECT: SeedNode = {
+  title: "Two weeks in Japan",
+  content: `## Trip
+
+- **When:** April 3 – 17, cherry blossom season
+- **Who:** two of us, first time in Japan
+- **Budget:** about $6,000 for both, flights booked
+
+## Route
+
+Tokyo (5 nights) → Hakone (1) → Kyoto (4) → Osaka (2) → Tokyo (1)`,
+  chat: [
+    [
+      "We're going to Japan for two weeks in April. First time. Where should we go?",
+      "April is a great time, the cherry blossoms peak in Tokyo and Kyoto in early April.\n\nFor a first trip, the classic loop works well: **Tokyo → Hakone → Kyoto → Osaka**, then back to Tokyo for the flight home. It covers the big city, a night at a hot spring, temples and food without spending your days on trains.",
+    ],
+    [
+      "Is the JR Pass still worth it?",
+      "Not for this route. The price went up a lot in 2023, and a single Tokyo to Kyoto shinkansen ticket plus a few local trips comes in well under it.\n\nBuy tickets as you go, and get a **Suica** card on your phone for the subway and buses.",
+    ],
+    [
+      "How many nights in Tokyo?",
+      "Five at the start, and one more before you fly home. Tokyo is really several cities in one, so I'd split it by area:\n\n1. **Shinjuku and Shibuya:** the neon, the crossing, Omoide Yokocho for dinner\n2. **Asakusa and Ueno:** Senso-ji early in the morning, then Ueno Park for the blossoms\n3. **Harajuku and Omotesando:** Meiji Shrine, then the side streets\n4. **A day trip:** Nikko or Kamakura\n5. **A slow day:** Shimokitazawa, coffee, vintage shops\n\nStay near a JR Yamanote line station so everything is one train away.",
+    ],
+    [
+      "Nice. Where should we stay in Kyoto?",
+      "Around **Gion or Higashiyama** if you want to walk out the door into old streets, or near **Kyoto Station** if you'd rather be close to the trains. For four nights I'd pick Higashiyama: most temples are walkable, and you can see them early before the crowds.",
+    ],
+  ],
+};

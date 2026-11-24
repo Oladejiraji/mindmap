@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { DEMO_PROJECTS, type SeedNode } from "./lib/demoSeed";
+import { DEMO_PROJECTS, RECORDING_PROJECT, type SeedNode } from "./lib/demoSeed";
 import { deleteTabsFor, openTab } from "./lib/tabs";
 
 /*
@@ -9,6 +9,7 @@ import { deleteTabsFor, openTab } from "./lib/tabs";
  * chats. Internal only.
  *   npx convex run seed:demo '{"email":"someone@example.com"}'
  *   npx convex run seed:clearDemo '{"email":"someone@example.com"}'
+ *   npx convex run seed:recording '{"email":"someone@example.com"}'
  */
 
 async function userIdFor(ctx: MutationCtx, email: string): Promise<string> {
@@ -107,5 +108,21 @@ export const clearDemo = internalMutation({
       removed++;
     }
     return { removed };
+  },
+});
+
+/** Adds the one project for recording the chat, opened as a tab. */
+export const recording = internalMutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await userIdFor(ctx, args.email);
+    const threadId = await ctx.db.insert("threads", {
+      userId,
+      name: RECORDING_PROJECT.title,
+      updatedAt: Date.now(),
+    });
+    await insertNode(ctx, userId, threadId, null, RECORDING_PROJECT);
+    await openTab(ctx, userId, threadId);
+    return { threadId };
   },
 });
