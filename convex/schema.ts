@@ -178,6 +178,8 @@ export default defineSchema({
     reason: v.string(),
     edits: v.array(documentEditValidator),
     status: proposalStatusValidator,
+    /** Accepted without these changes (indices into `edits`). */
+    skipped: v.optional(v.array(v.number())),
   })
     .index("by_nodeId_and_status", ["nodeId", "status"])
     .index("by_messageId", ["messageId"]),

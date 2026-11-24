@@ -25,8 +25,11 @@ export type NodeContext = {
 export type ChatTurn = {
   role: "user" | "assistant";
   content: string;
-  /** A document edit this assistant turn suggested, and what became of it. */
-  proposal?: { reason: string; state: ProposalState };
+  /**
+   * A document edit this assistant turn suggested, and what became of it.
+   * `kept`: accepted in part, with this many of `of` changes.
+   */
+  proposal?: { reason: string; state: ProposalState; kept?: { count: number; of: number } };
 };
 
 export type PromptContext = {
@@ -125,7 +128,15 @@ async function getChatTurns(
     return {
       role: m.role,
       content: m.content,
-      ...(proposal && { proposal: { reason: proposal.reason, state: proposalState(proposal, node) } }),
+      ...(proposal && {
+        proposal: {
+          reason: proposal.reason,
+          state: proposalState(proposal, node),
+          ...(proposal.skipped?.length && {
+            kept: { count: proposal.edits.length - proposal.skipped.length, of: proposal.edits.length },
+          }),
+        },
+      }),
     };
   });
 }
@@ -236,7 +247,10 @@ const EDIT_OUTCOMES: Record<ProposalState, string> = {
 };
 
 function editNote(proposal: NonNullable<ChatTurn["proposal"]>): string {
-  return `<document_edit outcome="${EDIT_OUTCOMES[proposal.state]}">${proposal.reason}</document_edit>`;
+  const outcome = proposal.kept
+    ? `accepted in part: ${proposal.kept.count} of its ${proposal.kept.of} changes, the user left out the rest`
+    : EDIT_OUTCOMES[proposal.state];
+  return `<document_edit outcome="${outcome}">${proposal.reason}</document_edit>`;
 }
 
 function numberBlocks(markdown: string): string {

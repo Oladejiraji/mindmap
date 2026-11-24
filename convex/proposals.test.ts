@@ -118,6 +118,25 @@ describe("accept", () => {
     expect(await status(id)).toBe("accepted");
   });
 
+  test("accepts in part: skipped changes are left out, and the card says how many were kept", async () => {
+    const { alice, nodeId, suggest, node } = await setup();
+    const id = await suggest([
+      { type: "replace", block: 2, markdown: "Usage-based." },
+      { type: "delete", block: 3 },
+    ]);
+    await alice.mutation(api.proposals.accept, { proposalId: id, skip: [1] });
+    expect((await node())?.content).toBe("# Pricing\n\nUsage-based.\n\nOpen questions.");
+    const [view] = await alice.query(api.proposals.listByNode, { nodeId });
+    expect(view.kept).toEqual({ count: 1, of: 2 });
+  });
+
+  test("won't accept with every change skipped", async () => {
+    const { alice, suggest, status } = await setup();
+    const id = await suggest(SWITCH);
+    await expect(alice.mutation(api.proposals.accept, { proposalId: id, skip: [0] })).rejects.toThrow();
+    expect(await status(id)).toBe("pending");
+  });
+
   test("is refused once the document changed, which shows it as out of date", async () => {
     const { alice, nodeId, suggest, node, status } = await setup();
     const id = await suggest(SWITCH);
@@ -213,7 +232,7 @@ describe("pendingByThread", () => {
         preview: [
           { kind: "same", markdown: "# Pricing" },
           { kind: "same", markdown: "Seat-based." },
-          { kind: "removed", markdown: "Open questions." },
+          { kind: "removed", markdown: "Open questions.", edit: 0 },
         ],
       },
     ]);

@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronRightIcon } from "@/components/icons/chevron-down";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMutation } from "convex/react";
 import { CloseIcon } from "@/components/icons/close-icon";
 import { Plus as PlusIcon } from "lucide-react";
 import { MaximizeIcon } from "@/components/icons/maximize-icons";
@@ -20,10 +19,8 @@ import { api } from "@convex/api";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
-import { NodeDocumentEditor } from "./node-document-editor";
-import { SuggestionBar } from "./suggestion-bar";
-import { DocumentReview } from "./document-review";
-import { isPreviewed, useEditPreview } from "@/lib/edit-preview";
+import { useEditPreview } from "@/lib/edit-preview";
+import { NodeDocumentPane } from "./node-document-pane";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
@@ -60,7 +57,6 @@ export function NodeEditorView({
   const { data: nodes } = useAuthedConvexQuery(api.nodes.listByThread, {
     threadId,
   });
-  const updateContent = useMutation(api.nodes.updateContent);
 
   const hasContent = Boolean(node?.content?.trim());
 
@@ -81,13 +77,10 @@ export function NodeEditorView({
     setInitializedFor(pickKey);
   }
 
-  // A suggested edit to this node, marked in the document while it's
-  // previewed (by default; Preview buttons turn it off and on).
+  // A suggested edit to this node, if one is waiting.
   const preview = useEditPreview();
   const { data: pending } = useAuthedConvexQuery(api.proposals.pendingByThread, { threadId });
   const suggestion = pending?.find((p) => p.nodeId === nodeId);
-  const reviewBlocks =
-    suggestion && isPreviewed(preview, suggestion.proposalId) ? suggestion.preview : undefined;
   // Turning this node's preview back on shows it here, on the Content tab.
   // (Not when a suggestion arrives: that would pull you out of the chat.)
   const [seenShown, setSeenShown] = useState(preview.shown);
@@ -105,11 +98,6 @@ export function NodeEditorView({
       depth: Math.max(chain.length - 1, 0),
     };
   }, [nodes, nodeId]);
-
-  const saveContent = useCallback(
-    (markdown: string) => updateContent({ nodeId, content: markdown }),
-    [nodeId, updateContent],
-  );
 
   const closeButton = (
     <Tip
@@ -337,27 +325,7 @@ export function NodeEditorView({
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="min-h-0 flex-1">
             {tab === "content" ? (
-              <div className="h-full overflow-y-auto overscroll-contain">
-                {/* Floats at the top as the document scrolls. */}
-                <div className="sticky top-0 z-10 px-3 pt-3 empty:hidden">
-                  <SuggestionBar nodeId={nodeId} />
-                </div>
-                {/* While previewing a suggested edit: the document with it
-                    marked. The editor stays mounted underneath, so its
-                    cursor and undo history survive. */}
-                <RenderIf condition={!!reviewBlocks}>
-                  <div className="px-5 py-5">
-                    <DocumentReview blocks={reviewBlocks ?? []} />
-                  </div>
-                </RenderIf>
-                <div className={cn("px-5 py-5", reviewBlocks && "hidden")}>
-                  <NodeDocumentEditor
-                    key={nodeId}
-                    markdown={node.content ?? ""}
-                    onSave={saveContent}
-                  />
-                </div>
-              </div>
+              <NodeDocumentPane threadId={threadId} nodeId={nodeId} markdown={node.content ?? ""} />
             ) : (
               <NodeChat key={nodeId} nodeId={nodeId} />
             )}

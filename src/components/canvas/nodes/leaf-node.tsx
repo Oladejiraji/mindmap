@@ -53,7 +53,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
             <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-background-2 text-fg-primary shadow-default [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {/* While previewing a suggested edit: the node as it would be. */}
               <RenderIf condition={!!preview}>
-                <NodePreview blocks={preview ?? []} />
+                <NodePreview blocks={preview ?? []} proposalId={proposalId ?? ""} />
               </RenderIf>
               <RenderIf condition={!preview}>
                 <NodeContent nodeId={id} content={content} />

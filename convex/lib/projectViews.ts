@@ -8,7 +8,7 @@ import type { Id } from "../_generated/dataModel";
  */
 
 // chat: a node's chat full screen.
-const KEYS = ["view", "node", "panel", "tab", "chat"] as const;
+const KEYS = ["view", "node", "panel", "tab", "chat", "doc"] as const;
 const NODE_KEYS = new Set(["node", "panel", "chat"]);
 const MAX_SEARCH = 300;
 

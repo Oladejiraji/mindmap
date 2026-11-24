@@ -11,7 +11,7 @@ import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
-import { isPreviewed, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
+import { acceptLabel, isPreviewed, skippedEdits, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
 
 /*
  * A document edit the AI suggested, under the reply that made it, shaped
@@ -72,9 +72,11 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
   const busy = accept.isPending || reject.isPending;
   const previewState = useEditPreview();
 
+  // Accepting leaves out the changes skipped in the document.
+  const skipped = skippedEdits(previewState, proposal._id);
   const answer = (action: typeof accept, message: string) => () =>
     action
-      .mutate({ proposalId: proposal._id })
+      .mutate({ proposalId: proposal._id, ...(action === accept && { skip: [...skipped] }) })
       .catch((err) => handleError(err, message));
 
   // Answered: one line, so the chat stays a conversation.
@@ -86,7 +88,10 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
         </span>
         <span className="min-w-0 truncate">{proposal.reason}</span>
         <span aria-hidden>·</span>
-        <span className="shrink-0">{OUTCOME[proposal.state]}</span>
+        <span className="shrink-0">
+          {OUTCOME[proposal.state]}
+          {proposal.kept && ` ${proposal.kept.count} of ${proposal.kept.of}`}
+        </span>
         <RenderIf condition={proposal.state === "out_of_date"}>
           <button
             type="button"
@@ -128,8 +133,13 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
       </div>
 
       <div className="flex gap-1.5 px-0.5 pb-0.5">
-        <Button size="xs" isLoading={accept.isPending} disabled={busy} onClick={answer(accept, "Failed to apply the edit")}>
-          Accept
+        <Button
+          size="xs"
+          isLoading={accept.isPending}
+          disabled={busy || skipped.size >= changes.length}
+          onClick={answer(accept, "Failed to apply the edit")}
+        >
+          {acceptLabel(skipped, changes.length)}
         </Button>
         <Button size="xs" variant="ghost" disabled={busy} onClick={answer(reject, "Failed to reject the edit")}>
           Reject

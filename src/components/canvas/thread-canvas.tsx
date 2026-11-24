@@ -551,17 +551,14 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
             onCollapse={() =>
               replaceQuery((q) => {
                 q.delete("chat");
+                q.delete("doc");
                 q.set("panel", fullChatId!);
                 q.set("tab", "chat");
               })
             }
-            onClose={() =>
-              replaceQuery((q) => {
-                q.delete("chat");
-                q.set("panel", fullChatId!);
-              })
-            }
             onNodeChange={(id) => replaceQuery((q) => q.set("chat", id))}
+            docOpen={searchParams.get("doc") === "1"}
+            onDocOpenChange={(open) => replaceQuery((q) => (open ? q.set("doc", "1") : q.delete("doc")))}
           />
         </div>
       </RenderIf>

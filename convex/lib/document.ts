@@ -31,11 +31,14 @@ export type DocumentChange = {
 /**
  * One block of the document after the edits, for previewing them: kept as
  * it was, new, a new version of an old block, or an old block that goes.
+ * A changed block names the edit it comes from (its index in the edits),
+ * so it can be left out when accepting.
  */
 export type PreviewBlock =
-  | { kind: "same" | "added"; markdown: string }
-  | { kind: "rewritten"; markdown: string; before: string }
-  | { kind: "removed"; markdown: string };
+  | { kind: "same"; markdown: string }
+  | { kind: "added"; markdown: string; edit: number }
+  | { kind: "rewritten"; markdown: string; before: string; edit: number }
+  | { kind: "removed"; markdown: string; edit: number };
 
 export class DocumentEditError extends Error {}
 
@@ -62,13 +65,13 @@ export function applyEdits(markdown: string, edits: DocumentEdit[]): string {
   const blocks = splitBlocks(markdown);
   const plan = planEdits(blocks, edits);
 
-  const out = [...plan.insertsAfter[0]];
+  const out = plan.insertsAfter[0].map((insert) => insert.markdown);
   blocks.forEach((block, i) => {
     const n = i + 1;
     const change = plan.changes.get(n);
     if (change === undefined) out.push(block);
-    else if (change !== null) out.push(change);
-    out.push(...plan.insertsAfter[n]);
+    else if (change.markdown !== null) out.push(change.markdown);
+    out.push(...plan.insertsAfter[n].map((insert) => insert.markdown));
   });
   return joinBlocks(out);
 }
@@ -81,15 +84,15 @@ export function applyEdits(markdown: string, edits: DocumentEdit[]): string {
 export function previewEdits(markdown: string, edits: DocumentEdit[]): PreviewBlock[] {
   const blocks = splitBlocks(markdown);
   const plan = planEdits(blocks, edits);
-  const added = (md: string): PreviewBlock => ({ kind: "added", markdown: md });
+  const added = (insert: Inserted): PreviewBlock => ({ kind: "added", markdown: insert.markdown, edit: insert.edit });
 
   const out: PreviewBlock[] = plan.insertsAfter[0].map(added);
   blocks.forEach((block, i) => {
     const n = i + 1;
     const change = plan.changes.get(n);
     if (change === undefined) out.push({ kind: "same", markdown: block });
-    else if (change === null) out.push({ kind: "removed", markdown: block });
-    else out.push({ kind: "rewritten", markdown: change, before: block });
+    else if (change.markdown === null) out.push({ kind: "removed", markdown: block, edit: change.edit });
+    else out.push({ kind: "rewritten", markdown: change.markdown, before: block, edit: change.edit });
     out.push(...plan.insertsAfter[n].map(added));
   });
   return out;
@@ -161,22 +164,42 @@ export function diffBlocks(before: string, after: string): DocumentEdit[] {
   return edits;
 }
 
+/**
+ * The edits to keep when accepting a suggestion, leaving out the ones at
+ * `skip` (indices into the edits). Throws DocumentEditError for an index
+ * that isn't there, or when nothing is left.
+ */
+export function keepEdits(edits: DocumentEdit[], skip: number[]): DocumentEdit[] {
+  for (const i of skip) {
+    if (!Number.isInteger(i) || i < 0 || i >= edits.length) {
+      throw new DocumentEditError(`There's no change ${i}: the suggestion has ${edits.length}`);
+    }
+  }
+  const kept = edits.filter((_, i) => !skip.includes(i));
+  if (kept.length === 0) throw new DocumentEditError("Every change is left out: reject the suggestion instead");
+  return kept;
+}
+
+/** A planned change: its markdown (null when deleted) and which edit made it. */
+type Planned = { markdown: string | null; edit: number };
+type Inserted = { markdown: string; edit: number };
+
 function planEdits(blocks: string[], edits: DocumentEdit[]) {
   if (edits.length === 0) throw new DocumentEditError("No edits");
 
   const count = blocks.length;
-  /** Block number → replacement markdown, or null when deleted. */
-  const changes = new Map<number, string | null>();
-  const insertsAfter: string[][] = Array.from({ length: count + 1 }, () => []);
+  /** Block number → its change. */
+  const changes = new Map<number, Planned>();
+  const insertsAfter: Inserted[][] = Array.from({ length: count + 1 }, () => []);
 
-  for (const edit of edits) {
+  for (const [index, edit] of edits.entries()) {
     if (edit.type === "insert") {
       if (!Number.isInteger(edit.after) || edit.after < 0 || edit.after > count) {
         throw new DocumentEditError(`Can't insert after block ${edit.after}: the document has ${count} blocks`);
       }
       const markdown = edit.markdown.trim();
       if (!markdown) throw new DocumentEditError("An insert has no content");
-      insertsAfter[edit.after].push(markdown);
+      insertsAfter[edit.after].push({ markdown, edit: index });
       continue;
     }
 
@@ -187,11 +210,11 @@ function planEdits(blocks: string[], edits: DocumentEdit[]) {
       throw new DocumentEditError(`Block ${edit.block} is changed more than once`);
     }
     if (edit.type === "delete") {
-      changes.set(edit.block, null);
+      changes.set(edit.block, { markdown: null, edit: index });
     } else {
       const markdown = edit.markdown.trim();
       if (!markdown) throw new DocumentEditError(`Replacing block ${edit.block} with nothing: use delete`);
-      changes.set(edit.block, markdown);
+      changes.set(edit.block, { markdown, edit: index });
     }
   }
 

@@ -10,6 +10,9 @@ import { useSyncExternalStore } from "react";
  * of them, so it lives outside React.
  *
  * Kept per suggestion, not per node, so a new suggestion starts previewed.
+ *
+ * Also which of a suggestion's changes you've left out, to accept the rest
+ * (by the edit's index). The previews show those as they are now.
  */
 
 type State = {
@@ -20,10 +23,12 @@ type State = {
    * show it. A new object each time, so turning the same one on twice counts.
    */
   shown: { proposalId: string } | null;
+  /** Suggestion → the changes left out of it. */
+  skipped: ReadonlyMap<string, ReadonlySet<number>>;
 };
 
-let state: State = { hidden: new Set(), shown: null };
-const serverState: State = { hidden: new Set(), shown: null };
+let state: State = { hidden: new Set(), shown: null, skipped: new Map() };
+const serverState: State = { hidden: new Set(), shown: null, skipped: new Map() };
 const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void) {
@@ -50,6 +55,28 @@ export function toggleEditPreview(proposalId: string) {
   const hidden = new Set(state.hidden);
   const turningOn = hidden.delete(proposalId);
   if (!turningOn) hidden.add(proposalId);
-  state = { hidden, shown: turningOn ? { proposalId } : state.shown };
+  state = { ...state, hidden, shown: turningOn ? { proposalId } : state.shown };
   listeners.forEach((listener) => listener());
+}
+
+const NONE: ReadonlySet<number> = new Set();
+
+/** The changes left out of a suggestion. */
+export function skippedEdits(preview: State, proposalId: string): ReadonlySet<number> {
+  return preview.skipped.get(proposalId) ?? NONE;
+}
+
+/** Leaves a change out of a suggestion, or puts it back. */
+export function toggleSkippedEdit(proposalId: string, edit: number) {
+  const edits = new Set(skippedEdits(state, proposalId));
+  if (!edits.delete(edit)) edits.add(edit);
+  const skipped = new Map(state.skipped);
+  skipped.set(proposalId, edits);
+  state = { ...state, skipped };
+  listeners.forEach((listener) => listener());
+}
+
+/** "Accept", or "Accept 2 of 3" when some changes are left out. */
+export function acceptLabel(skipped: ReadonlySet<number>, total: number) {
+  return skipped.size > 0 ? `Accept ${total - skipped.size} of ${total}` : "Accept";
 }

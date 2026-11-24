@@ -287,4 +287,16 @@ describe("toModelInput", () => {
   test("without an edit waiting, has no waiting edit section", () => {
     expect(toModelInput(context()).system).not.toContain("<waiting_edit");
   });
+
+  test("says when an edit was accepted in part", () => {
+    const { messages } = toModelInput(
+      context({
+        messages: [
+          { role: "user", content: "Tidy it up" },
+          { role: "assistant", content: "Done.", proposal: { reason: "Tidies", state: "accepted", kept: { count: 2, of: 3 } } },
+        ],
+      }),
+    );
+    expect(messages[1].content).toContain('outcome="accepted in part: 2 of its 3 changes, the user left out the rest"');
+  });
 });

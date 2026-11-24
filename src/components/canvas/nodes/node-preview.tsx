@@ -2,7 +2,8 @@
 
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "@convex/api";
-import { EditMarkdown } from "@/components/shared/edit-markdown";
+import { EditedBlock } from "@/components/shared/edit-markdown";
+import { skippedEdits, useEditPreview } from "@/lib/edit-preview";
 
 /** One block of a node's document after a suggested edit, marked with what happened to it. */
 export type PreviewBlock = FunctionReturnType<typeof api.proposals.pendingByThread>[number]["preview"][number];
@@ -27,18 +28,23 @@ function revealInBox(el: HTMLElement | null) {
  * content on the canvas: new text highlighted green, removed text red.
  * Read-only. `onBrand` for the blue (root and parent) nodes.
  */
-export function NodePreview({ blocks, onBrand = false }: { blocks: PreviewBlock[]; onBrand?: boolean }) {
+export function NodePreview({
+  blocks,
+  proposalId,
+  onBrand = false,
+}: {
+  blocks: PreviewBlock[];
+  /** The suggestion, for the changes left out of it (shown as they are now). */
+  proposalId: string;
+  onBrand?: boolean;
+}) {
+  const skipped = skippedEdits(useEditPreview(), proposalId);
   const firstChange = blocks.findIndex((block) => block.kind !== "same");
   return (
     <div aria-label="Preview of the suggested edit" className="node-markdown flex flex-col gap-1.5 p-2">
       {blocks.map((block, i) => (
         <div key={i} ref={i === firstChange ? revealInBox : undefined} className="flex flex-col gap-1.5 *:my-0">
-          {block.kind === "rewritten" && <EditMarkdown markdown={block.before} mark="removed" onBrand={onBrand} />}
-          <EditMarkdown
-            markdown={block.markdown}
-            mark={block.kind === "same" ? undefined : block.kind === "removed" ? "removed" : "added"}
-            onBrand={onBrand}
-          />
+          <EditedBlock block={block} skipped={block.kind !== "same" && skipped.has(block.edit)} onBrand={onBrand} />
         </div>
       ))}
     </div>

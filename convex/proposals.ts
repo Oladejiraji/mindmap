@@ -3,7 +3,7 @@ import type { MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { requireNode, requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
-import { applyEdits, describeEdits, previewEdits, type DocumentChange, type PreviewBlock } from "./lib/document";
+import { applyEdits, describeEdits, DocumentEditError, keepEdits, previewEdits, type DocumentChange, type PreviewBlock } from "./lib/document";
 import { saveContent } from "./lib/nodeContent";
 import { proposalState, type ProposalState } from "./lib/proposals";
 
@@ -20,6 +20,8 @@ export type ProposalView = {
   state: ProposalState;
   /** What would change, while the suggestion can still be accepted. */
   changes: DocumentChange[] | null;
+  /** Accepted in part: how many of its changes were kept. */
+  kept?: { count: number; of: number };
 };
 
 /** The node's suggested edits, for showing under the replies that made them. */
@@ -40,6 +42,9 @@ export const listByNode = userQuery({
         reason: proposal.reason,
         state,
         changes: state === "pending" ? describeEdits(node.content ?? "", proposal.edits) : null,
+        ...(proposal.skipped?.length && {
+          kept: { count: proposal.edits.length - proposal.skipped.length, of: proposal.edits.length },
+        }),
       };
     });
   },
@@ -84,7 +89,11 @@ export const pendingByThread = userQuery({
 });
 
 export const accept = userMutation({
-  args: { proposalId: v.id("proposals") },
+  args: {
+    proposalId: v.id("proposals"),
+    /** Changes to leave out (indices into the edits): accepting in part. */
+    skip: v.optional(v.array(v.number())),
+  },
   handler: async (ctx, args) => {
     const { proposal, node } = await requireProposal(ctx, args.proposalId);
     const state = proposalState(proposal, node);
@@ -96,8 +105,16 @@ export const accept = userMutation({
     }
     if (state !== "pending") throw new ConvexError("This edit was already answered");
 
-    await saveContent(ctx, node, applyEdits(node.content ?? "", proposal.edits));
-    await ctx.db.patch(proposal._id, { status: "accepted" });
+    const skip = [...new Set(args.skip ?? [])];
+    let edits;
+    try {
+      edits = keepEdits(proposal.edits, skip);
+    } catch (err) {
+      if (err instanceof DocumentEditError) throw new ConvexError(err.message);
+      throw err;
+    }
+    await saveContent(ctx, node, applyEdits(node.content ?? "", edits));
+    await ctx.db.patch(proposal._id, { status: "accepted", ...(skip.length > 0 && { skipped: skip }) });
     return null;
   },
 });

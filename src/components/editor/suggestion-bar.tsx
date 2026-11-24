@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { handleError } from "@/lib/handle-error";
-import { isPreviewed, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
+import { acceptLabel, isPreviewed, skippedEdits, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
 
 /**
  * Floats over a node's document while a suggested edit to it is waiting:
@@ -23,9 +23,12 @@ export function SuggestionBar({ nodeId }: { nodeId: Id<"nodes"> }) {
 
   if (!proposal) return null;
   const previewing = isPreviewed(previewState, proposal._id);
+  // Accepting leaves out the changes skipped in the document.
+  const skipped = skippedEdits(previewState, proposal._id);
+  const total = proposal.changes?.length ?? 0;
   const answer = (action: typeof accept, message: string) => () =>
     action
-      .mutate({ proposalId: proposal._id })
+      .mutate({ proposalId: proposal._id, ...(action === accept && { skip: [...skipped] }) })
       .catch((err) => handleError(err, message));
 
   return (
@@ -48,8 +51,13 @@ export function SuggestionBar({ nodeId }: { nodeId: Id<"nodes"> }) {
       <Button size="xs" variant="ghost" disabled={busy} onClick={answer(reject, "Failed to reject the edit")}>
         Reject
       </Button>
-      <Button size="xs" isLoading={accept.isPending} disabled={busy} onClick={answer(accept, "Failed to apply the edit")}>
-        Accept
+      <Button
+        size="xs"
+        isLoading={accept.isPending}
+        disabled={busy || skipped.size >= total}
+        onClick={answer(accept, "Failed to apply the edit")}
+      >
+        {acceptLabel(skipped, total)}
       </Button>
     </section>
   );

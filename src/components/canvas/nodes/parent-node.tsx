@@ -54,7 +54,7 @@ export function ParentNode({ id, data, selected }: NodeProps) {
         <div className="nowheel mt-3 max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-ring p-2 text-background shadow-node-inset [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* While previewing a suggested edit: the node as it would be. */}
           <RenderIf condition={!!preview}>
-            <NodePreview blocks={preview ?? []} onBrand />
+            <NodePreview blocks={preview ?? []} proposalId={proposalId ?? ""} onBrand />
           </RenderIf>
           <RenderIf condition={!preview}>
             <NodeContent nodeId={id} content={content} editorTheme="dark" />

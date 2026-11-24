@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEdits, describeEdits, diffBlocks, DocumentEditError, joinBlocks, previewEdits, splitBlocks } from "./document";
+import { applyEdits, describeEdits, diffBlocks, DocumentEditError, joinBlocks, keepEdits, previewEdits, splitBlocks } from "./document";
 
 const DOC = [
   "# Pricing",
@@ -112,22 +112,40 @@ describe("previewEdits", () => {
       ]),
     ).toEqual([
       { kind: "same", markdown: "# Pricing" },
-      { kind: "rewritten", markdown: "Usage-based.", before: "Seat-based." },
-      { kind: "added", markdown: "- Per seat\n- Per call" },
-      { kind: "removed", markdown: "Open questions." },
+      { kind: "rewritten", markdown: "Usage-based.", before: "Seat-based.", edit: 0 },
+      { kind: "added", markdown: "- Per seat\n- Per call", edit: 1 },
+      { kind: "removed", markdown: "Open questions.", edit: 2 },
     ]);
   });
 
   it("adds at the top, and agrees with applyEdits on what stays", () => {
     const edits = [{ type: "insert" as const, after: 0, markdown: "Summary." }];
     const preview = previewEdits(doc, edits);
-    expect(preview[0]).toEqual({ kind: "added", markdown: "Summary." });
+    expect(preview[0]).toEqual({ kind: "added", markdown: "Summary.", edit: 0 });
     const kept = preview.filter((b) => b.kind !== "removed").map((b) => b.markdown);
     expect(joinBlocks(kept)).toBe(applyEdits(doc, edits));
   });
 
   it("rejects edits that don't fit, like applyEdits", () => {
     expect(() => previewEdits(doc, [{ type: "delete", block: 9 }])).toThrow(DocumentEditError);
+  });
+});
+
+describe("keepEdits", () => {
+  const edits = [
+    { type: "delete" as const, block: 1 },
+    { type: "insert" as const, after: 0, markdown: "A" },
+    { type: "delete" as const, block: 2 },
+  ];
+
+  it("leaves out the skipped changes", () => {
+    expect(keepEdits(edits, [1])).toEqual([edits[0], edits[2]]);
+    expect(keepEdits(edits, [])).toEqual(edits);
+  });
+
+  it("refuses a change that isn't there, or skipping all of them", () => {
+    expect(() => keepEdits(edits, [3])).toThrow(DocumentEditError);
+    expect(() => keepEdits(edits, [0, 1, 2])).toThrow(DocumentEditError);
   });
 });
 
