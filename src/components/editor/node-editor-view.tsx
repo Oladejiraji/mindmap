@@ -22,6 +22,8 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { routes } from "@/lib/routes";
 import { NodeDocumentEditor } from "./node-document-editor";
 import { SuggestionBar } from "./suggestion-bar";
+import { DocumentReview } from "./document-review";
+import { isPreviewed, useEditPreview } from "@/lib/edit-preview";
 import { NodeChat } from "@/components/chat/node-chat";
 import { cn } from "@/lib/utils";
 import { Tip } from "@/components/ui/tooltip";
@@ -77,6 +79,21 @@ export function NodeEditorView({
           : "chat",
     );
     setInitializedFor(pickKey);
+  }
+
+  // A suggested edit to this node, marked in the document while it's
+  // previewed (by default; Preview buttons turn it off and on).
+  const preview = useEditPreview();
+  const { data: pending } = useAuthedConvexQuery(api.proposals.pendingByThread, { threadId });
+  const suggestion = pending?.find((p) => p.nodeId === nodeId);
+  const reviewBlocks =
+    suggestion && isPreviewed(preview, suggestion.proposalId) ? suggestion.preview : undefined;
+  // Turning this node's preview back on shows it here, on the Content tab.
+  // (Not when a suggestion arrives: that would pull you out of the chat.)
+  const [seenShown, setSeenShown] = useState(preview.shown);
+  if (seenShown !== preview.shown) {
+    setSeenShown(preview.shown);
+    if (suggestion && preview.shown?.proposalId === suggestion.proposalId) setTab("content");
   }
 
   const { ancestors, children, depth } = useMemo(() => {
@@ -321,11 +338,19 @@ export function NodeEditorView({
           <div className="min-h-0 flex-1">
             {tab === "content" ? (
               <div className="h-full overflow-y-auto overscroll-contain">
-                {/* Stays in view as the document scrolls. */}
-                <div className="sticky top-0 z-10 bg-background px-3 pt-3 empty:hidden">
+                {/* Floats at the top as the document scrolls. */}
+                <div className="sticky top-0 z-10 px-3 pt-3 empty:hidden">
                   <SuggestionBar nodeId={nodeId} />
                 </div>
-                <div className="px-5 py-5">
+                {/* While previewing a suggested edit: the document with it
+                    marked. The editor stays mounted underneath, so its
+                    cursor and undo history survive. */}
+                <RenderIf condition={!!reviewBlocks}>
+                  <div className="px-5 py-5">
+                    <DocumentReview blocks={reviewBlocks ?? []} />
+                  </div>
+                </RenderIf>
+                <div className={cn("px-5 py-5", reviewBlocks && "hidden")}>
                   <NodeDocumentEditor
                     key={nodeId}
                     markdown={node.content ?? ""}

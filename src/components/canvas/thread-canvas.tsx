@@ -46,7 +46,7 @@ import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
 import { getStorageItem, setStorageItem } from "@/lib/storage";
 import { routes } from "@/lib/routes";
-import { useEditPreview } from "@/lib/edit-preview";
+import { isPreviewed, useEditPreview } from "@/lib/edit-preview";
 import {
   ParentNode,
   LeafNode,
@@ -76,12 +76,20 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { data: nodes, isLoading } = useAuthedConvexQuery(api.nodes.listByThread, { threadId });
-  // Nodes with a suggested edit waiting: marked on the canvas.
+  // Nodes with a suggested edit waiting, each shown as it would be after
+  // it unless its preview was turned off.
   const { data: pending } = useAuthedConvexQuery(api.proposals.pendingByThread, { threadId });
-  const suggested = useMemo(() => new Set((pending ?? []).map((p) => p.nodeId as string)), [pending]);
-  // The node showing its suggested edit (from a Preview button).
-  const previewId = useEditPreview();
-  const previewBlocks = pending?.find((p) => p.nodeId === previewId)?.preview;
+  const preview = useEditPreview();
+  const suggestions = useMemo(
+    () =>
+      new Map(
+        (pending ?? []).map((p) => [
+          p.nodeId as string,
+          { proposalId: p.proposalId as string, preview: isPreviewed(preview, p.proposalId) ? p.preview : undefined },
+        ]),
+      ),
+    [pending, preview],
+  );
   // Zoom and pan per project, in this browser (they depend on screen
   // size). Without one, the map fits the screen. React Flow only mounts
   // once nodes load, on the client, so reading storage here is safe.
@@ -220,13 +228,13 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           onOpen: handleOpenNode,
           onDelete: handleDeleteNode,
           onRename: handleRenameNode,
-          hasSuggestion: suggested.has(node._id),
-          preview: node._id === previewId ? previewBlocks : undefined,
+          proposalId: suggestions.get(node._id)?.proposalId,
+          preview: suggestions.get(node._id)?.preview,
         },
         width: CANVAS_NODE_WIDTH,
       };
     });
-  }, [nodes, suggested, previewId, previewBlocks, handleOpenNode, handleDeleteNode, handleRenameNode]);
+  }, [nodes, suggestions, handleOpenNode, handleDeleteNode, handleRenameNode]);
 
   const rfEdges: RFEdge[] = useMemo(() => {
     if (!nodes) return [];
@@ -254,7 +262,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     rfNodes,
     setFlowNodes,
     nodes,
-    `${[...suggested].sort().join(",")}|${previewBlocks ? previewId : ""}|${pending?.find((p) => p.nodeId === previewId)?.proposalId ?? ""}`,
+    [...suggestions.values()].map((s) => `${s.proposalId}${s.preview ? "+" : ""}`).join(","),
   );
 
   // The panel's node is the selected one, and in view: however the panel

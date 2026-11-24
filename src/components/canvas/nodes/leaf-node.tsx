@@ -14,7 +14,7 @@ import { BorderBeam } from "border-beam";
 import { NodeContent } from "./node-content";
 
 export function LeafNode({ id, data, selected }: NodeProps) {
-  const { title, content, onOpen, onDelete, onRename, hasSuggestion, preview } = data as MindMapNodeData;
+  const { title, content, onOpen, onDelete, onRename, proposalId, preview } = data as MindMapNodeData;
 
   return (
     <div className="group" style={{ width: CANVAS_NODE_WIDTH }}>
@@ -39,8 +39,8 @@ export function LeafNode({ id, data, selected }: NodeProps) {
             />
           </div>
           <div className="flex shrink-0 items-center gap-1 pl-2">
-            <RenderIf condition={!!hasSuggestion}>
-              <EditPreviewButton nodeId={id} />
+            <RenderIf condition={!!proposalId}>
+              <EditPreviewButton proposalId={proposalId ?? ""} />
             </RenderIf>
             <NodeMenu id={id} onOpen={onOpen} onDelete={onDelete} />
           </div>

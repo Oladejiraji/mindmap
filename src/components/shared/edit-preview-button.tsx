@@ -1,23 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
+import { isPreviewed, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
 
 /**
- * Turns the canvas preview of a node's suggested edit on and off: the
- * node shows how it would look after the edit. Underlined text, so it
- * sits in a heading next to the title. `onBrand` for the blue nodes.
+ * Turns the preview of a node's suggested edit off and on again (it's on
+ * by default): the node shows how it would look after the edit.
+ * Underlined text, so it sits in the node's header. `onBrand` for the
+ * blue nodes.
  */
 export function EditPreviewButton({
-  nodeId,
+  proposalId,
   onBrand = false,
   className,
 }: {
-  nodeId: string;
+  proposalId: string;
   onBrand?: boolean;
   className?: string;
 }) {
-  const previewing = useEditPreview() === nodeId;
+  const previewing = isPreviewed(useEditPreview(), proposalId);
   return (
     <button
       type="button"
@@ -25,7 +26,7 @@ export function EditPreviewButton({
       onClick={(e) => {
         // On the canvas, a click on a node also selects it and opens its panel.
         e.stopPropagation();
-        toggleEditPreview(nodeId);
+        toggleEditPreview(proposalId);
       }}
       className={cn(
         "nodrag nopan shrink-0 cursor-pointer rounded-sm text-caption-lg leading-5 whitespace-nowrap underline decoration-1 underline-offset-2 outline-none motion-safe:animate-in motion-safe:fade-in-0",

@@ -10,8 +10,8 @@ export interface MindMapNodeData {
   onOpen?: (nodeId: string) => void;
   onDelete?: (nodeId: string) => void;
   onRename?: (nodeId: string, title: string) => void;
-  /** A suggested edit to this node is waiting for an answer. */
-  hasSuggestion?: boolean;
+  /** The suggested edit to this node waiting for an answer, if any. */
+  proposalId?: string;
   /** Shows the node as it would be after that edit, in place of its content. */
   preview?: PreviewBlock[];
   [key: string]: unknown;

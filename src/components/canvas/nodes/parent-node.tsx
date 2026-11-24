@@ -13,7 +13,7 @@ import { NodeMenu } from "./node-menu";
 import { NodeContent } from "./node-content";
 
 export function ParentNode({ id, data, selected }: NodeProps) {
-  const { title, isRoot, content, onOpen, onDelete, onRename, hasSuggestion, preview } =
+  const { title, isRoot, content, onOpen, onDelete, onRename, proposalId, preview } =
     data as MindMapNodeData;
   const isLeaf = !(data as MindMapNodeData).isParent && !isRoot;
 
@@ -44,8 +44,8 @@ export function ParentNode({ id, data, selected }: NodeProps) {
             />
           </div>
           <div className="flex shrink-0 items-center gap-1 pl-2">
-            <RenderIf condition={!!hasSuggestion}>
-              <EditPreviewButton nodeId={id} onBrand />
+            <RenderIf condition={!!proposalId}>
+              <EditPreviewButton proposalId={proposalId ?? ""} onBrand />
             </RenderIf>
             <NodeMenu id={id} onOpen={onOpen} onDelete={isLeaf ? onDelete : undefined} />
           </div>

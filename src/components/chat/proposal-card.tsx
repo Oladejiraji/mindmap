@@ -1,7 +1,5 @@
 "use client";
 
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { FunctionReturnType } from "convex/server";
 import type { Id } from "@convex/dataModel";
 import { api } from "@convex/api";
@@ -13,14 +11,13 @@ import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
-import { clearEditPreview, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
+import { isPreviewed, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
 
 /*
  * A document edit the AI suggested, under the reply that made it, shaped
- * like the node it changes: the node's title, why, how much changes, and
- * a short look at the new text. Accept and Reject answer it. Kept compact
- * so a long edit doesn't take over the chat; reviewing it in full is done
- * elsewhere. Once answered, it's one line.
+ * like the node it changes: the node's title, why, and how much changes.
+ * Accept and Reject answer it. Kept compact so a long edit doesn't take
+ * over the chat; the edit itself shows on the node and in its document. Once answered, it's one line.
  */
 
 export type Proposal = FunctionReturnType<typeof api.proposals.listByNode>[number];
@@ -73,13 +70,11 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
   const accept = useConvexMutation(api.proposals.accept);
   const reject = useConvexMutation(api.proposals.reject);
   const busy = accept.isPending || reject.isPending;
-  const previewing = useEditPreview() === nodeId;
+  const previewState = useEditPreview();
 
-  // Answering ends any preview of it on the canvas.
   const answer = (action: typeof accept, message: string) => () =>
     action
       .mutate({ proposalId: proposal._id })
-      .then(() => clearEditPreview(nodeId))
       .catch((err) => handleError(err, message));
 
   // Answered: one line, so the chat stays a conversation.
@@ -106,12 +101,9 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
     );
   }
 
+  const previewing = isPreviewed(previewState, proposal._id);
   const changes = proposal.changes ?? [];
   const counts = countChanges(changes);
-  // A look at the new text; if the edit only removes, what goes.
-  const added = changes.flatMap((c) => (c.after !== null ? [c.after] : []));
-  const removedOnly = added.length === 0;
-  const preview = removedOnly ? changes.flatMap((c) => (c.before !== null ? [c.before] : [])) : added;
 
   return (
     <section aria-label="Suggested edit" className={card}>
@@ -133,20 +125,6 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
             ))}
           </ul>
         </RenderIf>
-        {/* A few lines, fading out: enough to recognise the edit. The
-            canvas node's compact markdown (headings stay at text size),
-            at 13px. */}
-        <div
-          aria-hidden
-          className={cn(
-            "node-markdown max-h-19 overflow-hidden text-fg-primary mask-[linear-gradient(to_bottom,black_45%,transparent)]",
-            "text-[13px]! leading-[19px]! [&_:is(h1,h2,h3,h4,h5,h6)]:text-[13px]! [&_code]:text-[12px]!",
-            removedOnly && "text-fg-tertiary line-through",
-          )}
-        >
-          {/* Default escapes raw HTML: never add rehype-raw without rehype-sanitize. */}
-          <Markdown remarkPlugins={[remarkGfm]}>{preview.join("\n\n")}</Markdown>
-        </div>
       </div>
 
       <div className="flex gap-1.5 px-0.5 pb-0.5">
@@ -156,12 +134,12 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
         <Button size="xs" variant="ghost" disabled={busy} onClick={answer(reject, "Failed to reject the edit")}>
           Reject
         </Button>
-        {/* Shows the edit on the canvas node, until pressed again. */}
+        {/* The edit is shown on the node by default; this turns that off and on. */}
         <Button
           size="xs"
           variant="outline"
           aria-pressed={previewing}
-          onClick={() => toggleEditPreview(nodeId)}
+          onClick={() => toggleEditPreview(proposal._id)}
           className={cn("ml-auto", previewing && "bg-muted text-fg-primary")}
         >
           {previewing ? "Exit preview" : "Preview"}
@@ -184,7 +162,7 @@ export function ProposalPlaceholder({ nodeId }: { nodeId: Id<"nodes"> }) {
       </NodeHeading>
       <div aria-hidden className="flex flex-col gap-2 rounded-xl bg-background-2 px-3 py-2.5">
         <Skeleton className="h-3 w-3/4 rounded bg-component-hover" />
-        <Skeleton className="h-3 w-1/2 rounded bg-component-hover" />
+        <Skeleton className="h-5 w-24 rounded-full bg-component-hover" />
       </div>
       <div aria-hidden className="h-7" />
     </section>

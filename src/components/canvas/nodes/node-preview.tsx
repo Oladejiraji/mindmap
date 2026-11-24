@@ -1,10 +1,8 @@
 "use client";
 
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { FunctionReturnType } from "convex/server";
 import type { api } from "@convex/api";
-import { cn } from "@/lib/utils";
+import { EditMarkdown } from "@/components/shared/edit-markdown";
 
 /** One block of a node's document after a suggested edit, marked with what happened to it. */
 export type PreviewBlock = FunctionReturnType<typeof api.proposals.pendingByThread>[number]["preview"][number];
@@ -25,27 +23,22 @@ function revealInBox(el: HTMLElement | null) {
 }
 
 /**
- * A node's content as it would be after a suggested edit, in place of its
- * content on the canvas: new and rewritten blocks tinted, removed ones
- * struck through. Read-only. `onBrand` for the blue (root and parent) nodes.
+ * A node's content with a suggested edit marked in it, in place of its
+ * content on the canvas: new text highlighted green, removed text red.
+ * Read-only. `onBrand` for the blue (root and parent) nodes.
  */
 export function NodePreview({ blocks, onBrand = false }: { blocks: PreviewBlock[]; onBrand?: boolean }) {
   const firstChange = blocks.findIndex((block) => block.kind !== "same");
   return (
     <div aria-label="Preview of the suggested edit" className="node-markdown flex flex-col gap-1.5 p-2">
       {blocks.map((block, i) => (
-        <div
-          key={i}
-          ref={i === firstChange ? revealInBox : undefined}
-          className={cn(
-            "[&>*]:my-0",
-            (block.kind === "added" || block.kind === "rewritten") &&
-              cn("-mx-1 rounded-md px-1", onBrand ? "bg-white/20" : "bg-brand-subtle"),
-            block.kind === "removed" && cn("line-through", onBrand ? "text-white/50" : "text-fg-tertiary"),
-          )}
-        >
-          {/* Default escapes raw HTML: never add rehype-raw without rehype-sanitize. */}
-          <Markdown remarkPlugins={[remarkGfm]}>{block.markdown}</Markdown>
+        <div key={i} ref={i === firstChange ? revealInBox : undefined} className="flex flex-col gap-1.5 *:my-0">
+          {block.kind === "rewritten" && <EditMarkdown markdown={block.before} mark="removed" onBrand={onBrand} />}
+          <EditMarkdown
+            markdown={block.markdown}
+            mark={block.kind === "same" ? undefined : block.kind === "removed" ? "removed" : "added"}
+            onBrand={onBrand}
+          />
         </div>
       ))}
     </div>
