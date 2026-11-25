@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { documentEditValidator } from "./lib/document";
+import { proposedBranchValidator } from "./lib/proposals";
 
 export const proposalStatusValidator = v.union(
   v.literal("pending"),
@@ -156,6 +157,14 @@ export default defineSchema({
     /** While streaming: the model has started writing a document edit. Cleared when the reply finishes. */
     draftingEdit: v.optional(v.boolean()),
     /**
+     * While the model writes its suggestion: what's arrived so far (the
+     * reason, how many edits, the branch titles), so the chat can fill in
+     * the card as it comes. Cleared when the reply finishes.
+     */
+    draftSuggestion: v.optional(
+      v.object({ reason: v.optional(v.string()), edits: v.number(), branches: v.array(v.string()) }),
+    ),
+    /**
      * A reply that ended early: the model call failed, or the user stopped
      * it. The text written so far is kept. Failed replies are left out of
      * what the AI reads; stopped ones stay in.
@@ -164,9 +173,10 @@ export default defineSchema({
   }).index("by_chatId_and_index", ["chatId", "index"]),
 
   /**
-   * An edit to a node's document that the AI suggested in a reply. The user
-   * accepts or rejects it. It only applies to the document version it was
-   * made against: if the document changed since, it's out of date.
+   * What the AI suggested in a reply in a node's chat: edits to the node's
+   * document, new branches under it, or both (see lib/proposals). The user
+   * accepts (all or part) or rejects it. Document edits only apply to the
+   * version they were made against: if it changed since, it's out of date.
    */
   proposals: defineTable({
     nodeId: v.id("nodes"),
@@ -176,10 +186,15 @@ export default defineSchema({
     baseVersion: v.number(),
     /** One line on why, shown to the user. */
     reason: v.string(),
+    /** Edits to the document. Empty when it only adds branches. */
     edits: v.array(documentEditValidator),
+    /** New children of the node, each with a starting document. */
+    branches: v.optional(v.array(proposedBranchValidator)),
     status: proposalStatusValidator,
-    /** Accepted without these changes (indices into `edits`). */
+    /** Accepted without these edits (indices into `edits`). */
     skipped: v.optional(v.array(v.number())),
+    /** Accepted without these branches (indices into `branches`). */
+    skippedBranches: v.optional(v.array(v.number())),
   })
     .index("by_nodeId_and_status", ["nodeId", "status"])
     .index("by_messageId", ["messageId"]),

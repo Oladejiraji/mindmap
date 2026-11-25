@@ -111,4 +111,32 @@ export function placeBranch(parent: NodeBox, siblings: NodeBox[], all: NodeBox[]
   return { x, y };
 }
 
+/**
+ * Where `count` new children of `parentId` go, one after another, as
+ * placeBranch would put them. From the saved and laid-out positions (not
+ * what's measured on screen), so the canvas's preview of suggested
+ * branches and accepting them agree on where they land.
+ */
+export function placeBranches(nodes: Doc<"nodes">[], parentId: string, count: number): LayoutPosition[] {
+  const positions = layoutNodes(nodes);
+  const boxes: NodeBox[] = nodes.map((node) => ({
+    id: node._id,
+    ...positions.get(node._id)!,
+    width: NODE_WIDTH,
+    height: estimatedHeight(node),
+  }));
+  const parent = boxes.find((box) => box.id === parentId);
+  if (!parent) return [];
+  const siblings = boxes.filter((box) => nodes.find((n) => n._id === box.id)?.parentId === parentId);
+  const out: LayoutPosition[] = [];
+  for (let i = 0; i < count; i++) {
+    const position = placeBranch(parent, siblings, boxes);
+    const box = { id: `new-${i}`, ...position, width: NODE_WIDTH, height: NODE_HEIGHT };
+    siblings.push(box);
+    boxes.push(box);
+    out.push(position);
+  }
+  return out;
+}
+
 export { NODE_WIDTH, NODE_HEIGHT };

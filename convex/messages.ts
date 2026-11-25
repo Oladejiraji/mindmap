@@ -3,7 +3,7 @@ import { ConvexError } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { documentEditValidator } from "./lib/document";
+import { proposalContentValidator } from "./lib/proposals";
 import { requireNode } from "./lib/auth";
 import { userQuery } from "./lib/functions";
 import { countReply } from "./lib/replying";
@@ -72,9 +72,28 @@ export const startDraftingEdit = internalMutation({
 });
 
 /**
- * Closes a reply with its final text and the document edit it suggested,
- * if any. A new suggestion replaces any unanswered one for the same node:
- * only one can apply cleanly, and the newest reflects the conversation.
+ * Saves what's arrived of the suggestion the model is writing, so the
+ * chat can fill in the card as it comes. Says whether the reply was closed
+ * (stopped or timed out) meanwhile.
+ */
+export const patchDraftSuggestion = internalMutation({
+  args: {
+    messageId: v.id("messages"),
+    draft: v.object({ reason: v.optional(v.string()), edits: v.number(), branches: v.array(v.string()) }),
+  },
+  handler: async (ctx, args): Promise<{ closed: boolean }> => {
+    const message = await getMessage(ctx, args.messageId);
+    if (!message.isStreaming) return { closed: true };
+    await ctx.db.patch(args.messageId, { draftSuggestion: args.draft });
+    return { closed: false };
+  },
+});
+
+/**
+ * Closes a reply with its final text and what it suggested (document
+ * edits, branches), if any. A new suggestion replaces any unanswered one
+ * for the same node: only one can apply cleanly, and the newest reflects
+ * the conversation.
  * Does nothing if the reply was already closed (stopped or timed out).
  */
 export const finishStreamingMessage = internalMutation({
@@ -83,13 +102,7 @@ export const finishStreamingMessage = internalMutation({
     content: v.string(),
     /** The model call failed. The text so far is kept. */
     failed: v.optional(v.boolean()),
-    proposal: v.optional(
-      v.object({
-        baseVersion: v.number(),
-        reason: v.string(),
-        edits: v.array(documentEditValidator),
-      }),
-    ),
+    proposal: v.optional(proposalContentValidator),
   },
   handler: async (ctx, args) => {
     const message = await getMessage(ctx, args.messageId);
@@ -140,7 +153,12 @@ export async function closeReply(
   message: Doc<"messages">,
   fields: { content?: string; interrupted?: "failed" | "stopped" },
 ) {
-  await ctx.db.patch(message._id, { ...fields, isStreaming: false, draftingEdit: undefined });
+  await ctx.db.patch(message._id, {
+    ...fields,
+    isStreaming: false,
+    draftingEdit: undefined,
+    draftSuggestion: undefined,
+  });
   const chat = await ctx.db.get(message.chatId);
   if (!chat) throw new ConvexError("Chat not found");
   await ctx.db.patch(chat._id, { isStreaming: false });

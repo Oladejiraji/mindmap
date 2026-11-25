@@ -39,13 +39,13 @@ async function setup() {
 
   const alice = t.withIdentity({ subject: "alice" });
 
-  /** An assistant reply that suggests the given edits, as the chat action records it. */
-  const suggest = async (edits: DocumentEdit[], baseVersion = 3) => {
+  /** An assistant reply that suggests the given edits (and branches), as the chat action records it. */
+  const suggest = async (edits: DocumentEdit[], baseVersion = 3, branches?: { title: string; content: string }[]) => {
     const messageId = await startReply();
     await t.mutation(internal.messages.finishStreamingMessage, {
       messageId,
       content: "Reply",
-      proposal: { baseVersion, reason: "Record the switch", edits },
+      proposal: { baseVersion, reason: "Record the switch", edits, ...(branches && { branches }) },
     });
     const proposal = await t.run((ctx) =>
       ctx.db.query("proposals").withIndex("by_messageId", (q) => q.eq("messageId", messageId)).unique(),
@@ -218,6 +218,51 @@ describe("node content", () => {
   });
 });
 
+describe("branches", () => {
+  const BRANCHES = [
+    { title: "Budget", content: "What it costs." },
+    { title: "Packing", content: "What to bring." },
+  ];
+  const children = (t: Awaited<ReturnType<typeof setup>>["t"], parentId: Id<"nodes">) =>
+    t.run((ctx) => ctx.db.query("nodes").withIndex("by_parentId", (q) => q.eq("parentId", parentId)).take(10));
+
+  test("accepting adds the kept branches as children, with their documents and positions", async () => {
+    const { t, alice, nodeId, suggest, node } = await setup();
+    const id = await suggest(SWITCH, 3, BRANCHES);
+    await alice.mutation(api.proposals.accept, {
+      proposalId: id,
+      skipBranches: [1],
+      positions: [{ branch: 0, position: { x: 10, y: 20 } }],
+    });
+    const added = await children(t, nodeId);
+    expect(added).toHaveLength(1);
+    expect(added[0]).toMatchObject({ title: "Budget", content: "What it costs.", position: { x: 10, y: 20 }, userId: "alice" });
+    expect((await node())?.content).toContain("Usage-based.");
+    const [view] = await alice.query(api.proposals.listByNode, { nodeId });
+    expect(view.kept).toEqual({ count: 2, of: 3 });
+  });
+
+  test("branches alone: no document change, and never out of date", async () => {
+    const { t, alice, nodeId, suggest, node } = await setup();
+    const id = await suggest([], 3, BRANCHES);
+    await alice.mutation(api.nodes.updateContent, { nodeId, content: "# Pricing\n\nRewritten by hand." });
+    const [view] = await alice.query(api.proposals.listByNode, { nodeId });
+    expect(view).toMatchObject({ state: "pending", changes: [], branches: BRANCHES });
+    await alice.mutation(api.proposals.accept, { proposalId: id });
+    expect(await children(t, nodeId)).toHaveLength(2);
+    expect((await node())?.content).toBe("# Pricing\n\nRewritten by hand.");
+  });
+
+  test("won't accept with every edit and branch left out", async () => {
+    const { alice, suggest, status } = await setup();
+    const id = await suggest(SWITCH, 3, BRANCHES);
+    await expect(
+      alice.mutation(api.proposals.accept, { proposalId: id, skip: [0], skipBranches: [0, 1] }),
+    ).rejects.toThrow();
+    expect(await status(id)).toBe("pending");
+  });
+});
+
 describe("pendingByThread", () => {
   test("lists the edit waiting on each node, and only the caller's", async () => {
     const { t, alice, bob, threadId, nodeId, suggest } = await setup();
@@ -234,6 +279,7 @@ describe("pendingByThread", () => {
           { kind: "same", markdown: "Seat-based." },
           { kind: "removed", markdown: "Open questions.", edit: 0 },
         ],
+        branches: [],
       },
     ]);
 

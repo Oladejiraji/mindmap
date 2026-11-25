@@ -5,12 +5,13 @@ import { requireNode, requireThread } from "./lib/auth";
 import { userMutation, userQuery } from "./lib/functions";
 import { applyEdits, describeEdits, DocumentEditError, keepEdits, previewEdits, type DocumentChange, type PreviewBlock } from "./lib/document";
 import { saveContent } from "./lib/nodeContent";
-import { proposalState, type ProposalState } from "./lib/proposals";
+import { proposalState, type ProposalState, type ProposedBranch } from "./lib/proposals";
 
 /*
- * Document edits the AI suggested in a node's chat. The user accepts or
- * rejects each one. Accepting writes the edit to the document; the open
- * editors pick it up from there.
+ * What the AI suggested in a node's chat: edits to the node's document,
+ * new branches under it, or both. The user accepts (all or part) or
+ * rejects each suggestion. Accepting writes the edits to the document (the
+ * open editors pick them up from there) and adds the branches as children.
  */
 
 export type ProposalView = {
@@ -18,9 +19,11 @@ export type ProposalView = {
   messageId: Id<"messages">;
   reason: string;
   state: ProposalState;
-  /** What would change, while the suggestion can still be accepted. */
+  /** What would change in the document, while the suggestion can still be accepted. */
   changes: DocumentChange[] | null;
-  /** Accepted in part: how many of its changes were kept. */
+  /** The branches it would add, while it can still be accepted. */
+  branches: ProposedBranch[] | null;
+  /** Accepted in part: how many of its changes (edits and branches) were kept. */
   kept?: { count: number; of: number };
 };
 
@@ -41,28 +44,43 @@ export const listByNode = userQuery({
         messageId: proposal.messageId,
         reason: proposal.reason,
         state,
-        changes: state === "pending" ? describeEdits(node.content ?? "", proposal.edits) : null,
-        ...(proposal.skipped?.length && {
-          kept: { count: proposal.edits.length - proposal.skipped.length, of: proposal.edits.length },
-        }),
+        changes: state !== "pending" ? null : proposal.edits.length > 0 ? describeEdits(node.content ?? "", proposal.edits) : [],
+        branches: state === "pending" ? (proposal.branches ?? []) : null,
+        ...keptOf(proposal),
       };
     });
   },
 });
 
+/** Accepted in part: how many of its edits and branches were kept. */
+function keptOf(proposal: Doc<"proposals">): Pick<ProposalView, "kept"> {
+  const of = proposal.edits.length + (proposal.branches?.length ?? 0);
+  const left = (proposal.skipped?.length ?? 0) + (proposal.skippedBranches?.length ?? 0);
+  return left > 0 ? { kept: { count: of - left, of } } : {};
+}
+
 /**
- * The suggested edits still waiting for an answer across a project, one
- * per node at most (a newer one replaces the older), so the canvas can
- * mark those nodes and preview them: `preview` is the node's document
- * after the edit, block by block. Out-of-date ones are left out: they
- * can't be accepted.
+ * The suggestions still waiting for an answer across a project, one per
+ * node at most (a newer one replaces the older), so the canvas can mark
+ * those nodes and preview them: `preview` is the node's document after
+ * the edits, block by block (null without edits), and `branches` the
+ * children it would add. Out-of-date ones are left out: they can't be
+ * accepted.
  */
 export const pendingByThread = userQuery({
   args: { threadId: v.id("threads") },
   handler: async (
     ctx,
     args,
-  ): Promise<{ nodeId: Id<"nodes">; proposalId: Id<"proposals">; reason: string; preview: PreviewBlock[] }[]> => {
+  ): Promise<
+    {
+      nodeId: Id<"nodes">;
+      proposalId: Id<"proposals">;
+      reason: string;
+      preview: PreviewBlock[] | null;
+      branches: ProposedBranch[];
+    }[]
+  > => {
     await requireThread(ctx, args.threadId);
     const nodes = await ctx.db
       .query("nodes")
@@ -80,7 +98,8 @@ export const pendingByThread = userQuery({
           nodeId: node._id,
           proposalId: proposal._id,
           reason: proposal.reason,
-          preview: previewEdits(node.content ?? "", proposal.edits),
+          preview: proposal.edits.length > 0 ? previewEdits(node.content ?? "", proposal.edits) : null,
+          branches: proposal.branches ?? [],
         });
       }
     }
@@ -91,8 +110,14 @@ export const pendingByThread = userQuery({
 export const accept = userMutation({
   args: {
     proposalId: v.id("proposals"),
-    /** Changes to leave out (indices into the edits): accepting in part. */
+    /** Edits to leave out (indices into the edits): accepting in part. */
     skip: v.optional(v.array(v.number())),
+    /** Branches to leave out (indices into the branches). */
+    skipBranches: v.optional(v.array(v.number())),
+    /** Where to put the new branches on the canvas (by index); placed automatically without. */
+    positions: v.optional(
+      v.array(v.object({ branch: v.number(), position: v.object({ x: v.number(), y: v.number() }) })),
+    ),
   },
   handler: async (ctx, args) => {
     const { proposal, node } = await requireProposal(ctx, args.proposalId);
@@ -106,15 +131,38 @@ export const accept = userMutation({
     if (state !== "pending") throw new ConvexError("This edit was already answered");
 
     const skip = [...new Set(args.skip ?? [])];
+    const skipBranches = [...new Set(args.skipBranches ?? [])];
+    const branches = (proposal.branches ?? []).map((branch, index) => ({ ...branch, index }));
     let edits;
+    let keptBranches;
     try {
       edits = keepEdits(proposal.edits, skip);
+      keptBranches = keepEdits(branches, skipBranches);
     } catch (err) {
       if (err instanceof DocumentEditError) throw new ConvexError(err.message);
       throw err;
     }
-    await saveContent(ctx, node, applyEdits(node.content ?? "", edits));
-    await ctx.db.patch(proposal._id, { status: "accepted", ...(skip.length > 0 && { skipped: skip }) });
+    if (edits.length === 0 && keptBranches.length === 0) {
+      throw new ConvexError("Every change is left out: reject the suggestion instead");
+    }
+
+    if (edits.length > 0) await saveContent(ctx, node, applyEdits(node.content ?? "", edits));
+    for (const branch of keptBranches) {
+      await ctx.db.insert("nodes", {
+        userId: node.userId,
+        threadId: node.threadId,
+        parentId: node._id,
+        title: branch.title,
+        content: branch.content,
+        contentVersion: 1,
+        position: args.positions?.find((p) => p.branch === branch.index)?.position,
+      });
+    }
+    await ctx.db.patch(proposal._id, {
+      status: "accepted",
+      ...(skip.length > 0 && { skipped: skip }),
+      ...(skipBranches.length > 0 && { skippedBranches: skipBranches }),
+    });
     return null;
   },
 });

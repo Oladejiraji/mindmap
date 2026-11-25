@@ -11,10 +11,12 @@ import { useSyncExternalStore } from "react";
  *
  * Kept per suggestion, not per node, so a new suggestion starts previewed.
  *
- * Also which of a suggestion's changes you've left out, to accept the rest
- * (by the edit's index). The previews show those as they are now.
+ * Also which of a suggestion's changes you've left out, to accept the rest:
+ * its document edits and its branches, each by index. The previews show
+ * left-out edits as the document is now, and left-out branches faded.
  */
 
+export type EditPreviewState = State;
 type State = {
   /** Suggestions whose preview was turned off. */
   hidden: ReadonlySet<string>;
@@ -76,7 +78,20 @@ export function toggleSkippedEdit(proposalId: string, edit: number) {
   listeners.forEach((listener) => listener());
 }
 
-/** "Accept", or "Accept 2 of 3" when some changes are left out. */
-export function acceptLabel(skipped: ReadonlySet<number>, total: number) {
-  return skipped.size > 0 ? `Accept ${total - skipped.size} of ${total}` : "Accept";
+// Branches are kept under their own key, so their indices don't mix with the edits'.
+const branchesKey = (proposalId: string) => `${proposalId}#branches`;
+
+/** The branches left out of a suggestion. */
+export function skippedBranches(preview: State, proposalId: string): ReadonlySet<number> {
+  return skippedEdits(preview, branchesKey(proposalId));
+}
+
+/** Leaves a branch out of a suggestion, or puts it back. */
+export function toggleSkippedBranch(proposalId: string, branch: number) {
+  toggleSkippedEdit(branchesKey(proposalId), branch);
+}
+
+/** "Accept", or "Accept 2 of 3" when some changes (edits or branches) are left out. */
+export function acceptLabel(skipped: number, total: number) {
+  return skipped > 0 ? `Accept ${total - skipped} of ${total}` : "Accept";
 }

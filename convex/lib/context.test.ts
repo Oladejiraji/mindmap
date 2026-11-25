@@ -139,11 +139,17 @@ describe("buildPromptContext", () => {
         status: "pending",
       });
     });
-    expect((await build(t, leaf))?.draft).toEqual({ markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget" });
+    expect((await build(t, leaf))?.draft).toEqual({ markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget", branches: [] });
 
     // Out of date (the document moved on): no draft.
     await t.run((ctx) => ctx.db.patch(leaf, { contentVersion: 2 }));
     expect((await build(t, leaf))?.draft).toBeUndefined();
+  });
+
+  test("lists the current node's children by title", async () => {
+    const { t, usage, leaf } = await setupTree();
+    expect((await build(t, usage))?.children).toEqual(["Per API call"]);
+    expect((await build(t, leaf))?.children).toEqual([]);
   });
 
   test("a node without a chat has no messages", async () => {
@@ -167,6 +173,7 @@ describe("toModelInput", () => {
       { nodeId, title: "Usage-based", markdown: "" },
     ],
     current: { nodeId, title: "Per API call", markdown: "$0.002 per call." },
+    children: [],
     contentVersion: 0,
     messages: [{ role: "user", content: "Too cheap?" }],
     ...overrides,
@@ -272,20 +279,20 @@ describe("toModelInput", () => {
         ],
       }),
     );
-    expect(messages[1].content).toBe('Yes.\n\n<document_edit outcome="rejected">Record the switch</document_edit>');
+    expect(messages[1].content).toBe('Yes.\n\n<suggestion outcome="rejected">Record the switch</suggestion>');
     expect(messages[3].content).toContain('outcome="out of date: the document changed before the user answered"');
   });
 
   test("with an edit waiting, shows and numbers the draft, and says so", () => {
     const { system } = toModelInput(
-      context({ draft: { markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget" } }),
+      context({ draft: { markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget", branches: [] } }),
     );
     expect(system).toContain('<block n="2">\nBudget: $500.\n</block>');
-    expect(system).toContain('<waiting_edit reason="Adds a budget" />');
+    expect(system).toContain('<waiting_suggestion reason="Adds a budget">');
   });
 
   test("without an edit waiting, has no waiting edit section", () => {
-    expect(toModelInput(context()).system).not.toContain("<waiting_edit");
+    expect(toModelInput(context()).system).not.toContain("<waiting_suggestion");
   });
 
   test("says when an edit was accepted in part", () => {
@@ -298,5 +305,10 @@ describe("toModelInput", () => {
       }),
     );
     expect(messages[1].content).toContain('outcome="accepted in part: 2 of its 3 changes, the user left out the rest"');
+  });
+
+  test("lists the children, so branches aren't suggested twice", () => {
+    expect(toModelInput(context({ children: ["Budget"] })).system).toContain('<children>\n<child title="Budget" />\n</children>');
+    expect(toModelInput(context()).system).not.toContain("<children>\n");
   });
 });

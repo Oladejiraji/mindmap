@@ -11,13 +11,25 @@ import { useConvexMutation } from "@/lib/use-convex-mutation";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
 import { handleError } from "@/lib/handle-error";
 import { cn } from "@/lib/utils";
-import { acceptLabel, isPreviewed, skippedEdits, toggleEditPreview, useEditPreview } from "@/lib/edit-preview";
+import {
+  acceptLabel,
+  isPreviewed,
+  skippedBranches,
+  skippedEdits,
+  toggleEditPreview,
+  toggleSkippedBranch,
+  useEditPreview,
+} from "@/lib/edit-preview";
+import { acceptArgs } from "@/lib/accept-suggestion";
+import { markdownToPlainText } from "@/lib/markdown";
 
 /*
- * A document edit the AI suggested, under the reply that made it, shaped
- * like the node it changes: the node's title, why, and how much changes.
- * Accept and Reject answer it. Kept compact so a long edit doesn't take
- * over the chat; the edit itself shows on the node and in its document. Once answered, it's one line.
+ * What the AI suggested, under the reply that made it, shaped like the
+ * node it changes: the node's title, why, how much of its document
+ * changes, and the branches it would add (each can be skipped). Accept and
+ * Reject answer it. Kept compact so a long edit doesn't take over the
+ * chat; the edit itself shows on the node and in its document, the
+ * branches as ghosts on the canvas. Once answered, it's one line.
  */
 
 export type Proposal = FunctionReturnType<typeof api.proposals.listByNode>[number];
@@ -71,13 +83,23 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
   const reject = useConvexMutation(api.proposals.reject);
   const busy = accept.isPending || reject.isPending;
   const previewState = useEditPreview();
+  // For where accepted branches go: where the canvas shows them.
+  const { data: node } = useAuthedConvexQuery(api.nodes.get, { nodeId });
+  const { data: nodes } = useAuthedConvexQuery(
+    api.nodes.listByThread,
+    node ? { threadId: node.threadId } : "skip",
+  );
 
-  // Accepting leaves out the changes skipped in the document.
-  const skipped = skippedEdits(previewState, proposal._id);
+  const branches = proposal.branches ?? [];
+  // Accepting leaves out the edits skipped in the document and the
+  // branches skipped here or on the canvas.
+  const skippedBranchSet = skippedBranches(previewState, proposal._id);
+  const skippedCount = skippedEdits(previewState, proposal._id).size + skippedBranchSet.size;
   const answer = (action: typeof accept, message: string) => () =>
-    action
-      .mutate({ proposalId: proposal._id, ...(action === accept && { skip: [...skipped] }) })
-      .catch((err) => handleError(err, message));
+    (action === accept
+      ? accept.mutate(acceptArgs(proposal._id, nodeId, branches.length, nodes, previewState))
+      : reject.mutate({ proposalId: proposal._id })
+    ).catch((err) => handleError(err, message));
 
   // Answered: one line, so the chat stays a conversation.
   if (proposal.state !== "pending") {
@@ -109,11 +131,13 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
   const previewing = isPreviewed(previewState, proposal._id);
   const changes = proposal.changes ?? [];
   const counts = countChanges(changes);
+  const total = changes.length + branches.length;
+  const label = branches.length === 0 ? "suggested edit" : changes.length === 0 ? "suggests branches" : "suggested changes";
 
   return (
     <section aria-label="Suggested edit" className={card}>
       <NodeHeading nodeId={nodeId}>
-        <span className="shrink-0 text-caption-lg text-fg-tertiary">· suggested edit</span>
+        <span className="shrink-0 text-caption-lg text-fg-tertiary">· {label}</span>
       </NodeHeading>
 
       <div className="flex flex-col gap-2 rounded-xl bg-background-2 px-3 py-2.5">
@@ -130,16 +154,49 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
             ))}
           </ul>
         </RenderIf>
+        <RenderIf condition={branches.length > 0}>
+          <ul aria-label="Branches" className="flex flex-col gap-1">
+            {branches.map((branch, i) => {
+              const skipped = skippedBranchSet.has(i);
+              return (
+                <li key={i} className="group/branch flex items-start gap-2 rounded-lg bg-white px-2 py-1.5">
+                  <span aria-hidden className={cn("mt-0.5 flex size-4 shrink-0 items-center justify-center", skipped && "opacity-40")}>
+                    <BranchIcon pathClassName="fill-fg-tertiary" />
+                  </span>
+                  <div className={cn("min-w-0 flex-1 transition-opacity", skipped && "opacity-40")}>
+                    <p className="truncate text-caption-lg font-medium text-fg-primary">{branch.title}</p>
+                    <p className="truncate text-caption-lg text-fg-tertiary">{markdownToPlainText(branch.content)}</p>
+                  </div>
+                  <RenderIf condition={branches.length + changes.length > 1}>
+                    <button
+                      type="button"
+                      aria-pressed={skipped}
+                      aria-label={skipped ? `Put back ${branch.title}` : `Skip ${branch.title}`}
+                      onClick={() => toggleSkippedBranch(proposal._id, i)}
+                      className={cn(
+                        "shrink-0 cursor-pointer text-caption-lg leading-5 text-fg-secondary outline-none hover:text-fg-primary focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring/50",
+                        // Skipped: always shown, so it's clear how to undo.
+                        !skipped && "opacity-0 group-hover/branch:opacity-100",
+                      )}
+                    >
+                      {skipped ? "Undo" : "Skip"}
+                    </button>
+                  </RenderIf>
+                </li>
+              );
+            })}
+          </ul>
+        </RenderIf>
       </div>
 
       <div className="flex gap-1.5 px-0.5 pb-0.5">
         <Button
           size="xs"
           isLoading={accept.isPending}
-          disabled={busy || skipped.size >= changes.length}
-          onClick={answer(accept, "Failed to apply the edit")}
+          disabled={busy || skippedCount >= total}
+          onClick={answer(accept, "Failed to apply the suggestion")}
         >
-          {acceptLabel(skipped, changes.length)}
+          {acceptLabel(skippedCount, total)}
         </Button>
         <Button size="xs" variant="ghost" disabled={busy} onClick={answer(reject, "Failed to reject the edit")}>
           Reject
@@ -159,20 +216,52 @@ export function ProposalCard({ proposal, nodeId }: { proposal: Proposal; nodeId:
   );
 }
 
+/** What's arrived of a suggestion the model is still writing. */
+export type DraftSuggestion = { reason?: string; edits: number; branches: string[] };
+
 /**
- * Stands in for a suggested edit while the model is still writing it (a
- * few seconds after the reply text ends). Same shape as the card, so the
- * real one replaces it without a jump.
+ * Stands in for a suggestion while the model is still writing it (a few
+ * seconds after the reply text ends), filling in as it arrives: the
+ * reason, how many edits so far, the branch titles. Same shape as the
+ * card, so the real one replaces it without a jump.
  */
-export function ProposalPlaceholder({ nodeId }: { nodeId: Id<"nodes"> }) {
+export function ProposalPlaceholder({ nodeId, draft }: { nodeId: Id<"nodes">; draft?: DraftSuggestion }) {
+  const edits = draft?.edits ?? 0;
+  const branches = draft?.branches ?? [];
   return (
-    <section aria-label="Drafting an edit" role="status" className={card}>
+    <section aria-label="Drafting a suggestion" role="status" className={card}>
       <NodeHeading nodeId={nodeId}>
-        <span className="gradient-text-shimmer shrink-0 text-caption-lg">· drafting an edit…</span>
+        <span className="gradient-text-shimmer shrink-0 text-caption-lg">
+          · drafting {branches.length > 0 && edits === 0 ? "branches" : "an edit"}…
+        </span>
       </NodeHeading>
-      <div aria-hidden className="flex flex-col gap-2 rounded-xl bg-background-2 px-3 py-2.5">
-        <Skeleton className="h-3 w-3/4 rounded bg-component-hover" />
-        <Skeleton className="h-5 w-24 rounded-full bg-component-hover" />
+      <div className="flex flex-col gap-2 rounded-xl bg-background-2 px-3 py-2.5">
+        <RenderIf condition={!!draft?.reason}>
+          <p className="text-caption-lg text-fg-secondary">{draft?.reason}</p>
+        </RenderIf>
+        <RenderIf condition={!draft?.reason}>
+          <Skeleton aria-hidden className="my-0.5 h-3 w-3/4 rounded bg-component-hover" />
+        </RenderIf>
+        <RenderIf condition={edits > 0}>
+          <span className="w-fit rounded-full bg-white px-2 text-caption-lg leading-5 text-fg-secondary inset-ring-[0.5px] inset-ring-border-default">
+            {edits} {edits === 1 ? "change" : "changes"}
+          </span>
+        </RenderIf>
+        <RenderIf condition={branches.length > 0}>
+          <ul aria-label="Branches" className="flex flex-col gap-1">
+            {branches.map((title, i) => (
+              <li key={i} className="flex items-center gap-2 rounded-lg bg-white px-2 py-1.5 motion-safe:animate-in motion-safe:fade-in-0">
+                <span aria-hidden className="flex size-4 shrink-0 items-center justify-center">
+                  <BranchIcon pathClassName="fill-fg-tertiary" />
+                </span>
+                <span className="min-w-0 truncate text-caption-lg font-medium text-fg-primary">{title}</span>
+              </li>
+            ))}
+          </ul>
+        </RenderIf>
+        <RenderIf condition={!draft}>
+          <Skeleton aria-hidden className="h-5 w-24 rounded-full bg-component-hover" />
+        </RenderIf>
       </div>
       <div aria-hidden className="h-7" />
     </section>

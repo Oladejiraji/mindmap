@@ -143,9 +143,9 @@ describe("keepEdits", () => {
     expect(keepEdits(edits, [])).toEqual(edits);
   });
 
-  it("refuses a change that isn't there, or skipping all of them", () => {
+  it("refuses a change that isn't there", () => {
     expect(() => keepEdits(edits, [3])).toThrow(DocumentEditError);
-    expect(() => keepEdits(edits, [0, 1, 2])).toThrow(DocumentEditError);
+    expect(keepEdits(edits, [0, 1, 2])).toEqual([]);
   });
 });
 

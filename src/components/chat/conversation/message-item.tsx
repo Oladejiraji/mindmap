@@ -43,7 +43,7 @@ export function MessageItem({
       <MessageBubble message={message} />
       {proposal && <ProposalCard proposal={proposal} nodeId={nodeId} />}
       <RenderIf condition={!proposal && !!message.isStreaming && !!message.draftingEdit}>
-        <ProposalPlaceholder nodeId={nodeId} />
+        <ProposalPlaceholder nodeId={nodeId} draft={message.draftSuggestion} />
       </RenderIf>
       <RenderIf condition={message.interrupted !== undefined}>
         <ReplyInterrupted failed={message.interrupted === "failed"} onRetry={onRetry} />

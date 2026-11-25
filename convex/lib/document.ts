@@ -165,19 +165,17 @@ export function diffBlocks(before: string, after: string): DocumentEdit[] {
 }
 
 /**
- * The edits to keep when accepting a suggestion, leaving out the ones at
- * `skip` (indices into the edits). Throws DocumentEditError for an index
- * that isn't there, or when nothing is left.
+ * The items to keep when accepting a suggestion in part, leaving out the
+ * ones at `skip` (indices). Throws DocumentEditError for an index that
+ * isn't there.
  */
-export function keepEdits(edits: DocumentEdit[], skip: number[]): DocumentEdit[] {
+export function keepEdits<T>(items: T[], skip: number[]): T[] {
   for (const i of skip) {
-    if (!Number.isInteger(i) || i < 0 || i >= edits.length) {
-      throw new DocumentEditError(`There's no change ${i}: the suggestion has ${edits.length}`);
+    if (!Number.isInteger(i) || i < 0 || i >= items.length) {
+      throw new DocumentEditError(`There's no change ${i}: there are ${items.length}`);
     }
   }
-  const kept = edits.filter((_, i) => !skip.includes(i));
-  if (kept.length === 0) throw new DocumentEditError("Every change is left out: reject the suggestion instead");
-  return kept;
+  return items.filter((_, i) => !skip.includes(i));
 }
 
 /** A planned change: its markdown (null when deleted) and which edit made it. */

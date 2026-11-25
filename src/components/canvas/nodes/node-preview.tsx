@@ -6,7 +6,7 @@ import { EditedBlock } from "@/components/shared/edit-markdown";
 import { skippedEdits, useEditPreview } from "@/lib/edit-preview";
 
 /** One block of a node's document after a suggested edit, marked with what happened to it. */
-export type PreviewBlock = FunctionReturnType<typeof api.proposals.pendingByThread>[number]["preview"][number];
+export type PreviewBlock = NonNullable<FunctionReturnType<typeof api.proposals.pendingByThread>[number]["preview"]>[number];
 
 /**
  * Scrolls the node's content box (not the page or canvas) so the first

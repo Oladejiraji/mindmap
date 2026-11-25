@@ -35,7 +35,10 @@ export function useSyncConvexToFlow(
           .filter((n) => incoming.has(n.id))
           .map((existing) => {
             const next = incoming.get(existing.id)!;
-            return { ...existing, data: next.data, type: next.type };
+            // A suggested branch follows where it would go (its parent or
+            // siblings may have moved); real nodes keep where they're put.
+            const position = next.type === "ghost" ? next.position : existing.position;
+            return { ...existing, data: next.data, type: next.type, position };
           });
         for (const n of rfNodes) {
           if (!prevIds.has(n.id)) merged.push({ ...n, type: n.type ?? "leaf" });

@@ -80,7 +80,8 @@ export function FullNodeChat({
     api.proposals.pendingByThread,
     node ? { threadId: node.threadId } : "skip",
   );
-  const waitingId = pending && (pending.find((p) => p.nodeId === nodeId)?.proposalId ?? null);
+  // Only one that edits the document: branches alone have nothing to show there.
+  const waitingId = pending && (pending.find((p) => p.nodeId === nodeId && p.preview)?.proposalId ?? null);
 
   // The sheet also opens on its own for a suggestion that arrives while
   // you're here, or when its preview is turned back on. Once: closing it

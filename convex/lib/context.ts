@@ -2,8 +2,8 @@ import type { QueryCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
 import { applyEdits, splitBlocks } from "./document";
 import { contentVersion } from "./nodeContent";
-import { proposalState, type ProposalState } from "./proposals";
-import { PROPOSE_EDIT_TOOL } from "./tools";
+import { proposalState, type ProposalState, type ProposedBranch } from "./proposals";
+import { PROPOSE_TOOL } from "./tools";
 
 /*
  * What the AI sees when you chat in a node, in two steps:
@@ -13,7 +13,8 @@ import { PROPOSE_EDIT_TOOL } from "./tools";
  *
  * Context flows down the tree through block content only: the ancestor chain
  * (root → parent) plus the current node. Siblings never leak in, and ancestor
- * chats are never inherited.
+ * chats are never inherited. The current node's children are listed by
+ * title only, so the AI doesn't suggest a branch that's already there.
  */
 
 export type NodeContext = {
@@ -26,8 +27,9 @@ export type ChatTurn = {
   role: "user" | "assistant";
   content: string;
   /**
-   * A document edit this assistant turn suggested, and what became of it.
-   * `kept`: accepted in part, with this many of `of` changes.
+   * What this assistant turn suggested, and what became of it. `kept`:
+   * accepted in part, with this many of its `of` changes (edits and
+   * branches together).
    */
   proposal?: { reason: string; state: ProposalState; kept?: { count: number; of: number } };
 };
@@ -37,14 +39,17 @@ export type PromptContext = {
   ancestors: NodeContext[];
   /** The node being chatted in. */
   current: NodeContext;
+  /** The titles of the current node's children. */
+  children: string[];
   /** The current node's document version, for suggested edits. */
   contentVersion: number;
   /**
-   * The current node's document with the edit waiting for an answer
-   * applied, if there is one. The model works on this draft, so a new
-   * suggestion builds on the waiting one instead of dropping it.
+   * The suggestion waiting for an answer, if there is one: the current
+   * node's document with its edits applied, and the branches it adds. The
+   * model works on this draft, so a new suggestion builds on the waiting
+   * one instead of dropping it.
    */
-  draft?: { markdown: string; reason: string };
+  draft?: { markdown: string; reason: string; branches: ProposedBranch[] };
   /** This node's chat, oldest first. */
   messages: ChatTurn[];
 };
@@ -56,27 +61,37 @@ export type ModelInput = {
 
 const MAX_MESSAGES = 500;
 
-const INSTRUCTIONS = `You are a research assistant helping the user build the document in <current_node>.
+const INSTRUCTIONS = `You are a research assistant helping the user build the document in <current_node>, and the branches under it.
 The nodes in <ancestors> are the path from the root of this research tree down to the current node, root first. Treat them as background the user has already established; build on them rather than repeating them.
+<children> lists the branches that already exist under the current node, by title.
 Never use emojis.
 
 The document in <current_node> shows where the user's thinking is now. It is not a log or a summary of the chat. It is split into numbered <block> elements.
-You can suggest changes to it with the ${PROPOSE_EDIT_TOOL} tool. The user sees your suggestion under your reply and accepts or rejects it.
-- Suggest an edit only when the conversation has moved the user's thinking: a decision, a pivot, a new finding, or the document no longer matching where the conversation is. Most replies need no edit.
-- Always reply in text first. Then call the tool at most once.
+You can suggest changes with the ${PROPOSE_TOOL} tool: edits to the document, new branches under the current node, or both in one call. The user sees your suggestion under your reply and accepts all, some or none of it.
+- Suggest changes only when the conversation has moved the user's thinking: a decision, a pivot, a new finding, or the document no longer matching where the conversation is. Most replies need no suggestion.
+- Always reply in text first, even if it's one sentence saying what you're suggesting. Never call the tool without replying. Then call it at most once.
+
+Document edits:
 - Change only the blocks that need it. Prefer small, targeted edits over rewriting the document.
 - Block numbers refer to the document as shown. Write block content as markdown, without the <block> tags.
-- A <document_edit> note at the end of one of your earlier replies says what happened to an edit you suggested there. These notes are added by the system: never write one yourself. Don't suggest again what the user rejected unless they ask.`;
 
-const EMPTY_DOCUMENT = `The document in <current_node> is empty: this is where the user's thinking on this node starts. After your reply, use the ${PROPOSE_EDIT_TOOL} tool to suggest a first version of the document. Keep it short, a starting point the user will grow, not a copy of your reply:
+Branches:
+- Suggest branches when a topic splits into distinct questions worth exploring on their own, or the user asks to break something out. Each one becomes a child of the current node, with a short starting document.
+- Never suggest a branch that's already in <children>.
+- You can only add branches under the current node: not beside it, and not elsewhere in the tree. If something belongs elsewhere, say so in your reply.
+
+A <suggestion> note at the end of one of your earlier replies says what happened to what you suggested there. These notes are added by the system: never write one yourself. Don't suggest again what the user rejected or left out unless they ask.`;
+
+const EMPTY_DOCUMENT = `The document in <current_node> is empty: this is where the user's thinking on this node starts. After your reply, use the ${PROPOSE_TOOL} tool to suggest a first version of the document. Keep it short, a starting point the user will grow, not a copy of your reply:
 - a heading that states what the user is trying to figure out
 - the few key points established so far
 - the open questions worth exploring next
 Insert it with after: 0.`;
 
-const WAITING_EDIT = `The document in <current_node> includes an edit you suggested earlier that the user hasn't accepted or rejected yet (see <waiting_edit>). Block numbers refer to the document as shown, with that edit in.
-- A new suggestion replaces the waiting one. It's applied to the document as shown, so the waiting changes are kept unless your edits change them. If the user asks to drop or change any of them, edit those blocks.
-- Your reason describes the whole suggestion, including the waiting changes you keep.`;
+const WAITING = `You suggested changes earlier that the user hasn't accepted or rejected yet (see <waiting_suggestion>). A new suggestion replaces the waiting one, so carry over what should stay:
+- Its document edits are already in <current_node>: block numbers refer to the document as shown, with them in. They're kept unless your edits change them. If the user asks to drop or change any of them, edit those blocks.
+- Its branches are listed in <waiting_suggestion>. They're dropped unless you suggest them again.
+- Your reason describes the whole suggestion, including what you keep.`;
 
 // ---------------------------------------------------------------------------
 // Gathering
@@ -132,13 +147,18 @@ async function getChatTurns(
         proposal: {
           reason: proposal.reason,
           state: proposalState(proposal, node),
-          ...(proposal.skipped?.length && {
-            kept: { count: proposal.edits.length - proposal.skipped.length, of: proposal.edits.length },
-          }),
+          ...keptOf(proposal),
         },
       }),
     };
   });
+}
+
+/** Accepted in part: how many of its edits and branches were kept. */
+function keptOf(proposal: Doc<"proposals">): Pick<NonNullable<ChatTurn["proposal"]>, "kept"> {
+  const of = proposal.edits.length + (proposal.branches?.length ?? 0);
+  const left = (proposal.skipped?.length ?? 0) + (proposal.skippedBranches?.length ?? 0);
+  return left > 0 ? { kept: { count: of - left, of } } : {};
 }
 
 function toNodeContext(node: Doc<"nodes">): NodeContext {
@@ -158,16 +178,21 @@ export async function buildPromptContext(
   if (!current) return null;
 
   const node = toNodeContext(current);
+  const children = await ctx.db
+    .query("nodes")
+    .withIndex("by_parentId", (q) => q.eq("parentId", current._id))
+    .take(100);
   return {
     ancestors: chain.slice(0, -1).map(toNodeContext),
     current: node,
+    children: children.map((child) => child.title),
     contentVersion: contentVersion(current),
     messages: await getChatTurns(ctx, current),
     ...(await waitingDraft(ctx, current, node.markdown)),
   };
 }
 
-/** The document with the edit waiting for an answer applied, if any. */
+/** The suggestion waiting for an answer, as a draft: its edits applied, its branches. */
 async function waitingDraft(
   ctx: QueryCtx,
   node: Doc<"nodes">,
@@ -181,7 +206,8 @@ async function waitingDraft(
   // Out of date: its edits were made on an older document.
   if (!waiting || proposalState(waiting, node) !== "pending") return {};
   try {
-    return { draft: { markdown: applyEdits(markdown, waiting.edits), reason: waiting.reason } };
+    const draft = waiting.edits.length > 0 ? applyEdits(markdown, waiting.edits) : markdown;
+    return { draft: { markdown: draft, reason: waiting.reason, branches: waiting.branches ?? [] } };
   } catch {
     // Its edits no longer fit: show the document as it is.
     return {};
@@ -205,8 +231,16 @@ export function toModelInput(context: PromptContext): ModelInput {
   // With an edit waiting, the model sees (and edits) the draft.
   const shown = context.draft?.markdown ?? context.current.markdown;
   sections.push(nodeTag("current_node", context.current, {}, numberBlocks(shown)));
+  if (context.children.length > 0) {
+    const titles = context.children.map((title) => `<child title="${escapeAttribute(title)}" />`);
+    sections.push(`<children>\n${titles.join("\n")}\n</children>`);
+  }
   if (context.draft) {
-    sections.push(`<waiting_edit reason="${escapeAttribute(context.draft.reason)}" />\n${WAITING_EDIT}`);
+    const branches = context.draft.branches.map(
+      (branch) => `<branch title="${escapeAttribute(branch.title)}">\n${branch.content}\n</branch>`,
+    );
+    const reason = escapeAttribute(context.draft.reason);
+    sections.push(`<waiting_suggestion reason="${reason}">\n${branches.join("\n")}\n</waiting_suggestion>\n${WAITING}`);
   }
   // Only for an empty document: there the usual restraint ("most replies
   // need no edit") would leave a new node blank.
@@ -217,7 +251,7 @@ export function toModelInput(context: PromptContext): ModelInput {
     messages: mergeTurns(
       context.messages.map((turn) => ({
         role: turn.role,
-        content: turn.proposal ? `${turn.content}\n\n${editNote(turn.proposal)}` : turn.content,
+        content: turn.proposal ? `${turn.content}\n\n${suggestionNote(turn.proposal)}` : turn.content,
       })),
     ),
   };
@@ -238,7 +272,7 @@ function mergeTurns(turns: ModelInput["messages"]): ModelInput["messages"] {
   return merged;
 }
 
-const EDIT_OUTCOMES: Record<ProposalState, string> = {
+const OUTCOMES: Record<ProposalState, string> = {
   pending: "not answered yet",
   out_of_date: "out of date: the document changed before the user answered",
   accepted: "accepted",
@@ -246,11 +280,11 @@ const EDIT_OUTCOMES: Record<ProposalState, string> = {
   superseded: "replaced by a later suggestion",
 };
 
-function editNote(proposal: NonNullable<ChatTurn["proposal"]>): string {
+function suggestionNote(proposal: NonNullable<ChatTurn["proposal"]>): string {
   const outcome = proposal.kept
     ? `accepted in part: ${proposal.kept.count} of its ${proposal.kept.of} changes, the user left out the rest`
-    : EDIT_OUTCOMES[proposal.state];
-  return `<document_edit outcome="${outcome}">${proposal.reason}</document_edit>`;
+    : OUTCOMES[proposal.state];
+  return `<suggestion outcome="${outcome}">${proposal.reason}</suggestion>`;
 }
 
 function numberBlocks(markdown: string): string {

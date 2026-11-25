@@ -1,12 +1,13 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText, streamText, type TypedToolCall } from "ai";
+import { generateText, parsePartialJson, streamText, type TypedToolCall } from "ai";
 import type { ActionCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { toModelInput, type PromptContext } from "./context";
 import { CHAT_MODEL, TITLE_MODEL } from "./models";
 import { applyEdits, diffBlocks, DocumentEditError, type DocumentEdit } from "./document";
-import { chatTools, PROPOSE_EDIT_TOOL } from "./tools";
+import { chatTools, MAX_BRANCHES, PROPOSE_TOOL } from "./tools";
+import type { ProposalContent, ProposedBranch } from "./proposals";
 
 const PATCH_INTERVAL_MS = 100;
 
@@ -29,7 +30,7 @@ export async function streamAssistantResponse(
   const abort = new AbortController();
   let buffer = "";
   let lastPatch = Date.now();
-  let proposal: Proposal | undefined;
+  let proposal: ProposalContent | undefined;
   let failed = false;
   let closed = false;
 
@@ -52,9 +53,25 @@ export async function streamAssistantResponse(
     // starts writing an edit, which takes a few seconds after the text
     // ends. The chat shows a placeholder for that wait.
     let draftingEdit = false;
+    // The suggestion's JSON so far, read as it streams for the card.
+    let toolJson = "";
+    let lastDraft = "";
     for await (const part of result.fullStream) {
       if (part.type === "error") throw part.error;
-      if (part.type === "tool-input-start" && part.toolName === PROPOSE_EDIT_TOOL && !draftingEdit) {
+      if (part.type === "tool-input-delta") {
+        toolJson += part.delta;
+        if (Date.now() - lastPatch >= PATCH_INTERVAL_MS) {
+          const draft = await readDraft(toolJson);
+          const key = JSON.stringify(draft);
+          // Only when something shown changed: most chunks are mid-text.
+          if (draft && key !== lastDraft) {
+            lastDraft = key;
+            ({ closed } = await ctx.runMutation(internal.messages.patchDraftSuggestion, { messageId, draft }));
+            lastPatch = Date.now();
+          }
+        }
+      }
+      if (part.type === "tool-input-start" && part.toolName === PROPOSE_TOOL && !draftingEdit) {
         draftingEdit = true;
         ({ closed } = await ctx.runMutation(internal.messages.startDraftingEdit, { messageId, content: buffer }));
         lastPatch = Date.now();
@@ -84,40 +101,87 @@ export async function streamAssistantResponse(
   });
 }
 
-export type Proposal = { baseVersion: number; reason: string; edits: DocumentEdit[] };
+/**
+ * What's arrived of a suggestion the model is still writing, from its
+ * partial JSON: the reason so far, how many edits, and the titles of the
+ * branches. Null until there's something to show.
+ */
+async function readDraft(json: string) {
+  const { value } = await parsePartialJson(json);
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const input = value as { reason?: unknown; edits?: unknown; branches?: unknown };
+  const reason = typeof input.reason === "string" && input.reason.trim() ? input.reason : undefined;
+  const edits = Array.isArray(input.edits) ? input.edits.length : 0;
+  const branches = Array.isArray(input.branches)
+    ? input.branches.flatMap((b) =>
+        b && typeof b === "object" && typeof (b as { title?: unknown }).title === "string" && (b as { title: string }).title.trim()
+          ? [(b as { title: string }).title]
+          : [],
+      )
+    : [];
+  if (!reason && edits === 0 && branches.length === 0) return null;
+  return { ...(reason && { reason }), edits, branches };
+}
 
 /**
- * The model's suggested edit, if it made a valid one. Edits are checked
- * against the document the model saw; an edit that doesn't fit (a block
- * that isn't there, the same block changed twice) is dropped and logged,
- * so a bad suggestion never breaks the reply.
+ * What the model suggested, if it made a valid suggestion. Edits are
+ * checked against the document the model saw; edits that don't fit (a
+ * block that isn't there, the same block changed twice) are dropped and
+ * logged, so a bad suggestion never breaks the reply. Branches are tidied:
+ * no empty or repeated titles, none that already exist.
  *
- * With an edit waiting, the model saw (and edited) the draft. The result
- * is turned back into edits on the real document, so the new suggestion
- * carries the waiting changes it kept, and is saved like any other.
+ * With a suggestion waiting, the model saw (and edited) the draft. The
+ * result is turned back into edits on the real document, so the new
+ * suggestion carries the waiting edits it kept, and is saved like any other.
  */
 export function readProposal(
   toolCalls: TypedToolCall<typeof chatTools>[],
   context: PromptContext,
-): Proposal | undefined {
-  const call = toolCalls.find((c) => c.toolName === PROPOSE_EDIT_TOOL && !c.dynamic);
-  if (!call || call.toolName !== PROPOSE_EDIT_TOOL) return undefined;
-  const { reason, edits } = call.input;
-  let result: string;
-  try {
-    result = applyEdits(context.draft?.markdown ?? context.current.markdown, edits);
-  } catch (err) {
-    if (err instanceof DocumentEditError) {
+): ProposalContent | undefined {
+  const call = toolCalls.find((c) => c.toolName === PROPOSE_TOOL && !c.dynamic);
+  if (!call || call.toolName !== PROPOSE_TOOL) return undefined;
+  const { reason, edits = [], branches = [] } = call.input;
+
+  const shown = context.draft?.markdown ?? context.current.markdown;
+  let result = shown;
+  if (edits.length > 0) {
+    try {
+      result = applyEdits(shown, edits);
+    } catch (err) {
+      if (!(err instanceof DocumentEditError)) throw err;
       console.warn("Dropped an invalid document edit:", err.message, JSON.stringify(edits));
-      return undefined;
     }
-    throw err;
   }
-  const onDocument = context.draft ? diffBlocks(context.current.markdown, result) : edits;
-  // The edits only undid the waiting ones: nothing left to suggest. (The
-  // waiting one stays; the user can reject it.)
-  if (onDocument.length === 0) return undefined;
-  return { baseVersion: context.contentVersion, reason: reason.trim().slice(0, 300), edits: onDocument };
+  const onDocument: DocumentEdit[] = context.draft
+    ? diffBlocks(context.current.markdown, result)
+    : result === shown
+      ? []
+      : edits;
+
+  const kept = tidyBranches(branches, context.children);
+  // Nothing left: the edits were invalid or only undid the waiting ones,
+  // and no branches. (A waiting suggestion stays; the user can reject it.)
+  if (onDocument.length === 0 && kept.length === 0) return undefined;
+  return {
+    baseVersion: context.contentVersion,
+    reason: reason.trim().slice(0, 300),
+    edits: onDocument,
+    ...(kept.length > 0 && { branches: kept }),
+  };
+}
+
+/** Trimmed, without empty or repeated titles or ones already among the children, at most MAX_BRANCHES. */
+function tidyBranches(branches: ProposedBranch[], children: string[]): ProposedBranch[] {
+  const taken = new Set(children.map((title) => title.trim().toLowerCase()));
+  const out: ProposedBranch[] = [];
+  for (const branch of branches) {
+    const title = branch.title.trim().slice(0, 80);
+    const key = title.toLowerCase();
+    if (!title || taken.has(key)) continue;
+    taken.add(key);
+    out.push({ title, content: branch.content.trim().slice(0, 4000) });
+  }
+  return out.slice(0, MAX_BRANCHES);
 }
 
 /**

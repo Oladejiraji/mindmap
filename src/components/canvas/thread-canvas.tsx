@@ -54,6 +54,8 @@ import {
   type MindMapNodeData,
 } from "./nodes";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
+import { GhostNode, type GhostNodeData } from "./nodes/ghost-node";
+import { branchSlots } from "@/lib/accept-suggestion";
 
 /** How long Tidy up takes to move the nodes (ms). */
 const TIDY_DURATION = 300;
@@ -61,7 +63,11 @@ const TIDY_DURATION = 300;
 const nodeTypes: NodeTypes = {
   parent: ParentNode,
   leaf: LeafNode,
+  ghost: GhostNode,
 };
+
+/** A suggested branch's id on the canvas. */
+const ghostId = (proposalId: string, branch: number) => `ghost:${proposalId}:${branch}`;
 
 export function ThreadCanvas({ threadId }: { threadId: Id<"threads"> }) {
   return (
@@ -76,17 +82,26 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { data: nodes, isLoading } = useAuthedConvexQuery(api.nodes.listByThread, { threadId });
-  // Nodes with a suggested edit waiting, each shown as it would be after
-  // it unless its preview was turned off.
+  // Nodes with a suggestion waiting, each shown as it would be after it
+  // (its edits in it, its branches as ghosts under it) unless its preview
+  // was turned off.
   const { data: pending } = useAuthedConvexQuery(api.proposals.pendingByThread, { threadId });
   const preview = useEditPreview();
   const suggestions = useMemo(
     () =>
       new Map(
-        (pending ?? []).map((p) => [
-          p.nodeId as string,
-          { proposalId: p.proposalId as string, preview: isPreviewed(preview, p.proposalId) ? p.preview : undefined },
-        ]),
+        (pending ?? []).map((p) => {
+          const previewed = isPreviewed(preview, p.proposalId);
+          return [
+            p.nodeId as string,
+            {
+              proposalId: p.proposalId as string,
+              previewed,
+              preview: (previewed && p.preview) || undefined,
+              branches: previewed ? p.branches : [],
+            },
+          ];
+        }),
       ),
     [pending, preview],
   );
@@ -149,7 +164,8 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
   // selects it, and moving one shouldn't swap the chat.
   const onNodeClick = useCallback(
     (_event: React.MouseEvent, node: RFNode) => {
-      if (!panelNodeId || node.id === panelNodeId) return;
+      // A suggested branch isn't a node yet: nothing to open.
+      if (node.type === "ghost" || !panelNodeId || node.id === panelNodeId) return;
       const next = new URLSearchParams(searchParams);
       next.set("panel", node.id);
       router.replace(`${pathname}?${next.toString()}`, { scroll: false });
@@ -211,7 +227,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       }
     }
 
-    return nodes.map((node): RFNode<MindMapNodeData> => {
+    const real = nodes.map((node): RFNode<MindMapNodeData> => {
       const pos = positions.get(node._id) ?? { x: 0, y: 0 };
       const isRoot = node.parentId === null;
       const isParent = (childCounts.get(node._id) ?? 0) > 0;
@@ -234,13 +250,43 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
         width: CANVAS_NODE_WIDTH,
       };
     });
+
+    // Suggested branches, where accepting them would put them.
+    const ghosts = [...suggestions].flatMap(([nodeId, suggestion]) => {
+      const slots = branchSlots(nodes, nodeId, suggestion.branches.length);
+      return suggestion.branches.map((branch, i) => {
+        const data: GhostNodeData = { proposalId: suggestion.proposalId, branch: i, ...branch };
+        // Other data than the real nodes': the canvas only passes it through.
+        return {
+          id: ghostId(suggestion.proposalId, i),
+          type: "ghost",
+          position: slots[i] ?? { x: 0, y: 0 },
+          data,
+          draggable: false,
+          selectable: false,
+          connectable: false,
+          width: CANVAS_NODE_WIDTH,
+        } as unknown as RFNode<MindMapNodeData>;
+      });
+    });
+    return [...real, ...ghosts];
   }, [nodes, suggestions, handleOpenNode, handleDeleteNode, handleRenameNode]);
 
   const rfEdges: RFEdge[] = useMemo(() => {
     if (!nodes) return [];
+    // Dashed, to the suggested branches.
+    const ghostEdges: RFEdge[] = [...suggestions].flatMap(([nodeId, suggestion]) =>
+      suggestion.branches.map((_, i) => ({
+        id: `${nodeId}-${ghostId(suggestion.proposalId, i)}`,
+        source: nodeId,
+        target: ghostId(suggestion.proposalId, i),
+        type: "smoothstep",
+        style: { strokeDasharray: "4 4", opacity: 0.5 },
+      })),
+    );
     return nodes
       .filter((n) => n.parentId !== null)
-      .map((node) => {
+      .map((node): RFEdge => {
         const edgeId = `${node.parentId}-${node._id}`;
         const isAncestor = ancestorEdgeIds.has(edgeId);
         return {
@@ -253,8 +299,9 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
             ? { stroke: "var(--ring)", strokeWidth: 2 }
             : undefined,
         };
-      });
-  }, [nodes, ancestorEdgeIds]);
+      })
+      .concat(ghostEdges);
+  }, [nodes, ancestorEdgeIds, suggestions]);
 
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(rfNodes);
 
@@ -262,7 +309,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     rfNodes,
     setFlowNodes,
     nodes,
-    [...suggestions.values()].map((s) => `${s.proposalId}${s.preview ? "+" : ""}`).join(","),
+    [...suggestions.values()].map((s) => `${s.proposalId}${s.previewed ? "+" : ""}`).join(","),
   );
 
   // The panel's node is the selected one, and in view: however the panel
@@ -337,7 +384,8 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
     const dx = rootNow && rootLaidOut ? rootNow.x - rootLaidOut.x : 0;
     const dy = rootNow && rootLaidOut ? rootNow.y - rootLaidOut.y : 0;
     const after = new Map([...laidOut].map(([id, p]) => [id, { x: p.x + dx, y: p.y + dy }]));
-    const before = new Map([...onScreen].map(([id, n]) => [id, n.position]));
+    // Real nodes only: suggested branches aren't saved.
+    const before = new Map([...onScreen].filter(([, n]) => n.type !== "ghost").map(([id, n]) => [id, n.position]));
 
     const save = (positions: Map<string, LayoutPosition>) =>
       setPositions({
