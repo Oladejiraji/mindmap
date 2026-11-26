@@ -173,7 +173,7 @@ export const deleteSubtree = userMutation({
 });
 
 /** Deletes a node with its chat, messages and suggested edits. */
-async function deleteNodeAndChat(ctx: MutationCtx, nodeId: Id<"nodes">) {
+export async function deleteNodeAndChat(ctx: MutationCtx, nodeId: Id<"nodes">) {
   const proposals = await ctx.db
     .query("proposals")
     .withIndex("by_nodeId_and_status", (q) => q.eq("nodeId", nodeId))
