@@ -12,6 +12,7 @@ import { NodePreview } from "./node-preview";
 import { NodeMenu } from "./node-menu";
 import { BorderBeam } from "border-beam";
 import { NodeContent } from "./node-content";
+import { memo } from "react";
 
 export function LeafNode({ id, data, selected }: NodeProps) {
   const { title, content, onOpen, onDelete, onRename, proposalId, preview } = data as MindMapNodeData;
@@ -46,20 +47,8 @@ export function LeafNode({ id, data, selected }: NodeProps) {
           </div>
         </div>
 
-        {/* Antalik's border beam at 20% strength around the writing area
-            (was a static gradient border). */}
         <div className="mt-3">
-          <BorderBeam theme="light" strength={0.2}>
-            <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-background-2 text-fg-primary shadow-default [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {/* While previewing a suggested edit: the node as it would be. */}
-              <RenderIf condition={!!preview}>
-                <NodePreview blocks={preview ?? []} proposalId={proposalId ?? ""} />
-              </RenderIf>
-              <RenderIf condition={!preview}>
-                <NodeContent nodeId={id} content={content} />
-              </RenderIf>
-            </div>
-          </BorderBeam>
+          <BeamedContent nodeId={id} content={content} preview={preview} proposalId={proposalId} />
         </div>
 
         <CustomHandle type="source" position={Position.Bottom} />
@@ -67,3 +56,34 @@ export function LeafNode({ id, data, selected }: NodeProps) {
     </div>
   );
 }
+
+/**
+ * The writing area, in Antalik's border beam at 20% strength. Memoized:
+ * the beam sets state whenever its children change, so new children on
+ * every node render (a tidy re-renders each node every frame) loop.
+ */
+const BeamedContent = memo(function BeamedContent({
+  nodeId,
+  content,
+  preview,
+  proposalId,
+}: {
+  nodeId: string;
+  content: MindMapNodeData["content"];
+  preview: MindMapNodeData["preview"];
+  proposalId: MindMapNodeData["proposalId"];
+}) {
+  return (
+    <BorderBeam theme="light" strength={0.2}>
+      <div className="nowheel max-h-40 overflow-y-auto overscroll-contain rounded-lg bg-background-2 text-fg-primary shadow-default [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* While previewing a suggested edit: the node as it would be. */}
+        <RenderIf condition={!!preview}>
+          <NodePreview blocks={preview ?? []} proposalId={proposalId ?? ""} />
+        </RenderIf>
+        <RenderIf condition={!preview}>
+          <NodeContent nodeId={nodeId} content={content} />
+        </RenderIf>
+      </div>
+    </BorderBeam>
+  );
+});
