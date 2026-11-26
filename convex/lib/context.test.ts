@@ -194,15 +194,16 @@ describe("toModelInput", () => {
     expect(system).toContain('<node relation="parent" title="Pricing">');
   });
 
-  test("puts the instructions first, then ancestors, then the current node", () => {
-    const { system } = toModelInput(context());
+  test("puts the instructions then the ancestors in the system prompt, and the current node apart", () => {
+    const { system, current } = toModelInput(context());
     const instructions = system.indexOf("You are a research assistant");
     // The instructions mention <ancestors> too; the section tag sits on its own line.
     const ancestors = system.indexOf("\n<ancestors>\n");
-    const current = system.indexOf('<current_node title="Per API call">\n<block n="1">\n$0.002 per call.\n</block>\n</current_node>');
     expect(instructions).toBe(0);
     expect(ancestors).toBeGreaterThan(instructions);
-    expect(current).toBeGreaterThan(ancestors);
+    // The current node changes between replies, so it stays out of the cached system prompt.
+    expect(system).not.toContain("<current_node title=");
+    expect(current.startsWith('<current_node title="Per API call">\n<block n="1">\n$0.002 per call.\n</block>\n</current_node>')).toBe(true);
   });
 
   test("empty content is marked (empty)", () => {
@@ -211,16 +212,16 @@ describe("toModelInput", () => {
   });
 
   test("leaves out the ancestors section for a root node", () => {
-    const { system } = toModelInput(context({ ancestors: [] }));
+    const { system, current } = toModelInput(context({ ancestors: [] }));
     expect(system).not.toContain("\n<ancestors>\n");
-    expect(system).toContain("\n<current_node");
+    expect(current).toContain("<current_node");
   });
 
   test("escapes titles so they can't break the tags", () => {
-    const { system } = toModelInput(
+    const { current } = toModelInput(
       context({ current: { nodeId, title: 'Per "API" <call> & more', markdown: "x" } }),
     );
-    expect(system).toContain('<current_node title="Per &quot;API&quot; &lt;call&gt; &amp; more">');
+    expect(current).toContain('<current_node title="Per &quot;API&quot; &lt;call&gt; &amp; more">');
   });
 
   test("messages carry only the chat turns", () => {
@@ -229,21 +230,21 @@ describe("toModelInput", () => {
   });
 
   test("numbers the current node's blocks, but not the ancestors'", () => {
-    const { system } = toModelInput(
+    const { system, current } = toModelInput(
       context({ current: { nodeId, title: "Per API call", markdown: "# Price\n\n- a\n- b" } }),
     );
-    expect(system).toContain('<block n="1">\n# Price\n</block>\n<block n="2">\n- a\n- b\n</block>');
+    expect(current).toContain('<block n="1">\n# Price\n</block>\n<block n="2">\n- a\n- b\n</block>');
     expect(system).toContain('<node relation="root" title="Pricing">\nSmall teams.\n</node>');
   });
 
   test("an empty current node has no blocks", () => {
-    const { system } = toModelInput(context({ current: { nodeId, title: "New", markdown: "" } }));
-    expect(system).toContain('<current_node title="New">\n(empty)\n</current_node>');
+    const { current } = toModelInput(context({ current: { nodeId, title: "New", markdown: "" } }));
+    expect(current).toContain('<current_node title="New">\n(empty)\n</current_node>');
   });
 
   test("asks for a first version of the document only when it's empty", () => {
-    const empty = toModelInput(context({ current: { nodeId, title: "New", markdown: "" } })).system;
-    const written = toModelInput(context()).system;
+    const empty = toModelInput(context({ current: { nodeId, title: "New", markdown: "" } })).current;
+    const written = toModelInput(context()).current;
     expect(empty).toContain("The document in <current_node> is empty");
     expect(empty.indexOf("is empty")).toBeGreaterThan(empty.indexOf("</current_node>"));
     expect(written).not.toContain("The document in <current_node> is empty");
@@ -284,15 +285,15 @@ describe("toModelInput", () => {
   });
 
   test("with an edit waiting, shows and numbers the draft, and says so", () => {
-    const { system } = toModelInput(
+    const { current } = toModelInput(
       context({ draft: { markdown: "$0.002 per call.\n\nBudget: $500.", reason: "Adds a budget", branches: [] } }),
     );
-    expect(system).toContain('<block n="2">\nBudget: $500.\n</block>');
-    expect(system).toContain('<waiting_suggestion reason="Adds a budget">');
+    expect(current).toContain('<block n="2">\nBudget: $500.\n</block>');
+    expect(current).toContain('<waiting_suggestion reason="Adds a budget">');
   });
 
   test("without an edit waiting, has no waiting edit section", () => {
-    expect(toModelInput(context()).system).not.toContain("<waiting_suggestion");
+    expect(toModelInput(context()).current).not.toContain("<waiting_suggestion");
   });
 
   test("says when an edit was accepted in part", () => {
@@ -308,7 +309,7 @@ describe("toModelInput", () => {
   });
 
   test("lists the children, so branches aren't suggested twice", () => {
-    expect(toModelInput(context({ children: ["Budget"] })).system).toContain('<children>\n<child title="Budget" />\n</children>');
-    expect(toModelInput(context()).system).not.toContain("<children>\n");
+    expect(toModelInput(context({ children: ["Budget"] })).current).toContain('<children>\n<child title="Budget" />\n</children>');
+    expect(toModelInput(context()).current).not.toContain("<children>\n");
   });
 });

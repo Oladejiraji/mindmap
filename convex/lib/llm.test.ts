@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import type { Id } from "../_generated/dataModel";
 import type { PromptContext } from "./context";
 import { applyEdits, type DocumentEdit } from "./document";
-import { readProposal } from "./llm";
+import { cachedMessages, readProposal } from "./llm";
 import { PROPOSE_TOOL } from "./tools";
 
 const nodeId = "n" as Id<"nodes">;
@@ -75,5 +75,42 @@ describe("readProposal", () => {
     const proposal = readProposal(call([], "Why", [{ title: "Packing", content: "Bags." }]), context("Plan", draft));
     expect(applyEdits("Plan", proposal!.edits)).toBe("Plan\n\nBudget");
     expect(proposal?.branches).toEqual([{ title: "Packing", content: "Bags." }]);
+  });
+});
+
+describe("cachedMessages", () => {
+  const cache = { anthropic: { cacheControl: { type: "ephemeral" } } };
+
+  test("caches the system prompt and the chat, and puts the current part after them", () => {
+    const messages = cachedMessages({
+      system: "instructions",
+      messages: [
+        { role: "user", content: "Q1" },
+        { role: "assistant", content: "A1" },
+        { role: "user", content: "Q2" },
+      ],
+      current: "<current_node />",
+    });
+    expect(messages).toEqual([
+      { role: "system", content: "instructions", providerOptions: cache },
+      { role: "user", content: "Q1" },
+      { role: "assistant", content: "A1" },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "Q2", providerOptions: cache },
+          { type: "text", text: "<current_node />" },
+        ],
+      },
+    ]);
+  });
+
+  test("without a user message last, the current part is its own turn", () => {
+    const messages = cachedMessages({
+      system: "instructions",
+      messages: [{ role: "assistant", content: "A1" }],
+      current: "<current_node />",
+    });
+    expect(messages.at(-1)).toEqual({ role: "user", content: [{ type: "text", text: "<current_node />" }] });
   });
 });

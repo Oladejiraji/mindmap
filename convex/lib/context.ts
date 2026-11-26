@@ -15,6 +15,12 @@ import { PROPOSE_TOOL } from "./tools";
  * (root → parent) plus the current node. Siblings never leak in, and ancestor
  * chats are never inherited. The current node's children are listed by
  * title only, so the AI doesn't suggest a branch that's already there.
+ *
+ * Ordered by how often each part changes, for prompt caching: the
+ * instructions and ancestors, then the chat (it only grows), then what
+ * changes between replies (the current document, its children, a waiting
+ * suggestion). A change near the front would make the model re-read
+ * everything after it at full price.
  */
 
 export type NodeContext = {
@@ -55,8 +61,16 @@ export type PromptContext = {
 };
 
 export type ModelInput = {
+  /** The instructions and the ancestors: rarely changes, so it's cached. */
   system: string;
+  /** The chat, oldest first. Only grows, so it's cached too. */
   messages: { role: "user" | "assistant"; content: string }[];
+  /**
+   * What changes between replies: the current node's document, its
+   * children, a waiting suggestion. Sent after the chat, at the end of the
+   * user's latest message, so a change here doesn't throw away the cache.
+   */
+  current: string;
 };
 
 const MAX_MESSAGES = 500;
@@ -64,6 +78,7 @@ const MAX_MESSAGES = 500;
 const INSTRUCTIONS = `You are a research assistant helping the user build the document in <current_node>, and the branches under it.
 The nodes in <ancestors> are the path from the root of this research tree down to the current node, root first. Treat them as background the user has already established; build on them rather than repeating them.
 <children> lists the branches that already exist under the current node, by title.
+<current_node>, <children> and any <waiting_suggestion> come at the end of the user's latest message. They show the state right now.
 Never use emojis.
 
 The document in <current_node> shows where the user's thinking is now. It is not a log or a summary of the chat. It is split into numbered <block> elements.
@@ -218,42 +233,42 @@ async function waitingDraft(
 // Formatting
 
 export function toModelInput(context: PromptContext): ModelInput {
-  const sections = [INSTRUCTIONS];
-
+  const system = [INSTRUCTIONS];
   if (context.ancestors.length > 0) {
     const last = context.ancestors.length - 1;
     const nodes = context.ancestors.map((node, i) =>
       nodeTag("node", node, { relation: i === last ? "parent" : i === 0 ? "root" : "ancestor" }),
     );
-    sections.push(`<ancestors>\n${nodes.join("\n")}\n</ancestors>`);
+    system.push(`<ancestors>\n${nodes.join("\n")}\n</ancestors>`);
   }
 
   // With an edit waiting, the model sees (and edits) the draft.
   const shown = context.draft?.markdown ?? context.current.markdown;
-  sections.push(nodeTag("current_node", context.current, {}, numberBlocks(shown)));
+  const current = [nodeTag("current_node", context.current, {}, numberBlocks(shown))];
   if (context.children.length > 0) {
     const titles = context.children.map((title) => `<child title="${escapeAttribute(title)}" />`);
-    sections.push(`<children>\n${titles.join("\n")}\n</children>`);
+    current.push(`<children>\n${titles.join("\n")}\n</children>`);
   }
   if (context.draft) {
     const branches = context.draft.branches.map(
       (branch) => `<branch title="${escapeAttribute(branch.title)}">\n${branch.content}\n</branch>`,
     );
     const reason = escapeAttribute(context.draft.reason);
-    sections.push(`<waiting_suggestion reason="${reason}">\n${branches.join("\n")}\n</waiting_suggestion>\n${WAITING}`);
+    current.push(`<waiting_suggestion reason="${reason}">\n${branches.join("\n")}\n</waiting_suggestion>\n${WAITING}`);
   }
   // Only for an empty document: there the usual restraint ("most replies
   // need no edit") would leave a new node blank.
-  if (!shown) sections.push(EMPTY_DOCUMENT);
+  if (!shown) current.push(EMPTY_DOCUMENT);
 
   return {
-    system: sections.join("\n\n"),
+    system: system.join("\n\n"),
     messages: mergeTurns(
       context.messages.map((turn) => ({
         role: turn.role,
         content: turn.proposal ? `${turn.content}\n\n${suggestionNote(turn.proposal)}` : turn.content,
       })),
     ),
+    current: current.join("\n\n"),
   };
 }
 

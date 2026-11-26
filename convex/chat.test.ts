@@ -162,7 +162,10 @@ describe("a failed reply", () => {
     ]);
     // The retry read the question once, and not the failed reply.
     const prompt = model.doStreamCalls[0].prompt.filter((m) => m.role !== "system");
-    expect(prompt).toMatchObject([{ role: "user", content: [{ type: "text", text: "How should we price?" }] }]);
+    // The question, then the current node after it.
+    expect(prompt).toMatchObject([
+      { role: "user", content: [{ type: "text", text: "How should we price?" }, { type: "text" }] },
+    ]);
   });
 
   test("retry is refused unless the last reply failed", async () => {

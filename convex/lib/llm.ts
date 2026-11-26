@@ -1,9 +1,9 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText, parsePartialJson, streamText, type TypedToolCall } from "ai";
+import { generateText, parsePartialJson, streamText, type LanguageModelUsage, type ModelMessage, type TypedToolCall } from "ai";
 import type { ActionCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
-import { toModelInput, type PromptContext } from "./context";
+import { toModelInput, type ModelInput, type PromptContext } from "./context";
 import { CHAT_MODEL, TITLE_MODEL } from "./models";
 import { applyEdits, diffBlocks, DocumentEditError, type DocumentEdit } from "./document";
 import { chatTools, MAX_BRANCHES, PROPOSE_TOOL } from "./tools";
@@ -37,14 +37,11 @@ export async function streamAssistantResponse(
   try {
     const context: PromptContext | null = await ctx.runQuery(internal.chat.getContext, { nodeId });
     if (!context) throw new Error("Node not found");
-    const { system, messages } = toModelInput(context);
-
     // The edit tool has no execute function, so a tool call ends the reply
     // (one step) and comes back in `toolCalls` for the user to answer.
     const result = streamText({
       model: anthropic(CHAT_MODEL),
-      system,
-      messages,
+      messages: cachedMessages(toModelInput(context)),
       tools: chatTools,
       abortSignal: abort.signal,
     });
@@ -88,6 +85,7 @@ export async function streamAssistantResponse(
       return;
     }
     proposal = readProposal(await result.toolCalls, context);
+    logUsage(nodeId, await result.usage);
   } catch (err) {
     console.error("Reply failed:", err);
     failed = true;
@@ -99,6 +97,42 @@ export async function streamAssistantResponse(
     failed,
     proposal,
   });
+}
+
+const CACHE = { anthropic: { cacheControl: { type: "ephemeral" as const } } };
+
+/**
+ * The prompt as messages, with two cache points: after the instructions
+ * and ancestors, and after the chat. What changes between replies (the
+ * current document and the rest of `current`) goes after the second, at
+ * the end of the user's latest message, so the chat before it is read from
+ * the cache. The next reply finds that cache, since its chat starts with
+ * the same turns.
+ */
+export function cachedMessages({ system, messages, current }: ModelInput): ModelMessage[] {
+  const history: ModelMessage[] = messages.map((m) => ({ role: m.role, content: m.content }));
+  const last = messages.at(-1);
+  // The latest turn is the user's message being answered.
+  if (last?.role === "user") history.pop();
+  return [
+    { role: "system", content: system, providerOptions: CACHE },
+    ...history,
+    {
+      role: "user",
+      content: [
+        ...(last?.role === "user" ? [{ type: "text" as const, text: last.content, providerOptions: CACHE }] : []),
+        { type: "text" as const, text: current },
+      ],
+    },
+  ];
+}
+
+/** One line per reply: how big the prompt was and how much came from the cache. */
+function logUsage(nodeId: Id<"nodes">, usage: LanguageModelUsage) {
+  const { cacheReadTokens = 0, cacheWriteTokens = 0, noCacheTokens = 0 } = usage.inputTokenDetails;
+  console.log(
+    `[usage] node=${nodeId} input=${usage.inputTokens ?? 0} cached=${cacheReadTokens} written=${cacheWriteTokens} uncached=${noCacheTokens} output=${usage.outputTokens ?? 0}`,
+  );
 }
 
 /**
