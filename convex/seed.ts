@@ -1,8 +1,10 @@
 import { v } from "convex/values";
 import { internalMutation, type MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
-import { DEMO_PROJECTS, RECORDING_PROJECT, type SeedNode } from "./lib/demoSeed";
+import { DEMO_PROJECTS, PRICING_PROJECT, RECORDING_PROJECT, type SeedNode } from "./lib/demoSeed";
 import { deleteTabsFor, openTab } from "./lib/tabs";
+import { deleteViewsFor } from "./lib/projectViews";
+import { deleteNodeAndChat } from "./nodes";
 
 /*
  * Demo data for a user's account: projects with node trees, documents and
@@ -10,7 +12,11 @@ import { deleteTabsFor, openTab } from "./lib/tabs";
  *   npx convex run seed:demo '{"email":"someone@example.com"}'
  *   npx convex run seed:clearDemo '{"email":"someone@example.com"}'
  *   npx convex run seed:recording '{"email":"someone@example.com"}'
+ *   npx convex run seed:recording '{"email":"someone@example.com","project":"pricing"}'
+ *   npx convex run seed:clearRecording '{"email":"someone@example.com","project":"pricing"}'
  */
+
+const RECORDINGS = { japan: RECORDING_PROJECT, pricing: PRICING_PROJECT };
 
 async function userIdFor(ctx: MutationCtx, email: string): Promise<string> {
   // Small table; there's no index on email.
@@ -111,18 +117,45 @@ export const clearDemo = internalMutation({
   },
 });
 
-/** Adds the one project for recording the chat, opened as a tab. */
+/** Adds a project for recording (the Japan trip by default), opened as a tab. */
 export const recording = internalMutation({
-  args: { email: v.string() },
+  args: { email: v.string(), project: v.optional(v.union(v.literal("japan"), v.literal("pricing"))) },
   handler: async (ctx, args) => {
     const userId = await userIdFor(ctx, args.email);
+    const project = RECORDINGS[args.project ?? "japan"];
     const threadId = await ctx.db.insert("threads", {
       userId,
-      name: RECORDING_PROJECT.title,
+      name: project.title,
       updatedAt: Date.now(),
     });
-    await insertNode(ctx, userId, threadId, null, RECORDING_PROJECT);
+    await insertNode(ctx, userId, threadId, null, project);
     await openTab(ctx, userId, threadId);
     return { threadId };
+  },
+});
+
+/** Removes a recording project (matched by name) and everything in it. */
+export const clearRecording = internalMutation({
+  args: { email: v.string(), project: v.optional(v.union(v.literal("japan"), v.literal("pricing"))) },
+  handler: async (ctx, args) => {
+    const userId = await userIdFor(ctx, args.email);
+    const name = RECORDINGS[args.project ?? "japan"].title;
+    const threads = await ctx.db
+      .query("threads")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .take(500);
+    let removed = 0;
+    for (const thread of threads.filter((t) => t.name === name)) {
+      const nodes = await ctx.db
+        .query("nodes")
+        .withIndex("by_threadId", (q) => q.eq("threadId", thread._id))
+        .take(500);
+      for (const node of nodes) await deleteNodeAndChat(ctx, node._id);
+      await deleteTabsFor(ctx, thread._id);
+      await deleteViewsFor(ctx, thread._id);
+      await ctx.db.delete(thread._id);
+      removed++;
+    }
+    return { removed };
   },
 });

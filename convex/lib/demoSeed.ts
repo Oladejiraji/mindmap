@@ -500,3 +500,45 @@ Tokyo (5 nights) → Hakone (1) → Kyoto (4) → Osaka (2) → Tokyo (1)`,
     ],
   ],
 };
+
+/**
+ * For recording the AI's suggestions: a pricing doc with numbers to
+ * change (word-level highlights) and open questions to branch out.
+ */
+export const PRICING_PROJECT: SeedNode = {
+  title: "Self-serve pricing",
+  content: `## Goal
+
+Launch self-serve pricing by **March 1**, so small teams can start without talking to sales.
+
+## Plans
+
+| Plan | Price | For |
+| --- | --- | --- |
+| Free | $0 | One person trying it out |
+| Pro | $12 per user / month | Individuals who use it daily |
+| Team | $24 per user / month | Teams up to 50 people |
+
+Annual billing is **10% off**.
+
+## Decisions so far
+
+- Pricing is per user, not per workspace
+- Free has no time limit, but caps AI replies at 50 a month
+
+## Open questions
+
+- Should Team have a minimum number of seats?
+- What happens when a Free user hits the AI limit?
+- Do we offer discounts for startups and nonprofits?`,
+  chat: [
+    [
+      "We're launching self-serve pricing. Can you sanity-check the plans?",
+      "The shape is right: a free tier to try it, Pro for individuals, Team for groups. Two things stand out:\n\n1. **The jump from Pro to Team is steep.** $12 to $24 is a 2x step for what's mostly sharing and admin. Most tools in this space keep it under 1.5x.\n2. **10% off annual is low.** 15 to 20% is the norm, and it's what gets people to commit for a year.",
+    ],
+    [
+      "What do comparable tools charge for team plans?",
+      "Most collaborative docs and note tools land between **$15 and $20 per user per month** for their team tier, billed annually. Above $20 is usually where SSO, audit logs and admin controls come in, which you'd keep for an enterprise plan later.",
+    ],
+  ],
+};
