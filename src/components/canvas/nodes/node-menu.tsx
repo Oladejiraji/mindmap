@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Menu } from "@base-ui/react/menu";
-import { Ellipsis, PanelRightOpen, Trash2 } from "lucide-react";
+import { Copy, Download, Ellipsis, FolderDown, PanelRightOpen, Trash2 } from "lucide-react";
+import type { ExportAction } from "./types";
 import { cn } from "@/lib/utils";
 
 const item =
@@ -13,10 +14,15 @@ export function NodeMenu({
   id,
   onOpen,
   onDelete,
+  onExport,
+  hasBranches = false,
 }: {
   id: string;
   onOpen?: (nodeId: string) => void;
   onDelete?: (nodeId: string) => void;
+  onExport?: (nodeId: string, how: ExportAction) => void;
+  /** Offers downloading the node with everything under it. */
+  hasBranches?: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -41,6 +47,24 @@ export function NodeMenu({
                 <PanelRightOpen className="size-3" />
                 Open panel
               </Menu.Item>
+            )}
+            {onExport && (
+              <>
+                <Menu.Item className={item} onClick={() => onExport(id, "copy")}>
+                  <Copy className="size-3" />
+                  Copy as markdown
+                </Menu.Item>
+                <Menu.Item className={item} onClick={() => onExport(id, "download")}>
+                  <Download className="size-3" />
+                  Download
+                </Menu.Item>
+                {hasBranches && (
+                  <Menu.Item className={item} onClick={() => onExport(id, "branch")}>
+                    <FolderDown className="size-3" />
+                    Download with branches
+                  </Menu.Item>
+                )}
+              </>
             )}
             {onDelete && (
               <Menu.Item className={cn(item, "text-destructive")} onClick={() => onDelete(id)}>

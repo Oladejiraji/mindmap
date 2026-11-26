@@ -44,6 +44,7 @@ import {
 } from "@/lib/layout";
 import { buildNodeMap, walkAncestors } from "@/lib/tree";
 import { handleError } from "@/lib/handle-error";
+import { branchMarkdown, downloadMarkdown, markdownFileName } from "@/lib/export-markdown";
 import { getStorageItem, setStorageItem } from "@/lib/storage";
 import { routes } from "@/lib/routes";
 import { isPreviewed, useEditPreview } from "@/lib/edit-preview";
@@ -51,6 +52,7 @@ import {
   ParentNode,
   LeafNode,
   CANVAS_NODE_WIDTH,
+  type ExportAction,
   type MindMapNodeData,
 } from "./nodes";
 import { useAuthedConvexQuery } from "@/lib/use-authed-query";
@@ -127,6 +129,20 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       );
     },
     [deleteLeafNode],
+  );
+
+  const handleExportNode = useCallback(
+    (nodeId: string, how: ExportAction) => {
+      const node = nodes?.find((n) => n._id === nodeId);
+      if (!node || !nodes) return;
+      const markdown = branchMarkdown(nodes, node._id, how === "branch");
+      if (how !== "copy") return downloadMarkdown(markdownFileName(node.title), markdown);
+      navigator.clipboard.writeText(markdown).then(
+        () => toast("Copied as markdown"),
+        (err) => handleError(err, "Couldn't copy"),
+      );
+    },
+    [nodes],
   );
 
   const handleRenameNode = useCallback(
@@ -244,6 +260,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
           onOpen: handleOpenNode,
           onDelete: handleDeleteNode,
           onRename: handleRenameNode,
+          onExport: handleExportNode,
           proposalId: suggestions.get(node._id)?.proposalId,
           preview: suggestions.get(node._id)?.preview,
         },
@@ -270,7 +287,7 @@ function ThreadCanvasInner({ threadId }: { threadId: Id<"threads"> }) {
       });
     });
     return [...real, ...ghosts];
-  }, [nodes, suggestions, handleOpenNode, handleDeleteNode, handleRenameNode]);
+  }, [nodes, suggestions, handleOpenNode, handleDeleteNode, handleRenameNode, handleExportNode]);
 
   const rfEdges: RFEdge[] = useMemo(() => {
     if (!nodes) return [];

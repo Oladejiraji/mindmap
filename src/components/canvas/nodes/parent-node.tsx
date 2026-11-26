@@ -13,7 +13,7 @@ import { NodeMenu } from "./node-menu";
 import { NodeContent } from "./node-content";
 
 export function ParentNode({ id, data, selected }: NodeProps) {
-  const { title, isRoot, content, onOpen, onDelete, onRename, proposalId, preview } =
+  const { title, isRoot, content, onOpen, onDelete, onRename, onExport, proposalId, preview } =
     data as MindMapNodeData;
   const isLeaf = !(data as MindMapNodeData).isParent && !isRoot;
 
@@ -47,7 +47,13 @@ export function ParentNode({ id, data, selected }: NodeProps) {
             <RenderIf condition={!!proposalId}>
               <EditPreviewButton proposalId={proposalId ?? ""} onBrand />
             </RenderIf>
-            <NodeMenu id={id} onOpen={onOpen} onDelete={isLeaf ? onDelete : undefined} />
+            <NodeMenu
+              id={id}
+              onOpen={onOpen}
+              onDelete={isLeaf ? onDelete : undefined}
+              onExport={onExport}
+              hasBranches={(data as MindMapNodeData).isParent}
+            />
           </div>
         </div>
 

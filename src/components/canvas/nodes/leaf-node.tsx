@@ -15,7 +15,7 @@ import { NodeContent } from "./node-content";
 import { memo } from "react";
 
 export function LeafNode({ id, data, selected }: NodeProps) {
-  const { title, content, onOpen, onDelete, onRename, proposalId, preview } = data as MindMapNodeData;
+  const { title, content, onOpen, onDelete, onRename, onExport, proposalId, preview } = data as MindMapNodeData;
 
   return (
     <div className="group" style={{ width: CANVAS_NODE_WIDTH }}>
@@ -43,7 +43,7 @@ export function LeafNode({ id, data, selected }: NodeProps) {
             <RenderIf condition={!!proposalId}>
               <EditPreviewButton proposalId={proposalId ?? ""} />
             </RenderIf>
-            <NodeMenu id={id} onOpen={onOpen} onDelete={onDelete} />
+            <NodeMenu id={id} onOpen={onOpen} onDelete={onDelete} onExport={onExport} />
           </div>
         </div>
 

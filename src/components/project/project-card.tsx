@@ -9,8 +9,9 @@ import { routes } from "@/lib/routes";
 import { CanvasIcon } from "@/components/icons/canvas-icon";
 import { api } from "@convex/api";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { useMutation } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import { handleError } from "@/lib/handle-error";
+import { downloadProject } from "@/lib/export-markdown";
 import type { Id } from "@convex/dataModel";
 import { renameThreadOptimistic } from "@/lib/optimistic";
 
@@ -32,6 +33,7 @@ export function ProjectCard({
 }) {
   const router = useRouter();
   const removeThread = useMutation(api.threads.remove);
+  const convex = useConvex();
   const renameThread = useMutation(api.threads.rename).withOptimisticUpdate(renameThreadOptimistic);
   const [showDelete, setShowDelete] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -133,6 +135,16 @@ export function ProjectCard({
               <ContextMenu.Separator className="my-1 h-px bg-foreground/8" />
               <ContextMenu.Item className={itemClass} onClick={startRename}>
                 Rename
+              </ContextMenu.Item>
+              <ContextMenu.Item
+                className={itemClass}
+                onClick={() =>
+                  downloadProject(convex, threadId as Id<"threads">, name).catch((err) =>
+                    handleError(err, "Couldn't download the project"),
+                  )
+                }
+              >
+                Download as markdown
               </ContextMenu.Item>
               <ContextMenu.Item
                 className="corner-squircle flex w-full cursor-pointer items-center gap-2 rounded-[14px] px-2 py-1.5 text-caption-lg text-red-500/80 transition-colors data-[highlighted]:bg-red-500/8 data-[highlighted]:text-red-500 outline-none"
